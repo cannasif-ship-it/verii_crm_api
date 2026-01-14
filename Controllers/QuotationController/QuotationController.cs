@@ -1,0 +1,164 @@
+using Microsoft.AspNetCore.Mvc;
+using cms_webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using cms_webapi.Interfaces;
+
+namespace cms_webapi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class QuotationController : ControllerBase
+    {
+        private readonly IQuotationService _quotationService;
+        private readonly ILocalizationService _localizationService;
+
+        public QuotationController(IQuotationService quotationService, ILocalizationService localizationService)
+        {
+            _quotationService = quotationService;
+            _localizationService = localizationService;
+        }
+
+        /// <summary>
+        /// Tüm teklifleri getirir
+        /// </summary>
+        /// <returns>ApiResponse</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetQuotations([FromQuery] PagedRequest request)
+        {
+            var result = await _quotationService.GetAllQuotationsAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// ID'ye göre teklif getirir
+        /// </summary>
+        /// <param name="id">Teklif ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetQuotation(long id)
+        {
+            var result = await _quotationService.GetQuotationByIdAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Yeni teklif oluşturur
+        /// </summary>
+        /// <param name="createQuotationDto">Teklif oluşturma bilgileri</param>
+        /// <returns>ApiResponse</returns>
+        [HttpPost]
+        public async Task<IActionResult> CreateQuotation([FromBody] CreateQuotationDto createQuotationDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<QuotationDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.CreateQuotationAsync(createQuotationDto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("bulk")]
+        public async Task<IActionResult> CreateBulkQuotation([FromBody] CreateBulkQuotationDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<CreateBulkQuotationResultDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.CreateBulkQuotationAsync(dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("bulk-quotation")]
+        public async Task<IActionResult> CreateQuotationBulk([FromBody] QuotationBulkCreateDto bulkDto)
+        {
+
+            var result = await _quotationService.CreateQuotationBulkAsync(bulkDto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("price-of-product")]
+        public async Task<IActionResult> GetPriceOfProduct([FromQuery] List<PriceOfProductRequestDto> request)
+        {
+            var result = await _quotationService.GetPriceOfProductAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Teklifi günceller
+        /// </summary>
+        /// <param name="id">Teklif ID</param>
+        /// <param name="updateQuotationDto">Güncellenecek teklif bilgileri</param>
+        /// <returns>ApiResponse</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateQuotation(long id, [FromBody] UpdateQuotationDto updateQuotationDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<QuotationDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.UpdateQuotationAsync(id, updateQuotationDto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Teklifi siler
+        /// </summary>
+        /// <param name="id">Teklif ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteQuotation(long id)
+        {
+            var result = await _quotationService.DeleteQuotationAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Potansiyel müşteriye göre teklifleri getirir
+        /// </summary>
+        /// <param name="potentialCustomerId">Potansiyel müşteri ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("by-potential-customer/{potentialCustomerId}")]
+        public async Task<IActionResult> GetQuotationsByPotentialCustomer(long potentialCustomerId)
+        {
+            var result = await _quotationService.GetQuotationsByPotentialCustomerIdAsync(potentialCustomerId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Temsilciye göre teklifleri getirir
+        /// </summary>
+        /// <param name="representativeId">Temsilci ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("by-representative/{representativeId}")]
+        public async Task<IActionResult> GetQuotationsByRepresentative(long representativeId)
+        {
+            var result = await _quotationService.GetQuotationsByRepresentativeIdAsync(representativeId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Duruma göre teklifleri getirir
+        /// </summary>
+        /// <param name="status">Durum</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("by-status/{status}")]
+        public async Task<IActionResult> GetQuotationsByStatus(int status)
+        {
+            var result = await _quotationService.GetQuotationsByStatusAsync(status);
+            return StatusCode(result.StatusCode, result);
+        }
+    }
+}

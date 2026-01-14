@@ -1,0 +1,108 @@
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using cms_webapi.Hubs;
+using cms_webapi.Interfaces;
+using cms_webapi.DTOs;
+
+namespace cms_webapi.Controllers
+{
+    [ApiController]
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IHubContext<AuthHub> _hubContext;
+        private readonly ILocalizationService _localizationService;
+        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
+
+        public AuthController(IHubContext<AuthHub> hubContext, ILocalizationService localizationService, IAuthService authService, IUserService userService)
+        {
+            _hubContext = hubContext;
+            _localizationService = localizationService;
+            _authService = authService;
+            _userService = userService;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult<ApiResponse<string>>> Login([FromBody] LoginRequest request)
+        {
+            var loginDto = new LoginDto
+            {
+                Username = request.Email,
+                Password = request.Password
+            };
+
+            var loginResult = await _authService.LoginWithSessionAsync(loginDto);
+            
+            // SignalR ile eski kullanıcıyı çıkış yaptır (eğer varsa)
+            if (loginResult.Success && loginResult.Data != null)
+            {
+                await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
+                
+                // Token'ı string olarak döndür
+                return StatusCode(loginResult.StatusCode, ApiResponse<string>.SuccessResult(
+                    loginResult.Data.Token,
+                    loginResult.Message));
+            }
+
+            return StatusCode(loginResult.StatusCode, ApiResponse<string>.ErrorResult(
+                loginResult.Message,
+                loginResult.ExceptionMessage,
+                loginResult.StatusCode));
+        }
+
+        [AllowAnonymous]
+        [HttpPost("admin-login")]
+        public async Task<ActionResult<ApiResponse<string>>> AdminLogin()
+        {
+            var loginDto = new LoginRequest
+            {
+                Email = "admin@v3rii.com",
+                Password = "Veriipass123!"
+            };
+
+            var loginDtoInternal = new LoginDto
+            {
+                Username = loginDto.Email,
+                Password = loginDto.Password
+            };
+
+            var loginResult = await _authService.LoginWithSessionAsync(loginDtoInternal);
+            
+            // SignalR ile eski kullanıcıyı çıkış yaptır (eğer varsa)
+            if (loginResult.Success && loginResult.Data != null)
+            {
+                await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
+                
+                return StatusCode(loginResult.StatusCode, ApiResponse<string>.SuccessResult(
+                    loginResult.Data.Token,
+                    loginResult.Message));
+            }
+
+            return StatusCode(loginResult.StatusCode, ApiResponse<string>.ErrorResult(
+                loginResult.Message,
+                loginResult.ExceptionMessage,
+                loginResult.StatusCode));
+        }
+
+        [Authorize]
+        [HttpGet("user")]
+        public async Task<ActionResult<ApiResponse<UserDto>>> GetProfile()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return StatusCode(401, ApiResponse<UserDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("AuthService.UserIdNotFound"),
+                    "Unauthorized",
+                    401));
+            }
+
+            var result = await _userService.GetUserProfileAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
+    }
+}
