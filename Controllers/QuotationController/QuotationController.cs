@@ -62,26 +62,19 @@ namespace cms_webapi.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPost("bulk")]
-        public async Task<IActionResult> CreateBulkQuotation([FromBody] CreateBulkQuotationDto dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<CreateBulkQuotationResultDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
-
-            var result = await _quotationService.CreateBulkQuotationAsync(dto);
-            return StatusCode(result.StatusCode, result);
-        }
 
         [HttpPost("bulk-quotation")]
         public async Task<IActionResult> CreateQuotationBulk([FromBody] QuotationBulkCreateDto bulkDto)
         {
 
             var result = await _quotationService.CreateQuotationBulkAsync(bulkDto);
+            return StatusCode(result.StatusCode, result);
+        }
+        
+        [HttpGet("price-rule-of-quotation")]
+        public async Task<IActionResult> GetPriceRuleOfQuotation([FromQuery] string customerCode,[FromQuery] long salesmenId,[FromQuery] DateTime quotationDate)
+        {
+            var result = await _quotationService.GetPriceRuleOfQuotationAsync(customerCode,salesmenId,quotationDate);
             return StatusCode(result.StatusCode, result);
         }
 

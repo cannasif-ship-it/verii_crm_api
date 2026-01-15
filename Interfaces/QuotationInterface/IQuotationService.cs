@@ -14,8 +14,8 @@ namespace cms_webapi.Interfaces
         Task<ApiResponse<List<QuotationGetDto>>> GetQuotationsByRepresentativeIdAsync(long representativeId);
         Task<ApiResponse<List<QuotationGetDto>>> GetQuotationsByStatusAsync(int status);
         Task<ApiResponse<bool>> QuotationExistsAsync(long id);
-        Task<ApiResponse<CreateBulkQuotationResultDto>> CreateBulkQuotationAsync(CreateBulkQuotationDto dto);
         Task<ApiResponse<QuotationGetDto>> CreateQuotationBulkAsync(QuotationBulkCreateDto bulkDto);
+        Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode,long salesmenId,DateTime quotationDate);
         Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request);
     }
 }

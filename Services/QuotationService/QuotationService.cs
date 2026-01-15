@@ -22,14 +22,15 @@ namespace cms_webapi.Services
         private readonly CmsDbContext _context;
         private readonly IApprovalService _approvalService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
+        private readonly IErpService _erpService;
         public QuotationService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILocalizationService localizationService,
             CmsDbContext context,
             IApprovalService approvalService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IErpService erpService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -37,6 +38,7 @@ namespace cms_webapi.Services
             _context = context;
             _approvalService = approvalService;
             _httpContextAccessor = httpContextAccessor;
+            _erpService = erpService;
         }
 
         public async Task<ApiResponse<PagedResponse<QuotationGetDto>>> GetAllQuotationsAsync(PagedRequest request)
@@ -359,79 +361,6 @@ namespace cms_webapi.Services
             }
         }
 
-        public async Task<ApiResponse<CreateBulkQuotationResultDto>> CreateBulkQuotationAsync(CreateBulkQuotationDto dto)
-        {
-            try
-            {
-                // Start transaction
-                await _unitOfWork.BeginTransactionAsync();
-
-                try
-                {
-                    var quotation = _mapper.Map<Quotation>(dto.Header);
-                    quotation.OfferNo = "T";
-
-                    await _unitOfWork.Quotations.AddAsync(quotation);
-                    await _unitOfWork.SaveChangesAsync(); // Get ID
-
-                    var createdLines = new List<QuotationLine>();
-                    foreach (var line in dto.Lines)
-                    {
-                        var entity = new QuotationLine
-                        {
-                            QuotationId = quotation.Id,
-                            ProductCode = line.ProductCode,
-                            Quantity = line.Quantity,
-                            UnitPrice = line.UnitPrice,
-                            DiscountRate1 = line.DiscountRate1,
-                            DiscountAmount1 = line.DiscountAmount1,
-                            DiscountRate2 = line.DiscountRate2,
-                            DiscountAmount2 = line.DiscountAmount2,
-                            DiscountRate3 = line.DiscountRate3,
-                            DiscountAmount3 = line.DiscountAmount3,
-                            VatRate = line.VatRate,
-                            VatAmount = line.VatAmount,
-                            LineTotal = line.LineTotal,
-                            LineGrandTotal = line.LineGrandTotal,
-                            Description = line.Description,
-                            CreatedDate = DateTime.UtcNow
-                        };
-
-                        await _unitOfWork.QuotationLines.AddAsync(entity);
-                        createdLines.Add(entity);
-                    }
-
-                    quotation.Total = createdLines.Sum(x => x.LineTotal);
-                    quotation.GrandTotal = createdLines.Sum(x => x.LineGrandTotal);
-                    await _unitOfWork.Quotations.UpdateAsync(quotation);
-
-                    await _unitOfWork.SaveChangesAsync();
-                    await _unitOfWork.CommitTransactionAsync();
-
-                    // Start approval process
-                    await _approvalService.ProcessQuotationApproval(quotation.Id);
-
-                    var result = new CreateBulkQuotationResultDto
-                    {
-                        Quotation = _mapper.Map<QuotationDto>(quotation),
-                        Lines = _mapper.Map<List<QuotationLineDto>>(createdLines)
-                    };
-
-                    return ApiResponse<CreateBulkQuotationResultDto>.SuccessResult(result, _localizationService.GetLocalizedString("QuotationService.QuotationCreated"));
-                }
-                catch
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                return ApiResponse<CreateBulkQuotationResultDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
-                    _localizationService.GetLocalizedString("QuotationService.CreateBulkQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
-            }
-        }
         public async Task<ApiResponse<QuotationGetDto>> CreateQuotationBulkAsync(QuotationBulkCreateDto bulkDto)
         {
             await _unitOfWork.BeginTransactionAsync();
@@ -591,90 +520,93 @@ namespace cms_webapi.Services
         }
 
 
-        public async Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode,long salesmenId,DateTime quotationDate)
+        public async Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode, long salesmanId, DateTime quotationDate)
         {
             try
             {
-                var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"] as string;
-                short branchCode = short.Parse(branchCodeStr!);
+                var branchCodeRequest = await _erpService.GetBranchCodeFromContext();
+                if (!branchCodeRequest.Success)
+                {
+                    return ApiResponse<List<PricingRuleLineGetDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalError"),
+                        _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"),
+                        StatusCodes.Status500InternalServerError);
+                }
+                
+                short branchCode = branchCodeRequest.Data;
 
-                PricingRuleHeader? header = null;
-
-                // 1️⃣ Satışçı + Cari
-                header = await _unitOfWork.PricingRuleHeaders.Query()
-                .AsNoTracking()
+                // 1️⃣ Ortak filtre (tek doğruluk kaynağı)
+                var baseQuery = _unitOfWork.PricingRuleHeaders.Query()
+                    .AsNoTracking()
                     .Where(x =>
                         x.IsActive &&
+                        x.RuleType == PricingRuleType.Quotation &&
                         !x.IsDeleted &&
-                        x.ValidFrom <= quotationDate &&
-                        x.ValidTo >= quotationDate &&
-                        x.ErpCustomerCode == customerCode &&
                         x.BranchCode == branchCode &&
-                        x.Salesmen.Any(s => s.SalesmanId == salesmenId && !s.IsDeleted)
-                    )
-                    .OrderByDescending(x => x.Id)
-                    .FirstOrDefaultAsync();
+                        x.ValidFrom <= quotationDate &&
+                        x.ValidTo >= quotationDate
+                    );
 
-                // 2️⃣ Satışçı var – Cari yok
+                // 2️⃣ İş kuralı öncelik sırası AÇIK
+                PricingRuleHeader? header =
+                    // 1. Satışçı + Cari
+                    await baseQuery
+                        .Where(x =>
+                            x.ErpCustomerCode == customerCode &&
+                            x.Salesmen.Any(s => s.SalesmanId == salesmanId && !s.IsDeleted))
+                        .FirstOrDefaultAsync()
+
+                    // 2. Cari var – Satışçı yok
+                    ?? await baseQuery
+                        .Where(x =>
+                            x.ErpCustomerCode == customerCode &&
+                            !x.Salesmen.Any(s => !s.IsDeleted))
+                        .FirstOrDefaultAsync()
+
+                    // 3. Satışçı var – Cari yok
+                    ?? await baseQuery
+                        .Where(x =>
+                            string.IsNullOrEmpty(x.ErpCustomerCode) &&
+                            x.Salesmen.Any(s => s.SalesmanId == salesmanId && !s.IsDeleted))
+                        .FirstOrDefaultAsync()
+
+                    // 4. Genel (Cari yok – Satışçı yok)
+                    ?? await baseQuery
+                        .Where(x =>
+                            string.IsNullOrEmpty(x.ErpCustomerCode) &&
+                            !x.Salesmen.Any(s => !s.IsDeleted))
+                        .FirstOrDefaultAsync();
+                var denme = baseQuery.ToList();
+                // 3️⃣ Kural yoksa → bilinçli boş dönüş
                 if (header == null)
                 {
-                    header = await _unitOfWork.PricingRuleHeaders.Query()
-                        .AsNoTracking()
-                        .Where(x =>
-                            x.IsActive &&
-                            !x.IsDeleted &&
-                            x.ValidFrom <= quotationDate &&
-                            x.ValidTo >= quotationDate &&
-                            (x.ErpCustomerCode == null || x.ErpCustomerCode == "") &&
-                            x.BranchCode == branchCode &&
-                            x.Salesmen.Any(s => s.SalesmanId == salesmenId && !s.IsDeleted)
-                        )
-                        .OrderByDescending(x => x.Id)
-                        .FirstOrDefaultAsync();
+                    return ApiResponse<List<PricingRuleLineGetDto>>.SuccessResult(
+                        new List<PricingRuleLineGetDto>(),
+                        _localizationService.GetLocalizedString(
+                            "QuotationService.PriceRuleNotFound"));
                 }
 
-                // 3️⃣ Satışçı yok – Cari yok – Ürün bazlı
-                if (header == null)
-                {
-                    header = await _unitOfWork.PricingRuleHeaders.Query()
-                        .AsNoTracking()
-                        .Where(x =>
-                            x.IsActive &&
-                            !x.IsDeleted &&
-                            x.ValidFrom <= quotationDate &&
-                            x.ValidTo >= quotationDate &&
-                            (x.ErpCustomerCode == null || x.ErpCustomerCode == "") &&
-                            x.BranchCode == branchCode &&
-                            x.Salesmen.Count == 0
-                        )
-                        .OrderByDescending(x => x.Id)
-                        .FirstOrDefaultAsync();
-                }
-
-                    if (header == null)
-                    {
-                        return ApiResponse<List<PricingRuleLineGetDto>>.SuccessResult(
-                            new List<PricingRuleLineGetDto>(), _localizationService.GetLocalizedString("QuotationService.PriceRuleOfQuotationRetrieved"));
-                    }
-
-                    var lines = await _unitOfWork.PricingRuleLines.Query()
-                        .AsNoTracking()
-                        .Where(x =>
-                            x.PricingRuleHeaderId == header.Id &&
-                            !x.IsDeleted
-                        )
-                        .ToListAsync();
+                // 4️⃣ Line’ları getir
+                var lines = await _unitOfWork.PricingRuleLines.Query()
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.PricingRuleHeaderId == header.Id &&
+                        !x.IsDeleted)
+                    .ToListAsync();
 
                 var dto = _mapper.Map<List<PricingRuleLineGetDto>>(lines);
 
-                return ApiResponse<List<PricingRuleLineGetDto>>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationService.PriceRuleOfQuotationRetrieved"));
+                return ApiResponse<List<PricingRuleLineGetDto>>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString(
+                        "QuotationService.PriceRuleOfQuotationRetrieved"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<List<PricingRuleLineGetDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
-                    ex.Message,
-                    StatusCodes.Status500InternalServerError);
+                    _localizationService.GetLocalizedString("QuotationService.GetPriceRuleOfQuotationExceptionMessage", ex.Message
+                    , StatusCodes.Status500InternalServerError));
             }
         }
 
