@@ -30,6 +30,18 @@ namespace cms_webapi.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public async Task<ApiResponse<short>> GetBranchCodeFromContext()
+        {
+            var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"]?.ToString();
+
+            if (!short.TryParse(branchCodeStr, out var branchCode))
+                return ApiResponse<short>.ErrorResult(_localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalError"), _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"), StatusCodes.Status500InternalServerError);
+
+            return ApiResponse<short>.SuccessResult(branchCode, _localizationService.GetLocalizedString("ErpService.BranchCodeRetrieved"));
+        }
+
+
+
         
         // Cari işlemleri - DTO dönen versiyon
         public async Task<ApiResponse<List<CariDto>>> GetCarisAsync(string? cariKodu)
@@ -140,7 +152,7 @@ namespace cms_webapi.Services
         {
             try
             {
-                string input = "11.01.2026 00:00:00";
+                string input = tarih.ToString();
 
                 DateTime dt = DateTime.ParseExact(
                     input,
@@ -192,7 +204,7 @@ namespace cms_webapi.Services
                 var subeFromContext = _httpContextAccessor.HttpContext?.Items["BranchCode"] as string;
                 var subeKodu = string.IsNullOrWhiteSpace(subeFromContext) ? null : subeFromContext;
                 var result = await _cmsContext.Set<RII_STGROUP>()
-                .FromSqlRaw("SELECT * FROM dbo.RII_FN_STGRUP({0}, {1})", subeKodu, grupKodu)
+                .FromSqlRaw("SELECT * FROM dbo.RII_FN_STGRUP({0}, {1})", grupKodu, subeKodu )
                 .AsNoTracking()
                 .ToListAsync();
                 var mappedResult = _mapper.Map<List<StokGroupDto>>(result);

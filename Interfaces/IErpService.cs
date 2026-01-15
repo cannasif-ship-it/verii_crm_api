@@ -7,6 +7,7 @@ namespace cms_webapi.Interfaces
 {
     public interface IErpService
     {
+        Task<ApiResponse<short>> GetBranchCodeFromContext();
         Task<ApiResponse<List<CariDto>>> GetCarisAsync(string? cariKodu);
         Task<ApiResponse<List<CariDto>>> GetCarisByCodesAsync(IEnumerable<string> cariKodlari);
         Task<ApiResponse<List<StokFunctionDto>>> GetStoksAsync(string? stokKodu);
