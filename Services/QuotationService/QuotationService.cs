@@ -432,111 +432,165 @@ namespace cms_webapi.Services
                     _localizationService.GetLocalizedString("QuotationService.CreateBulkQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
-
         public async Task<ApiResponse<QuotationGetDto>> CreateQuotationBulkAsync(QuotationBulkCreateDto bulkDto)
         {
+            await _unitOfWork.BeginTransactionAsync();
+
             try
             {
-                // Start transaction
-                await _unitOfWork.BeginTransactionAsync();
+                // 1. Header map
+                var quotation = _mapper.Map<Quotation>(bulkDto.Quotation);
 
-                try
+                decimal total = 0m;
+                decimal grandTotal = 0m;
+
+                // 2. Header totals calculation
+                foreach (var lineDto in bulkDto.Lines)
                 {
-                    // 1. Quotation Header'ı oluştur
-                    var quotation = _mapper.Map<Quotation>(bulkDto.Quotation);
+                    var calc = CalculateLine(
+                        lineDto.Quantity,
+                        lineDto.UnitPrice,
+                        lineDto.DiscountRate1,
+                        lineDto.DiscountRate2,
+                        lineDto.DiscountRate3,
+                        lineDto.DiscountAmount1,
+                        lineDto.DiscountAmount2,
+                        lineDto.DiscountAmount3,
+                        lineDto.VatRate
+                    );
 
-                    // 2. Lines toplamını hesapla (GrandTotal için)
-                    decimal total = 0m;
-                    decimal grandTotal = 0m;
+                    total += calc.NetTotal;
+                    grandTotal += calc.GrandTotal;
+                }
 
-                    foreach (var lineDto in bulkDto.Lines)
-                    {
-                        var lineTotal = (lineDto.Quantity * lineDto.UnitPrice)
-                            - (lineDto.DiscountAmount1 + lineDto.DiscountAmount2 + lineDto.DiscountAmount3)
-                            - ((lineDto.Quantity * lineDto.UnitPrice) * (lineDto.DiscountRate1 + lineDto.DiscountRate2 + lineDto.DiscountRate3) / 100);
+                quotation.Total = total;
+                quotation.GrandTotal = grandTotal;
 
-                        var vatAmount = lineTotal * (lineDto.VatRate / 100);
-                        var lineGrandTotal = lineTotal + vatAmount;
+                // 3. Save header
+                await _unitOfWork.Quotations.AddAsync(quotation);
+                await _unitOfWork.SaveChangesAsync();
 
-                        total += lineTotal;
-                        grandTotal += lineGrandTotal;
-                    }
+                // 4. Map & calculate lines
+                var lines = new List<QuotationLine>(bulkDto.Lines.Count);
 
-                    quotation.Total = total;
-                    quotation.GrandTotal = grandTotal;
+                foreach (var lineDto in bulkDto.Lines)
+                {
+                    var line = _mapper.Map<QuotationLine>(lineDto);
+                    line.QuotationId = quotation.Id;
 
-                    // 3. Quotation'ı kaydet
-                    await _unitOfWork.Quotations.AddAsync(quotation);
-                    await _unitOfWork.SaveChangesAsync(); // ID'yi almak için
+                    var calc = CalculateLine(
+                        line.Quantity,
+                        line.UnitPrice,
+                        line.DiscountRate1,
+                        line.DiscountRate2,
+                        line.DiscountRate3,
+                        line.DiscountAmount1,
+                        line.DiscountAmount2,
+                        line.DiscountAmount3,
+                        line.VatRate
+                    );
 
-                    // 4. Lines'ı bulk insert et
-                    var lines = new List<QuotationLine>();
-                    foreach (var lineDto in bulkDto.Lines)
-                    {
-                        var line = _mapper.Map<QuotationLine>(lineDto);
-                        line.QuotationId = quotation.Id;
+                    line.LineTotal = calc.NetTotal;
+                    line.VatAmount = calc.VatAmount;
+                    line.LineGrandTotal = calc.GrandTotal;
 
-                        // Line toplamlarını hesapla
-                        line.LineTotal = (line.Quantity * line.UnitPrice)
-                            - (line.DiscountAmount1 + line.DiscountAmount2 + line.DiscountAmount3)
-                            - ((line.Quantity * line.UnitPrice) * (line.DiscountRate1 + line.DiscountRate2 + line.DiscountRate3) / 100);
+                    lines.Add(line);
+                }
 
-                        line.VatAmount = line.LineTotal * (line.VatRate / 100);
-                        line.LineGrandTotal = line.LineTotal + line.VatAmount;
+                await _unitOfWork.QuotationLines.AddAllAsync(lines);
 
-                        lines.Add(line);
-                    }
-
-                    foreach (var line in lines)
-                    {
-                        await _unitOfWork.QuotationLines.AddAsync(line);
-                    }
-
-                    // 5. ExchangeRate'leri bulk insert et (varsa)
-                    if (bulkDto.ExchangeRates != null && bulkDto.ExchangeRates.Any())
-                    {
-                        foreach (var rateDto in bulkDto.ExchangeRates)
+                // 5. Exchange rates
+                if (bulkDto.ExchangeRates?.Any() == true)
+                {
+                    var rates = bulkDto.ExchangeRates
+                        .Select(r =>
                         {
-                            var exchangeRate = _mapper.Map<QuotationExchangeRate>(rateDto);
-                            exchangeRate.QuotationId = quotation.Id;
-                            await _unitOfWork.QuotationExchangeRates.AddAsync(exchangeRate);
-                        }
-                    }
+                            var rate = _mapper.Map<QuotationExchangeRate>(r);
+                            rate.QuotationId = quotation.Id;
+                            return rate;
+                        }).ToList();
 
-                    // 6. Transaction commit
-                    await _unitOfWork.CommitTransactionAsync();
-
-                    // 7. Onay akışını başlat
-                    await _approvalService.ProcessQuotationApproval(quotation.Id);
-
-                    // 8. Reload with navigation properties
-                    var quotationWithNav = await _unitOfWork.Quotations
-                        .Query()
-                        .Include(q => q.Representative)
-                        .Include(q => q.Lines)
-                        .Include(q => q.PotentialCustomer)
-                        .Include(q => q.CreatedByUser)
-                        .Include(q => q.UpdatedByUser)
-                        .FirstOrDefaultAsync(q => q.Id == quotation.Id);
-
-                    var quotationDto = _mapper.Map<QuotationGetDto>(quotationWithNav);
-                    return ApiResponse<QuotationGetDto>.SuccessResult(quotationDto, "Quotation created successfully");
+                    await _unitOfWork.QuotationExchangeRates.AddAllAsync(rates);
                 }
-                catch
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    throw;
-                }
+
+                // 6. Commit
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                // 8. Reload
+                var quotationWithNav = await _unitOfWork.Quotations
+                    .Query()
+                    .AsNoTracking()
+                    .Include(q => q.Representative)
+                    .Include(q => q.Lines)
+                    .Include(q => q.PotentialCustomer)
+                    .Include(q => q.CreatedByUser)
+                    .Include(q => q.UpdatedByUser)
+                    .FirstOrDefaultAsync(q => q.Id == quotation.Id);
+
+                var dto = _mapper.Map<QuotationGetDto>(quotationWithNav);
+
+                return ApiResponse<QuotationGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationService.QuotationCreated"));
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync();
+
                 return ApiResponse<QuotationGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
-                    ex.Message,
-                    StatusCodes.Status500InternalServerError);
+                    _localizationService.GetLocalizedString("QuotationService.CreateQuotationBulkExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
-        
+
+        private static LineCalculationResult CalculateLine(
+    decimal quantity,
+    decimal unitPrice,
+    decimal discountRate1,
+    decimal discountRate2,
+    decimal discountRate3,
+    decimal discountAmount1,
+    decimal discountAmount2,
+    decimal discountAmount3,
+    decimal vatRate)
+        {
+            decimal gross = quantity * unitPrice;
+
+            // Sequential discount rates
+            decimal netAfterRates = gross;
+            netAfterRates *= (1 - discountRate1 / 100m);
+            netAfterRates *= (1 - discountRate2 / 100m);
+            netAfterRates *= (1 - discountRate3 / 100m);
+
+            // Discount amounts
+            decimal net = netAfterRates
+                - discountAmount1
+                - discountAmount2
+                - discountAmount3;
+
+            if (net < 0)
+                net = 0;
+
+            net = Math.Round(net, 2, MidpointRounding.AwayFromZero);
+
+            decimal vat = Math.Round(net * vatRate / 100m, 2, MidpointRounding.AwayFromZero);
+            decimal grandTotal = net + vat;
+
+            return new LineCalculationResult
+            {
+                NetTotal = net,
+                VatAmount = vat,
+                GrandTotal = grandTotal
+            };
+        }
+
+        private sealed class LineCalculationResult
+        {
+            public decimal NetTotal { get; init; }
+            public decimal VatAmount { get; init; }
+            public decimal GrandTotal { get; init; }
+        }
+
+
         public async Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode,long salesmenId,DateTime quotationDate)
         {
             try
@@ -624,7 +678,7 @@ namespace cms_webapi.Services
             }
         }
 
-  
+
         public async Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request)
         {
             try
@@ -702,5 +756,6 @@ namespace cms_webapi.Services
                     _localizationService.GetLocalizedString("QuotationService.GetPriceOfProductExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
+ 
     }
 }
