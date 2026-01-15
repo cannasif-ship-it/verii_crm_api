@@ -12,8 +12,8 @@ using cms_webapi.Data;
 namespace cms_webapi.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    [Migration("20260113142318_AddPricingRuleAndStockToQuotationLine")]
-    partial class AddPricingRuleAndStockToQuotationLine
+    [Migration("20260115080742_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,9 @@ namespace cms_webapi.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<long?>("ActivityTypeId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("AssignedUserId")
                         .HasColumnType("bigint");
@@ -108,6 +111,8 @@ namespace cms_webapi.Migrations
                     b.HasIndex("ActivityType")
                         .HasDatabaseName("IX_Activity_ActivityType");
 
+                    b.HasIndex("ActivityTypeId");
+
                     b.HasIndex("AssignedUserId")
                         .HasDatabaseName("IX_Activity_AssignedUserId");
 
@@ -136,6 +141,66 @@ namespace cms_webapi.Migrations
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("RII_ACTIVITY", (string)null);
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ActivityType", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CreatedDate")
+                        .HasDatabaseName("IX_ActivityType_CreatedDate");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ActivityType_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_ActivityType_Name");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_ACTIVITY_TYPE", (string)null);
                 });
 
             modelBuilder.Entity("cms_webapi.Models.ApprovalAuthority", b =>
@@ -2106,9 +2171,6 @@ namespace cms_webapi.Migrations
                     b.Property<long>("QuotationId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("QuotationId1")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("RelatedStockId")
                         .HasColumnType("bigint");
 
@@ -2144,8 +2206,6 @@ namespace cms_webapi.Migrations
 
                     b.HasIndex("QuotationId")
                         .HasDatabaseName("IX_QuotationLine_QuotationId");
-
-                    b.HasIndex("QuotationId1");
 
                     b.HasIndex("RelatedStockId")
                         .HasDatabaseName("IX_QuotationLine_RelatedStockId");
@@ -2253,6 +2313,11 @@ namespace cms_webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("BranchCode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
 
@@ -2272,8 +2337,56 @@ namespace cms_webapi.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("GrupAdi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("GrupKodu")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Kod1")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Kod1Adi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Kod2")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Kod2Adi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Kod3")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Kod3Adi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Kod4")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Kod4Adi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Kod5")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Kod5Adi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("StockName")
                         .IsRequired()
@@ -2289,6 +2402,10 @@ namespace cms_webapi.Migrations
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("UreticiKodu")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -3092,9 +3209,12 @@ namespace cms_webapi.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasNoKey();
+                    b.ToTable("__EFMigrationsHistory_FN_2SHIPPING", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
                     b.ToFunction("RII_FN_2SHIPPING");
-                    b.Metadata.SetIsTableExcludedFromMigrations(true);
                 });
 
             modelBuilder.Entity("depoWebAPI.Models.RII_FN_KUR", b =>
@@ -3109,9 +3229,97 @@ namespace cms_webapi.Migrations
                     b.Property<double>("KUR_DEGERI")
                         .HasColumnType("float");
 
-                    b.HasNoKey();
+                    b.ToTable("__EFMigrationsHistory_FN_KUR", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
                     b.ToFunction("RII_FN_KUR");
-                    b.Metadata.SetIsTableExcludedFromMigrations(true);
+                });
+
+            modelBuilder.Entity("depoWebAPI.Models.RII_FN_STOK", b =>
+                {
+                    b.Property<string>("GRUP_ISIM")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("GRUP_KODU")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("INGISIM")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<short>("ISLETME_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("KOD1_ADI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KOD2_ADI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KOD3_ADI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KOD4_ADI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KOD5_ADI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KOD_1")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("KOD_2")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("KOD_3")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("KOD_4")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("KOD_5")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("OLCU_BR1")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<string>("STOK_ADI")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("STOK_KODU")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("nvarchar(35)");
+
+                    b.Property<short>("SUBE_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("URETICI_KODU")
+                        .HasMaxLength(35)
+                        .HasColumnType("nvarchar(35)");
+
+                    b.ToTable("__EFMigrationsHistory_FN_STOK", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_STOK");
                 });
 
             modelBuilder.Entity("depoWebAPI.Models.RII_STGROUP", b =>
@@ -3130,13 +3338,20 @@ namespace cms_webapi.Migrations
                     b.Property<short>("SUBE_KODU")
                         .HasColumnType("smallint");
 
-                    b.HasNoKey();
+                    b.ToTable("__EFMigrationsHistory_STGROUP", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
                     b.ToFunction("RII_STGROUP");
-                    b.Metadata.SetIsTableExcludedFromMigrations(true);
                 });
 
             modelBuilder.Entity("cms_webapi.Models.Activity", b =>
                 {
+                    b.HasOne("cms_webapi.Models.ActivityType", null)
+                        .WithMany("Activities")
+                        .HasForeignKey("ActivityTypeId");
+
                     b.HasOne("cms_webapi.Models.User", "AssignedUser")
                         .WithMany()
                         .HasForeignKey("AssignedUserId")
@@ -3176,6 +3391,30 @@ namespace cms_webapi.Migrations
                     b.Navigation("DeletedByUser");
 
                     b.Navigation("PotentialCustomer");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ActivityType", b =>
+                {
+                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
 
                     b.Navigation("UpdatedByUser");
                 });
@@ -3956,14 +4195,10 @@ namespace cms_webapi.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("cms_webapi.Models.Quotation", "Quotation")
-                        .WithMany()
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("cms_webapi.Models.Quotation", null)
                         .WithMany("Lines")
-                        .HasForeignKey("QuotationId1");
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("cms_webapi.Models.Stock", "RelatedStock")
                         .WithMany()
@@ -4389,6 +4624,11 @@ namespace cms_webapi.Migrations
                     b.Navigation("UpdatedByUser");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ActivityType", b =>
+                {
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("cms_webapi.Models.City", b =>

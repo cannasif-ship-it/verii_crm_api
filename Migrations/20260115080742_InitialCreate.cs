@@ -30,6 +30,7 @@ namespace cms_webapi.Migrations
                     ContactId = table.Column<long>(type: "bigint", nullable: true),
                     AssignedUserId = table.Column<long>(type: "bigint", nullable: true),
                     ActivityDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ActivityTypeId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -41,6 +42,27 @@ namespace cms_webapi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RII_ACTIVITY", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_ACTIVITY_TYPE",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_ACTIVITY_TYPE", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -705,7 +727,7 @@ namespace cms_webapi.Migrations
                     Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     ApprovalStatus = table.Column<int>(type: "int", nullable: false),
                     PricingRuleHeaderId = table.Column<long>(type: "bigint", nullable: true),
-                    QuotationId1 = table.Column<long>(type: "bigint", nullable: true),
+                    RelatedStockId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -721,18 +743,14 @@ namespace cms_webapi.Migrations
                         name: "FK_RII_QUOTATION_LINE_RII_PRICING_RULE_HEADER_PricingRuleHeaderId",
                         column: x => x.PricingRuleHeaderId,
                         principalTable: "RII_PRICING_RULE_HEADER",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_RII_QUOTATION_LINE_RII_QUOTATION_QuotationId",
                         column: x => x.QuotationId,
                         principalTable: "RII_QUOTATION",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_RII_QUOTATION_LINE_RII_QUOTATION_QuotationId1",
-                        column: x => x.QuotationId1,
-                        principalTable: "RII_QUOTATION",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -792,6 +810,20 @@ namespace cms_webapi.Migrations
                     ErpStockCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     StockName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Unit = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    UreticiKodu = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    GrupKodu = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    GrupAdi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Kod1 = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Kod1Adi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Kod2 = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Kod2Adi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Kod3 = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Kod3Adi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Kod4 = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Kod4Adi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Kod5 = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Kod5Adi = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    BranchCode = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -1244,6 +1276,11 @@ namespace cms_webapi.Migrations
                 column: "Subject");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RII_ACTIVITY_ActivityTypeId",
+                table: "RII_ACTIVITY",
+                column: "ActivityTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RII_ACTIVITY_CreatedBy",
                 table: "RII_ACTIVITY",
                 column: "CreatedBy");
@@ -1256,6 +1293,36 @@ namespace cms_webapi.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_RII_ACTIVITY_UpdatedBy",
                 table: "RII_ACTIVITY",
+                column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityType_CreatedDate",
+                table: "RII_ACTIVITY_TYPE",
+                column: "CreatedDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityType_IsDeleted",
+                table: "RII_ACTIVITY_TYPE",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityType_Name",
+                table: "RII_ACTIVITY_TYPE",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_ACTIVITY_TYPE_CreatedBy",
+                table: "RII_ACTIVITY_TYPE",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_ACTIVITY_TYPE_DeletedBy",
+                table: "RII_ACTIVITY_TYPE",
+                column: "DeletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_ACTIVITY_TYPE_UpdatedBy",
+                table: "RII_ACTIVITY_TYPE",
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
@@ -2156,6 +2223,11 @@ namespace cms_webapi.Migrations
                 column: "IsDeleted");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuotationLine_PricingRuleHeaderId",
+                table: "RII_QUOTATION_LINE",
+                column: "PricingRuleHeaderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuotationLine_ProductCode",
                 table: "RII_QUOTATION_LINE",
                 column: "ProductCode");
@@ -2166,6 +2238,11 @@ namespace cms_webapi.Migrations
                 column: "QuotationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuotationLine_RelatedStockId",
+                table: "RII_QUOTATION_LINE",
+                column: "RelatedStockId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RII_QUOTATION_LINE_CreatedBy",
                 table: "RII_QUOTATION_LINE",
                 column: "CreatedBy");
@@ -2174,16 +2251,6 @@ namespace cms_webapi.Migrations
                 name: "IX_RII_QUOTATION_LINE_DeletedBy",
                 table: "RII_QUOTATION_LINE",
                 column: "DeletedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_QUOTATION_LINE_PricingRuleHeaderId",
-                table: "RII_QUOTATION_LINE",
-                column: "PricingRuleHeaderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_QUOTATION_LINE_QuotationId1",
-                table: "RII_QUOTATION_LINE",
-                column: "QuotationId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RII_QUOTATION_LINE_UpdatedBy",
@@ -2578,6 +2645,13 @@ namespace cms_webapi.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_RII_ACTIVITY_RII_ACTIVITY_TYPE_ActivityTypeId",
+                table: "RII_ACTIVITY",
+                column: "ActivityTypeId",
+                principalTable: "RII_ACTIVITY_TYPE",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_RII_ACTIVITY_RII_CONTACT_ContactId",
                 table: "RII_ACTIVITY",
                 column: "ContactId",
@@ -2615,6 +2689,27 @@ namespace cms_webapi.Migrations
             migrationBuilder.AddForeignKey(
                 name: "FK_RII_ACTIVITY_RII_USERS_UpdatedBy",
                 table: "RII_ACTIVITY",
+                column: "UpdatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_ACTIVITY_TYPE_RII_USERS_CreatedBy",
+                table: "RII_ACTIVITY_TYPE",
+                column: "CreatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_ACTIVITY_TYPE_RII_USERS_DeletedBy",
+                table: "RII_ACTIVITY_TYPE",
+                column: "DeletedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_ACTIVITY_TYPE_RII_USERS_UpdatedBy",
+                table: "RII_ACTIVITY_TYPE",
                 column: "UpdatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
@@ -3219,6 +3314,14 @@ namespace cms_webapi.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_RII_QUOTATION_LINE_RII_STOCK_RelatedStockId",
+                table: "RII_QUOTATION_LINE",
+                column: "RelatedStockId",
+                principalTable: "RII_STOCK",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_RII_QUOTATION_LINE_RII_USERS_CreatedBy",
                 table: "RII_QUOTATION_LINE",
                 column: "CreatedBy",
@@ -3463,13 +3566,13 @@ namespace cms_webapi.Migrations
                 name: "RII_QUOTATION_LINE");
 
             migrationBuilder.DropTable(
-                name: "RII_STOCK");
-
-            migrationBuilder.DropTable(
                 name: "RII_PRICING_RULE_HEADER");
 
             migrationBuilder.DropTable(
                 name: "RII_QUOTATION");
+
+            migrationBuilder.DropTable(
+                name: "RII_STOCK");
 
             migrationBuilder.DropTable(
                 name: "RII_ACTIVITY");
@@ -3479,6 +3582,9 @@ namespace cms_webapi.Migrations
 
             migrationBuilder.DropTable(
                 name: "RII_SHIPPING_ADDRESS");
+
+            migrationBuilder.DropTable(
+                name: "RII_ACTIVITY_TYPE");
 
             migrationBuilder.DropTable(
                 name: "RII_CONTACT");
