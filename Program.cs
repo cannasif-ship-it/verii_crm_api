@@ -441,6 +441,9 @@ if (Directory.Exists(uploadsPath))
 // Add Request Localization Middleware
 app.UseRequestLocalization();
 
+// Add BranchCode Middleware - Must be before Authentication to capture header early
+app.UseMiddleware<BranchCodeMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
