@@ -60,48 +60,33 @@ namespace cms_webapi.Data
             modelBuilder.Entity<RII_FN_KUR>(entity =>
             {
                 entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_FN_KUR", t => t.ExcludeFromMigrations());
                 entity.ToFunction("RII_FN_KUR");
-                entity.Metadata.SetIsTableExcludedFromMigrations(true);
             });
 
             // 2SHIPPING function yapılandırması - Key yok
             modelBuilder.Entity<RII_FN_2SHIPPING>(entity =>
             {
                 entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_FN_2SHIPPING", t => t.ExcludeFromMigrations());
                 entity.ToFunction("RII_FN_2SHIPPING");
-                entity.Metadata.SetIsTableExcludedFromMigrations(true);
             });
 
             // Stok group function yapılandırması - Key yok
             modelBuilder.Entity<RII_STGROUP>(entity =>
             {
                 entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_STGROUP", t => t.ExcludeFromMigrations());
                 entity.ToFunction("RII_STGROUP");
-                entity.Metadata.SetIsTableExcludedFromMigrations(true);
             });
 
             // Stok function yapılandırması - Key yok
             modelBuilder.Entity<RII_FN_STOK>(entity =>
             {
                 entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_FN_STOK", t => t.ExcludeFromMigrations());
                 entity.ToFunction("RII_FN_STOK");
-                entity.Property(e => e.STOK_KODU).HasMaxLength(35);
-                entity.Property(e => e.URETICI_KODU).HasMaxLength(35);
-                entity.Property(e => e.STOK_ADI).HasMaxLength(200);
-                entity.Property(e => e.GRUP_KODU).HasMaxLength(8);
-                entity.Property(e => e.GRUP_ISIM).HasMaxLength(30);
-                entity.Property(e => e.KOD_1).HasMaxLength(8);
-                entity.Property(e => e.KOD1_ADI).HasMaxLength(30);
-                entity.Property(e => e.KOD_2).HasMaxLength(8);
-                entity.Property(e => e.KOD2_ADI).HasMaxLength(30);
-                entity.Property(e => e.KOD_3).HasMaxLength(8);
-                entity.Property(e => e.KOD3_ADI).HasMaxLength(30);
-                entity.Property(e => e.KOD_4).HasMaxLength(8);
-                entity.Property(e => e.KOD4_ADI).HasMaxLength(30);
-                entity.Property(e => e.KOD_5).HasMaxLength(8);
-                entity.Property(e => e.KOD5_ADI).HasMaxLength(30);
-                entity.Property(e => e.INGISIM).HasMaxLength(100);
-                entity.Metadata.SetIsTableExcludedFromMigrations(true);
+
             });
 
             // Apply all configurations from the Configurations folder

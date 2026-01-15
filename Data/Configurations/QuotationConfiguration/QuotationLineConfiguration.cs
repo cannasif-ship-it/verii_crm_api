@@ -20,13 +20,9 @@ namespace cms_webapi.Data.Configurations
 
             // Decimal precisions are defined via [Column(TypeName = "decimal(18,6)")] in the model
             // Relationships
+            // Note: Quotation relationship is configured in QuotationConfiguration to avoid duplicate foreign keys
             builder.Property(e => e.QuotationId)
                 .IsRequired();
-
-            builder.HasOne(e => e.Quotation)
-                .WithMany()
-                .HasForeignKey(e => e.QuotationId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(e => e.PricingRuleHeader)
                 .WithMany()
