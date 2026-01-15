@@ -10,7 +10,7 @@ namespace cms_webapi.DTOs
         public decimal MinQuantity { get; set; }
         public decimal? MaxQuantity { get; set; }
         public decimal? FixedUnitPrice { get; set; }
-        public string CurrencyCode { get; set; } = "TRY";
+        public string CurrencyCode { get; set; } = string.Empty;
         public decimal DiscountRate1 { get; set; }
         public decimal DiscountAmount1 { get; set; }
         public decimal DiscountRate2 { get; set; }

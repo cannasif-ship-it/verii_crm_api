@@ -24,7 +24,7 @@ namespace cms_webapi.Models
         public decimal? FixedUnitPrice { get; set; }
 
         // Fiyat bilgisi
-        public string CurrencyCode { get; set; } = "TRY";
+        public string CurrencyCode { get; set; } = string.Empty;
 
         // 🔹 İndirimler
         [Column(TypeName = "decimal(18,6)")]
