@@ -43,6 +43,7 @@ namespace cms_webapi.Services
                 var query = _context.Activities
                     .AsNoTracking()
                     .Where(a => !a.IsDeleted)
+                    .Include(a => a.ActivityType)
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
@@ -96,6 +97,7 @@ namespace cms_webapi.Services
                 // Reload with navigation properties for mapping
                 var activityWithNav = await _context.Activities
                     .AsNoTracking()
+                    .Include(a => a.ActivityType)
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
@@ -124,6 +126,7 @@ namespace cms_webapi.Services
                 // Reload with navigation properties for mapping
                 var activityWithNav = await _context.Activities
                     .AsNoTracking()
+                    .Include(a => a.ActivityType)
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
@@ -162,6 +165,7 @@ namespace cms_webapi.Services
                 // Reload with navigation properties for mapping
                 var activityWithNav = await _context.Activities
                     .AsNoTracking()
+                    .Include(a => a.ActivityType)
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)

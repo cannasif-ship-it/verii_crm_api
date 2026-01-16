@@ -20,9 +20,14 @@ namespace cms_webapi.Data.Configurations
                 .HasMaxLength(500)
                 .IsRequired(false);
 
-            builder.Property(e => e.ActivityType)
-                .HasMaxLength(50)
-                .IsRequired();
+            // ActivityType relationship
+            builder.Property(e => e.ActivityTypeId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.ActivityType)
+                .WithMany(at => at.Activities)
+                .HasForeignKey(e => e.ActivityTypeId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.Property(e => e.ErpCustomerCode)
                 .HasMaxLength(50)
@@ -63,8 +68,8 @@ namespace cms_webapi.Data.Configurations
             builder.HasIndex(e => e.Subject)
                 .HasDatabaseName("IX_Activity_Subject");
 
-            builder.HasIndex(e => e.ActivityType)
-                .HasDatabaseName("IX_Activity_ActivityType");
+            builder.HasIndex(e => e.ActivityTypeId)
+                .HasDatabaseName("IX_Activity_ActivityTypeId");
 
             builder.HasIndex(e => e.Status)
                 .HasDatabaseName("IX_Activity_Status");

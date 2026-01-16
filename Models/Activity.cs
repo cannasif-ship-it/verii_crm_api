@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace cms_webapi.Models
 {
@@ -9,7 +10,9 @@ namespace cms_webapi.Models
 
         public string? Description { get; set; }
 
-        public string ActivityType { get; set; } = String.Empty;  // e.g., "Call", "Meeting", "Email"
+        public long? ActivityTypeId { get; set; }  // Foreign key to ActivityType
+        [ForeignKey("ActivityTypeId")]
+        public ActivityType? ActivityType { get; set; }
 
         public long? PotentialCustomerId { get; set; }
         public Customer? PotentialCustomer { get; set; }

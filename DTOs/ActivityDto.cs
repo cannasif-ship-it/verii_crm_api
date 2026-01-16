@@ -7,7 +7,8 @@ namespace cms_webapi.DTOs
     {
         public string Subject { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string ActivityType { get; set; } = string.Empty;
+        public long? ActivityTypeId { get; set; }
+        public ActivityTypeGetDto? ActivityType { get; set; }
         public long? PotentialCustomerId { get; set; }
         public CustomerGetDto? PotentialCustomer { get; set; }
         public string? ErpCustomerCode { get; set; }
@@ -30,9 +31,7 @@ namespace cms_webapi.DTOs
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string ActivityType { get; set; } = string.Empty;
+        public long? ActivityTypeId { get; set; }
 
         public long? PotentialCustomerId { get; set; }
 
@@ -63,9 +62,7 @@ namespace cms_webapi.DTOs
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string ActivityType { get; set; } = string.Empty;
+        public long? ActivityTypeId { get; set; }
 
         public long? PotentialCustomerId { get; set; }
 
