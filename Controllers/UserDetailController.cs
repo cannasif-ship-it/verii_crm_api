@@ -26,15 +26,15 @@ namespace cms_webapi.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUserId(long userId)
+        [HttpGet("user/{userId:long}")]
+        public async Task<IActionResult> GetByUserId([FromRoute] long userId)
         {
             var result = await _service.GetByUserIdAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(long id)
+        [HttpGet("{id:long}")]
+        public async Task<IActionResult> GetById([FromRoute] long id)
         {
             var result = await _service.GetByIdAsync(id);
             return StatusCode(result.StatusCode, result);

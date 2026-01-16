@@ -7,12 +7,12 @@ namespace cms_webapi.DTOs
     public class PriceOfProductRequestDto
     {
         public string ProductCode { get; set; } = string.Empty;
-        public string GroupCode { get; set; } = string.Empty;
+        public string? GroupCode { get; set; } = string.Empty;
     }
     public class PriceOfProductDto
     {
         public string ProductCode { get; set; } = string.Empty;
-        public string GroupCode { get; set; } = string.Empty;
+        public string? GroupCode { get; set; } = string.Empty;
         public string Currency { get; set; } = string.Empty;
         public decimal ListPrice { get; set; }
         public decimal CostPrice { get; set; }

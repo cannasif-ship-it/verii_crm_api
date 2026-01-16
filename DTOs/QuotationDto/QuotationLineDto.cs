@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using cms_webapi.Models;
 
 namespace cms_webapi.DTOs
 {
@@ -9,6 +10,7 @@ namespace cms_webapi.DTOs
         public long? ProductId { get; set; }
         public string? ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
+        public string? GroupCode { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal DiscountRate1 { get; set; }
@@ -24,6 +26,7 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
     public class CreateQuotationLineDto
@@ -40,6 +43,8 @@ namespace cms_webapi.DTOs
         [MaxLength(250)]
         public string ProductName { get; set; } = string.Empty;
 
+        public string? GroupCode { get; set; } = string.Empty;
+
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal DiscountRate1 { get; set; }
@@ -56,6 +61,7 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
     public class UpdateQuotationLineDto
@@ -69,6 +75,9 @@ namespace cms_webapi.DTOs
         [MaxLength(250)]
         public string ProductName { get; set; } = string.Empty;
 
+        [MaxLength(50)]
+        public string? GroupCode { get; set; } = string.Empty;
+
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal DiscountRate1 { get; set; }
@@ -85,6 +94,7 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
     public class QuotationLineGetDto : BaseEntityDto
@@ -93,6 +103,7 @@ namespace cms_webapi.DTOs
         public long? ProductId { get; set; }
         public string? ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
+        public string? GroupCode { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal DiscountRate1 { get; set; }
@@ -108,5 +119,6 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 }
