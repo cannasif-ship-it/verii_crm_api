@@ -7,6 +7,7 @@ using cms_webapi.UnitOfWork;
 using cms_webapi.Helpers;
 using cms_webapi.Data;
 using Microsoft.AspNetCore.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace cms_webapi.Services
 {
@@ -42,11 +43,11 @@ namespace cms_webapi.Services
 
                 // Reload with navigation properties for mapping
                 var entityWithNav = await _context.UserDetails
-                    .AsNoTracking()
+                    .Where(x => x.Id == id && !x.IsDeleted)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+                    .FirstOrDefaultAsync();
 
                 var dto = _mapper.Map<UserDetailDto>(entityWithNav ?? entity);
                 return ApiResponse<UserDetailDto>.SuccessResult(dto, _localizationService.GetLocalizedString("UserDetailService.UserDetailRetrievedSuccessfully"));
@@ -71,14 +72,6 @@ namespace cms_webapi.Services
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
                     .FirstOrDefaultAsync();
-
-                if (entity == null)
-                {
-                    return ApiResponse<UserDetailDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("UserDetailService.UserDetailNotFound"),
-                        _localizationService.GetLocalizedString("UserDetailService.UserDetailNotFound"),
-                        StatusCodes.Status404NotFound);
-                }
 
                 var dto = _mapper.Map<UserDetailDto>(entity);
                 return ApiResponse<UserDetailDto>.SuccessResult(dto, _localizationService.GetLocalizedString("UserDetailService.UserDetailRetrievedSuccessfully"));

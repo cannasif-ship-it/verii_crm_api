@@ -118,8 +118,10 @@ namespace cms_webapi.Services
         {
             try
             {
-                var userDiscountLimits = await _unitOfWork.UserDiscountLimits
-                    .FindAsync(x => x.SalespersonId == salespersonId);
+                var userDiscountLimits = await _unitOfWork.UserDiscountLimits.Query()
+                    .AsNoTracking()
+                    .Where(x => x.SalespersonId == salespersonId && !x.IsDeleted)
+                    .ToListAsync();
                 var userDiscountLimitDtos = _mapper.Map<List<UserDiscountLimitDto>>(userDiscountLimits);
 
                 return ApiResponse<List<UserDiscountLimitDto>>.SuccessResult(userDiscountLimitDtos, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitsRetrieved"));
@@ -300,7 +302,7 @@ namespace cms_webapi.Services
                 var userDiscountLimits = await _unitOfWork.UserDiscountLimits
                     .FindAsync(x => x.SalespersonId == salespersonId && x.ErpProductGroupCode == erpProductGroupCode);
                 var exists = userDiscountLimits.Any();
-                
+
                 return ApiResponse<bool>.SuccessResult(exists, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitExistsChecked"));
             }
             catch (Exception ex)
@@ -311,5 +313,6 @@ namespace cms_webapi.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
+        
     }
 }
