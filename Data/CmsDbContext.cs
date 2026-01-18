@@ -29,10 +29,6 @@ namespace cms_webapi.Data
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<QuotationLine> QuotationLines { get; set; }
         public DbSet<ApprovalWorkflow> ApprovalWorkflows { get; set; }
-        public DbSet<UserHierarchy> UserHierarchies { get; set; }
-        public DbSet<ApprovalAuthority> ApprovalAuthorities { get; set; }
-        public DbSet<ApprovalRule> ApprovalRules { get; set; }
-        public DbSet<ApprovalQueue> ApprovalQueues { get; set; }
         public DbSet<QuotationExchangeRate> QuotationExchangeRates { get; set; }
         public DbSet<ApprovalTransaction> ApprovalTransactions { get; set; }
         public DbSet<UserAuthority> UserAuthorities { get; set; }
@@ -47,6 +43,13 @@ namespace cms_webapi.Data
         public DbSet<StockDetail> StockDetails { get; set; }
         public DbSet<StockImage> StockImages { get; set; }
         public DbSet<StockRelation> StockRelations { get; set; }
+        public DbSet<ApprovalAction> ApprovalActions { get; set; }
+        public DbSet<ApprovalFlow> ApprovalFlows { get; set; }
+        public DbSet<ApprovalFlowStep> ApprovalFlowSteps { get; set; }
+        public DbSet<ApprovalRequest> ApprovalRequests { get; set; }
+        public DbSet<ApprovalRoleGroup> ApprovalRoleGroups { get; set; }
+        public DbSet<ApprovalRole> ApprovalRoles { get; set; }
+        public DbSet<ApprovalUserRole> ApprovalUserRoles { get; set; }
 
 
 

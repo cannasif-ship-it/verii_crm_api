@@ -21,7 +21,7 @@ namespace cms_webapi.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Subject = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ActivityType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ActivityTypeId = table.Column<long>(type: "bigint", nullable: true),
                     PotentialCustomerId = table.Column<long>(type: "bigint", nullable: true),
                     ErpCustomerCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -30,7 +30,6 @@ namespace cms_webapi.Migrations
                     ContactId = table.Column<long>(type: "bigint", nullable: true),
                     AssignedUserId = table.Column<long>(type: "bigint", nullable: true),
                     ActivityDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ActivityTypeId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -66,16 +65,37 @@ namespace cms_webapi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RII_APPROVAL_AUTHORITY",
+                name: "RII_APPROVAL_ACTION",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    MaxApprovalAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    ApprovalLevel = table.Column<int>(type: "int", nullable: false),
-                    CanFinalize = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    RequireUpperManagement = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    ApprovalRequestId = table.Column<long>(type: "bigint", nullable: false),
+                    StepOrder = table.Column<int>(type: "int", nullable: false),
+                    ApprovedByUserId = table.Column<long>(type: "bigint", nullable: false),
+                    ActionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_APPROVAL_ACTION", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_APPROVAL_FLOW",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DocumentType = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -87,25 +107,18 @@ namespace cms_webapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RII_APPROVAL_AUTHORITY", x => x.Id);
+                    table.PrimaryKey("PK_RII_APPROVAL_FLOW", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RII_APPROVAL_QUEUE",
+                name: "RII_APPROVAL_FLOW_STEP",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    QuotationId = table.Column<long>(type: "bigint", nullable: false),
-                    QuotationLineId = table.Column<long>(type: "bigint", nullable: true),
-                    AssignedToUserId = table.Column<long>(type: "bigint", nullable: false),
-                    ApprovalLevel = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    SequenceOrder = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    IsCurrent = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ApprovalFlowId = table.Column<long>(type: "bigint", nullable: false),
+                    StepOrder = table.Column<int>(type: "int", nullable: false),
+                    ApprovalRoleGroupId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -116,36 +129,82 @@ namespace cms_webapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RII_APPROVAL_QUEUE", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RII_APPROVAL_RULE",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApprovalAuthorityId = table.Column<long>(type: "bigint", nullable: false),
-                    ForwardToUpperManagement = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    ForwardToLevel = table.Column<int>(type: "int", nullable: true),
-                    RequireFinanceApproval = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RII_APPROVAL_RULE", x => x.Id);
+                    table.PrimaryKey("PK_RII_APPROVAL_FLOW_STEP", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RII_APPROVAL_RULE_RII_APPROVAL_AUTHORITY_ApprovalAuthorityId",
-                        column: x => x.ApprovalAuthorityId,
-                        principalTable: "RII_APPROVAL_AUTHORITY",
+                        name: "FK_RII_APPROVAL_FLOW_STEP_RII_APPROVAL_FLOW_ApprovalFlowId",
+                        column: x => x.ApprovalFlowId,
+                        principalTable: "RII_APPROVAL_FLOW",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_APPROVAL_REQUEST",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EntityId = table.Column<long>(type: "bigint", nullable: false),
+                    DocumentType = table.Column<int>(type: "int", nullable: false),
+                    ApprovalFlowId = table.Column<long>(type: "bigint", nullable: false),
+                    CurrentStep = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_APPROVAL_REQUEST", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RII_APPROVAL_REQUEST_RII_APPROVAL_FLOW_ApprovalFlowId",
+                        column: x => x.ApprovalFlowId,
+                        principalTable: "RII_APPROVAL_FLOW",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_APPROVAL_ROLE",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ApprovalRoleGroupId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_APPROVAL_ROLE", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_APPROVAL_ROLE_GROUP",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_APPROVAL_ROLE_GROUP", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -157,11 +216,35 @@ namespace cms_webapi.Migrations
                     DocumentId = table.Column<long>(type: "bigint", nullable: false),
                     LineId = table.Column<long>(type: "bigint", nullable: true),
                     ApprovalLevel = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     ApprovedByUserId = table.Column<long>(type: "bigint", nullable: true),
-                    RequestedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    RequestedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedByUserId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RII_APPROVAL_TRANSACTION", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RII_APPROVAL_USER_ROLE",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    ApprovalRoleId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -172,7 +255,12 @@ namespace cms_webapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RII_APPROVAL_TRANSACTION", x => x.Id);
+                    table.PrimaryKey("PK_RII_APPROVAL_USER_ROLE", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RII_APPROVAL_USER_ROLE_RII_APPROVAL_ROLE_ApprovalRoleId",
+                        column: x => x.ApprovalRoleId,
+                        principalTable: "RII_APPROVAL_ROLE",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -185,13 +273,16 @@ namespace cms_webapi.Migrations
                     UserId = table.Column<long>(type: "bigint", nullable: true),
                     MinAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     MaxAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedByUserId = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
+                    UpdatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedBy = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedByUserId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -728,6 +819,8 @@ namespace cms_webapi.Migrations
                     ApprovalStatus = table.Column<int>(type: "int", nullable: false),
                     PricingRuleHeaderId = table.Column<long>(type: "bigint", nullable: true),
                     RelatedStockId = table.Column<long>(type: "bigint", nullable: true),
+                    RelatedProductKey = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IsMainRelatedProduct = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -1114,60 +1207,6 @@ namespace cms_webapi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RII_USER_HIERARCHY",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SalespersonId = table.Column<long>(type: "bigint", nullable: false),
-                    ManagerId = table.Column<long>(type: "bigint", nullable: true),
-                    GeneralManagerId = table.Column<long>(type: "bigint", nullable: true),
-                    HierarchyLevel = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedBy = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RII_USER_HIERARCHY", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_DeletedBy",
-                        column: x => x.DeletedBy,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_GeneralManagerId",
-                        column: x => x.GeneralManagerId,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_ManagerId",
-                        column: x => x.ManagerId,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_SalespersonId",
-                        column: x => x.SalespersonId,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RII_USER_HIERARCHY_RII_USERS_UpdatedBy",
-                        column: x => x.UpdatedBy,
-                        principalTable: "RII_USERS",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RII_USER_SESSION",
                 columns: table => new
                 {
@@ -1236,9 +1275,9 @@ namespace cms_webapi.Migrations
                 column: "ActivityDate");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Activity_ActivityType",
+                name: "IX_Activity_ActivityTypeId",
                 table: "RII_ACTIVITY",
-                column: "ActivityType");
+                column: "ActivityTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Activity_AssignedUserId",
@@ -1274,11 +1313,6 @@ namespace cms_webapi.Migrations
                 name: "IX_Activity_Subject",
                 table: "RII_ACTIVITY",
                 column: "Subject");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_ACTIVITY_ActivityTypeId",
-                table: "RII_ACTIVITY",
-                column: "ActivityTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RII_ACTIVITY_CreatedBy",
@@ -1326,239 +1360,264 @@ namespace cms_webapi.Migrations
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalAuthority_ApprovalLevel",
-                table: "RII_APPROVAL_AUTHORITY",
-                column: "ApprovalLevel");
+                name: "IX_ApprovalAction_ApprovalRequestId",
+                table: "RII_APPROVAL_ACTION",
+                column: "ApprovalRequestId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalAuthority_IsActive",
-                table: "RII_APPROVAL_AUTHORITY",
-                column: "IsActive");
+                name: "IX_ApprovalAction_ApprovedByUserId",
+                table: "RII_APPROVAL_ACTION",
+                column: "ApprovedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalAuthority_IsDeleted",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "IX_ApprovalAction_IsDeleted",
+                table: "RII_APPROVAL_ACTION",
                 column: "IsDeleted");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalAuthority_Level_IsActive",
-                table: "RII_APPROVAL_AUTHORITY",
-                columns: new[] { "ApprovalLevel", "IsActive" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalAuthority_UserId",
-                table: "RII_APPROVAL_AUTHORITY",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_AUTHORITY_CreatedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "IX_RII_APPROVAL_ACTION_CreatedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_AUTHORITY_DeletedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "IX_RII_APPROVAL_ACTION_DeletedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "DeletedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_AUTHORITY_UpdatedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "IX_RII_APPROVAL_ACTION_UpdatedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_ApprovalLevel",
-                table: "RII_APPROVAL_QUEUE",
-                column: "ApprovalLevel");
+                name: "IX_ApprovalFlow_DocumentType",
+                table: "RII_APPROVAL_FLOW",
+                column: "DocumentType");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_AssignedToUserId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "AssignedToUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_AssignedToUserId_Status_IsCurrent",
-                table: "RII_APPROVAL_QUEUE",
-                columns: new[] { "AssignedToUserId", "Status", "IsCurrent" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_IsCurrent",
-                table: "RII_APPROVAL_QUEUE",
-                column: "IsCurrent");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_IsDeleted",
-                table: "RII_APPROVAL_QUEUE",
+                name: "IX_ApprovalFlow_IsDeleted",
+                table: "RII_APPROVAL_FLOW",
                 column: "IsDeleted");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_QuotationId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "QuotationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_QuotationId_IsCurrent_Status",
-                table: "RII_APPROVAL_QUEUE",
-                columns: new[] { "QuotationId", "IsCurrent", "Status" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_QuotationId_SequenceOrder",
-                table: "RII_APPROVAL_QUEUE",
-                columns: new[] { "QuotationId", "SequenceOrder" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_QuotationLineId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "QuotationLineId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_SequenceOrder",
-                table: "RII_APPROVAL_QUEUE",
-                column: "SequenceOrder");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalQueue_Status",
-                table: "RII_APPROVAL_QUEUE",
-                column: "Status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_QUEUE_CreatedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "IX_RII_APPROVAL_FLOW_CreatedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_QUEUE_DeletedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "IX_RII_APPROVAL_FLOW_DeletedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "DeletedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_QUEUE_UpdatedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "IX_RII_APPROVAL_FLOW_UpdatedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalRule_ApprovalAuthorityId",
-                table: "RII_APPROVAL_RULE",
-                column: "ApprovalAuthorityId");
+                name: "IX_ApprovalFlowStep_ApprovalFlowId",
+                table: "RII_APPROVAL_FLOW_STEP",
+                column: "ApprovalFlowId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalRule_AuthorityId_IsActive",
-                table: "RII_APPROVAL_RULE",
-                columns: new[] { "ApprovalAuthorityId", "IsActive" });
+                name: "IX_ApprovalFlowStep_ApprovalRoleGroupId",
+                table: "RII_APPROVAL_FLOW_STEP",
+                column: "ApprovalRoleGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalRule_IsActive",
-                table: "RII_APPROVAL_RULE",
-                column: "IsActive");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalRule_IsDeleted",
-                table: "RII_APPROVAL_RULE",
+                name: "IX_ApprovalFlowStep_IsDeleted",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "IsDeleted");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_RULE_CreatedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "IX_RII_APPROVAL_FLOW_STEP_CreatedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_RULE_DeletedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "IX_RII_APPROVAL_FLOW_STEP_DeletedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "DeletedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_RULE_UpdatedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "IX_RII_APPROVAL_FLOW_STEP_UpdatedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_ActionDate",
-                table: "RII_APPROVAL_TRANSACTION",
-                column: "ActionDate");
+                name: "IX_ApprovalRequest_ApprovalFlowId",
+                table: "RII_APPROVAL_REQUEST",
+                column: "ApprovalFlowId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_ApprovalLevel",
-                table: "RII_APPROVAL_TRANSACTION",
-                column: "ApprovalLevel");
+                name: "IX_ApprovalRequest_DocumentType",
+                table: "RII_APPROVAL_REQUEST",
+                column: "DocumentType");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_ApprovedByUserId",
+                name: "IX_ApprovalRequest_EntityId",
+                table: "RII_APPROVAL_REQUEST",
+                column: "EntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRequest_IsDeleted",
+                table: "RII_APPROVAL_REQUEST",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_REQUEST_CreatedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_REQUEST_DeletedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "DeletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_REQUEST_UpdatedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRole_ApprovalRoleGroupId",
+                table: "RII_APPROVAL_ROLE",
+                column: "ApprovalRoleGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRole_IsDeleted",
+                table: "RII_APPROVAL_ROLE",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRole_Name",
+                table: "RII_APPROVAL_ROLE",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_CreatedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_DeletedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "DeletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_UpdatedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRoleGroup_IsDeleted",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalRoleGroup_Name",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_GROUP_CreatedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_GROUP_DeletedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "DeletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_ROLE_GROUP_UpdatedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_TRANSACTION_ApprovedByUserId",
                 table: "RII_APPROVAL_TRANSACTION",
                 column: "ApprovedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_DocumentId",
+                name: "IX_RII_APPROVAL_TRANSACTION_CreatedByUserId",
+                table: "RII_APPROVAL_TRANSACTION",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_TRANSACTION_DeletedByUserId",
+                table: "RII_APPROVAL_TRANSACTION",
+                column: "DeletedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_TRANSACTION_DocumentId",
                 table: "RII_APPROVAL_TRANSACTION",
                 column: "DocumentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_DocumentId_LineId",
-                table: "RII_APPROVAL_TRANSACTION",
-                columns: new[] { "DocumentId", "LineId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_IsDeleted",
-                table: "RII_APPROVAL_TRANSACTION",
-                column: "IsDeleted");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_LineId",
+                name: "IX_RII_APPROVAL_TRANSACTION_LineId",
                 table: "RII_APPROVAL_TRANSACTION",
                 column: "LineId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_RequestedAt",
+                name: "IX_RII_APPROVAL_TRANSACTION_UpdatedByUserId",
                 table: "RII_APPROVAL_TRANSACTION",
-                column: "RequestedAt");
+                column: "UpdatedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalTransaction_Status",
-                table: "RII_APPROVAL_TRANSACTION",
-                column: "Status");
+                name: "IX_ApprovalUserRole_ApprovalRoleId",
+                table: "RII_APPROVAL_USER_ROLE",
+                column: "ApprovalRoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_TRANSACTION_CreatedBy",
-                table: "RII_APPROVAL_TRANSACTION",
+                name: "IX_ApprovalUserRole_IsDeleted",
+                table: "RII_APPROVAL_USER_ROLE",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalUserRole_UserId",
+                table: "RII_APPROVAL_USER_ROLE",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_USER_ROLE_CreatedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_TRANSACTION_DeletedBy",
-                table: "RII_APPROVAL_TRANSACTION",
+                name: "IX_RII_APPROVAL_USER_ROLE_DeletedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "DeletedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_TRANSACTION_UpdatedBy",
-                table: "RII_APPROVAL_TRANSACTION",
+                name: "IX_RII_APPROVAL_USER_ROLE_UpdatedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalWorkflow_CustomerTypeId",
+                name: "IX_RII_APPROVAL_WORKFLOW_CreatedByUserId",
+                table: "RII_APPROVAL_WORKFLOW",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_WORKFLOW_CustomerTypeId",
                 table: "RII_APPROVAL_WORKFLOW",
                 column: "CustomerTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalWorkflow_IsDeleted",
+                name: "IX_RII_APPROVAL_WORKFLOW_DeletedByUserId",
                 table: "RII_APPROVAL_WORKFLOW",
-                column: "IsDeleted");
+                column: "DeletedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApprovalWorkflow_UserId",
+                name: "IX_RII_APPROVAL_WORKFLOW_UpdatedByUserId",
+                table: "RII_APPROVAL_WORKFLOW",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RII_APPROVAL_WORKFLOW_UserId",
                 table: "RII_APPROVAL_WORKFLOW",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_WORKFLOW_CreatedBy",
-                table: "RII_APPROVAL_WORKFLOW",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_WORKFLOW_DeletedBy",
-                table: "RII_APPROVAL_WORKFLOW",
-                column: "DeletedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_APPROVAL_WORKFLOW_UpdatedBy",
-                table: "RII_APPROVAL_WORKFLOW",
-                column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_City_CountryId",
@@ -2527,51 +2586,6 @@ namespace cms_webapi.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RII_USER_HIERARCHY_CreatedBy",
-                table: "RII_USER_HIERARCHY",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_USER_HIERARCHY_DeletedBy",
-                table: "RII_USER_HIERARCHY",
-                column: "DeletedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RII_USER_HIERARCHY_UpdatedBy",
-                table: "RII_USER_HIERARCHY",
-                column: "UpdatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_GeneralManagerId",
-                table: "RII_USER_HIERARCHY",
-                column: "GeneralManagerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_IsActive",
-                table: "RII_USER_HIERARCHY",
-                column: "IsActive");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_IsDeleted",
-                table: "RII_USER_HIERARCHY",
-                column: "IsDeleted");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_ManagerId",
-                table: "RII_USER_HIERARCHY",
-                column: "ManagerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_SalespersonId",
-                table: "RII_USER_HIERARCHY",
-                column: "SalespersonId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserHierarchy_SalespersonId_IsActive",
-                table: "RII_USER_HIERARCHY",
-                columns: new[] { "SalespersonId", "IsActive" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RII_USER_SESSION_CreatedBy",
                 table: "RII_USER_SESSION",
                 column: "CreatedBy");
@@ -2649,7 +2663,8 @@ namespace cms_webapi.Migrations
                 table: "RII_ACTIVITY",
                 column: "ActivityTypeId",
                 principalTable: "RII_ACTIVITY_TYPE",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_RII_ACTIVITY_RII_CONTACT_ContactId",
@@ -2715,92 +2730,155 @@ namespace cms_webapi.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_AUTHORITY_RII_USERS_CreatedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "FK_RII_APPROVAL_ACTION_RII_APPROVAL_REQUEST_ApprovalRequestId",
+                table: "RII_APPROVAL_ACTION",
+                column: "ApprovalRequestId",
+                principalTable: "RII_APPROVAL_REQUEST",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ACTION_RII_USERS_ApprovedByUserId",
+                table: "RII_APPROVAL_ACTION",
+                column: "ApprovedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ACTION_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "CreatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_AUTHORITY_RII_USERS_DeletedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "FK_RII_APPROVAL_ACTION_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "DeletedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_AUTHORITY_RII_USERS_UpdatedBy",
-                table: "RII_APPROVAL_AUTHORITY",
+                name: "FK_RII_APPROVAL_ACTION_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_ACTION",
                 column: "UpdatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_AUTHORITY_RII_USERS_UserId",
-                table: "RII_APPROVAL_AUTHORITY",
-                column: "UserId",
-                principalTable: "RII_USERS",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_QUOTATION_LINE_QuotationLineId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "QuotationLineId",
-                principalTable: "RII_QUOTATION_LINE",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_QUOTATION_QuotationId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "QuotationId",
-                principalTable: "RII_QUOTATION",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_USERS_AssignedToUserId",
-                table: "RII_APPROVAL_QUEUE",
-                column: "AssignedToUserId",
-                principalTable: "RII_USERS",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_USERS_CreatedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "FK_RII_APPROVAL_FLOW_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "CreatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_USERS_DeletedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "FK_RII_APPROVAL_FLOW_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "DeletedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_QUEUE_RII_USERS_UpdatedBy",
-                table: "RII_APPROVAL_QUEUE",
+                name: "FK_RII_APPROVAL_FLOW_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_FLOW",
                 column: "UpdatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_RULE_RII_USERS_CreatedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "FK_RII_APPROVAL_FLOW_STEP_RII_APPROVAL_ROLE_GROUP_ApprovalRoleGroupId",
+                table: "RII_APPROVAL_FLOW_STEP",
+                column: "ApprovalRoleGroupId",
+                principalTable: "RII_APPROVAL_ROLE_GROUP",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_FLOW_STEP_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "CreatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_RULE_RII_USERS_DeletedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "FK_RII_APPROVAL_FLOW_STEP_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
                 column: "DeletedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_RULE_RII_USERS_UpdatedBy",
-                table: "RII_APPROVAL_RULE",
+                name: "FK_RII_APPROVAL_FLOW_STEP_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_FLOW_STEP",
+                column: "UpdatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_REQUEST_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "CreatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_REQUEST_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "DeletedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_REQUEST_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_REQUEST",
+                column: "UpdatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_RII_APPROVAL_ROLE_GROUP_ApprovalRoleGroupId",
+                table: "RII_APPROVAL_ROLE",
+                column: "ApprovalRoleGroupId",
+                principalTable: "RII_APPROVAL_ROLE_GROUP",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "CreatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "DeletedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_ROLE",
+                column: "UpdatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_GROUP_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "CreatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_GROUP_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
+                column: "DeletedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_ROLE_GROUP_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_ROLE_GROUP",
                 column: "UpdatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
@@ -2810,7 +2888,8 @@ namespace cms_webapi.Migrations
                 table: "RII_APPROVAL_TRANSACTION",
                 column: "DocumentId",
                 principalTable: "RII_QUOTATION",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_RII_APPROVAL_TRANSACTION_RII_QUOTATION_LINE_LineId",
@@ -2827,23 +2906,51 @@ namespace cms_webapi.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_CreatedBy",
+                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_CreatedByUserId",
                 table: "RII_APPROVAL_TRANSACTION",
+                column: "CreatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_DeletedByUserId",
+                table: "RII_APPROVAL_TRANSACTION",
+                column: "DeletedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_UpdatedByUserId",
+                table: "RII_APPROVAL_TRANSACTION",
+                column: "UpdatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_USER_ROLE_RII_USERS_CreatedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "CreatedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_DeletedBy",
-                table: "RII_APPROVAL_TRANSACTION",
+                name: "FK_RII_APPROVAL_USER_ROLE_RII_USERS_DeletedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "DeletedBy",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_TRANSACTION_RII_USERS_UpdatedBy",
-                table: "RII_APPROVAL_TRANSACTION",
+                name: "FK_RII_APPROVAL_USER_ROLE_RII_USERS_UpdatedBy",
+                table: "RII_APPROVAL_USER_ROLE",
                 column: "UpdatedBy",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_APPROVAL_USER_ROLE_RII_USERS_UserId",
+                table: "RII_APPROVAL_USER_ROLE",
+                column: "UserId",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
@@ -2852,26 +2959,27 @@ namespace cms_webapi.Migrations
                 table: "RII_APPROVAL_WORKFLOW",
                 column: "CustomerTypeId",
                 principalTable: "RII_CUSTOMER_TYPE",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_CreatedBy",
+                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_CreatedByUserId",
                 table: "RII_APPROVAL_WORKFLOW",
-                column: "CreatedBy",
+                column: "CreatedByUserId",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_DeletedBy",
+                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_DeletedByUserId",
                 table: "RII_APPROVAL_WORKFLOW",
-                column: "DeletedBy",
+                column: "DeletedByUserId",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_UpdatedBy",
+                name: "FK_RII_APPROVAL_WORKFLOW_RII_USERS_UpdatedByUserId",
                 table: "RII_APPROVAL_WORKFLOW",
-                column: "UpdatedBy",
+                column: "UpdatedByUserId",
                 principalTable: "RII_USERS",
                 principalColumn: "Id");
 
@@ -3506,13 +3614,16 @@ namespace cms_webapi.Migrations
                 table: "RII_USER_AUTHORITY");
 
             migrationBuilder.DropTable(
-                name: "RII_APPROVAL_QUEUE");
+                name: "RII_APPROVAL_ACTION");
 
             migrationBuilder.DropTable(
-                name: "RII_APPROVAL_RULE");
+                name: "RII_APPROVAL_FLOW_STEP");
 
             migrationBuilder.DropTable(
                 name: "RII_APPROVAL_TRANSACTION");
+
+            migrationBuilder.DropTable(
+                name: "RII_APPROVAL_USER_ROLE");
 
             migrationBuilder.DropTable(
                 name: "RII_APPROVAL_WORKFLOW");
@@ -3554,16 +3665,19 @@ namespace cms_webapi.Migrations
                 name: "RII_USER_DISCOUNT_LIMIT");
 
             migrationBuilder.DropTable(
-                name: "RII_USER_HIERARCHY");
-
-            migrationBuilder.DropTable(
                 name: "RII_USER_SESSION");
 
             migrationBuilder.DropTable(
-                name: "RII_APPROVAL_AUTHORITY");
+                name: "RII_APPROVAL_REQUEST");
 
             migrationBuilder.DropTable(
                 name: "RII_QUOTATION_LINE");
+
+            migrationBuilder.DropTable(
+                name: "RII_APPROVAL_ROLE");
+
+            migrationBuilder.DropTable(
+                name: "RII_APPROVAL_FLOW");
 
             migrationBuilder.DropTable(
                 name: "RII_PRICING_RULE_HEADER");
@@ -3573,6 +3687,9 @@ namespace cms_webapi.Migrations
 
             migrationBuilder.DropTable(
                 name: "RII_STOCK");
+
+            migrationBuilder.DropTable(
+                name: "RII_APPROVAL_ROLE_GROUP");
 
             migrationBuilder.DropTable(
                 name: "RII_ACTIVITY");

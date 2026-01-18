@@ -12,7 +12,7 @@ using cms_webapi.Data;
 namespace cms_webapi.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    [Migration("20260115080742_InitialCreate")]
+    [Migration("20260118170226_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,11 +35,6 @@ namespace cms_webapi.Migrations
 
                     b.Property<DateTime?>("ActivityDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ActivityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<long?>("ActivityTypeId")
                         .HasColumnType("bigint");
@@ -108,10 +103,8 @@ namespace cms_webapi.Migrations
                     b.HasIndex("ActivityDate")
                         .HasDatabaseName("IX_Activity_ActivityDate");
 
-                    b.HasIndex("ActivityType")
-                        .HasDatabaseName("IX_Activity_ActivityType");
-
-                    b.HasIndex("ActivityTypeId");
+                    b.HasIndex("ActivityTypeId")
+                        .HasDatabaseName("IX_Activity_ActivityTypeId");
 
                     b.HasIndex("AssignedUserId")
                         .HasDatabaseName("IX_Activity_AssignedUserId");
@@ -203,7 +196,7 @@ namespace cms_webapi.Migrations
                     b.ToTable("RII_ACTIVITY_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalAuthority", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalAction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -211,13 +204,14 @@ namespace cms_webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("ApprovalLevel")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("ActionDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<bool>("CanFinalize")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                    b.Property<long>("ApprovalRequestId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ApprovedByUserId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
@@ -232,6 +226,70 @@ namespace cms_webapi.Migrations
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StepOrder")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalRequestId")
+                        .HasDatabaseName("IX_ApprovalAction_ApprovalRequestId");
+
+                    b.HasIndex("ApprovedByUserId")
+                        .HasDatabaseName("IX_ApprovalAction_ApprovedByUserId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ApprovalAction_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_APPROVAL_ACTION", (string)null);
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalFlow", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -241,50 +299,30 @@ namespace cms_webapi.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("MaxApprovalAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<bool>("RequireUpperManagement")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ApprovalLevel")
-                        .HasDatabaseName("IX_ApprovalAuthority_ApprovalLevel");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_ApprovalAuthority_IsActive");
+                    b.HasIndex("DocumentType")
+                        .HasDatabaseName("IX_ApprovalFlow_DocumentType");
 
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ApprovalAuthority_IsDeleted");
+                        .HasDatabaseName("IX_ApprovalFlow_IsDeleted");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_ApprovalAuthority_UserId");
-
-                    b.HasIndex("ApprovalLevel", "IsActive")
-                        .HasDatabaseName("IX_ApprovalAuthority_Level_IsActive");
-
-                    b.ToTable("RII_APPROVAL_AUTHORITY", (string)null);
+                    b.ToTable("RII_APPROVAL_FLOW", (string)null);
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalQueue", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalFlowStep", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -292,19 +330,11 @@ namespace cms_webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("ApprovalLevel")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("AssignedToUserId")
+                    b.Property<long>("ApprovalFlowId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<long>("ApprovalRoleGroupId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
@@ -320,28 +350,76 @@ namespace cms_webapi.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsCurrent")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("StepOrder")
+                        .HasColumnType("int");
 
-                    b.Property<long>("QuotationId")
+                    b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("QuotationLineId")
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalFlowId")
+                        .HasDatabaseName("IX_ApprovalFlowStep_ApprovalFlowId");
+
+                    b.HasIndex("ApprovalRoleGroupId")
+                        .HasDatabaseName("IX_ApprovalFlowStep_ApprovalRoleGroupId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ApprovalFlowStep_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_APPROVAL_FLOW_STEP", (string)null);
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<int>("SequenceOrder")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApprovalFlowId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("CurrentStep")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(1);
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
@@ -356,49 +434,28 @@ namespace cms_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovalLevel")
-                        .HasDatabaseName("IX_ApprovalQueue_ApprovalLevel");
-
-                    b.HasIndex("AssignedToUserId")
-                        .HasDatabaseName("IX_ApprovalQueue_AssignedToUserId");
+                    b.HasIndex("ApprovalFlowId")
+                        .HasDatabaseName("IX_ApprovalRequest_ApprovalFlowId");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("IsCurrent")
-                        .HasDatabaseName("IX_ApprovalQueue_IsCurrent");
+                    b.HasIndex("DocumentType")
+                        .HasDatabaseName("IX_ApprovalRequest_DocumentType");
+
+                    b.HasIndex("EntityId")
+                        .HasDatabaseName("IX_ApprovalRequest_EntityId");
 
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ApprovalQueue_IsDeleted");
-
-                    b.HasIndex("QuotationId")
-                        .HasDatabaseName("IX_ApprovalQueue_QuotationId");
-
-                    b.HasIndex("QuotationLineId")
-                        .HasDatabaseName("IX_ApprovalQueue_QuotationLineId");
-
-                    b.HasIndex("SequenceOrder")
-                        .HasDatabaseName("IX_ApprovalQueue_SequenceOrder");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_ApprovalQueue_Status");
+                        .HasDatabaseName("IX_ApprovalRequest_IsDeleted");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.HasIndex("QuotationId", "SequenceOrder")
-                        .HasDatabaseName("IX_ApprovalQueue_QuotationId_SequenceOrder");
-
-                    b.HasIndex("AssignedToUserId", "Status", "IsCurrent")
-                        .HasDatabaseName("IX_ApprovalQueue_AssignedToUserId_Status_IsCurrent");
-
-                    b.HasIndex("QuotationId", "IsCurrent", "Status")
-                        .HasDatabaseName("IX_ApprovalQueue_QuotationId_IsCurrent_Status");
-
-                    b.ToTable("RII_APPROVAL_QUEUE", (string)null);
+                    b.ToTable("RII_APPROVAL_REQUEST", (string)null);
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalRule", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRole", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -406,7 +463,7 @@ namespace cms_webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ApprovalAuthorityId")
+                    b.Property<long>("ApprovalRoleGroupId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("CreatedBy")
@@ -423,26 +480,13 @@ namespace cms_webapi.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("ForwardToLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("ForwardToUpperManagement")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("RequireFinanceApproval")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
@@ -452,25 +496,75 @@ namespace cms_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovalAuthorityId")
-                        .HasDatabaseName("IX_ApprovalRule_ApprovalAuthorityId");
+                    b.HasIndex("ApprovalRoleGroupId")
+                        .HasDatabaseName("IX_ApprovalRole_ApprovalRoleGroupId");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_ApprovalRule_IsActive");
-
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ApprovalRule_IsDeleted");
+                        .HasDatabaseName("IX_ApprovalRole_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_ApprovalRole_Name");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.HasIndex("ApprovalAuthorityId", "IsActive")
-                        .HasDatabaseName("IX_ApprovalRule_AuthorityId_IsActive");
+                    b.ToTable("RII_APPROVAL_ROLE", (string)null);
+                });
 
-                    b.ToTable("RII_APPROVAL_RULE", (string)null);
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRoleGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ApprovalRoleGroup_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_ApprovalRoleGroup_Name");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_APPROVAL_ROLE_GROUP", (string)null);
                 });
 
             modelBuilder.Entity("cms_webapi.Models.ApprovalTransaction", b =>
@@ -493,12 +587,16 @@ namespace cms_webapi.Migrations
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedDate")
@@ -518,16 +616,15 @@ namespace cms_webapi.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("RequestedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
 
                     b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -535,40 +632,76 @@ namespace cms_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActionDate")
-                        .HasDatabaseName("IX_ApprovalTransaction_ActionDate");
+                    b.HasIndex("ApprovedByUserId");
 
-                    b.HasIndex("ApprovalLevel")
-                        .HasDatabaseName("IX_ApprovalTransaction_ApprovalLevel");
+                    b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("ApprovedByUserId")
-                        .HasDatabaseName("IX_ApprovalTransaction_ApprovedByUserId");
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("LineId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("RII_APPROVAL_TRANSACTION");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalUserRole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApprovalRoleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalRoleId")
+                        .HasDatabaseName("IX_ApprovalUserRole_ApprovalRoleId");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("DocumentId")
-                        .HasDatabaseName("IX_ApprovalTransaction_DocumentId");
-
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ApprovalTransaction_IsDeleted");
-
-                    b.HasIndex("LineId")
-                        .HasDatabaseName("IX_ApprovalTransaction_LineId");
-
-                    b.HasIndex("RequestedAt")
-                        .HasDatabaseName("IX_ApprovalTransaction_RequestedAt");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_ApprovalTransaction_Status");
+                        .HasDatabaseName("IX_ApprovalUserRole_IsDeleted");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.HasIndex("DocumentId", "LineId")
-                        .HasDatabaseName("IX_ApprovalTransaction_DocumentId_LineId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_ApprovalUserRole_UserId");
 
-                    b.ToTable("RII_APPROVAL_TRANSACTION", (string)null);
+                    b.ToTable("RII_APPROVAL_USER_ROLE", (string)null);
                 });
 
             modelBuilder.Entity("cms_webapi.Models.ApprovalWorkflow", b =>
@@ -582,15 +715,19 @@ namespace cms_webapi.Migrations
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("CustomerTypeId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedDate")
@@ -608,6 +745,9 @@ namespace cms_webapi.Migrations
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -616,22 +756,17 @@ namespace cms_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("CustomerTypeId")
-                        .HasDatabaseName("IX_ApprovalWorkflow_CustomerTypeId");
+                    b.HasIndex("CustomerTypeId");
 
-                    b.HasIndex("DeletedBy");
+                    b.HasIndex("DeletedByUserId");
 
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ApprovalWorkflow_IsDeleted");
+                    b.HasIndex("UpdatedByUserId");
 
-                    b.HasIndex("UpdatedBy");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_ApprovalWorkflow_UserId");
-
-                    b.ToTable("RII_APPROVAL_WORKFLOW", (string)null);
+                    b.ToTable("RII_APPROVAL_WORKFLOW");
                 });
 
             modelBuilder.Entity("cms_webapi.Models.City", b =>
@@ -2152,6 +2287,11 @@ namespace cms_webapi.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMainRelatedProduct")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<decimal>("LineGrandTotal")
                         .HasColumnType("decimal(18,6)");
 
@@ -2170,6 +2310,10 @@ namespace cms_webapi.Migrations
 
                     b.Property<long>("QuotationId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("RelatedProductKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<long?>("RelatedStockId")
                         .HasColumnType("bigint");
@@ -3024,85 +3168,6 @@ namespace cms_webapi.Migrations
                     b.ToTable("RII_USER_DISCOUNT_LIMIT", (string)null);
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.UserHierarchy", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("GeneralManagerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("HierarchyLevel")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<long?>("ManagerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SalespersonId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("GeneralManagerId")
-                        .HasDatabaseName("IX_UserHierarchy_GeneralManagerId");
-
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_UserHierarchy_IsActive");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserHierarchy_IsDeleted");
-
-                    b.HasIndex("ManagerId")
-                        .HasDatabaseName("IX_UserHierarchy_ManagerId");
-
-                    b.HasIndex("SalespersonId")
-                        .HasDatabaseName("IX_UserHierarchy_SalespersonId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("SalespersonId", "IsActive")
-                        .HasDatabaseName("IX_UserHierarchy_SalespersonId_IsActive");
-
-                    b.ToTable("RII_USER_HIERARCHY", (string)null);
-                });
-
             modelBuilder.Entity("cms_webapi.Models.UserSession", b =>
                 {
                     b.Property<long>("Id")
@@ -3348,9 +3413,10 @@ namespace cms_webapi.Migrations
 
             modelBuilder.Entity("cms_webapi.Models.Activity", b =>
                 {
-                    b.HasOne("cms_webapi.Models.ActivityType", null)
+                    b.HasOne("cms_webapi.Models.ActivityType", "ActivityType")
                         .WithMany("Activities")
-                        .HasForeignKey("ActivityTypeId");
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("cms_webapi.Models.User", "AssignedUser")
                         .WithMany()
@@ -3381,6 +3447,8 @@ namespace cms_webapi.Migrations
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ActivityType");
 
                     b.Navigation("AssignedUser");
 
@@ -3419,8 +3487,20 @@ namespace cms_webapi.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalAuthority", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalAction", b =>
                 {
+                    b.HasOne("cms_webapi.Models.ApprovalRequest", "ApprovalRequest")
+                        .WithMany()
+                        .HasForeignKey("ApprovalRequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("cms_webapi.Models.User", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("cms_webapi.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
@@ -3436,29 +3516,19 @@ namespace cms_webapi.Migrations
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("cms_webapi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("ApprovalRequest");
+
+                    b.Navigation("ApprovedByUser");
 
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("DeletedByUser");
 
                     b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalQueue", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalFlow", b =>
                 {
-                    b.HasOne("cms_webapi.Models.User", "AssignedToUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedToUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("cms_webapi.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
@@ -3469,40 +3539,29 @@ namespace cms_webapi.Migrations
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("cms_webapi.Models.Quotation", "Quotation")
-                        .WithMany()
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("cms_webapi.Models.QuotationLine", "QuotationLine")
-                        .WithMany()
-                        .HasForeignKey("QuotationLineId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("AssignedToUser");
 
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("DeletedByUser");
 
-                    b.Navigation("Quotation");
-
-                    b.Navigation("QuotationLine");
-
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalRule", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalFlowStep", b =>
                 {
-                    b.HasOne("cms_webapi.Models.ApprovalAuthority", "ApprovalAuthority")
+                    b.HasOne("cms_webapi.Models.ApprovalFlow", "ApprovalFlow")
                         .WithMany()
-                        .HasForeignKey("ApprovalAuthorityId")
+                        .HasForeignKey("ApprovalFlowId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("cms_webapi.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                        .WithMany()
+                        .HasForeignKey("ApprovalRoleGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -3521,7 +3580,97 @@ namespace cms_webapi.Migrations
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Navigation("ApprovalAuthority");
+                    b.Navigation("ApprovalFlow");
+
+                    b.Navigation("ApprovalRoleGroup");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRequest", b =>
+                {
+                    b.HasOne("cms_webapi.Models.ApprovalFlow", "ApprovalFlow")
+                        .WithMany()
+                        .HasForeignKey("ApprovalFlowId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ApprovalFlow");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRole", b =>
+                {
+                    b.HasOne("cms_webapi.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                        .WithMany()
+                        .HasForeignKey("ApprovalRoleGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ApprovalRoleGroup");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalRoleGroup", b =>
+                {
+                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("CreatedByUser");
 
@@ -3534,34 +3683,29 @@ namespace cms_webapi.Migrations
                 {
                     b.HasOne("cms_webapi.Models.User", "ApprovedByUser")
                         .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("ApprovedByUserId");
 
                     b.HasOne("cms_webapi.Models.User", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("CreatedByUserId");
 
                     b.HasOne("cms_webapi.Models.User", "DeletedByUser")
                         .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("DeletedByUserId");
 
                     b.HasOne("cms_webapi.Models.Quotation", "Quotation")
                         .WithMany()
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("cms_webapi.Models.QuotationLine", "QuotationLine")
                         .WithMany()
-                        .HasForeignKey("LineId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("LineId");
 
                     b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
                         .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("UpdatedByUserId");
 
                     b.Navigation("ApprovedByUser");
 
@@ -3576,18 +3720,18 @@ namespace cms_webapi.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("cms_webapi.Models.ApprovalWorkflow", b =>
+            modelBuilder.Entity("cms_webapi.Models.ApprovalUserRole", b =>
                 {
+                    b.HasOne("cms_webapi.Models.ApprovalRole", "ApprovalRole")
+                        .WithMany()
+                        .HasForeignKey("ApprovalRoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("cms_webapi.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("cms_webapi.Models.CustomerType", "CustomerType")
-                        .WithMany()
-                        .HasForeignKey("CustomerTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
 
                     b.HasOne("cms_webapi.Models.User", "DeletedByUser")
                         .WithMany()
@@ -3602,7 +3746,43 @@ namespace cms_webapi.Migrations
                     b.HasOne("cms_webapi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalRole");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("cms_webapi.Models.ApprovalWorkflow", b =>
+                {
+                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("cms_webapi.Models.CustomerType", "CustomerType")
+                        .WithMany()
+                        .HasForeignKey("CustomerTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.HasOne("cms_webapi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("CreatedByUser");
 
@@ -4544,52 +4724,6 @@ namespace cms_webapi.Migrations
                     b.Navigation("DeletedByUser");
 
                     b.Navigation("Salespersons");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("cms_webapi.Models.UserHierarchy", b =>
-                {
-                    b.HasOne("cms_webapi.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("cms_webapi.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("cms_webapi.Models.User", "GeneralManager")
-                        .WithMany()
-                        .HasForeignKey("GeneralManagerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("cms_webapi.Models.User", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("cms_webapi.Models.User", "Salesperson")
-                        .WithMany()
-                        .HasForeignKey("SalespersonId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("cms_webapi.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("GeneralManager");
-
-                    b.Navigation("Manager");
-
-                    b.Navigation("Salesperson");
 
                     b.Navigation("UpdatedByUser");
                 });

@@ -96,10 +96,7 @@ builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
 // Register Quotation Services
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddScoped<IQuotationLineService, QuotationLineService>();
-builder.Services.AddScoped<IApprovalWorkflowService, ApprovalWorkflowService>();
-builder.Services.AddScoped<IApprovalService, ApprovalService>();
 builder.Services.AddScoped<IQuotationExchangeRateService, QuotationExchangeRateService>();
-builder.Services.AddScoped<IApprovalTransactionService, ApprovalTransactionService>();
 
 // Register Product Services
 builder.Services.AddScoped<IProductPricingService, ProductPricingService>();
@@ -134,6 +131,15 @@ builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<IStockDetailService, StockDetailService>();
 builder.Services.AddScoped<IStockImageService, StockImageService>();
 builder.Services.AddScoped<IStockRelationService, StockRelationService>();
+
+// Register Approval Services
+builder.Services.AddScoped<IApprovalActionService, ApprovalActionService>();
+builder.Services.AddScoped<IApprovalFlowService, ApprovalFlowService>();
+builder.Services.AddScoped<IApprovalFlowStepService, ApprovalFlowStepService>();
+builder.Services.AddScoped<IApprovalRequestService, ApprovalRequestService>();
+builder.Services.AddScoped<IApprovalRoleGroupService, ApprovalRoleGroupService>();
+builder.Services.AddScoped<IApprovalRoleService, ApprovalRoleService>();
+builder.Services.AddScoped<IApprovalUserRoleService, ApprovalUserRoleService>();
 
 // Register Background Jobs
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IStockSyncJob, Infrastructure.BackgroundJobs.StockSyncJob>();
@@ -392,18 +398,19 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed data initialization
+// Database migration and initialization
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
     try
     {
-        context.Database.EnsureCreated();
-        Console.WriteLine("Database created successfully.");
+        // Apply pending migrations
+        context.Database.Migrate();
+        Console.WriteLine("Database migrated successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error creating database: {ex.Message}");
+        Console.WriteLine($"Error migrating database: {ex.Message}");
     }
 }
 
