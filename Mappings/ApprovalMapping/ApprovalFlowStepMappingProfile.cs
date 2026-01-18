@@ -4,17 +4,19 @@ using cms_webapi.DTOs;
 
 namespace cms_webapi.Mappings
 {
-    public class ApprovalRuleMappingProfile : Profile
+    public class ApprovalFlowStepMappingProfile : Profile
     {
-        public ApprovalRuleMappingProfile()
+        public ApprovalFlowStepMappingProfile()
         {
-            CreateMap<ApprovalRule, ApprovalRuleGetDto>()
-                .ForMember(dest => dest.ApprovalAuthorityUserFullName, opt => opt.MapFrom(src => src.ApprovalAuthority != null && src.ApprovalAuthority.User != null ? $"{src.ApprovalAuthority.User.FirstName} {src.ApprovalAuthority.User.LastName}".Trim() : null))
+            // ApprovalFlowStep mappings
+            CreateMap<ApprovalFlowStep, ApprovalFlowStepGetDto>()
+                .ForMember(dest => dest.ApprovalFlowDescription, opt => opt.MapFrom(src => src.ApprovalFlow != null ? src.ApprovalFlow.Description : null))
+                .ForMember(dest => dest.ApprovalRoleGroupName, opt => opt.MapFrom(src => src.ApprovalRoleGroup != null ? src.ApprovalRoleGroup.Name : null))
                 .ForMember(dest => dest.CreatedByFullUser, opt => opt.MapFrom(src => src.CreatedByUser != null ? $"{src.CreatedByUser.FirstName} {src.CreatedByUser.LastName}".Trim() : null))
                 .ForMember(dest => dest.UpdatedByFullUser, opt => opt.MapFrom(src => src.UpdatedByUser != null ? $"{src.UpdatedByUser.FirstName} {src.UpdatedByUser.LastName}".Trim() : null))
                 .ForMember(dest => dest.DeletedByFullUser, opt => opt.MapFrom(src => src.DeletedByUser != null ? $"{src.DeletedByUser.FirstName} {src.DeletedByUser.LastName}".Trim() : null));
 
-            CreateMap<ApprovalRuleCreateDto, ApprovalRule>()
+            CreateMap<ApprovalFlowStepCreateDto, ApprovalFlowStep>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
@@ -23,9 +25,10 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
-                .ForMember(dest => dest.ApprovalAuthority, opt => opt.Ignore());
+                .ForMember(dest => dest.ApprovalFlow, opt => opt.Ignore())
+                .ForMember(dest => dest.ApprovalRoleGroup, opt => opt.Ignore());
 
-            CreateMap<ApprovalRuleUpdateDto, ApprovalRule>()
+            CreateMap<ApprovalFlowStepUpdateDto, ApprovalFlowStep>()
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
@@ -33,7 +36,9 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
-                .ForMember(dest => dest.ApprovalAuthority, opt => opt.Ignore());
+                .ForMember(dest => dest.ApprovalFlow, opt => opt.Ignore())
+                .ForMember(dest => dest.ApprovalRoleGroup, opt => opt.Ignore())
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }
