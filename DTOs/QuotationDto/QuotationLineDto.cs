@@ -26,6 +26,8 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public string? RelatedProductKey { get; set; }
+        public bool IsMainRelatedProduct { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
@@ -61,6 +63,8 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public string? RelatedProductKey { get; set; }
+        public bool IsMainRelatedProduct { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
@@ -94,6 +98,8 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public string? RelatedProductKey { get; set; }
+        public bool IsMainRelatedProduct { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 
@@ -119,6 +125,8 @@ namespace cms_webapi.DTOs
         public string? Description { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
+        public string? RelatedProductKey { get; set; }
+        public bool IsMainRelatedProduct { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
     }
 }

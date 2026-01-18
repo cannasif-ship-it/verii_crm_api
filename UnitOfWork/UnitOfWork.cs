@@ -41,10 +41,6 @@ namespace cms_webapi.UnitOfWork
         private IGenericRepository<QuotationLine>? _quotationLines;
         private IGenericRepository<UserSession>? _userSessions;
         private IGenericRepository<ApprovalWorkflow>? _approvalWorkflows;
-        private IGenericRepository<UserHierarchy>? _userHierarchies;
-        private IGenericRepository<ApprovalAuthority>? _approvalAuthorities;
-        private IGenericRepository<ApprovalRule>? _approvalRules;
-        private IGenericRepository<ApprovalQueue>? _approvalQueues;
         private IGenericRepository<QuotationExchangeRate>? _quotationExchangeRates;
         private IGenericRepository<ApprovalTransaction>? _approvalTransactions;
         private IGenericRepository<UserDetail>? _userDetails;
@@ -54,6 +50,13 @@ namespace cms_webapi.UnitOfWork
         private IGenericRepository<DocumentSerialType>? _documentSerialTypes;
         private IGenericRepository<Stock>? _stocks;
         private IGenericRepository<StockDetail>? _stockDetails;
+        private IGenericRepository<ApprovalAction>? _approvalActions;
+        private IGenericRepository<ApprovalFlow>? _approvalFlows;
+        private IGenericRepository<ApprovalFlowStep>? _approvalFlowSteps;
+        private IGenericRepository<ApprovalRequest>? _approvalRequests;
+        private IGenericRepository<ApprovalRoleGroup>? _approvalRoleGroups;
+        private IGenericRepository<ApprovalRole>? _approvalRoles;
+        private IGenericRepository<ApprovalUserRole>? _approvalUserRoles;
 
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
@@ -86,10 +89,6 @@ namespace cms_webapi.UnitOfWork
         public IGenericRepository<QuotationLine> QuotationLines{get{_quotationLines ??= new GenericRepository<QuotationLine>(_context, _httpContextAccessor);return _quotationLines;}}
         public IGenericRepository<UserSession> UserSessions{get{_userSessions ??= new GenericRepository<UserSession>(_context, _httpContextAccessor);return _userSessions;}}
         public IGenericRepository<ApprovalWorkflow> ApprovalWorkflows{get{_approvalWorkflows ??= new GenericRepository<ApprovalWorkflow>(_context, _httpContextAccessor);return _approvalWorkflows;}}
-        public IGenericRepository<UserHierarchy> UserHierarchies{get{_userHierarchies ??= new GenericRepository<UserHierarchy>(_context, _httpContextAccessor);return _userHierarchies;}}
-        public IGenericRepository<ApprovalAuthority> ApprovalAuthorities{get{_approvalAuthorities ??= new GenericRepository<ApprovalAuthority>(_context, _httpContextAccessor);return _approvalAuthorities;}}
-        public IGenericRepository<ApprovalRule> ApprovalRules{get{_approvalRules ??= new GenericRepository<ApprovalRule>(_context, _httpContextAccessor);return _approvalRules;}}
-        public IGenericRepository<ApprovalQueue> ApprovalQueues{get{_approvalQueues ??= new GenericRepository<ApprovalQueue>(_context, _httpContextAccessor);return _approvalQueues;}}
         public IGenericRepository<QuotationExchangeRate> QuotationExchangeRates{get{_quotationExchangeRates ??= new GenericRepository<QuotationExchangeRate>(_context, _httpContextAccessor);return _quotationExchangeRates;}}
         public IGenericRepository<ApprovalTransaction> ApprovalTransactions{get{_approvalTransactions ??= new GenericRepository<ApprovalTransaction>(_context, _httpContextAccessor);return _approvalTransactions;}}
         public IGenericRepository<UserDetail> UserDetails{get{_userDetails ??= new GenericRepository<UserDetail>(_context, _httpContextAccessor);return _userDetails;}}
@@ -99,6 +98,13 @@ namespace cms_webapi.UnitOfWork
         public IGenericRepository<DocumentSerialType> DocumentSerialTypes{get{_documentSerialTypes ??= new GenericRepository<DocumentSerialType>(_context, _httpContextAccessor);return _documentSerialTypes;}}
         public IGenericRepository<Stock> Stocks{get{_stocks ??= new GenericRepository<Stock>(_context, _httpContextAccessor);return _stocks;}}
         public IGenericRepository<StockDetail> StockDetails{get{_stockDetails ??= new GenericRepository<StockDetail>(_context, _httpContextAccessor);return _stockDetails;}}
+        public IGenericRepository<ApprovalAction> ApprovalActions{get{_approvalActions ??= new GenericRepository<ApprovalAction>(_context, _httpContextAccessor);return _approvalActions;}}
+        public IGenericRepository<ApprovalFlow> ApprovalFlows{get{_approvalFlows ??= new GenericRepository<ApprovalFlow>(_context, _httpContextAccessor);return _approvalFlows;}}
+        public IGenericRepository<ApprovalFlowStep> ApprovalFlowSteps{get{_approvalFlowSteps ??= new GenericRepository<ApprovalFlowStep>(_context, _httpContextAccessor);return _approvalFlowSteps;}}
+        public IGenericRepository<ApprovalRequest> ApprovalRequests{get{_approvalRequests ??= new GenericRepository<ApprovalRequest>(_context, _httpContextAccessor);return _approvalRequests;}}
+        public IGenericRepository<ApprovalRoleGroup> ApprovalRoleGroups{get{_approvalRoleGroups ??= new GenericRepository<ApprovalRoleGroup>(_context, _httpContextAccessor);return _approvalRoleGroups;}}
+        public IGenericRepository<ApprovalRole> ApprovalRoles{get{_approvalRoles ??= new GenericRepository<ApprovalRole>(_context, _httpContextAccessor);return _approvalRoles;}}
+        public IGenericRepository<ApprovalUserRole> ApprovalUserRoles{get{_approvalUserRoles ??= new GenericRepository<ApprovalUserRole>(_context, _httpContextAccessor);return _approvalUserRoles;}}
 
 
         /// <summary>

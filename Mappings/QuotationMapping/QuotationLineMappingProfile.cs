@@ -9,8 +9,13 @@ namespace cms_webapi.Mappings
         public QuotationLineMappingProfile()
         {
             // Entity -> DTO
-            CreateMap<QuotationLine, QuotationLineDto>();
-            CreateMap<QuotationLine, QuotationLineGetDto>();
+            CreateMap<QuotationLine, QuotationLineDto>()
+                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
+                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
+            
+            CreateMap<QuotationLine, QuotationLineGetDto>()
+                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
+                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
 
             // Create DTO -> Entity
             CreateMap<CreateQuotationLineDto, QuotationLine>()
@@ -25,7 +30,9 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.Quotation, opt => opt.Ignore())
                 .ForMember(dest => dest.ProductCode, opt => opt.Ignore())
                 .ForMember(dest => dest.PricingRuleHeader, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore());
+                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore())
+                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
+                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
 
             // Update DTO -> Entity
             CreateMap<UpdateQuotationLineDto, QuotationLine>()
@@ -40,7 +47,9 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.Quotation, opt => opt.Ignore())
                 .ForMember(dest => dest.ProductCode, opt => opt.Ignore())
                 .ForMember(dest => dest.PricingRuleHeader, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore());
+                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore())
+                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
+                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
                 
         }
     }

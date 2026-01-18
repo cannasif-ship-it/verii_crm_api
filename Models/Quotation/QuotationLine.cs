@@ -74,5 +74,9 @@ namespace cms_webapi.Models
         [ForeignKey("RelatedStockId")]
         public Stock? RelatedStock { get; set; }
 
+        public string? RelatedProductKey { get; set; }
+
+        public bool IsMainRelatedProduct { get; set; } = false;
+
     }
 }

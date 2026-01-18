@@ -31,10 +31,6 @@ namespace cms_webapi.UnitOfWork
         IGenericRepository<QuotationLine> QuotationLines { get; }
         IGenericRepository<UserSession> UserSessions { get; }
         IGenericRepository<ApprovalWorkflow> ApprovalWorkflows { get; }
-        IGenericRepository<UserHierarchy> UserHierarchies { get; }
-        IGenericRepository<ApprovalAuthority> ApprovalAuthorities { get; }
-        IGenericRepository<ApprovalRule> ApprovalRules { get; }
-        IGenericRepository<ApprovalQueue> ApprovalQueues { get; }
         IGenericRepository<QuotationExchangeRate> QuotationExchangeRates { get; }
         IGenericRepository<ApprovalTransaction> ApprovalTransactions { get; }
         IGenericRepository<UserDetail> UserDetails { get; }
@@ -44,6 +40,13 @@ namespace cms_webapi.UnitOfWork
         IGenericRepository<DocumentSerialType> DocumentSerialTypes { get; }
         IGenericRepository<Stock> Stocks { get; }
         IGenericRepository<StockDetail> StockDetails { get; }
+        IGenericRepository<ApprovalAction> ApprovalActions { get; }
+        IGenericRepository<ApprovalFlow> ApprovalFlows { get; }
+        IGenericRepository<ApprovalFlowStep> ApprovalFlowSteps { get; }
+        IGenericRepository<ApprovalRequest> ApprovalRequests { get; }
+        IGenericRepository<ApprovalRoleGroup> ApprovalRoleGroups { get; }
+        IGenericRepository<ApprovalRole> ApprovalRoles { get; }
+        IGenericRepository<ApprovalUserRole> ApprovalUserRoles { get; }
 
         /// <summary>
         /// Save all changes to the database within a transaction

@@ -20,7 +20,6 @@ namespace cms_webapi.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
-        private readonly IApprovalService _approvalService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IErpService _erpService;
         public QuotationService(
@@ -28,7 +27,6 @@ namespace cms_webapi.Services
             IMapper mapper,
             ILocalizationService localizationService,
             CmsDbContext context,
-            IApprovalService approvalService,
             IHttpContextAccessor httpContextAccessor,
             IErpService erpService)
         {
@@ -36,7 +34,6 @@ namespace cms_webapi.Services
             _mapper = mapper;
             _localizationService = localizationService;
             _context = context;
-            _approvalService = approvalService;
             _httpContextAccessor = httpContextAccessor;
             _erpService = erpService;
         }
@@ -163,15 +160,6 @@ namespace cms_webapi.Services
                         StatusCodes.Status401Unauthorized);
                 }
 
-                // 1. Düzenleme yetkisi kontrolü
-                var canEdit = await _approvalService.CanUserEditQuotation(id, userId.Value);
-                if (!canEdit)
-                {
-                    return ApiResponse<QuotationDto>.ErrorResult(
-                        "Bu teklifi düzenleme yetkiniz yok. Teklif onay akışında olabilir.",
-                        "You do not have permission to edit this quotation. It may be in approval process.",
-                        StatusCodes.Status403Forbidden);
-                }
 
                 var quotation = await _unitOfWork.Quotations
                     .Query()
@@ -186,15 +174,6 @@ namespace cms_webapi.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                // 2. Onay akışında mı kontrol et
-                var isInApproval = await _approvalService.IsQuotationInApprovalProcess(id);
-                if (isInApproval)
-                {
-                    return ApiResponse<QuotationDto>.ErrorResult(
-                        "Onay akışındaki teklifler düzenlenemez.",
-                        "Quotations in approval process cannot be edited",
-                        StatusCodes.Status400BadRequest);
-                }
 
                 // 3. Güncelleme işlemi
                 _mapper.Map(updateQuotationDto, quotation);
@@ -216,9 +195,6 @@ namespace cms_webapi.Services
 
                 await _unitOfWork.Quotations.UpdateAsync(quotation);
                 await _unitOfWork.SaveChangesAsync();
-
-                // 5. Onay akışını yeniden başlat (gerekirse)
-                await _approvalService.ProcessQuotationApproval(id);
 
                 var quotationDto = _mapper.Map<QuotationDto>(quotation);
                 return ApiResponse<QuotationDto>.SuccessResult(quotationDto, _localizationService.GetLocalizedString("QuotationService.QuotationUpdated"));
@@ -245,15 +221,6 @@ namespace cms_webapi.Services
                         StatusCodes.Status401Unauthorized);
                 }
 
-                // 1. Silme yetkisi kontrolü
-                var canDelete = await _approvalService.CanUserDeleteQuotation(id, userId.Value);
-                if (!canDelete)
-                {
-                    return ApiResponse<object>.ErrorResult(
-                        "Bu teklifi silme yetkiniz yok. Teklif onay akışında olabilir.",
-                        "You do not have permission to delete this quotation. It may be in approval process.",
-                        StatusCodes.Status403Forbidden);
-                }
 
                 var quotation = await _unitOfWork.Quotations.GetByIdAsync(id);
                 if (quotation == null)
@@ -264,15 +231,6 @@ namespace cms_webapi.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                // 2. Onay akışında mı kontrol et
-                var isInApproval = await _approvalService.IsQuotationInApprovalProcess(id);
-                if (isInApproval)
-                {
-                    return ApiResponse<object>.ErrorResult(
-                        "Onay akışındaki teklifler silinemez.",
-                        "Quotations in approval process cannot be deleted",
-                        StatusCodes.Status400BadRequest);
-                }
 
                 // 3. Soft delete
                 await _unitOfWork.Quotations.SoftDeleteAsync(id);

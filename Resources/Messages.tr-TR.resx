@@ -1133,4 +1133,277 @@
     <value>Stok silinirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.StockService -->
+  
+  <!-- #region Services.ApprovalActionService -->
+  <data name="ApprovalActionService.ApprovalActionsRetrieved" xml:space="preserve">
+    <value>Onay aksiyonları başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalActionService.ApprovalActionRetrieved" xml:space="preserve">
+    <value>Onay aksiyonu başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalActionService.ApprovalActionNotFound" xml:space="preserve">
+    <value>Onay aksiyonu bulunamadı.</value>
+  </data>
+  <data name="ApprovalActionService.ApprovalActionCreated" xml:space="preserve">
+    <value>Onay aksiyonu başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalActionService.ApprovalActionUpdated" xml:space="preserve">
+    <value>Onay aksiyonu başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalActionService.ApprovalActionDeleted" xml:space="preserve">
+    <value>Onay aksiyonu başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalActionService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalActionService.GetAllApprovalActionsExceptionMessage" xml:space="preserve">
+    <value>Onay aksiyonları getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalActionService.GetApprovalActionByIdExceptionMessage" xml:space="preserve">
+    <value>Onay aksiyonu getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalActionService.CreateApprovalActionExceptionMessage" xml:space="preserve">
+    <value>Onay aksiyonu oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalActionService.UpdateApprovalActionExceptionMessage" xml:space="preserve">
+    <value>Onay aksiyonu güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalActionService.DeleteApprovalActionExceptionMessage" xml:space="preserve">
+    <value>Onay aksiyonu silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalActionService -->
+  
+  <!-- #region Services.ApprovalFlowService -->
+  <data name="ApprovalFlowService.ApprovalFlowsRetrieved" xml:space="preserve">
+    <value>Onay akışları başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalFlowService.ApprovalFlowRetrieved" xml:space="preserve">
+    <value>Onay akışı başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalFlowService.ApprovalFlowNotFound" xml:space="preserve">
+    <value>Onay akışı bulunamadı.</value>
+  </data>
+  <data name="ApprovalFlowService.ApprovalFlowCreated" xml:space="preserve">
+    <value>Onay akışı başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalFlowService.ApprovalFlowUpdated" xml:space="preserve">
+    <value>Onay akışı başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalFlowService.ApprovalFlowDeleted" xml:space="preserve">
+    <value>Onay akışı başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalFlowService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalFlowService.GetAllApprovalFlowsExceptionMessage" xml:space="preserve">
+    <value>Onay akışları getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowService.GetApprovalFlowByIdExceptionMessage" xml:space="preserve">
+    <value>Onay akışı getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowService.CreateApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>Onay akışı oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowService.UpdateApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>Onay akışı güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowService.DeleteApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>Onay akışı silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalFlowService -->
+  
+  <!-- #region Services.ApprovalFlowStepService -->
+  <data name="ApprovalFlowStepService.ApprovalFlowStepsRetrieved" xml:space="preserve">
+    <value>Onay akış adımları başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalFlowStepService.ApprovalFlowStepRetrieved" xml:space="preserve">
+    <value>Onay akış adımı başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalFlowStepService.ApprovalFlowStepNotFound" xml:space="preserve">
+    <value>Onay akış adımı bulunamadı.</value>
+  </data>
+  <data name="ApprovalFlowStepService.ApprovalFlowStepCreated" xml:space="preserve">
+    <value>Onay akış adımı başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalFlowStepService.ApprovalFlowStepUpdated" xml:space="preserve">
+    <value>Onay akış adımı başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalFlowStepService.ApprovalFlowStepDeleted" xml:space="preserve">
+    <value>Onay akış adımı başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalFlowStepService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalFlowStepService.GetAllApprovalFlowStepsExceptionMessage" xml:space="preserve">
+    <value>Onay akış adımları getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowStepService.GetApprovalFlowStepByIdExceptionMessage" xml:space="preserve">
+    <value>Onay akış adımı getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowStepService.CreateApprovalFlowStepExceptionMessage" xml:space="preserve">
+    <value>Onay akış adımı oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowStepService.UpdateApprovalFlowStepExceptionMessage" xml:space="preserve">
+    <value>Onay akış adımı güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalFlowStepService.DeleteApprovalFlowStepExceptionMessage" xml:space="preserve">
+    <value>Onay akış adımı silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalFlowStepService -->
+  
+  <!-- #region Services.ApprovalRequestService -->
+  <data name="ApprovalRequestService.ApprovalRequestsRetrieved" xml:space="preserve">
+    <value>Onay talepleri başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRequestService.ApprovalRequestRetrieved" xml:space="preserve">
+    <value>Onay talebi başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRequestService.ApprovalRequestNotFound" xml:space="preserve">
+    <value>Onay talebi bulunamadı.</value>
+  </data>
+  <data name="ApprovalRequestService.ApprovalRequestCreated" xml:space="preserve">
+    <value>Onay talebi başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalRequestService.ApprovalRequestUpdated" xml:space="preserve">
+    <value>Onay talebi başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalRequestService.ApprovalRequestDeleted" xml:space="preserve">
+    <value>Onay talebi başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalRequestService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalRequestService.GetAllApprovalRequestsExceptionMessage" xml:space="preserve">
+    <value>Onay talepleri getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRequestService.GetApprovalRequestByIdExceptionMessage" xml:space="preserve">
+    <value>Onay talebi getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRequestService.CreateApprovalRequestExceptionMessage" xml:space="preserve">
+    <value>Onay talebi oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRequestService.UpdateApprovalRequestExceptionMessage" xml:space="preserve">
+    <value>Onay talebi güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRequestService.DeleteApprovalRequestExceptionMessage" xml:space="preserve">
+    <value>Onay talebi silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalRequestService -->
+  
+  <!-- #region Services.ApprovalRoleGroupService -->
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupsRetrieved" xml:space="preserve">
+    <value>Onay rol grupları başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupRetrieved" xml:space="preserve">
+    <value>Onay rol grubu başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupNotFound" xml:space="preserve">
+    <value>Onay rol grubu bulunamadı.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupCreated" xml:space="preserve">
+    <value>Onay rol grubu başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupUpdated" xml:space="preserve">
+    <value>Onay rol grubu başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.ApprovalRoleGroupDeleted" xml:space="preserve">
+    <value>Onay rol grubu başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalRoleGroupService.GetAllApprovalRoleGroupsExceptionMessage" xml:space="preserve">
+    <value>Onay rol grupları getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleGroupService.GetApprovalRoleGroupByIdExceptionMessage" xml:space="preserve">
+    <value>Onay rol grubu getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleGroupService.CreateApprovalRoleGroupExceptionMessage" xml:space="preserve">
+    <value>Onay rol grubu oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleGroupService.UpdateApprovalRoleGroupExceptionMessage" xml:space="preserve">
+    <value>Onay rol grubu güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleGroupService.DeleteApprovalRoleGroupExceptionMessage" xml:space="preserve">
+    <value>Onay rol grubu silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalRoleGroupService -->
+  
+  <!-- #region Services.ApprovalRoleService -->
+  <data name="ApprovalRoleService.ApprovalRolesRetrieved" xml:space="preserve">
+    <value>Onay rolleri başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRoleService.ApprovalRoleRetrieved" xml:space="preserve">
+    <value>Onay rolü başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalRoleService.ApprovalRoleNotFound" xml:space="preserve">
+    <value>Onay rolü bulunamadı.</value>
+  </data>
+  <data name="ApprovalRoleService.ApprovalRoleCreated" xml:space="preserve">
+    <value>Onay rolü başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalRoleService.ApprovalRoleUpdated" xml:space="preserve">
+    <value>Onay rolü başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalRoleService.ApprovalRoleDeleted" xml:space="preserve">
+    <value>Onay rolü başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalRoleService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalRoleService.GetAllApprovalRolesExceptionMessage" xml:space="preserve">
+    <value>Onay rolleri getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleService.GetApprovalRoleByIdExceptionMessage" xml:space="preserve">
+    <value>Onay rolü getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleService.CreateApprovalRoleExceptionMessage" xml:space="preserve">
+    <value>Onay rolü oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleService.UpdateApprovalRoleExceptionMessage" xml:space="preserve">
+    <value>Onay rolü güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalRoleService.DeleteApprovalRoleExceptionMessage" xml:space="preserve">
+    <value>Onay rolü silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalRoleService -->
+  
+  <!-- #region Services.ApprovalUserRoleService -->
+  <data name="ApprovalUserRoleService.ApprovalUserRolesRetrieved" xml:space="preserve">
+    <value>Onay kullanıcı rolleri başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalUserRoleService.ApprovalUserRoleRetrieved" xml:space="preserve">
+    <value>Onay kullanıcı rolü başarıyla getirildi.</value>
+  </data>
+  <data name="ApprovalUserRoleService.ApprovalUserRoleNotFound" xml:space="preserve">
+    <value>Onay kullanıcı rolü bulunamadı.</value>
+  </data>
+  <data name="ApprovalUserRoleService.ApprovalUserRoleCreated" xml:space="preserve">
+    <value>Onay kullanıcı rolü başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ApprovalUserRoleService.ApprovalUserRoleUpdated" xml:space="preserve">
+    <value>Onay kullanıcı rolü başarıyla güncellendi.</value>
+  </data>
+  <data name="ApprovalUserRoleService.ApprovalUserRoleDeleted" xml:space="preserve">
+    <value>Onay kullanıcı rolü başarıyla silindi.</value>
+  </data>
+  <data name="ApprovalUserRoleService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ApprovalUserRoleService.GetAllApprovalUserRolesExceptionMessage" xml:space="preserve">
+    <value>Onay kullanıcı rolleri getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalUserRoleService.GetApprovalUserRoleByIdExceptionMessage" xml:space="preserve">
+    <value>Onay kullanıcı rolü getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalUserRoleService.CreateApprovalUserRoleExceptionMessage" xml:space="preserve">
+    <value>Onay kullanıcı rolü oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalUserRoleService.UpdateApprovalUserRoleExceptionMessage" xml:space="preserve">
+    <value>Onay kullanıcı rolü güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ApprovalUserRoleService.DeleteApprovalUserRoleExceptionMessage" xml:space="preserve">
+    <value>Onay kullanıcı rolü silinirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ApprovalUserRoleService -->
 </root>
