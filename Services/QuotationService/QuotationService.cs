@@ -928,6 +928,19 @@ namespace cms_webapi.Services
                         StatusCodes.Status404NotFound);
                 }
 
+                // Quotation'ı al (hem akış bittiğinde hem de sonraki step için gerekli)
+                var quotation = await _context.Quotations
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+
+                if (quotation == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        "Teklif bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
                 int nextStepOrder = approvalRequest.CurrentStep + 1;
 
                 var nextStep = await _context.ApprovalFlowSteps
@@ -944,6 +957,21 @@ namespace cms_webapi.Services
                     approvalRequest.UpdatedBy = userId;
                     await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
                     await _unitOfWork.SaveChangesAsync();
+
+                    // QuotationLine'ların ApprovalStatus'unu Approved yap
+                    var quotationLines = await _context.QuotationLines
+                        .Where(ql => ql.QuotationId == quotation.Id && !ql.IsDeleted)
+                        .ToListAsync();
+
+                    foreach (var line in quotationLines)
+                    {
+                        line.ApprovalStatus = ApprovalStatus.Approved;
+                        line.UpdatedDate = DateTime.UtcNow;
+                        line.UpdatedBy = userId;
+                        await _unitOfWork.QuotationLines.UpdateAsync(line);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
 
                     return ApiResponse<bool>.SuccessResult(
@@ -959,19 +987,6 @@ namespace cms_webapi.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Yeni step için rolleri bul (StartApprovalFlow'daki mantık)
-                // Not: Burada totalAmount bilgisine ihtiyacımız var, ApprovalRequest'ten EntityId ile Quotation'a bakabiliriz
-                var quotation = await _context.Quotations
-                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
-
-                if (quotation == null)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
-                        "Teklif bulunamadı.",
-                        StatusCodes.Status404NotFound);
-                }
-
                 var validRoles = await _context.ApprovalRoles
                     .Where(r =>
                         r.ApprovalRoleGroupId == nextStep.ApprovalRoleGroupId &&
@@ -1105,6 +1120,32 @@ namespace cms_webapi.Services
 
                 await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Eğer reddeden kullanıcı teklifi oluşturan kullanıcıysa ve en alt aşamadaysa (CurrentStep == 1)
+                // QuotationLine'ların ApprovalStatus'unu Rejected yap
+                if (approvalRequest.CurrentStep == 1)
+                {
+                    var quotation = await _context.Quotations
+                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+
+                    if (quotation != null && quotation.CreatedBy == userId)
+                    {
+                        var quotationLines = await _context.QuotationLines
+                            .Where(ql => ql.QuotationId == quotation.Id && !ql.IsDeleted)
+                            .ToListAsync();
+
+                        foreach (var line in quotationLines)
+                        {
+                            line.ApprovalStatus = ApprovalStatus.Rejected;
+                            line.UpdatedDate = DateTime.UtcNow;
+                            line.UpdatedBy = userId;
+                            await _unitOfWork.QuotationLines.UpdateAsync(line);
+                        }
+
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
+
                 await _unitOfWork.CommitTransactionAsync();
 
                 // 📌 Burada:

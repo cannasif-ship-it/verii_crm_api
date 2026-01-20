@@ -170,8 +170,46 @@ namespace cms_webapi.Services
         {
             try
             {
-                var lines = await _unitOfWork.QuotationLines.FindAsync(q => q.QuotationId == quotationId);
-                var dtos = _mapper.Map<List<QuotationLineGetDto>>(lines.ToList());
+                var dtos = await _unitOfWork.QuotationLines
+                    .Query()
+                    .Where(q => q.QuotationId == quotationId && !q.IsDeleted)
+                    .Join(
+                        _unitOfWork.Stocks.Query(),
+                        ql => ql.ProductCode,
+                        s => s.ErpStockCode,
+                        (ql, s) => new
+                        {
+                            QuotationLine = ql,
+                            ProductName = s.StockName,
+                            GroupCode = s.GrupKodu
+                        })
+                    .Select(x => new QuotationLineGetDto
+                    {
+                        QuotationId = x.QuotationLine.QuotationId,
+                        ProductCode = x.QuotationLine.ProductCode,
+                        ProductName = x.ProductName,
+                        GroupCode = x.GroupCode,
+                        Quantity = x.QuotationLine.Quantity,
+                        UnitPrice = x.QuotationLine.UnitPrice,
+                        DiscountRate1 = x.QuotationLine.DiscountRate1,
+                        DiscountAmount1 = x.QuotationLine.DiscountAmount1,
+                        DiscountRate2 = x.QuotationLine.DiscountRate2,
+                        DiscountAmount2 = x.QuotationLine.DiscountAmount2,
+                        DiscountRate3 = x.QuotationLine.DiscountRate3,
+                        DiscountAmount3 = x.QuotationLine.DiscountAmount3,
+                        VatRate = x.QuotationLine.VatRate,
+                        VatAmount = x.QuotationLine.VatAmount,
+                        LineTotal = x.QuotationLine.LineTotal,
+                        LineGrandTotal = x.QuotationLine.LineGrandTotal,
+                        Description = x.QuotationLine.Description,
+                        PricingRuleHeaderId = x.QuotationLine.PricingRuleHeaderId,
+                        RelatedStockId = x.QuotationLine.RelatedStockId,
+                        RelatedProductKey = x.QuotationLine.RelatedProductKey,
+                        IsMainRelatedProduct = x.QuotationLine.IsMainRelatedProduct,
+                        ApprovalStatus = x.QuotationLine.ApprovalStatus
+                    })
+                    .ToListAsync();
+
                 return ApiResponse<List<QuotationLineGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesByQuotationRetrieved"));
             }
             catch (Exception ex)

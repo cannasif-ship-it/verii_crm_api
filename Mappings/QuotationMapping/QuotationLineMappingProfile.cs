@@ -9,15 +9,13 @@ namespace cms_webapi.Mappings
         public QuotationLineMappingProfile()
         {
             // Entity -> DTO
-            CreateMap<QuotationLine, QuotationLineDto>()
-                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
-                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
+            CreateMap<QuotationLine, QuotationLineDto>();
             
-            CreateMap<QuotationLine, QuotationLineGetDto>()
-                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
-                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
+            CreateMap<QuotationLine, QuotationLineGetDto>();
 
             // Create DTO -> Entity
+            // ProductCode, ApprovalStatus, PricingRuleHeaderId, RelatedStockId, RelatedProductKey, 
+            // IsMainRelatedProduct ve diğer tüm eşleşen property'ler otomatik map edilecek
             CreateMap<CreateQuotationLineDto, QuotationLine>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
@@ -28,13 +26,12 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.Quotation, opt => opt.Ignore())
-                .ForMember(dest => dest.ProductCode, opt => opt.Ignore())
                 .ForMember(dest => dest.PricingRuleHeader, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
-                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
+                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore());
 
             // Update DTO -> Entity
+            // ProductCode, ApprovalStatus, PricingRuleHeaderId, RelatedStockId, RelatedProductKey, 
+            // IsMainRelatedProduct ve diğer tüm eşleşen property'ler otomatik map edilecek
             CreateMap<UpdateQuotationLineDto, QuotationLine>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
@@ -45,11 +42,8 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.Quotation, opt => opt.Ignore())
-                .ForMember(dest => dest.ProductCode, opt => opt.Ignore())
                 .ForMember(dest => dest.PricingRuleHeader, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore())
-                .ForMember(dest => dest.RelatedProductKey, opt => opt.MapFrom(src => src.RelatedProductKey))
-                .ForMember(dest => dest.IsMainRelatedProduct, opt => opt.MapFrom(src => src.IsMainRelatedProduct));
+                .ForMember(dest => dest.RelatedStock, opt => opt.Ignore());
                 
         }
     }
