@@ -8,6 +8,7 @@ namespace cms_webapi.DTOs
         public long ApprovalRoleGroupId { get; set; }
         public string? ApprovalRoleGroupName { get; set; }
         public string Name { get; set; } = string.Empty;
+        public decimal MaxAmount { get; set; }
     }
 
     public class ApprovalRoleCreateDto : BaseCreateDto
@@ -18,6 +19,8 @@ namespace cms_webapi.DTOs
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
+
+        public decimal MaxAmount { get; set; }
     }
 
     public class ApprovalRoleUpdateDto : BaseUpdateDto
@@ -28,5 +31,7 @@ namespace cms_webapi.DTOs
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
+
+        public decimal MaxAmount { get; set; }
     }
 }

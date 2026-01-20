@@ -646,6 +646,485 @@ namespace cms_webapi.Services
                     _localizationService.GetLocalizedString("QuotationService.GetPriceOfProductExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
+
+        public async Task<ApiResponse<bool>> StartApprovalFlowAsync(StartApprovalFlowDto request)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                // Get userId from HttpContext
+                var startedByUserId = GetCurrentUserId();
+                if (startedByUserId == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
+                        "User identity not found",
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                // 1️⃣ Daha önce başlatılmış mı?
+                bool exists = await _context.ApprovalRequests
+                    .AnyAsync(x =>
+                        x.EntityId == request.EntityId &&
+                        x.DocumentType == request.DocumentType &&
+                        x.Status == ApprovalStatus.Waiting &&
+                        !x.IsDeleted);
+
+                if (exists)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowAlreadyExists"),
+                        "Bu belge için zaten aktif bir onay süreci var.",
+                        StatusCodes.Status400BadRequest);
+                }
+
+                // 2️⃣ Aktif flow bul
+                var flow = await _context.ApprovalFlows
+                    .FirstOrDefaultAsync(x => 
+                        x.DocumentType == request.DocumentType && 
+                        x.IsActive && 
+                        !x.IsDeleted);
+
+                if (flow == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowNotFound"),
+                        "Bu belge tipi için onay akışı tanımlı değil.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // 3️⃣ Step'leri sırayla al
+                var steps = await _context.ApprovalFlowSteps
+                    .Where(x => 
+                        x.ApprovalFlowId == flow.Id && 
+                        !x.IsDeleted)
+                    .OrderBy(x => x.StepOrder)
+                    .ToListAsync();
+
+                if (!steps.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowStepsNotFound"),
+                        "Flow'a ait step tanımı yok.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // 4️⃣ Tutarı karşılayan ilk step'i bul
+                ApprovalFlowStep? selectedStep = null;
+                List<ApprovalRole>? validRoles = null;
+
+                foreach (var step in steps)
+                {
+                    var roles = await _context.ApprovalRoles
+                        .Where(r =>
+                            r.ApprovalRoleGroupId == step.ApprovalRoleGroupId &&
+                            r.MaxAmount >= request.TotalAmount &&
+                            !r.IsDeleted)
+                        .ToListAsync();
+
+                    if (roles.Any())
+                    {
+                        selectedStep = step;
+                        validRoles = roles;
+                        break;
+                    }
+                }
+
+                if (selectedStep == null || validRoles == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalRoleNotFound"),
+                        "Bu tutarı karşılayan onay yetkisi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // 5️⃣ ApprovalRequest oluştur
+                var approvalRequest = new ApprovalRequest
+                {
+                    EntityId = request.EntityId,
+                    DocumentType = request.DocumentType,
+                    ApprovalFlowId = flow.Id,
+                    CurrentStep = selectedStep.StepOrder,
+                    Status = ApprovalStatus.Waiting,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedBy = startedByUserId,
+                    IsDeleted = false
+                };
+
+                await _unitOfWork.ApprovalRequests.AddAsync(approvalRequest);
+                await _unitOfWork.SaveChangesAsync();
+
+                // 6️⃣ Bu step için onaylayacak kullanıcıları bul
+                var roleIds = validRoles.Select(r => r.Id).ToList();
+                var userIds = await _context.ApprovalUserRoles
+                    .Where(x => 
+                        roleIds.Contains(x.ApprovalRoleId) && 
+                        !x.IsDeleted)
+                    .Select(x => x.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                if (!userIds.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalUsersNotFound"),
+                        "Bu step için onay yetkisi olan kullanıcı bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // 7️⃣ ApprovalAction kayıtlarını oluştur
+                var actions = new List<ApprovalAction>();
+                foreach (var userId in userIds)
+                {
+                    var action = new ApprovalAction
+                    {
+                        ApprovalRequestId = approvalRequest.Id,
+                        StepOrder = selectedStep.StepOrder,
+                        ApprovedByUserId = userId,
+                        Status = ApprovalStatus.Waiting,
+                        ActionDate = DateTime.UtcNow,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = startedByUserId,
+                        IsDeleted = false
+                    };
+
+                    actions.Add(action);
+                }
+
+                await _unitOfWork.ApprovalActions.AddAllAsync(actions);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Transaction'ı commit et
+                await _unitOfWork.CommitTransactionAsync();
+
+                return ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("QuotationService.ApprovalFlowStarted"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.StartApprovalFlowExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync()
+        {
+            try
+            {
+                // Eğer userId verilmemişse HttpContext'ten al
+                var targetUserId = GetCurrentUserId();
+                if (targetUserId == null)
+                {
+                    return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
+                        "User identity not found",
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                var approvalActions = await _context.ApprovalActions
+                    .Where(x =>
+                        x.ApprovalRequest.DocumentType == PricingRuleType.Quotation &&
+                        x.ApprovedByUserId == targetUserId &&
+                        x.Status == ApprovalStatus.Waiting &&
+                        !x.IsDeleted)
+                    .ToListAsync();
+
+                var dtos = _mapper.Map<List<ApprovalActionGetDto>>(approvalActions);
+
+                return ApiResponse<List<ApprovalActionGetDto>>.SuccessResult(
+                    dtos,
+                    _localizationService.GetLocalizedString("QuotationService.WaitingApprovalsRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.GetWaitingApprovalsExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
+                        "User identity not found",
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                // Onay kaydını bul
+                var action = await _context.ApprovalActions
+                    .Include(a => a.ApprovalRequest)
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == request.ApprovalActionId &&
+                        x.ApprovedByUserId == userId &&
+                        !x.IsDeleted);
+
+                if (action == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalActionNotFound"),
+                        "Onay kaydı bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // Onay işlemini gerçekleştir
+                action.Status = ApprovalStatus.Approved;
+                action.ActionDate = DateTime.UtcNow;
+                action.UpdatedDate = DateTime.UtcNow;
+                action.UpdatedBy = userId;
+
+                await _unitOfWork.ApprovalActions.UpdateAsync(action);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Aynı step'te bekleyen var mı?
+                bool anyWaiting = await _context.ApprovalActions
+                    .AnyAsync(x =>
+                        x.ApprovalRequestId == action.ApprovalRequestId &&
+                        x.StepOrder == action.StepOrder &&
+                        x.Status == ApprovalStatus.Waiting &&
+                        !x.IsDeleted);
+
+                if (anyWaiting)
+                {
+                    // Herkes onaylamadan ilerleme
+                    await _unitOfWork.CommitTransactionAsync();
+                    return ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalActionApproved"));
+                }
+
+                // Step tamamlandı → sonraki step'e geç
+                var approvalRequest = await _context.ApprovalRequests
+                    .Include(ar => ar.ApprovalFlow)
+                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
+
+                if (approvalRequest == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalRequestNotFound"),
+                        "Onay talebi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                int nextStepOrder = approvalRequest.CurrentStep + 1;
+
+                var nextStep = await _context.ApprovalFlowSteps
+                    .FirstOrDefaultAsync(x =>
+                        x.ApprovalFlowId == approvalRequest.ApprovalFlowId &&
+                        x.StepOrder == nextStepOrder &&
+                        !x.IsDeleted);
+
+                if (nextStep == null)
+                {
+                    // 🎉 AKIŞ BİTTİ
+                    approvalRequest.Status = ApprovalStatus.Approved;
+                    approvalRequest.UpdatedDate = DateTime.UtcNow;
+                    approvalRequest.UpdatedBy = userId;
+                    await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    return ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowCompleted"));
+                }
+
+                // Yeni step için onaycıları oluştur
+                approvalRequest.CurrentStep = nextStep.StepOrder;
+                approvalRequest.UpdatedDate = DateTime.UtcNow;
+                approvalRequest.UpdatedBy = userId;
+                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Yeni step için rolleri bul (StartApprovalFlow'daki mantık)
+                // Not: Burada totalAmount bilgisine ihtiyacımız var, ApprovalRequest'ten EntityId ile Quotation'a bakabiliriz
+                var quotation = await _context.Quotations
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+
+                if (quotation == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        "Teklif bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var validRoles = await _context.ApprovalRoles
+                    .Where(r =>
+                        r.ApprovalRoleGroupId == nextStep.ApprovalRoleGroupId &&
+                        r.MaxAmount >= quotation.GrandTotal &&
+                        !r.IsDeleted)
+                    .ToListAsync();
+
+                if (!validRoles.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalRoleNotFound"),
+                        "Yeni step için uygun onay yetkisi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // Onaylayacak kullanıcıları bul
+                var roleIds = validRoles.Select(r => r.Id).ToList();
+                var userIds = await _context.ApprovalUserRoles
+                    .Where(x =>
+                        roleIds.Contains(x.ApprovalRoleId) &&
+                        !x.IsDeleted)
+                    .Select(x => x.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                if (!userIds.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalUsersNotFound"),
+                        "Yeni step için onay yetkisi olan kullanıcı bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // Yeni ApprovalAction kayıtlarını oluştur
+                var newActions = new List<ApprovalAction>();
+                foreach (var newUserId in userIds)
+                {
+                    var newAction = new ApprovalAction
+                    {
+                        ApprovalRequestId = approvalRequest.Id,
+                        StepOrder = nextStep.StepOrder,
+                        ApprovedByUserId = newUserId,
+                        Status = ApprovalStatus.Waiting,
+                        ActionDate = DateTime.UtcNow,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = userId,
+                        IsDeleted = false
+                    };
+
+                    newActions.Add(newAction);
+                }
+
+                await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                return ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("QuotationService.ApprovalActionApprovedAndNextStepStarted"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.ApproveExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> RejectAsync(RejectActionDto request)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
+                        "User identity not found",
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                // Onay kaydını bul
+                var action = await _context.ApprovalActions
+                    .Include(a => a.ApprovalRequest)
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == request.ApprovalActionId &&
+                        x.ApprovedByUserId == userId &&
+                        !x.IsDeleted);
+
+                if (action == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalActionNotFound"),
+                        "Onay kaydı bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                // Red işlemini gerçekleştir
+                action.Status = ApprovalStatus.Rejected;
+                action.ActionDate = DateTime.UtcNow;
+                action.UpdatedDate = DateTime.UtcNow;
+                action.UpdatedBy = userId;
+
+                await _unitOfWork.ApprovalActions.UpdateAsync(action);
+                await _unitOfWork.SaveChangesAsync();
+
+                // ApprovalRequest'i reddedildi olarak işaretle
+                var approvalRequest = await _context.ApprovalRequests
+                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
+
+                if (approvalRequest == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalRequestNotFound"),
+                        "Onay talebi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                approvalRequest.Status = ApprovalStatus.Rejected;
+                approvalRequest.UpdatedDate = DateTime.UtcNow;
+                approvalRequest.UpdatedBy = userId;
+
+                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                // 📌 Burada:
+                // - Teklif sahibine mail gönderilebilir
+                // - UI'da "Reddedildi" gösterilebilir
+                // - Düzelt → yeniden başlat işlemi yapılabilir
+
+                return ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("QuotationService.ApprovalActionRejected"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.RejectExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
  
     }
 }

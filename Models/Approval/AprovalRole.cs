@@ -14,6 +14,10 @@ namespace cms_webapi.Models
         [ForeignKey(nameof(ApprovalRoleGroupId))]
         public ApprovalRoleGroup ApprovalRoleGroup { get; set; } = null!;
 
+
+        [Column(TypeName = "decimal(18,6)")]
+        public decimal MaxAmount { get; set; }
+
         /// <summary>
         /// A Bölge Satışçı, B Bölge Satışçı
         /// </summary>

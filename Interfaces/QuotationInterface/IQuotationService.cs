@@ -17,5 +17,9 @@ namespace cms_webapi.Interfaces
         Task<ApiResponse<QuotationGetDto>> CreateQuotationBulkAsync(QuotationBulkCreateDto bulkDto);
         Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode,long salesmenId,DateTime quotationDate);
         Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request);
+        Task<ApiResponse<bool>> StartApprovalFlowAsync(StartApprovalFlowDto request);
+        Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync();
+        Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request);
+        Task<ApiResponse<bool>> RejectAsync(RejectActionDto request);
     }
 }

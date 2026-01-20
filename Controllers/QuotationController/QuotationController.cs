@@ -86,6 +86,77 @@ namespace cms_webapi.Controllers
         }
 
         /// <summary>
+        /// Onay akışını başlatır
+        /// </summary>
+        /// <param name="request">Onay akışı başlatma bilgileri</param>
+        /// <returns>ApiResponse</returns>
+        [HttpPost("start-approval-flow")]
+        public async Task<IActionResult> StartApprovalFlow([FromBody] StartApprovalFlowDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.StartApprovalFlowAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Kullanıcının bekleyen onaylarını getirir
+        /// </summary>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("waiting-approvals")]
+        public async Task<IActionResult> GetWaitingApprovals()
+        {
+            var result = await _quotationService.GetWaitingApprovalsAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Onay işlemini gerçekleştirir
+        /// </summary>
+        /// <param name="request">Onay işlemi bilgileri</param>
+        /// <returns>ApiResponse</returns>
+        [HttpPost("approve")]
+        public async Task<IActionResult> Approve([FromBody] ApproveActionDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.ApproveAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Red işlemini gerçekleştirir
+        /// </summary>
+        /// <param name="request">Red işlemi bilgileri</param>
+        /// <returns>ApiResponse</returns>
+        [HttpPost("reject")]
+        public async Task<IActionResult> Reject([FromBody] RejectActionDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(400, ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
+                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
+                    400));
+            }
+
+            var result = await _quotationService.RejectAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// Teklifi günceller
         /// </summary>
         /// <param name="id">Teklif ID</param>

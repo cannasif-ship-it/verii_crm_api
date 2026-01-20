@@ -19,6 +19,10 @@ namespace cms_webapi.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
 
+            builder.Property(e => e.MaxAmount)
+                .HasColumnType("decimal(18,6)")
+                .IsRequired();
+
             // Navigation Properties
             builder.HasOne(e => e.ApprovalRoleGroup)
                 .WithMany()

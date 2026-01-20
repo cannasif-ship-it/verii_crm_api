@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using cms_webapi.Models;
 
 namespace cms_webapi.DTOs
 {
@@ -127,5 +128,32 @@ namespace cms_webapi.DTOs
         public string Currency { get; set; } = string.Empty;
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
+    }
+
+    public class StartApprovalFlowDto
+    {
+        [Required]
+        public long EntityId { get; set; }
+
+        [Required]
+        public PricingRuleType DocumentType { get; set; }
+
+        [Required]
+        public decimal TotalAmount { get; set; }
+    }
+
+    public class ApproveActionDto
+    {
+        [Required]
+        public long ApprovalActionId { get; set; }
+    }
+
+    public class RejectActionDto
+    {
+        [Required]
+        public long ApprovalActionId { get; set; }
+
+        [MaxLength(500)]
+        public string? RejectReason { get; set; }
     }
 }
