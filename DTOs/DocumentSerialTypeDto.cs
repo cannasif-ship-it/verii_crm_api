@@ -11,6 +11,11 @@ namespace cms_webapi.DTOs
         public string? CustomerTypeName { get; set; }
         public long? SalesRepId { get; set; }
         public string? SalesRepFullName { get; set; }
+        public string? SerialPrefix { get; set; }
+        public int? SerialLength { get; set; }
+        public int? SerialStart { get; set; }
+        public int? SerialCurrent { get; set; }
+        public int? SerialIncrement { get; set; }
     }
 
     public class DocumentSerialTypeCreateDto
@@ -21,6 +26,16 @@ namespace cms_webapi.DTOs
         public long? CustomerTypeId { get; set; }
 
         public long? SalesRepId { get; set; }
+
+        public string? SerialPrefix { get; set; }
+
+        public int? SerialLength { get; set; }
+
+        public int? SerialStart { get; set; }
+
+        public int? SerialCurrent { get; set; }
+
+        public int? SerialIncrement { get; set; }
     }
 
     public class DocumentSerialTypeUpdateDto
@@ -31,5 +46,15 @@ namespace cms_webapi.DTOs
         public long? CustomerTypeId { get; set; }
 
         public long? SalesRepId { get; set; }
+
+        public string? SerialPrefix { get; set; }
+
+        public int? SerialLength { get; set; }
+
+        public int? SerialStart { get; set; }
+
+        public int? SerialCurrent { get; set; }
+
+        public int? SerialIncrement { get; set; }
     }
 }

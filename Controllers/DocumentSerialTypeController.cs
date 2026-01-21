@@ -2,6 +2,7 @@ using cms_webapi.DTOs;
 using cms_webapi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using cms_webapi.Models;
 
 namespace cms_webapi.Controllers
 {
@@ -49,6 +50,13 @@ namespace cms_webapi.Controllers
         public async Task<IActionResult> Delete(long id)
         {
             var result = await _documentSerialTypeService.DeleteDocumentSerialTypeAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("avaible/customer/{customerTypeId}/salesrep/{salesRepId}/rule/{ruleType}")]
+        public async Task<IActionResult> GetAvaible([FromRoute] long customerTypeId, [FromRoute] long salesRepId, [FromRoute] PricingRuleType ruleType)
+        {
+            var result = await _documentSerialTypeService.GetAvaibleDocumentSerialTypesAsync(customerTypeId, salesRepId, ruleType);
             return StatusCode(result.StatusCode, result);
         }
     }

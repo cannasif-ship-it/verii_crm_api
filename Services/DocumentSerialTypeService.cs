@@ -219,5 +219,113 @@ namespace cms_webapi.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
+
+        public async Task<ApiResponse<List<DocumentSerialTypeGetDto>>> GetAvaibleDocumentSerialTypesAsync(long customerTypeId, long salesRepId, PricingRuleType ruleType)
+        {
+            try
+            {
+                var documentSerialTypeBaseQuery = _unitOfWork.DocumentSerialTypes.Query()
+                    .Where(x => !x.IsDeleted);
+
+                List<DocumentSerialType> documentSerialTypes = await documentSerialTypeBaseQuery
+                    .Where(x => x.CustomerTypeId == customerTypeId && x.SalesRepId == salesRepId)
+                    .ToListAsync();
+
+                if (!documentSerialTypes.Any())
+                {
+                    documentSerialTypes = await documentSerialTypeBaseQuery
+                        .Where(x => x.CustomerTypeId == customerTypeId && x.SalesRepId == null)
+                        .ToListAsync();
+                }
+
+                if (!documentSerialTypes.Any())
+                {
+                    documentSerialTypes = await documentSerialTypeBaseQuery
+                        .Where(x => x.CustomerTypeId == null && x.SalesRepId == salesRepId)
+                        .ToListAsync();
+                }
+
+                if (!documentSerialTypes.Any())
+                {
+                    documentSerialTypes = await documentSerialTypeBaseQuery
+                        .Where(x => x.CustomerTypeId == null && x.SalesRepId == null)
+                        .ToListAsync();
+                }
+
+                var dtos = _mapper.Map<List<DocumentSerialTypeGetDto>>(documentSerialTypes);
+
+                return ApiResponse<List<DocumentSerialTypeGetDto>>.SuccessResult(
+                    dtos,
+                    _localizationService.GetLocalizedString("DocumentSerialTypeService.DocumentSerialTypesRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<DocumentSerialTypeGetDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("DocumentSerialTypeService.InternalServerError"),
+                    _localizationService.GetLocalizedString(
+                        "DocumentSerialTypeService.GetAvaibleDocumentSerialTypesExceptionMessage",
+                        ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+
+        public async Task<ApiResponse<string>> GenerateDocumentSerialAsync(long id, bool isNewDocument = true, string? oldDocumentSerial = null)
+        {
+            try
+            {
+                var documentSerialType = await _unitOfWork.DocumentSerialTypes.Query(tracking:true)
+                .Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
+
+                if (documentSerialType == null)
+                {
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("DocumentSerialTypeService.DocumentSerialTypeNotFound"),
+                        _localizationService.GetLocalizedString("DocumentSerialTypeService.DocumentSerialTypeNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+                var returnDocumentSerial = "";
+                if(isNewDocument)
+                {
+                    int length = documentSerialType.SerialLength ?? 0;
+                    int current = documentSerialType.SerialCurrent ?? 0;
+                    returnDocumentSerial = $"{documentSerialType.SerialPrefix}{DateTime.UtcNow.Year.ToString()}{current.ToString($"D{length}")}";
+                    current++;
+                    documentSerialType.SerialCurrent = current;
+                    await _unitOfWork.SaveChangesAsync();
+
+                }
+                else
+                {
+                    string beforeDash = oldDocumentSerial.Split('-')[0];
+                    var QuotationDocumentSerialTypes = await _unitOfWork.Quotations.Query().Where(x => x.OfferNo == beforeDash).ToListAsync();
+                    int maxSerialNumber = QuotationDocumentSerialTypes
+                                                            .Select(x =>
+                                                            {
+                                                                if (string.IsNullOrWhiteSpace(x.RevisionNo))
+                                                                    return 0;
+
+                                                                var index = x.RevisionNo.LastIndexOf('-');                                                                if (index == -1)
+                                                                    return 0;
+
+                                                                var numberPart = x.RevisionNo[(index + 1)..];
+                                                                return int.TryParse(numberPart, out var rev) ? rev : 0;
+                                                            })
+                                                            .DefaultIfEmpty(0)
+                                                            .Max();
+                    returnDocumentSerial = $"{beforeDash}-{maxSerialNumber + 1}";
+                }
+
+                return ApiResponse<string>.SuccessResult(returnDocumentSerial, _localizationService.GetLocalizedString("DocumentSerialTypeService.DocumentSerialGenerated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.ErrorResult(
+                    _localizationService.GetLocalizedString("DocumentSerialTypeService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DocumentSerialTypeService.GenerateDocumentSerialExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }

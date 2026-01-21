@@ -16,7 +16,11 @@ namespace cms_webapi.Models
         public long? SalesRepId { get; set; }        // Plasiyer
         [ForeignKey("SalesRepId")]
         public User? SalesRep { get; set; }
-
+        public string? SerialPrefix { get; set; }
+        public int? SerialLength { get; set; }  // 4 basamaklı, 5 basamaklı, vs
+        public int? SerialStart { get; set; }  // 1000
+        public int? SerialCurrent { get; set; }  // 1000
+        public int? SerialIncrement { get; set; }  // 1
     }
 }
 

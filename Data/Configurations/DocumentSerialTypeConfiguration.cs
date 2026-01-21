@@ -34,6 +34,27 @@ namespace cms_webapi.Data.Configurations
                 .HasForeignKey(e => e.SalesRepId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Serial Prefix
+            builder.Property(e => e.SerialPrefix)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
+            // Serial Length
+            builder.Property(e => e.SerialLength)
+                .IsRequired(false);
+
+            // Serial Start
+            builder.Property(e => e.SerialStart)
+                .IsRequired(false);
+
+            // Serial Current
+            builder.Property(e => e.SerialCurrent)
+                .IsRequired(false);
+
+            // Serial Increment
+            builder.Property(e => e.SerialIncrement)
+                .IsRequired(false);
+
             // Indexes
             builder.HasIndex(e => e.RuleType)
                 .HasDatabaseName("IX_DocumentSerialType_RuleType");
