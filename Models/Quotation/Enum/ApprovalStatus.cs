@@ -1,6 +1,6 @@
 namespace cms_webapi.Models
 {
-    public enum ApprovalStatus
+    public enum ApprovalStatus : int
     {
         NotRequired = 0,
         Waiting = 1,

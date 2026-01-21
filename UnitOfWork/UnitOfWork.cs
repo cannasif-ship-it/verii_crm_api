@@ -40,9 +40,7 @@ namespace cms_webapi.UnitOfWork
         private IGenericRepository<Quotation>? _quotations;
         private IGenericRepository<QuotationLine>? _quotationLines;
         private IGenericRepository<UserSession>? _userSessions;
-        private IGenericRepository<ApprovalWorkflow>? _approvalWorkflows;
         private IGenericRepository<QuotationExchangeRate>? _quotationExchangeRates;
-        private IGenericRepository<ApprovalTransaction>? _approvalTransactions;
         private IGenericRepository<UserDetail>? _userDetails;
         private IGenericRepository<PricingRuleHeader>? _pricingRuleHeaders;
         private IGenericRepository<PricingRuleLine>? _pricingRuleLines;
@@ -88,10 +86,8 @@ namespace cms_webapi.UnitOfWork
         public IGenericRepository<Quotation> Quotations{get{_quotations ??= new GenericRepository<Quotation>(_context, _httpContextAccessor);return _quotations;}}
         public IGenericRepository<QuotationLine> QuotationLines{get{_quotationLines ??= new GenericRepository<QuotationLine>(_context, _httpContextAccessor);return _quotationLines;}}
         public IGenericRepository<UserSession> UserSessions{get{_userSessions ??= new GenericRepository<UserSession>(_context, _httpContextAccessor);return _userSessions;}}
-        public IGenericRepository<ApprovalWorkflow> ApprovalWorkflows{get{_approvalWorkflows ??= new GenericRepository<ApprovalWorkflow>(_context, _httpContextAccessor);return _approvalWorkflows;}}
-        public IGenericRepository<QuotationExchangeRate> QuotationExchangeRates{get{_quotationExchangeRates ??= new GenericRepository<QuotationExchangeRate>(_context, _httpContextAccessor);return _quotationExchangeRates;}}
-        public IGenericRepository<ApprovalTransaction> ApprovalTransactions{get{_approvalTransactions ??= new GenericRepository<ApprovalTransaction>(_context, _httpContextAccessor);return _approvalTransactions;}}
-        public IGenericRepository<UserDetail> UserDetails{get{_userDetails ??= new GenericRepository<UserDetail>(_context, _httpContextAccessor);return _userDetails;}}
+       public IGenericRepository<QuotationExchangeRate> QuotationExchangeRates{get{_quotationExchangeRates ??= new GenericRepository<QuotationExchangeRate>(_context, _httpContextAccessor);return _quotationExchangeRates;}}
+       public IGenericRepository<UserDetail> UserDetails{get{_userDetails ??= new GenericRepository<UserDetail>(_context, _httpContextAccessor);return _userDetails;}}
         public IGenericRepository<PricingRuleHeader> PricingRuleHeaders{get{_pricingRuleHeaders ??= new GenericRepository<PricingRuleHeader>(_context, _httpContextAccessor);return _pricingRuleHeaders;}}
         public IGenericRepository<PricingRuleLine> PricingRuleLines{get{_pricingRuleLines ??= new GenericRepository<PricingRuleLine>(_context, _httpContextAccessor);return _pricingRuleLines;}}
         public IGenericRepository<PricingRuleSalesman> PricingRuleSalesmen{get{_pricingRuleSalesmen ??= new GenericRepository<PricingRuleSalesman>(_context, _httpContextAccessor);return _pricingRuleSalesmen;}}

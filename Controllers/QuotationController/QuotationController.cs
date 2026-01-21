@@ -70,7 +70,14 @@ namespace cms_webapi.Controllers
             var result = await _quotationService.CreateQuotationBulkAsync(bulkDto);
             return StatusCode(result.StatusCode, result);
         }
-        
+
+        [HttpPost("revision-of-quotation")]
+        public async Task<IActionResult> CreateRevisionOfQuotation([FromBody] long quotationId)
+        {
+            var result = await _quotationService.CreateRevisionOfQuotationAsync(quotationId);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("price-rule-of-quotation")]
         public async Task<IActionResult> GetPriceRuleOfQuotation([FromQuery] string customerCode,[FromQuery] long salesmenId,[FromQuery] DateTime quotationDate)
         {

@@ -28,9 +28,7 @@ namespace cms_webapi.Data
         public DbSet<ShippingAddress> ShippingAddresses { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<QuotationLine> QuotationLines { get; set; }
-        public DbSet<ApprovalWorkflow> ApprovalWorkflows { get; set; }
         public DbSet<QuotationExchangeRate> QuotationExchangeRates { get; set; }
-        public DbSet<ApprovalTransaction> ApprovalTransactions { get; set; }
         public DbSet<UserAuthority> UserAuthorities { get; set; }
         public DbSet<UserSession> UserSessions { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
