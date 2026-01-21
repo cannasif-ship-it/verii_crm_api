@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cms_webapi.Data;
 
@@ -11,9 +12,11 @@ using cms_webapi.Data;
 namespace cms_webapi.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    partial class CmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260121072652_AddSerialPrefixAndLengthToDocumentSerialType")]
+    partial class AddSerialPrefixAndLengthToDocumentSerialType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1213,21 +1216,12 @@ namespace cms_webapi.Migrations
                     b.Property<long?>("SalesRepId")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("SerialCurrent")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SerialIncrement")
-                        .HasColumnType("int");
-
                     b.Property<int?>("SerialLength")
                         .HasColumnType("int");
 
                     b.Property<string>("SerialPrefix")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("SerialStart")
-                        .HasColumnType("int");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
