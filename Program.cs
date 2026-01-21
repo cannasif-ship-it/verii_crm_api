@@ -177,13 +177,6 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.SetIsOriginAllowed(_ => true)
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
 
     options.AddPolicy("DevCors", policy =>
     {
