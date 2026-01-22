@@ -27,28 +27,24 @@ namespace cms_webapi.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<ApiResponse<string>>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<ApiResponse<LoginWithSessionResponseDto>>> Login([FromBody] LoginRequest request)
         {
             var loginDto = new LoginDto
             {
                 Username = request.Email,
-                Password = request.Password
+                Password = request.Password,
+                RememberMe = request.RememberMe
             };
 
             var loginResult = await _authService.LoginWithSessionAsync(loginDto);
-            
-            // SignalR ile eski kullanıcıyı çıkış yaptır (eğer varsa)
+
             if (loginResult.Success && loginResult.Data != null)
             {
                 await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
-                
-                // Token'ı string olarak döndür
-                return StatusCode(loginResult.StatusCode, ApiResponse<string>.SuccessResult(
-                    loginResult.Data.Token,
-                    loginResult.Message));
+                return StatusCode(loginResult.StatusCode, loginResult);
             }
 
-            return StatusCode(loginResult.StatusCode, ApiResponse<string>.ErrorResult(
+            return StatusCode(loginResult.StatusCode, ApiResponse<LoginWithSessionResponseDto>.ErrorResult(
                 loginResult.Message,
                 loginResult.ExceptionMessage,
                 loginResult.StatusCode));
@@ -71,12 +67,12 @@ namespace cms_webapi.Controllers
             };
 
             var loginResult = await _authService.LoginWithSessionAsync(loginDtoInternal);
-            
+
             // SignalR ile eski kullanıcıyı çıkış yaptır (eğer varsa)
             if (loginResult.Success && loginResult.Data != null)
             {
                 await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
-                
+
                 return StatusCode(loginResult.StatusCode, ApiResponse<string>.SuccessResult(
                     loginResult.Data.Token,
                     loginResult.Message));
@@ -104,5 +100,22 @@ namespace cms_webapi.Controllers
             var result = await _userService.GetUserProfileAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
+
+        [AllowAnonymous]
+        [HttpPost("request-password-reset")]
+        public async Task<ActionResult<ApiResponse<string>>> RequestPasswordReset([FromBody] ForgotPasswordRequest request)
+        {
+            var result = await _authService.RequestPasswordResetAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<ApiResponse<string>>> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPasswordAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
     }
 }

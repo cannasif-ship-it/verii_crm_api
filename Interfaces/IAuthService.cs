@@ -23,5 +23,7 @@ namespace cms_webapi.Interfaces
         public string Token { get; set; } = string.Empty;
         public long UserId { get; set; }
         public Guid SessionId { get; set; }
+        /// <summary>true: localStorage; false: sessionStorage (frontend token saklama)</summary>
+        public bool RememberMe { get; set; }
     }
 }

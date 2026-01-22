@@ -7,6 +7,9 @@ using cms_webapi.Models;
 using cms_webapi.Interfaces;
 using cms_webapi.UnitOfWork;
 using cms_webapi.Hubs;
+using Hangfire;
+using Infrastructure.BackgroundJobs.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace cms_webapi.Services
 {
@@ -17,14 +20,16 @@ namespace cms_webapi.Services
         private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
         private readonly IHubContext<AuthHub> _hubContext;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(IUnitOfWork unitOfWork, IJwtService jwtService, ILocalizationService localizationService, CmsDbContext context, IHubContext<AuthHub> hubContext)
+        public AuthService(IUnitOfWork unitOfWork, IJwtService jwtService, ILocalizationService localizationService, CmsDbContext context, IHubContext<AuthHub> hubContext, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
             _localizationService = localizationService;
             _context = context;
             _hubContext = hubContext;
+            _configuration = configuration;
         }
 
         public async Task<ApiResponse<UserDto>> GetUserByUsernameAsync(string username)
@@ -191,7 +196,8 @@ namespace cms_webapi.Services
                 var loginRequest = new LoginRequest
                 {
                     Email = loginDto.Username,
-                    Password = loginDto.Password
+                    Password = loginDto.Password,
+                    RememberMe = loginDto.RememberMe
                 };
 
                 var loginResult = await LoginAsync(loginRequest);
@@ -222,7 +228,8 @@ namespace cms_webapi.Services
                 {
                     Token = loginResult.Data!,
                     UserId = user.Id,
-                    SessionId = session.SessionId
+                    SessionId = session.SessionId,
+                    RememberMe = loginDto.RememberMe
                 };
 
                 return ApiResponse<LoginWithSessionResponseDto>.SuccessResult(response, loginResult.Message);
@@ -289,13 +296,64 @@ namespace cms_webapi.Services
                     _context.Set<PasswordResetRequest>().Add(reset);
                     await _context.SaveChangesAsync();
                     
-                    // TODO: Background job for email sending if Hangfire is configured
-                    // var fullName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
-                    // if (string.IsNullOrWhiteSpace(fullName))
-                    // {
-                    //     fullName = user.Username;
-                    // }
-                    // BackgroundJob.Enqueue<ResetPasswordEmailJob>(job => job.Send(user.Email, fullName, token));
+                    // Send password reset email via Hangfire background job
+                    var fullName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    if (string.IsNullOrWhiteSpace(fullName))
+                    {
+                        fullName = user.Username;
+                    }
+
+                    var frontendBaseUrl = _configuration["FrontendSettings:BaseUrl"] ?? "http://localhost:5173";
+                    var resetPasswordPath = _configuration["FrontendSettings:ResetPasswordPath"] ?? "/reset-password";
+                    var resetLink = $"{frontendBaseUrl}{resetPasswordPath}?token={token}";
+
+                    var emailSubject = _localizationService.GetLocalizedString("PasswordResetEmailSubject") ?? "Password Reset Request";
+                    var emailBody = $@"
+                        <html>
+                        <head>
+                            <style>
+                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                                .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
+                                .content {{ padding: 20px; background-color: #f9f9f9; }}
+                                .button {{ display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class=""container"">
+                                <div class=""header"">
+                                    <h2>Password Reset Request</h2>
+                                </div>
+                                <div class=""content"">
+                                    <p>Hello {fullName},</p>
+                                    <p>You have requested to reset your password. Please click the button below to reset your password:</p>
+                                    <p style=""text-align: center;"">
+                                        <a href=""{resetLink}"" class=""button"">Reset Password</a>
+                                    </p>
+                                    <p>Or copy and paste this link into your browser:</p>
+                                    <p style=""word-break: break-all; color: #4CAF50;"">{resetLink}</p>
+                                    <p><strong>This link will expire in 30 minutes.</strong></p>
+                                    <p>If you did not request a password reset, please ignore this email.</p>
+                                </div>
+                                <div class=""footer"">
+                                    <p>This is an automated message, please do not reply to this email.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>";
+
+                    BackgroundJob.Enqueue<IMailJob>(job =>
+                        job.SendEmailAsync(
+                            user.Email,
+                            emailSubject,
+                            emailBody,
+                            true,
+                            null,
+                            null,
+                            null
+                        )
+                    );
                 }
 
                 var msg = _localizationService.GetLocalizedString("OperationSuccessful");

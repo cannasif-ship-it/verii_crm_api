@@ -9,5 +9,8 @@ namespace cms_webapi.DTOs
 
         [Required]
         public string Password { get; set; } = string.Empty;
+
+        /// <summary>true: token localStorage; false: token sessionStorage (frontend)</summary>
+        public bool RememberMe { get; set; } = false;
     }
 }
