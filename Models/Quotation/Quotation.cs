@@ -37,8 +37,7 @@ namespace cms_webapi.Models
         [ForeignKey("ActivityId")]
         public Activity? Activity { get; set; } // Bağlı olduğu activite
 
-        [Column(TypeName = "int")]
-        public int? Status { get; set; } // Genel durum bilgisi (Workflow)
+        public ApprovalStatus? Status { get; set; } // Genel durum bilgisi (Workflow)
 
         [MaxLength(500)]
         [Column(TypeName = "nvarchar(500)")]
@@ -48,9 +47,15 @@ namespace cms_webapi.Models
         [ForeignKey("PaymentTypeId")]
         public virtual PaymentType? PaymentType { get; set; } // Navigation Property (Ödeme tipi bilgisi)
 
+
+        public long DocumentSerialTypeId { get; set; }
+
+        [ForeignKey(nameof(DocumentSerialTypeId))]
+        public DocumentSerialType? DocumentSerialType { get; set; } // Navigation Property (Belge seri tipi bilgisi)
+
         [MaxLength(50)]
         [Column(TypeName = "nvarchar(50)")]
-        public string OfferType { get; set; } = null!; // Teklif tipi Yurtiçi yurtdışı
+        public string? OfferType { get; set; } = string.Empty; // Teklif tipi Yurtiçi yurtdışı
 
         public DateTime? OfferDate { get; set; } // Teklif tarihi
 

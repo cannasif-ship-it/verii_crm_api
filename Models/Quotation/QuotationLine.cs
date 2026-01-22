@@ -64,7 +64,7 @@ namespace cms_webapi.Models
         public string? Description { get; set; } // Satır açıklaması (opsiyonel)
 
         // === Onay ===
-        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
 
         public long? PricingRuleHeaderId { get; set; }
         [ForeignKey("PricingRuleHeaderId")]

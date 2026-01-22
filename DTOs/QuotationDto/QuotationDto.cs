@@ -14,10 +14,12 @@ namespace cms_webapi.DTOs
         public string? ShippingAddressText { get; set; }
         public long? RepresentativeId { get; set; }
         public string? RepresentativeName { get; set; }
-        public int? Status { get; set; }
+        public ApprovalStatus? Status { get; set; }
         public string? Description { get; set; }
         public long? PaymentTypeId { get; set; }
         public string? PaymentTypeName { get; set; }
+        public long DocumentSerialTypeId { get; set; }
+        public string? DocumentSerialTypeName { get; set; }
         public string OfferType { get; set; } = string.Empty;
         public DateTime? OfferDate { get; set; }
         public string? OfferNo { get; set; }
@@ -41,12 +43,14 @@ namespace cms_webapi.DTOs
 
         public long? RepresentativeId { get; set; }
 
-        public int? Status { get; set; }
+        public ApprovalStatus? Status { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }
 
         public long? PaymentTypeId { get; set; }
+
+        public long DocumentSerialTypeId { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -80,12 +84,14 @@ namespace cms_webapi.DTOs
 
         public long? RepresentativeId { get; set; }
 
-        public int? Status { get; set; }
+        public ApprovalStatus? Status { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }
 
         public long? PaymentTypeId { get; set; }
+
+        public long DocumentSerialTypeId { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -116,10 +122,12 @@ namespace cms_webapi.DTOs
         public string? ShippingAddressText { get; set; }
         public long? RepresentativeId { get; set; }
         public string? RepresentativeName { get; set; }
-        public int? Status { get; set; }
+        public ApprovalStatus? Status { get; set; }
         public string? Description { get; set; }
         public long? PaymentTypeId { get; set; }
         public string? PaymentTypeName { get; set; }
+        public long DocumentSerialTypeId { get; set; }
+        public string? DocumentSerialTypeName { get; set; }
         public string OfferType { get; set; } = string.Empty;
         public DateTime? OfferDate { get; set; }
         public string? OfferNo { get; set; }

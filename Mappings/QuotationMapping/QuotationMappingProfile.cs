@@ -13,13 +13,15 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.PotentialCustomerName, opt => opt.MapFrom(src => src.PotentialCustomer != null ? src.PotentialCustomer.CustomerName : null))
                 .ForMember(dest => dest.ShippingAddressText, opt => opt.MapFrom(src => src.ShippingAddress != null ? src.ShippingAddress.Address : null))
                 .ForMember(dest => dest.RepresentativeName, opt => opt.MapFrom(src => src.Representative != null ? src.Representative.FirstName + " " + src.Representative.LastName : null))
-                .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null));
+                .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
+                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
 
             CreateMap<Quotation, QuotationGetDto>()
                 .ForMember(dest => dest.PotentialCustomerName, opt => opt.MapFrom(src => src.PotentialCustomer != null ? src.PotentialCustomer.CustomerName : null))
                 .ForMember(dest => dest.ShippingAddressText, opt => opt.MapFrom(src => src.ShippingAddress != null ? src.ShippingAddress.Address : null))
                 .ForMember(dest => dest.RepresentativeName, opt => opt.MapFrom(src => src.Representative != null ? src.Representative.FirstName + " " + src.Representative.LastName : null))
-                .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null));
+                .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
+                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
 
             CreateMap<CreateQuotationDto, Quotation>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -33,7 +35,8 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.PotentialCustomer, opt => opt.Ignore())
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
-                .ForMember(dest => dest.PaymentType, opt => opt.Ignore());
+                .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore());
 
             CreateMap<UpdateQuotationDto, Quotation>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -47,7 +50,8 @@ namespace cms_webapi.Mappings
                 .ForMember(dest => dest.PotentialCustomer, opt => opt.Ignore())
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
-                .ForMember(dest => dest.PaymentType, opt => opt.Ignore());
+                .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore());
         }
     }
 }

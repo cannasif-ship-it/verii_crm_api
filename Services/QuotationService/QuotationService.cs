@@ -10,6 +10,9 @@ using cms_webapi.Helpers;
 using System;
 using System.Security.Claims;
 using System.Linq;
+using Hangfire;
+using Infrastructure.BackgroundJobs.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 
 namespace cms_webapi.Services
@@ -23,6 +26,8 @@ namespace cms_webapi.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IErpService _erpService;
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
+        private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
         public QuotationService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -30,7 +35,9 @@ namespace cms_webapi.Services
             CmsDbContext context,
             IHttpContextAccessor httpContextAccessor,
             IErpService erpService,
-            IDocumentSerialTypeService documentSerialTypeService)
+            IDocumentSerialTypeService documentSerialTypeService,
+            IConfiguration configuration,
+            IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -39,6 +46,8 @@ namespace cms_webapi.Services
             _httpContextAccessor = httpContextAccessor;
             _erpService = erpService;
             _documentSerialTypeService = documentSerialTypeService;
+            _configuration = configuration;
+            _userService = userService;
         }
 
         public async Task<ApiResponse<PagedResponse<QuotationGetDto>>> GetAllQuotationsAsync(PagedRequest request)
@@ -61,6 +70,7 @@ namespace cms_webapi.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
+                    .Include(q => q.DocumentSerialType)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Quotation.Id);
@@ -114,6 +124,7 @@ namespace cms_webapi.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
+                    .Include(q => q.DocumentSerialType)
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
 
                 var quotationDto = _mapper.Map<QuotationGetDto>(quotationWithNav ?? quotation);
@@ -154,15 +165,15 @@ namespace cms_webapi.Services
             try
             {
                 // Get userId from HttpContext (should be set by middleware)
-                var userId = GetCurrentUserId();
-                if (userId == null)
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
                 {
                     return ApiResponse<QuotationDto>.ErrorResult(
-                        "Kullanıcı kimliği bulunamadı.",
-                        "User identity not found",
+                        userIdResponse.Message,
+                        userIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
-
+                var userId = userIdResponse.Data;
 
                 var quotation = await _unitOfWork.Quotations
                     .Query()
@@ -215,14 +226,15 @@ namespace cms_webapi.Services
             try
             {
                 // Get userId from HttpContext (should be set by middleware)
-                var userId = GetCurrentUserId();
-                if (userId == null)
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
                 {
                     return ApiResponse<object>.ErrorResult(
-                        "Kullanıcı kimliği bulunamadı.",
-                        "User identity not found",
+                        userIdResponse.Message,
+                        userIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
+                var userId = userIdResponse.Data;
 
 
                 var quotation = await _unitOfWork.Quotations.GetByIdAsync(id);
@@ -247,16 +259,6 @@ namespace cms_webapi.Services
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
                     _localizationService.GetLocalizedString("QuotationService.DeleteQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
-        }
-
-        private long? GetCurrentUserId()
-        {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
-            {
-                return null;
-            }
-            return userId;
         }
 
         public async Task<ApiResponse<List<QuotationGetDto>>> GetQuotationsByPotentialCustomerIdAsync(long potentialCustomerId)
@@ -295,7 +297,7 @@ namespace cms_webapi.Services
         {
             try
             {
-                var quotations = await _unitOfWork.Quotations.FindAsync(q => q.Status == status);
+                var quotations = await _unitOfWork.Quotations.FindAsync(q => (int?)q.Status == status);
                 var quotationDtos = _mapper.Map<List<QuotationGetDto>>(quotations.ToList());
                 return ApiResponse<List<QuotationGetDto>>.SuccessResult(quotationDtos, _localizationService.GetLocalizedString("QuotationService.QuotationsByStatusRetrieved"));
             }
@@ -328,8 +330,7 @@ namespace cms_webapi.Services
 
             try
             {
-                long longoffertypeId = long.Parse(bulkDto.Quotation.OfferType);
-                var documentSerialType = await _documentSerialTypeService.GenerateDocumentSerialAsync(longoffertypeId);
+                var documentSerialType = await _documentSerialTypeService.GenerateDocumentSerialAsync(bulkDto.Quotation.DocumentSerialTypeId);
                 if (!documentSerialType.Success)
                 {
                     return ApiResponse<QuotationGetDto>.ErrorResult(
@@ -339,6 +340,8 @@ namespace cms_webapi.Services
                 }
                 bulkDto.Quotation.OfferNo = documentSerialType.Data;
                 bulkDto.Quotation.RevisionNo = documentSerialType.Data;
+                bulkDto.Quotation.Status = ApprovalStatus.HavenotStarted;
+
                 // 1. Header map
                 var quotation = _mapper.Map<Quotation>(bulkDto.Quotation);
 
@@ -427,6 +430,7 @@ namespace cms_webapi.Services
                     .Include(q => q.PotentialCustomer)
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
+                    .Include(q => q.DocumentSerialType)
                     .FirstOrDefaultAsync(q => q.Id == quotation.Id);
 
                 var dto = _mapper.Map<QuotationGetDto>(quotationWithNav);
@@ -486,114 +490,114 @@ namespace cms_webapi.Services
       public async Task<ApiResponse<QuotationGetDto>> CreateRevisionOfQuotationAsync(long quotationId)
         {
         await _unitOfWork.BeginTransactionAsync();
-        try
-        {
-                var quotation = await _unitOfWork.Quotations.GetByIdAsync(quotationId);
-                if (quotation == null)
-                {
-                    return ApiResponse<QuotationGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
-                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
-                        StatusCodes.Status404NotFound);
-                }
+            try
+            {
+                    var quotation = await _unitOfWork.Quotations.GetByIdAsync(quotationId);
+                    if (quotation == null)
+                    {
+                        return ApiResponse<QuotationGetDto>.ErrorResult(
+                            _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                            _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                            StatusCodes.Status404NotFound);
+                    }
 
-                var quotationLines = await _unitOfWork.QuotationLines.Query()
-                .Where(x => !x.IsDeleted && x.QuotationId == quotationId).ToListAsync();
+                    var quotationLines = await _unitOfWork.QuotationLines.Query()
+                    .Where(x => !x.IsDeleted && x.QuotationId == quotationId).ToListAsync();
 
-                var QuotationExchangeRates = await _unitOfWork.QuotationExchangeRates.Query()
-                .Where(x => !x.IsDeleted && x.QuotationId == quotationId).ToListAsync();
-                
-                var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(long.Parse(quotation.OfferType), false,quotation.RevisionNo);
-                if (!documentSerialTypeWithRevision.Success)
-                {
-                    return ApiResponse<QuotationGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.DocumentSerialTypeGenerationError"),
-                        documentSerialTypeWithRevision.Message,
-                        StatusCodes.Status500InternalServerError);
-                }
+                    var QuotationExchangeRates = await _unitOfWork.QuotationExchangeRates.Query()
+                    .Where(x => !x.IsDeleted && x.QuotationId == quotationId).ToListAsync();
+                    
+                    var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(quotation.DocumentSerialTypeId, false,quotation.RevisionNo);
+                    if (!documentSerialTypeWithRevision.Success)
+                    {
+                        return ApiResponse<QuotationGetDto>.ErrorResult(
+                            _localizationService.GetLocalizedString("QuotationService.DocumentSerialTypeGenerationError"),
+                            documentSerialTypeWithRevision.Message,
+                            StatusCodes.Status500InternalServerError);
+                    }
 
-                var newQuotation = new Quotation();
-                newQuotation.OfferType = quotation.OfferType;
-                newQuotation.RevisionId = quotation.Id;
-                newQuotation.OfferDate = quotation.OfferDate;
-                newQuotation.OfferNo = quotation.OfferNo;
-                newQuotation.RevisionNo = documentSerialTypeWithRevision.Data;
-                newQuotation.OfferDate = quotation.OfferDate;
-                newQuotation.Currency = quotation.Currency;
-                newQuotation.Total = quotation.Total;
-                newQuotation.GrandTotal = quotation.GrandTotal;
-                newQuotation.CreatedBy = quotation.CreatedBy;
-                newQuotation.CreatedDate = DateTime.UtcNow;
-                newQuotation.PotentialCustomerId = quotation.PotentialCustomerId;
-                newQuotation.ErpCustomerCode = quotation.ErpCustomerCode;
-                newQuotation.ContactId = quotation.ContactId;
-                newQuotation.ValidUntil = quotation.ValidUntil;
-                newQuotation.DeliveryDate = quotation.DeliveryDate;
-                newQuotation.ShippingAddressId = quotation.ShippingAddressId;
-                newQuotation.RepresentativeId = quotation.RepresentativeId;
-                newQuotation.ActivityId = quotation.ActivityId;
-                newQuotation.Description = quotation.Description;
-                newQuotation.PaymentTypeId = quotation.PaymentTypeId;
-                newQuotation.HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount;
-                newQuotation.Status = (int)ApprovalStatus.NotRequired;
+                    var newQuotation = new Quotation();
+                    newQuotation.OfferType = quotation.OfferType;
+                    newQuotation.RevisionId = quotation.Id;
+                    newQuotation.OfferDate = quotation.OfferDate;
+                    newQuotation.OfferNo = quotation.OfferNo;
+                    newQuotation.RevisionNo = documentSerialTypeWithRevision.Data;
+                    newQuotation.OfferDate = quotation.OfferDate;
+                    newQuotation.Currency = quotation.Currency;
+                    newQuotation.Total = quotation.Total;
+                    newQuotation.GrandTotal = quotation.GrandTotal;
+                    newQuotation.CreatedBy = quotation.CreatedBy;
+                    newQuotation.CreatedDate = DateTime.UtcNow;
+                    newQuotation.PotentialCustomerId = quotation.PotentialCustomerId;
+                    newQuotation.ErpCustomerCode = quotation.ErpCustomerCode;
+                    newQuotation.ContactId = quotation.ContactId;
+                    newQuotation.ValidUntil = quotation.ValidUntil;
+                    newQuotation.DeliveryDate = quotation.DeliveryDate;
+                    newQuotation.ShippingAddressId = quotation.ShippingAddressId;
+                    newQuotation.RepresentativeId = quotation.RepresentativeId;
+                    newQuotation.ActivityId = quotation.ActivityId;
+                    newQuotation.Description = quotation.Description;
+                    newQuotation.PaymentTypeId = quotation.PaymentTypeId;
+                    newQuotation.HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount;
+                    newQuotation.Status = (int)ApprovalStatus.HavenotStarted;
 
-                await _unitOfWork.Quotations.AddAsync(newQuotation);
-                await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.Quotations.AddAsync(newQuotation);
+                    await _unitOfWork.SaveChangesAsync();
 
-                var newQuotationLines = new List<QuotationLine>();
-                foreach (var line in quotationLines)
-                {
-                    var newLine = new QuotationLine();
-                    newLine.QuotationId = newQuotation.Id;
-                    newLine.ProductCode = line.ProductCode;
-                    newLine.Quantity = line.Quantity;
-                    newLine.UnitPrice = line.UnitPrice;
-                    newLine.DiscountRate1 = line.DiscountRate1;
-                    newLine.DiscountRate2 = line.DiscountRate2;
-                    newLine.DiscountRate3 = line.DiscountRate3;
-                    newLine.DiscountAmount1 = line.DiscountAmount1;
-                    newLine.DiscountAmount2 = line.DiscountAmount2;
-                    newLine.DiscountAmount3 = line.DiscountAmount3;
-                    newLine.VatRate = line.VatRate;
-                    newLine.LineTotal = line.LineTotal;
-                    newLine.VatAmount = line.VatAmount;
-                    newLine.LineGrandTotal = line.LineGrandTotal;
-                    newLine.Description = line.Description;
-                    newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
-                    newLine.RelatedStockId = line.RelatedStockId;
-                    newLine.RelatedProductKey = line.RelatedProductKey;
-                    newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
-                    newLine.ApprovalStatus = ApprovalStatus.NotRequired;
-                    newQuotationLines.Add(newLine);
-                }
-                await _unitOfWork.QuotationLines.AddAllAsync(newQuotationLines);
-                await _unitOfWork.SaveChangesAsync();
+                    var newQuotationLines = new List<QuotationLine>();
+                    foreach (var line in quotationLines)
+                    {
+                        var newLine = new QuotationLine();
+                        newLine.QuotationId = newQuotation.Id;
+                        newLine.ProductCode = line.ProductCode;
+                        newLine.Quantity = line.Quantity;
+                        newLine.UnitPrice = line.UnitPrice;
+                        newLine.DiscountRate1 = line.DiscountRate1;
+                        newLine.DiscountRate2 = line.DiscountRate2;
+                        newLine.DiscountRate3 = line.DiscountRate3;
+                        newLine.DiscountAmount1 = line.DiscountAmount1;
+                        newLine.DiscountAmount2 = line.DiscountAmount2;
+                        newLine.DiscountAmount3 = line.DiscountAmount3;
+                        newLine.VatRate = line.VatRate;
+                        newLine.LineTotal = line.LineTotal;
+                        newLine.VatAmount = line.VatAmount;
+                        newLine.LineGrandTotal = line.LineGrandTotal;
+                        newLine.Description = line.Description;
+                        newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
+                        newLine.RelatedStockId = line.RelatedStockId;
+                        newLine.RelatedProductKey = line.RelatedProductKey;
+                        newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
+                        newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
+                        newQuotationLines.Add(newLine);
+                    }
+                    await _unitOfWork.QuotationLines.AddAllAsync(newQuotationLines);
+                    await _unitOfWork.SaveChangesAsync();
 
-                var newQuotationExchangeRates = new List<QuotationExchangeRate>();
-                foreach (var exchangeRate in QuotationExchangeRates)
-                {
-                    var newExchangeRate = new QuotationExchangeRate();
-                    newExchangeRate.QuotationId = newQuotation.Id;
-                    newExchangeRate.ExchangeRate = exchangeRate.ExchangeRate;
-                    newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
-                    newExchangeRate.Currency = exchangeRate.Currency;
-                    newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
-                    newQuotationExchangeRates.Add(newExchangeRate);
-                }
-                await _unitOfWork.QuotationExchangeRates.AddAllAsync(newQuotationExchangeRates);
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
-                var dtos  = _mapper.Map<QuotationGetDto>(newQuotation);
-                return ApiResponse<QuotationGetDto>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationService.QuotationRevisionCreated"));
+                    var newQuotationExchangeRates = new List<QuotationExchangeRate>();
+                    foreach (var exchangeRate in QuotationExchangeRates)
+                    {
+                        var newExchangeRate = new QuotationExchangeRate();
+                        newExchangeRate.QuotationId = newQuotation.Id;
+                        newExchangeRate.ExchangeRate = exchangeRate.ExchangeRate;
+                        newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
+                        newExchangeRate.Currency = exchangeRate.Currency;
+                        newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
+                        newQuotationExchangeRates.Add(newExchangeRate);
+                    }
+                    await _unitOfWork.QuotationExchangeRates.AddAllAsync(newQuotationExchangeRates);
+                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.CommitTransactionAsync();
+                    var dtos  = _mapper.Map<QuotationGetDto>(newQuotation);
+                    return ApiResponse<QuotationGetDto>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationService.QuotationRevisionCreated"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<QuotationGetDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.CreateRevisionOfQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
         }
-        catch (Exception ex)
-        {
-            await _unitOfWork.RollbackTransactionAsync();
-            return ApiResponse<QuotationGetDto>.ErrorResult(
-                _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
-                _localizationService.GetLocalizedString("QuotationService.CreateRevisionOfQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
-        }
-      }
 
         public async Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode, long salesmanId, DateTime quotationDate)
         {
@@ -765,20 +769,21 @@ namespace cms_webapi.Services
 
         public async Task<ApiResponse<bool>> StartApprovalFlowAsync(StartApprovalFlowDto request)
         {
-            await _unitOfWork.BeginTransactionAsync();
 
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 // Get userId from HttpContext
-                var startedByUserId = GetCurrentUserId();
-                if (startedByUserId == null)
+                var startedByUserIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!startedByUserIdResponse.Success)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
-                        "User identity not found",
+                        startedByUserIdResponse.Message,
+                        startedByUserIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
+                var startedByUserId = startedByUserIdResponse.Data;
 
                 // 1️⃣ Daha önce başlatılmış mı?
                 bool exists = await _context.ApprovalRequests
@@ -895,10 +900,25 @@ namespace cms_webapi.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                // 7️⃣ ApprovalAction kayıtlarını oluştur
+                // 7️⃣ ApprovalAction kayıtlarını oluştur ve onay maili gönderilecek kullanıcıları topla
                 var actions = new List<ApprovalAction>();
+                var usersToNotify = new List<(string Email, string FullName, long UserId)>();
+
                 foreach (var userId in userIds)
                 {
+                    var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                    if (user == null)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<bool>.ErrorResult(
+                            _localizationService.GetLocalizedString("QuotationService.UserNotFound"),
+                            "Kullanıcı bulunamadı.",
+                            StatusCodes.Status404NotFound);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(user.Email))
+                        usersToNotify.Add((user.Email, user.FullName, userId));
+
                     var action = new ApprovalAction
                     {
                         ApprovalRequestId = approvalRequest.Id,
@@ -917,8 +937,80 @@ namespace cms_webapi.Services
                 await _unitOfWork.ApprovalActions.AddAllAsync(actions);
                 await _unitOfWork.SaveChangesAsync();
 
+                var quotation = await _unitOfWork.Quotations.GetByIdAsync(request.EntityId);
+                if (quotation == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        "Teklif bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+                quotation.Status = ApprovalStatus.Waiting;
+
+                await _unitOfWork.Quotations.UpdateAsync(quotation);
+                await _unitOfWork.SaveChangesAsync();
+
                 // Transaction'ı commit et
                 await _unitOfWork.CommitTransactionAsync();
+
+                // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
+                var userIdToActionId = actions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
+                var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
+                var quotationPath = _configuration["FrontendSettings:QuotationDetailPath"]?.TrimStart('/') ?? "quotations";
+                var quotationLink = $"{baseUrl}/{quotationPath}/{request.EntityId}";
+
+                // Onaya düşen her kullanıcıya "Onay bekleyen kaydınız bulunmaktadır" maili (Onayla/Reddet + Teklife Git butonları)
+                var emailSubject = _localizationService.GetLocalizedString("QuotationService.PendingApprovalEmailSubject")
+                    ?? "Onay Bekleyen Kaydınız Bulunmaktadır";
+                foreach (var (email, fullName, uid) in usersToNotify)
+                {
+                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
+                    var actionId = userIdToActionId.GetValueOrDefault(uid);
+                    var approvalLink = actionId != 0
+                        ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
+                        : $"{baseUrl}/{approvalPath}";
+
+                    var emailBody = $@"
+                        <html>
+                        <head>
+                            <style>
+                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                                .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
+                                .content {{ padding: 20px; background-color: #f9f9f9; }}
+                                .btn {{ display: inline-block; padding: 12px 24px; color: white; text-decoration: none; border-radius: 6px; margin: 8px 4px; font-weight: bold; }}
+                                .btn-approve {{ background-color: #4CAF50; }}
+                                .btn-approve:hover {{ background-color: #45a049; }}
+                                .btn-quotation {{ background-color: #2196F3; }}
+                                .btn-quotation:hover {{ background-color: #0b7dda; }}
+                                .buttons {{ margin: 20px 0; text-align: center; }}
+                                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class=""container"">
+                                <div class=""header"">
+                                    <h2>Onay Bekleyen Kaydınız Bulunmaktadır</h2>
+                                </div>
+                                <div class=""content"">
+                                    <p>Sayın {displayName},</p>
+                                    <p>Onay bekleyen kaydınız bulunmaktadır. Aşağıdaki butonlarla onaylayabilir/reddedebilir veya teklife gidebilirsiniz.</p>
+                                    <div class=""buttons"">
+                                        <a href=""{approvalLink}"" class=""btn btn-approve"">Onayla / Reddet</a>
+                                        <a href=""{quotationLink}"" class=""btn btn-quotation"">Teklife Git</a>
+                                    </div>
+                                </div>
+                                <div class=""footer"">
+                                    <p>Bu e-posta otomatik olarak gönderilmiştir, lütfen yanıtlamayınız.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>";
+                    BackgroundJob.Enqueue<IMailJob>(job =>
+                        job.SendEmailAsync(email, emailSubject, emailBody, true, null, null, null));
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -939,14 +1031,15 @@ namespace cms_webapi.Services
             try
             {
                 // Eğer userId verilmemişse HttpContext'ten al
-                var targetUserId = GetCurrentUserId();
-                if (targetUserId == null)
+                var targetUserIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!targetUserIdResponse.Success)
                 {
                     return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
-                        "User identity not found",
+                        targetUserIdResponse.Message,
+                        targetUserIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
+                var targetUserId = targetUserIdResponse.Data;
 
                 var approvalActions = await _context.ApprovalActions
                     .Where(x =>
@@ -977,15 +1070,16 @@ namespace cms_webapi.Services
 
             try
             {
-                var userId = GetCurrentUserId();
-                if (userId == null)
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
-                        "User identity not found",
+                        userIdResponse.Message,
+                        userIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
+                var userId = userIdResponse.Data;
 
                 // Onay kaydını bul
                 var action = await _context.ApprovalActions
@@ -1181,15 +1275,16 @@ namespace cms_webapi.Services
 
             try
             {
-                var userId = GetCurrentUserId();
-                if (userId == null)
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.UserIdentityNotFound"),
-                        "User identity not found",
+                        userIdResponse.Message,
+                        userIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
+                var userId = userIdResponse.Data;
 
                 // Onay kaydını bul
                 var action = await _context.ApprovalActions

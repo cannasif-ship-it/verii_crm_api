@@ -28,7 +28,7 @@ namespace cms_webapi.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
-        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
     public class CreateQuotationLineDto
@@ -65,7 +65,7 @@ namespace cms_webapi.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
-        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
     public class UpdateQuotationLineDto
@@ -100,7 +100,7 @@ namespace cms_webapi.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
-        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
     public class QuotationLineGetDto : BaseEntityDto
@@ -127,6 +127,6 @@ namespace cms_webapi.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
-        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.NotRequired;
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 }

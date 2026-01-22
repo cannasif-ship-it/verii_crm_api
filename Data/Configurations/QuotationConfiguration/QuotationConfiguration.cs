@@ -87,6 +87,15 @@ namespace cms_webapi.Data.Configurations
                 .HasForeignKey(e => e.PaymentTypeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Document Serial Type relationship
+            builder.Property(e => e.DocumentSerialTypeId)
+                .IsRequired();
+
+            builder.HasOne(e => e.DocumentSerialType)
+                .WithMany()
+                .HasForeignKey(e => e.DocumentSerialTypeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // Offer Type
             builder.Property(e => e.OfferType)
                 .HasMaxLength(50)
@@ -209,6 +218,9 @@ namespace cms_webapi.Data.Configurations
 
             builder.HasIndex(e => e.PaymentTypeId)
                 .HasDatabaseName("IX_Quotation_PaymentTypeId");
+
+            builder.HasIndex(e => e.DocumentSerialTypeId)
+                .HasDatabaseName("IX_Quotation_DocumentSerialTypeId");
 
             builder.HasIndex(e => e.Status)
                 .HasDatabaseName("IX_Quotation_Status");
