@@ -9,6 +9,7 @@ using cms_webapi.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace cms_webapi.Services
 {
@@ -18,10 +19,34 @@ namespace cms_webapi.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _loc;
         private readonly CmsDbContext _context;
-
-        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _uow = uow; _mapper = mapper; _loc = loc; _context = context;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<ApiResponse<long>> GetCurrentUserIdAsync()
+        {
+            try
+            {
+            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
+            {
+                return ApiResponse<long>.ErrorResult(
+                    _loc.GetLocalizedString("UserService.InvalidUserId"),
+                    _loc.GetLocalizedString("UserService.InvalidUserId"),
+                    StatusCodes.Status400BadRequest);
+                }
+                return ApiResponse<long>.SuccessResult(userId, _loc.GetLocalizedString("UserService.UserIdRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<long>.ErrorResult(
+                    _loc.GetLocalizedString("UserService.InternalServerError"),
+                    _loc.GetLocalizedString("UserService.GetCurrentUserIdExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
         }
 
         public async Task<ApiResponse<PagedResponse<UserDto>>> GetAllUsersAsync(PagedRequest request)

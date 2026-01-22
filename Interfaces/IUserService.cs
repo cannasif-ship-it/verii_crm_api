@@ -5,6 +5,7 @@ namespace cms_webapi.Interfaces
 {
     public interface IUserService
     {
+        Task<ApiResponse<long>> GetCurrentUserIdAsync();
         Task<ApiResponse<PagedResponse<UserDto>>> GetAllUsersAsync(PagedRequest request);
         Task<ApiResponse<UserDto>> GetUserByIdAsync(long id);
         Task<ApiResponse<UserDto>> CreateUserAsync(CreateUserDto dto);

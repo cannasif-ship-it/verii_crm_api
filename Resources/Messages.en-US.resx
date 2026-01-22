@@ -716,6 +716,9 @@
   <data name="QuotationService.QuotationsByStatusRetrieved" xml:space="preserve">
     <value>Quotations by status retrieved successfully.</value>
   </data>
+  <data name="QuotationService.PendingApprovalEmailSubject" xml:space="preserve">
+    <value>You Have a Record Pending Approval</value>
+  </data>
   <!-- #endregion Services.QuotationService -->
   
   <!-- #region Services.QuotationLineService -->

@@ -141,8 +141,12 @@ builder.Services.AddScoped<IApprovalRoleGroupService, ApprovalRoleGroupService>(
 builder.Services.AddScoped<IApprovalRoleService, ApprovalRoleService>();
 builder.Services.AddScoped<IApprovalUserRoleService, ApprovalUserRoleService>();
 
+// Register Mail Services
+builder.Services.AddScoped<IMailService, MailService>();
+
 // Register Background Jobs
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IStockSyncJob, Infrastructure.BackgroundJobs.StockSyncJob>();
+builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IMailJob, Infrastructure.BackgroundJobs.MailJob>();
 
 // Register File Upload Services
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();

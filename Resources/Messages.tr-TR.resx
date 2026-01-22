@@ -749,6 +749,9 @@
   <data name="QuotationService.QuotationsByStatusRetrieved" xml:space="preserve">
     <value>Durum teklifleri başarıyla getirildi.</value>
   </data>
+  <data name="QuotationService.PendingApprovalEmailSubject" xml:space="preserve">
+    <value>Onay Bekleyen Kaydınız Bulunmaktadır</value>
+  </data>
   <!-- #endregion Services.QuotationService -->
   
   <!-- #region Services.QuotationLineService -->
