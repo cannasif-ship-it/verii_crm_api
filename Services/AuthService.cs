@@ -21,8 +21,15 @@ namespace crm_api.Services
         private readonly CmsDbContext _context;
         private readonly IHubContext<AuthHub> _hubContext;
         private readonly IConfiguration _configuration;
-
-        public AuthService(IUnitOfWork unitOfWork, IJwtService jwtService, ILocalizationService localizationService, CmsDbContext context, IHubContext<AuthHub> hubContext, IConfiguration configuration)
+        private readonly IUserService _userService;
+        public AuthService(
+            IUnitOfWork unitOfWork,
+            IJwtService jwtService,
+            ILocalizationService localizationService,
+            CmsDbContext context,
+            IHubContext<AuthHub> hubContext,
+            IConfiguration configuration,
+            IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
@@ -30,6 +37,7 @@ namespace crm_api.Services
             _context = context;
             _hubContext = hubContext;
             _configuration = configuration;
+            _userService = userService;
         }
 
         public async Task<ApiResponse<UserDto>> GetUserByUsernameAsync(string username)
@@ -399,10 +407,16 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> ChangePasswordAsync(long userId, ChangePasswordRequest request)
+        public async Task<ApiResponse<bool>> ChangePasswordAsync(ChangePasswordRequest request)
         {
             try
             {
+                var userIdRequest = await _userService.GetCurrentUserIdAsync();
+                if (!userIdRequest.Success)
+                {
+                    return ApiResponse<bool>.ErrorResult(userIdRequest.Message, userIdRequest.ExceptionMessage ?? string.Empty, userIdRequest.StatusCode);
+                }
+                var userId = userIdRequest.Data!;
                 var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
