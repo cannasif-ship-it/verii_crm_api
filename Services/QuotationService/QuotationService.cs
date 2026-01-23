@@ -688,7 +688,6 @@ namespace crm_api.Services
             }
         }
 
-
         public async Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request)
         {
             try
