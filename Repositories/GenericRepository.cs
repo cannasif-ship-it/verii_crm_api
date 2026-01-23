@@ -32,14 +32,17 @@ namespace crm_api.Repositories
         /// Read-only query for lists, reports, dropdowns
         /// Returns AsNoTracking() queryable
         /// </summary>
-        public IQueryable<T> Query(bool tracking = false)
+        public IQueryable<T> Query(bool tracking = false, bool ignoreQueryFilters = false)
         {
-            return tracking ?
-                 _dbSet.Where(e => !e.IsDeleted) 
-                 : 
-                 _dbSet
-                .Where(e => !e.IsDeleted)
-                .AsNoTracking();
+            IQueryable<T> query = _dbSet;
+
+            if (ignoreQueryFilters)
+                query = query.IgnoreQueryFilters();
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            return query;
         }
 
         /// <summary>

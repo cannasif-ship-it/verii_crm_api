@@ -7,7 +7,7 @@ namespace crm_api.Repositories
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
-        IQueryable<T> Query(bool tracking = false);
+        IQueryable<T> Query(bool tracking = false, bool ignoreQueryFilters = false);
         Task<T?> GetByIdAsync(long id);
         Task<T?> GetByIdForUpdateAsync(long id);
         Task<IEnumerable<T>> GetAllAsync();
