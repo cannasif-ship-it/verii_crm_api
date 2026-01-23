@@ -189,48 +189,6 @@ namespace crm_api.Services
                 _mapper.Map(updateDto, header);
                 await _unitOfWork.PricingRuleHeaders.UpdateAsync(header);
 
-                // Handle Lines update (delete existing and add new)
-                if (updateDto.Lines != null)
-                {
-                    var existingLines = await _unitOfWork.PricingRuleLines
-                        .Query()
-                        .Where(l => l.PricingRuleHeaderId == id && !l.IsDeleted)
-                        .ToListAsync();
-
-                    foreach (var existingLine in existingLines)
-                    {
-                        await _unitOfWork.PricingRuleLines.SoftDeleteAsync(existingLine.Id);
-                    }
-
-                    foreach (var lineDto in updateDto.Lines)
-                    {
-                        var line = _mapper.Map<PricingRuleLine>(lineDto);
-                        line.PricingRuleHeaderId = id;
-                        await _unitOfWork.PricingRuleLines.AddAsync(line);
-                    }
-                }
-
-                // Handle Salesmen update (delete existing and add new)
-                if (updateDto.Salesmen != null)
-                {
-                    var existingSalesmen = await _unitOfWork.PricingRuleSalesmen
-                        .Query()
-                        .Where(s => s.PricingRuleHeaderId == id && !s.IsDeleted)
-                        .ToListAsync();
-
-                    foreach (var existingSalesman in existingSalesmen)
-                    {
-                        await _unitOfWork.PricingRuleSalesmen.SoftDeleteAsync(existingSalesman.Id);
-                    }
-
-                    foreach (var salesmanDto in updateDto.Salesmen)
-                    {
-                        var salesman = _mapper.Map<PricingRuleSalesman>(salesmanDto);
-                        salesman.PricingRuleHeaderId = id;
-                        await _unitOfWork.PricingRuleSalesmen.AddAsync(salesman);
-                    }
-                }
-
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties

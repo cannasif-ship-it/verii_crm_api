@@ -111,7 +111,29 @@ namespace crm_api.Services
             try
             {
                 var line = _mapper.Map<PricingRuleLine>(createDto);
+                var lineCheck = await _unitOfWork.PricingRuleLines.Query(tracking: false, ignoreQueryFilters: true)
+                                    .IgnoreQueryFilters()
+                                    .FirstOrDefaultAsync(l => l.PricingRuleHeaderId == createDto.PricingRuleHeaderId && l.StokCode == createDto.StokCode);
+                if (lineCheck != null)
+                {
+                    lineCheck.IsDeleted = false;
+                    lineCheck.MinQuantity = createDto.MinQuantity;
+                    lineCheck.MaxQuantity = createDto.MaxQuantity;
+                    lineCheck.FixedUnitPrice = createDto.FixedUnitPrice;
+                    lineCheck.CurrencyCode = createDto.CurrencyCode;
+                    lineCheck.DiscountRate1 = createDto.DiscountRate1;
+                    lineCheck.DiscountAmount1 = createDto.DiscountAmount1;
+                    lineCheck.DiscountRate2 = createDto.DiscountRate2;
+                    lineCheck.DiscountAmount2 = createDto.DiscountAmount2;
+                    lineCheck.DiscountRate3 = createDto.DiscountRate3;
+                    lineCheck.DiscountAmount3 = createDto.DiscountAmount3;
+                    lineCheck.DeletedBy = null;
+                    lineCheck.DeletedDate = null;
+                    await _unitOfWork.PricingRuleLines.UpdateAsync(lineCheck);
+                    line = lineCheck;
+                }else{
                 await _unitOfWork.PricingRuleLines.AddAsync(line);
+                }
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties

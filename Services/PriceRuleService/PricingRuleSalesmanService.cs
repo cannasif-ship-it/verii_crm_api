@@ -113,7 +113,22 @@ namespace crm_api.Services
             try
             {
                 var salesman = _mapper.Map<PricingRuleSalesman>(createDto);
+                var salesmanCheck =  await _unitOfWork.PricingRuleSalesmen
+                                    .Query(tracking: false, ignoreQueryFilters: true)
+                                    .IgnoreQueryFilters()
+                                    .FirstOrDefaultAsync(s =>
+                                        s.PricingRuleHeaderId == createDto.PricingRuleHeaderId &&
+                                        s.SalesmanId == createDto.SalesmanId);
+                if (salesmanCheck != null)
+                {
+                    salesmanCheck.IsDeleted = false;
+                    salesmanCheck.DeletedBy = null;
+                    salesmanCheck.DeletedDate = null;
+                    await _unitOfWork.PricingRuleSalesmen.UpdateAsync(salesmanCheck);
+                    salesman = salesmanCheck;
+                }else{
                 await _unitOfWork.PricingRuleSalesmen.AddAsync(salesman);
+                }
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties
