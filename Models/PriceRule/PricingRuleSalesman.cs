@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     [Table("RII_PRICING_RULE_SALESMAN")]
     public class PricingRuleSalesman : BaseEntity

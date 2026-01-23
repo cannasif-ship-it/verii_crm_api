@@ -1,4 +1,4 @@
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IMailService
     {

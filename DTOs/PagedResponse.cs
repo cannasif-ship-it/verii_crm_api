@@ -1,4 +1,4 @@
-namespace cms_webapi.DTOs
+namespace crm_api.DTOs
 {
     public class PagedResponse<T>
     {

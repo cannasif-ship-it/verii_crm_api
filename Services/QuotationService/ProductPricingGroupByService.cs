@@ -1,16 +1,16 @@
 using AutoMapper;
-using cms_webapi.DTOs;
-using cms_webapi.Interfaces;
-using cms_webapi.Models;
-using cms_webapi.UnitOfWork;
-using cms_webapi.Data;
+using crm_api.DTOs;
+using crm_api.Interfaces;
+using crm_api.Models;
+using crm_api.UnitOfWork;
+using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using cms_webapi.Helpers;
+using crm_api.Helpers;
 using System;
 using System.Collections.Generic;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class ProductPricingGroupByService : IProductPricingGroupByService
     {

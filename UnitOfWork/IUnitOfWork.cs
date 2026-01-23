@@ -1,7 +1,7 @@
-using cms_webapi.Models;
-using cms_webapi.Repositories;
+using crm_api.Models;
+using crm_api.Repositories;
 
-namespace cms_webapi.UnitOfWork
+namespace crm_api.UnitOfWork
 {
     /// <summary>
     /// Unit of Work pattern interface for managing transactions and repositories

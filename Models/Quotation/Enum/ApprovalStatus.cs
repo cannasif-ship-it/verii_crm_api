@@ -1,4 +1,4 @@
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     public enum ApprovalStatus : int
     {

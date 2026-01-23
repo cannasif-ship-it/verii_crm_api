@@ -2,12 +2,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using cms_webapi.Models;
-using cms_webapi.Interfaces;
-using cms_webapi.DTOs;
-using cms_webapi.UnitOfWork;
+using crm_api.Models;
+using crm_api.Interfaces;
+using crm_api.DTOs;
+using crm_api.UnitOfWork;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class JwtService : IJwtService
     {

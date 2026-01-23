@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
-using cms_webapi.Data;
-using cms_webapi.DTOs;
-using cms_webapi.Models;
-using cms_webapi.Interfaces;
-using cms_webapi.UnitOfWork;
-using cms_webapi.Hubs;
+using crm_api.Data;
+using crm_api.DTOs;
+using crm_api.Models;
+using crm_api.Interfaces;
+using crm_api.UnitOfWork;
+using crm_api.Hubs;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class AuthService : IAuthService
     {

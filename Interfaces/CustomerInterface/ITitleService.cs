@@ -1,8 +1,8 @@
 using depoWebAPI.Models;
-using cms_webapi.DTOs;
-using cms_webapi.Data;
+using crm_api.DTOs;
+using crm_api.Data;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface ITitleService
     {

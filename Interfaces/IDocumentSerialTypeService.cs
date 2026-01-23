@@ -1,7 +1,7 @@
-using cms_webapi.DTOs;
-using cms_webapi.Models;
+using crm_api.DTOs;
+using crm_api.Models;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IDocumentSerialTypeService
     {

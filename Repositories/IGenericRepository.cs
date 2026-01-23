@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Linq.Expressions;
-using cms_webapi.Models;
+using crm_api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace cms_webapi.Repositories
+namespace crm_api.Repositories
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {

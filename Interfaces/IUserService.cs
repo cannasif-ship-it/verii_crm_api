@@ -1,7 +1,7 @@
-using cms_webapi.DTOs;
+using crm_api.DTOs;
 using System.Security.Claims;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IUserService
     {

@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using cms_webapi.DTOs;
-using cms_webapi.Interfaces;
+using crm_api.DTOs;
+using crm_api.Interfaces;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class FileUploadService : IFileUploadService
     {

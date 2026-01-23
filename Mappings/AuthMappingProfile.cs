@@ -1,7 +1,7 @@
 using AutoMapper;
-using cms_webapi.DTOs;
+using crm_api.DTOs;
 
-namespace cms_webapi.Mappings
+namespace crm_api.Mappings
 {
     public class AuthMappingProfile : Profile
     {

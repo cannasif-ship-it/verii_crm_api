@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using depoWebAPI.Models;
 
-namespace cms_webapi.Data
+namespace crm_api.Data
 {
     /// <summary>
     /// ERP veritabanı bağlantısı için DbContext

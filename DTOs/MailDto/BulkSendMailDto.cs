@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace cms_webapi.DTOs.MailDto
+namespace crm_api.DTOs.MailDto
 {
     public class BulkSendMailDto
     {

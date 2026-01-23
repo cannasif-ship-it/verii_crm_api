@@ -1,8 +1,8 @@
 using AutoMapper;
 using depoWebAPI.Models;
-using cms_webapi.DTOs.ErpDto;
+using crm_api.DTOs.ErpDto;
 
-namespace cms_webapi.Mappings
+namespace crm_api.Mappings
 {
     public class ErpMappingProfile : Profile
     {

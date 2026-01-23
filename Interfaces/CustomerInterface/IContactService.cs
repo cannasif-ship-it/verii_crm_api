@@ -1,8 +1,8 @@
 // fixed wrong copy-paste namespace
-using cms_webapi.DTOs;
-using cms_webapi.Data;
+using crm_api.DTOs;
+using crm_api.Data;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IContactService
     {

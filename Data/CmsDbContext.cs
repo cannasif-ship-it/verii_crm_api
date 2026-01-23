@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using cms_webapi.Models;
-using cms_webapi.Data.Configurations;
+using crm_api.Models;
+using crm_api.Data.Configurations;
 using depoWebAPI.Models;
 
-namespace cms_webapi.Data
+namespace crm_api.Data
 {
     public class CmsDbContext : DbContext
     {

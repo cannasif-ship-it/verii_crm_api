@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using cms_webapi.Hubs;
-using cms_webapi.Interfaces;
-using cms_webapi.DTOs;
+using crm_api.Hubs;
+using crm_api.Interfaces;
+using crm_api.DTOs;
 
-namespace cms_webapi.Controllers
+namespace crm_api.Controllers
 {
     [ApiController]
     [Route("api/auth")]

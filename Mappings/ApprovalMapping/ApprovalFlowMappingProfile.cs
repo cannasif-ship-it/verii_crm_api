@@ -1,8 +1,8 @@
 using AutoMapper;
-using cms_webapi.Models;
-using cms_webapi.DTOs;
+using crm_api.Models;
+using crm_api.DTOs;
 
-namespace cms_webapi.Mappings
+namespace crm_api.Mappings
 {
     public class ApprovalFlowMappingProfile : Profile
     {

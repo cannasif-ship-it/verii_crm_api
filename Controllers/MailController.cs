@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using cms_webapi.DTOs.MailDto;
-using cms_webapi.Interfaces;
+using crm_api.DTOs.MailDto;
+using crm_api.Interfaces;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 
-namespace cms_webapi.Controllers
+namespace crm_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

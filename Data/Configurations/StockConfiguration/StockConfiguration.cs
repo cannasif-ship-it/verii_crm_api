@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.Data.Configurations
+namespace crm_api.Data.Configurations
 {
     public class StockConfiguration : BaseEntityConfiguration<Stock>
     {

@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using cms_webapi.Data;
+using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.Hubs
+namespace crm_api.Hubs
 {
     [Authorize]
     public class AuthHub : Hub

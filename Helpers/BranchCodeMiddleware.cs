@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace cms_webapi.Helpers
+namespace crm_api.Helpers
 {
     /// <summary>
     /// Middleware to extract BranchCode from request header and store it in HttpContext.Items

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace cms_webapi.DTOs
+namespace crm_api.DTOs
 {
     public class Filter
     {

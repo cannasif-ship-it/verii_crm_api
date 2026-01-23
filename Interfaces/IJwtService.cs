@@ -1,7 +1,7 @@
-using cms_webapi.Models;
-using cms_webapi.DTOs;
+using crm_api.Models;
+using crm_api.DTOs;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IJwtService
     {

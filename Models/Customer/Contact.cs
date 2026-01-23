@@ -1,6 +1,6 @@
 using System;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     public class Contact : BaseEntity
     {

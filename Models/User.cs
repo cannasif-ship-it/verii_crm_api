@@ -1,7 +1,7 @@
 using System;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     public class User : BaseEntity
     {

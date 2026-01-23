@@ -1,15 +1,15 @@
 using AutoMapper;
-using cms_webapi.Data;
-using cms_webapi.DTOs;
-using cms_webapi.DTOs.ErpDto;
-using cms_webapi.Interfaces;
-using cms_webapi.UnitOfWork;
+using crm_api.Data;
+using crm_api.DTOs;
+using crm_api.DTOs.ErpDto;
+using crm_api.Interfaces;
+using crm_api.UnitOfWork;
 using depoWebAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class ErpService : IErpService
     {

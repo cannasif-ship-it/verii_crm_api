@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace cms_webapi.DTOs
+namespace crm_api.DTOs
 {
     public class TitleDto : BaseEntityDto
     {

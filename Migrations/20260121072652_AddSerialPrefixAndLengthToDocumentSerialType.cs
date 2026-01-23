@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace cms_webapi.Migrations
+namespace crm_api.Migrations
 {
     /// <inheritdoc />
     public partial class AddSerialPrefixAndLengthToDocumentSerialType : Migration

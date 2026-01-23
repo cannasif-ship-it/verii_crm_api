@@ -1,6 +1,6 @@
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
-using cms_webapi.Interfaces;
+using crm_api.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.BackgroundJobs

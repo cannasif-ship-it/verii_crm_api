@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     [Table("RII_USER_AUTHORITY")]
     public class UserAuthority : BaseEntity

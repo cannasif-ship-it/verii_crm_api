@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using cms_webapi.Interfaces;
-using cms_webapi.DTOs;
-using cms_webapi.DTOs.ErpDto;
+using crm_api.Interfaces;
+using crm_api.DTOs;
+using crm_api.DTOs.ErpDto;
 using Microsoft.AspNetCore.Authorization;
 
-namespace cms_webapi.Controllers
+namespace crm_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

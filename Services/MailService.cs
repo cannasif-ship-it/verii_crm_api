@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Mail;
-using cms_webapi.Interfaces;
+using crm_api.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class MailService : IMailService
     {

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Localization;
-using cms_webapi.Interfaces;
+using crm_api.Interfaces;
 using System.Globalization;
 using System.Resources;
 using System.Reflection;
-using cms_webapi.UnitOfWork;
+using crm_api.UnitOfWork;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     public class LocalizationService : ILocalizationService
     {
@@ -20,9 +20,9 @@ namespace cms_webapi.Services
             var assembly = Assembly.GetExecutingAssembly();
             
             // Create ResourceManager for Messages resources
-            _resourceManager = new ResourceManager("cms_webapi.Resources.Messages", assembly);
+            _resourceManager = new ResourceManager("crm_api.Resources.Messages", assembly);
             
-            _logger.LogInformation($"LocalizationService initialized with ResourceManager for cms_webapi.Resources.Messages");
+            _logger.LogInformation($"LocalizationService initialized with ResourceManager for crm_api.Resources.Messages");
         }
 
         public string GetLocalizedString(string key)

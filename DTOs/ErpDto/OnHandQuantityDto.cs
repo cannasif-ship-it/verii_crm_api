@@ -1,4 +1,4 @@
-namespace cms_webapi.DTOs.ErpDto
+namespace crm_api.DTOs.ErpDto
 {
     public class OnHandQuantityDto
     {

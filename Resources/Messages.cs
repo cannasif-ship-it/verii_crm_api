@@ -1,4 +1,4 @@
-namespace cms_webapi.Resources
+namespace crm_api.Resources
 {
     public class Messages
     {

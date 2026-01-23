@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace cms_webapi.Migrations
+namespace crm_api.Migrations
 {
     /// <inheritdoc />
     public partial class AddMaxAmountToApprovalRole : Migration

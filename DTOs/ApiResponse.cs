@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace cms_webapi.DTOs
+namespace crm_api.DTOs
 {
     public class ApiResponse<T>
     {

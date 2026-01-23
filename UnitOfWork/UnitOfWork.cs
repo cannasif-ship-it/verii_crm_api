@@ -1,13 +1,13 @@
-using cms_webapi.Data;
-using cms_webapi.Interfaces;
-using cms_webapi.Models;
-using cms_webapi.Repositories;
+using crm_api.Data;
+using crm_api.Interfaces;
+using crm_api.Models;
+using crm_api.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 
-namespace cms_webapi.UnitOfWork
+namespace crm_api.UnitOfWork
 {
     /// <summary>
     /// Unit of Work implementation for managing transactions and repositories

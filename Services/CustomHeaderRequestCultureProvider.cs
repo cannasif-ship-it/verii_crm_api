@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Localization;
 
-namespace cms_webapi.Services
+namespace crm_api.Services
 {
     /// <summary>
     /// Custom culture provider that reads language from "x-language" header

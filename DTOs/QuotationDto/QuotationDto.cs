@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.DTOs
+namespace crm_api.DTOs
 {
     public class QuotationDto : BaseHeaderEntityDto
     {

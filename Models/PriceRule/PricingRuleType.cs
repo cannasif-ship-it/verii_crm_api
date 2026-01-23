@@ -1,6 +1,6 @@
 using System;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     /// <summary>
     /// Fiyat kuralının hangi iş akışında geçerli olacağını belirtir

@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using cms_webapi.Models;
+using crm_api.Models;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     [Table("APPROVAL_FLOW_STEP")]
     public class ApprovalFlowStep : BaseEntity

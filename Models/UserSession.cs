@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     [Table("RII_USER_SESSION")]
     public class UserSession : BaseEntity

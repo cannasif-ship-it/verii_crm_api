@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace cms_webapi.Models
+namespace crm_api.Models
 {
     public class Country : BaseEntity
     {

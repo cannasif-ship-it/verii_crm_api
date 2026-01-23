@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using cms_webapi.Data;
-using cms_webapi.Interfaces;
-using cms_webapi.Models;
+using crm_api.Data;
+using crm_api.Interfaces;
+using crm_api.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace cms_webapi.Repositories
+namespace crm_api.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {

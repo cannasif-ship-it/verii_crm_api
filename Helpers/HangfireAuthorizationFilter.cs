@@ -1,6 +1,6 @@
 using Hangfire.Dashboard;
 
-namespace cms_webapi.Helpers
+namespace crm_api.Helpers
 {
     public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
     {

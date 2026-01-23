@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
-using cms_webapi.DTOs;
+using crm_api.DTOs;
 
-namespace cms_webapi.Helpers
+namespace crm_api.Helpers
 {
     public static class QueryHelper
     {

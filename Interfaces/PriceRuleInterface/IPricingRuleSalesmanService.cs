@@ -1,6 +1,6 @@
-using cms_webapi.DTOs;
+using crm_api.DTOs;
 
-namespace cms_webapi.Interfaces
+namespace crm_api.Interfaces
 {
     public interface IPricingRuleSalesmanService
     {
