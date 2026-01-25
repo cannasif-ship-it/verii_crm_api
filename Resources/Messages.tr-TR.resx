@@ -466,6 +466,24 @@
   <data name="CustomerService.ErrorDeletingCustomer" xml:space="preserve">
     <value>Müşteri silinirken bir hata oluştu.</value>
   </data>
+  <data name="CustomerService.CreateCustomerExceptionMessage" xml:space="preserve">
+    <value>Customer oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerService.DeleteCustomerExceptionMessage" xml:space="preserve">
+    <value>Customer silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerService.GetAllCustomersExceptionMessage" xml:space="preserve">
+    <value>Customerler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerService.GetCustomerByIdExceptionMessage" xml:space="preserve">
+    <value>Customer getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="CustomerService.UpdateCustomerExceptionMessage" xml:space="preserve">
+    <value>Customer güncellenirken bir hata oluştu: {0}</value>
+  </data>
   <!-- #endregion Services.CustomerService -->
   
   <!-- #region Services.CustomerTypeService -->
@@ -501,6 +519,24 @@
   </data>
   <data name="CustomerTypeService.ErrorDeletingCustomerType" xml:space="preserve">
     <value>Müşteri türü silinirken bir hata oluştu.</value>
+  </data>
+  <data name="CustomerTypeService.CreateCustomerTypeExceptionMessage" xml:space="preserve">
+    <value>Customer Type oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerTypeService.DeleteCustomerTypeExceptionMessage" xml:space="preserve">
+    <value>Customer Type silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerTypeService.GetAllCustomerTypesExceptionMessage" xml:space="preserve">
+    <value>Customer Typeler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerTypeService.GetCustomerTypeByIdExceptionMessage" xml:space="preserve">
+    <value>Customer Type getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerTypeService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="CustomerTypeService.UpdateCustomerTypeExceptionMessage" xml:space="preserve">
+    <value>Customer Type güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.CustomerTypeService -->
   
@@ -538,6 +574,24 @@
   <data name="ContactService.ErrorDeletingContact" xml:space="preserve">
     <value>İletişim bilgisi silinirken bir hata oluştu.</value>
   </data>
+  <data name="ContactService.CreateContactExceptionMessage" xml:space="preserve">
+    <value>Contact oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ContactService.DeleteContactExceptionMessage" xml:space="preserve">
+    <value>Contact silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ContactService.GetAllContactsExceptionMessage" xml:space="preserve">
+    <value>Contactler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ContactService.GetContactByIdExceptionMessage" xml:space="preserve">
+    <value>Contact getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ContactService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ContactService.UpdateContactExceptionMessage" xml:space="preserve">
+    <value>Contact güncellenirken bir hata oluştu: {0}</value>
+  </data>
   <!-- #endregion Services.ContactService -->
   
   <!-- #region Services.ActivityService -->
@@ -558,6 +612,24 @@
   </data>
   <data name="ActivityService.ActivityDeleted" xml:space="preserve">
     <value>Aktivite başarıyla silindi.</value>
+  </data>
+  <data name="ActivityService.CreateActivityExceptionMessage" xml:space="preserve">
+    <value>Activity oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityService.DeleteActivityExceptionMessage" xml:space="preserve">
+    <value>Activity silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityService.GetActivityByIdExceptionMessage" xml:space="preserve">
+    <value>Activity getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityService.GetAllActivitiesExceptionMessage" xml:space="preserve">
+    <value>Activityler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ActivityService.UpdateActivityExceptionMessage" xml:space="preserve">
+    <value>Activity güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.ActivityService -->
   
@@ -580,6 +652,24 @@
   <data name="ProductPricingService.ProductPricingDeleted" xml:space="preserve">
     <value>Ürün fiyatlandırması başarıyla silindi.</value>
   </data>
+  <data name="ProductPricingService.CreateProductPricingExceptionMessage" xml:space="preserve">
+    <value>Product Pricing oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingService.DeleteProductPricingExceptionMessage" xml:space="preserve">
+    <value>Product Pricing silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingService.GetAllProductPricingsExceptionMessage" xml:space="preserve">
+    <value>Product Pricingler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingService.GetProductPricingByIdExceptionMessage" xml:space="preserve">
+    <value>Product Pricing getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ProductPricingService.UpdateProductPricingExceptionMessage" xml:space="preserve">
+    <value>Product Pricing güncellenirken bir hata oluştu: {0}</value>
+  </data>
   <!-- #endregion Services.ProductPricingService -->
   
   <!-- #region Services.ProductPricingGroupByService -->
@@ -600,6 +690,24 @@
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByDeleted" xml:space="preserve">
     <value>Ürün fiyatlandırma grubu başarıyla silindi.</value>
+  </data>
+  <data name="ProductPricingGroupByService.CreateProductPricingGroupByExceptionMessage" xml:space="preserve">
+    <value>Product Pricing Group By oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingGroupByService.DeleteProductPricingGroupByExceptionMessage" xml:space="preserve">
+    <value>Product Pricing Group By silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingGroupByService.GetAllProductPricingGroupBysExceptionMessage" xml:space="preserve">
+    <value>Product Pricing Group Byler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingGroupByService.GetProductPricingGroupByByIdExceptionMessage" xml:space="preserve">
+    <value>Product Pricing Group By getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ProductPricingGroupByService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ProductPricingGroupByService.UpdateProductPricingGroupByExceptionMessage" xml:space="preserve">
+    <value>Product Pricing Group By güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.ProductPricingGroupByService -->
   
@@ -627,6 +735,39 @@
   </data>
   <data name="UserDiscountLimitService.AlreadyExists" xml:space="preserve">
     <value>Satış temsilcisi {0} ve grup {1} için kullanıcı indirim limiti zaten mevcut.</value>
+  </data>
+  <data name="UserDiscountLimitService.CreateExceptionMessage" xml:space="preserve">
+    <value>User Discount Limit oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.DeleteExceptionMessage" xml:space="preserve">
+    <value>User Discount Limit silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.ExistsBySalespersonAndGroupExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.ExistsExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.GetAllExceptionMessage" xml:space="preserve">
+    <value>User Discount Limitler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.GetByErpProductGroupCodeExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>User Discount Limit getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.GetBySalespersonAndGroupExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.GetBySalespersonIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDiscountLimitService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="UserDiscountLimitService.UpdateExceptionMessage" xml:space="preserve">
+    <value>User Discount Limit güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.UserDiscountLimitService -->
   
@@ -674,6 +815,36 @@
   <data name="ErpService.ErpConnectionFailed" xml:space="preserve">
     <value>ERP bağlantısı başarısız.</value>
   </data>
+  <data name="ErpService.BranchCodeRetrievalError" xml:space="preserve">
+    <value>Branch Code Retrieval Error.</value>
+  </data>
+  <data name="ErpService.BranchCodeRetrievalErrorMessage" xml:space="preserve">
+    <value>Branch Code Retrieval Error Message.</value>
+  </data>
+  <data name="ErpService.BranchCodeRetrieved" xml:space="preserve">
+    <value>Erp başarıyla getirildi.</value>
+  </data>
+  <data name="ErpService.ExchangeRateRecordsRetrieved" xml:space="preserve">
+    <value>Erpler başarıyla getirildi.</value>
+  </data>
+  <data name="ErpService.GetAllErpShippingAddressExceptionMessage" xml:space="preserve">
+    <value>Erpler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ErpService.GetAllExchangeRateExceptionMessage" xml:space="preserve">
+    <value>Erpler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ErpService.GetAllStokExceptionMessage" xml:space="preserve">
+    <value>Erpler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ErpService.GetAllStokGroupExceptionMessage" xml:space="preserve">
+    <value>Erpler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ErpService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ErpService.StokGroupRecordsRetrieved" xml:space="preserve">
+    <value>Erpler başarıyla getirildi.</value>
+  </data>
   <!-- #endregion Services.ErpService -->
   
   <!-- #region Services.PaymentTypeService -->
@@ -694,6 +865,24 @@
   </data>
   <data name="PaymentTypeService.PaymentTypeDeleted" xml:space="preserve">
     <value>Ödeme tipi başarıyla silindi.</value>
+  </data>
+  <data name="PaymentTypeService.CreatePaymentTypeExceptionMessage" xml:space="preserve">
+    <value>Payment Type oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PaymentTypeService.DeletePaymentTypeExceptionMessage" xml:space="preserve">
+    <value>Payment Type silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PaymentTypeService.GetAllPaymentTypesExceptionMessage" xml:space="preserve">
+    <value>Payment Typeler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PaymentTypeService.GetPaymentTypeByIdExceptionMessage" xml:space="preserve">
+    <value>Payment Type getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PaymentTypeService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PaymentTypeService.UpdatePaymentTypeExceptionMessage" xml:space="preserve">
+    <value>Payment Type güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.PaymentTypeService -->
   
@@ -718,6 +907,27 @@
   </data>
   <data name="ShippingAddressService.ShippingAddressesByCustomerRetrieved" xml:space="preserve">
     <value>Müşteri sevk adresleri başarıyla getirildi.</value>
+  </data>
+  <data name="ShippingAddressService.CreateShippingAddressExceptionMessage" xml:space="preserve">
+    <value>Shipping Address oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ShippingAddressService.DeleteShippingAddressExceptionMessage" xml:space="preserve">
+    <value>Shipping Address silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ShippingAddressService.GetAllShippingAddressesExceptionMessage" xml:space="preserve">
+    <value>Shipping Addressler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ShippingAddressService.GetShippingAddressByIdExceptionMessage" xml:space="preserve">
+    <value>Shipping Address getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ShippingAddressService.GetShippingAddressesByCustomerIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="ShippingAddressService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ShippingAddressService.UpdateShippingAddressExceptionMessage" xml:space="preserve">
+    <value>Shipping Address güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.ShippingAddressService -->
   
@@ -751,6 +961,111 @@
   </data>
   <data name="QuotationService.PendingApprovalEmailSubject" xml:space="preserve">
     <value>Onay Bekleyen Kaydınız Bulunmaktadır</value>
+  </data>
+  <data name="QuotationService.ApprovalActionApproved" xml:space="preserve">
+    <value>Approval Action Approved.</value>
+  </data>
+  <data name="QuotationService.ApprovalActionApprovedAndNextStepStarted" xml:space="preserve">
+    <value>Approval Action Approved And Next Step Started.</value>
+  </data>
+  <data name="QuotationService.ApprovalActionNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApprovalActionRejected" xml:space="preserve">
+    <value>Approval Action Rejected.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowAlreadyExists" xml:space="preserve">
+    <value>Quotation zaten mevcut.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowCompleted" xml:space="preserve">
+    <value>Approval Flow Completed.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowStarted" xml:space="preserve">
+    <value>Approval Flow Started.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowStepsNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApprovalRequestNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApprovalRoleNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApprovalUsersNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.ApproveExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.CreateQuotationBulkExceptionMessage" xml:space="preserve">
+    <value>Quotation oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.CreateQuotationExceptionMessage" xml:space="preserve">
+    <value>Quotation oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.CreateRevisionOfQuotationExceptionMessage" xml:space="preserve">
+    <value>Quotation oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.DeleteQuotationExceptionMessage" xml:space="preserve">
+    <value>Quotation silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.DocumentSerialTypeGenerationError" xml:space="preserve">
+    <value>Document Serial Type Generation Error.</value>
+  </data>
+  <data name="QuotationService.GetAllQuotationsExceptionMessage" xml:space="preserve">
+    <value>Quotationler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetPriceOfProductExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetPriceRuleOfQuotationExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetQuotationByIdExceptionMessage" xml:space="preserve">
+    <value>Quotation getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetQuotationsByPotentialCustomerExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetQuotationsByRepresentativeExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetQuotationsByStatusExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.GetWaitingApprovalsExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="QuotationService.PriceOfProductRetrieved" xml:space="preserve">
+    <value>Quotation başarıyla getirildi.</value>
+  </data>
+  <data name="QuotationService.QuotationExistsExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.QuotationRevisionCreated" xml:space="preserve">
+    <value>Quotation başarıyla oluşturuldu.</value>
+  </data>
+  <data name="QuotationService.RejectExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.StartApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.UpdateQuotationExceptionMessage" xml:space="preserve">
+    <value>Quotation güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationService.UserNotFound" xml:space="preserve">
+    <value>Quotation bulunamadı.</value>
+  </data>
+  <data name="QuotationService.WaitingApprovalsRetrieved" xml:space="preserve">
+    <value>Quotationler başarıyla getirildi.</value>
   </data>
   <!-- #endregion Services.QuotationService -->
   
@@ -790,6 +1105,27 @@
   </data>
   <data name="QuotationLineService.QuotationLinesByQuotationRetrieved" xml:space="preserve">
     <value>Teklife göre teklif satırları başarıyla getirildi.</value>
+  </data>
+  <data name="QuotationLineService.CreateExceptionMessage" xml:space="preserve">
+    <value>Quotation Line oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Quotation Line silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Quotation Lineler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Quotation Line getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.GetByQuotationIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="QuotationLineService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Quotation Line güncellenirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.QuotationLineService -->
   <!-- #region Services.QuotationDocumentTypeService -->
@@ -937,6 +1273,24 @@
   <data name="UserAuthorityService.ErrorCheckingExists" xml:space="preserve">
     <value>Kullanıcı yetkisi varlığı kontrol edilirken bir hata oluştu.</value>
   </data>
+  <data name="UserAuthorityService.CreateExceptionMessage" xml:space="preserve">
+    <value>User Authority oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserAuthorityService.ExistsExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserAuthorityService.GetAllExceptionMessage" xml:space="preserve">
+    <value>User Authorityler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserAuthorityService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>User Authority getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserAuthorityService.SoftDeleteExceptionMessage" xml:space="preserve">
+    <value>User Authority silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserAuthorityService.UpdateExceptionMessage" xml:space="preserve">
+    <value>User Authority güncellenirken bir hata oluştu: {0}</value>
+  </data>
   <!-- #endregion Services.UserAuthorityService -->
   
   <!-- #region Services.FileUploadService -->
@@ -987,6 +1341,48 @@
   </data>
   <data name="UserDetailService.UserDetailRetrievalExceptionMessage" xml:space="preserve">
     <value>Kullanıcı detayı getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDetailService.ProfilePictureUploadError" xml:space="preserve">
+    <value>Profile Picture Upload Error.</value>
+  </data>
+  <data name="UserDetailService.ProfilePictureUploadExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDetailService.ProfilePictureUploadedSuccessfully" xml:space="preserve">
+    <value>Profile Picture Uploaded Successfully.</value>
+  </data>
+  <data name="UserDetailService.UserDetailAlreadyExists" xml:space="preserve">
+    <value>User Detail zaten mevcut.</value>
+  </data>
+  <data name="UserDetailService.UserDetailCreatedSuccessfully" xml:space="preserve">
+    <value>User Detail başarıyla oluşturuldu.</value>
+  </data>
+  <data name="UserDetailService.UserDetailCreationError" xml:space="preserve">
+    <value>User Detail Creation Error.</value>
+  </data>
+  <data name="UserDetailService.UserDetailCreationExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDetailService.UserDetailDeletedSuccessfully" xml:space="preserve">
+    <value>User Detail başarıyla silindi.</value>
+  </data>
+  <data name="UserDetailService.UserDetailDeletionError" xml:space="preserve">
+    <value>User Detail Deletion Error.</value>
+  </data>
+  <data name="UserDetailService.UserDetailDeletionExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDetailService.UserDetailUpdateError" xml:space="preserve">
+    <value>User Detail Update Error.</value>
+  </data>
+  <data name="UserDetailService.UserDetailUpdateExceptionMessage" xml:space="preserve">
+    <value>User Detail güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserDetailService.UserDetailUpdatedSuccessfully" xml:space="preserve">
+    <value>User Detail başarıyla güncellendi.</value>
+  </data>
+  <data name="UserDetailService.UserNotFound" xml:space="preserve">
+    <value>User Detail bulunamadı.</value>
   </data>
   <!-- #endregion Services.UserDetailService -->
   
@@ -1409,4 +1805,339 @@
     <value>Onay kullanıcı rolü silinirken bir hata oluştu: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalUserRoleService -->
+
+  <!-- #region Services.ActivityTypeService -->
+  <data name="ActivityTypeService.ActivityTypeCreated" xml:space="preserve">
+    <value>Activity Type başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ActivityTypeService.ActivityTypeDeleted" xml:space="preserve">
+    <value>Activity Type başarıyla silindi.</value>
+  </data>
+  <data name="ActivityTypeService.ActivityTypeNotFound" xml:space="preserve">
+    <value>Activity Type bulunamadı.</value>
+  </data>
+  <data name="ActivityTypeService.ActivityTypeRetrieved" xml:space="preserve">
+    <value>Activity Type başarıyla getirildi.</value>
+  </data>
+  <data name="ActivityTypeService.ActivityTypeUpdated" xml:space="preserve">
+    <value>Activity Type başarıyla güncellendi.</value>
+  </data>
+  <data name="ActivityTypeService.ActivityTypesRetrieved" xml:space="preserve">
+    <value>Activity Typeler başarıyla getirildi.</value>
+  </data>
+  <data name="ActivityTypeService.CreateActivityTypeExceptionMessage" xml:space="preserve">
+    <value>Activity Type oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityTypeService.DeleteActivityTypeExceptionMessage" xml:space="preserve">
+    <value>Activity Type silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityTypeService.GetActivityTypeByIdExceptionMessage" xml:space="preserve">
+    <value>Activity Type getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityTypeService.GetAllActivityTypesExceptionMessage" xml:space="preserve">
+    <value>Activity Typeler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="ActivityTypeService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="ActivityTypeService.UpdateActivityTypeExceptionMessage" xml:space="preserve">
+    <value>Activity Type güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.ActivityTypeService -->
+
+  <!-- #region Services.DocumentSerialTypeService -->
+  <data name="DocumentSerialTypeService.CreateTypeExceptionMessage" xml:space="preserve">
+    <value>Document Serial Type oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="DocumentSerialTypeService.DeleteTypeExceptionMessage" xml:space="preserve">
+    <value>Document Serial Type silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="DocumentSerialTypeService.DocumentSerialGenerated" xml:space="preserve">
+    <value>Document Serial Generated.</value>
+  </data>
+  <data name="DocumentSerialTypeService.DocumentSerialTypeNotFound" xml:space="preserve">
+    <value>Document Serial Type bulunamadı.</value>
+  </data>
+  <data name="DocumentSerialTypeService.DocumentSerialTypesRetrieved" xml:space="preserve">
+    <value>Document Serial Typeler başarıyla getirildi.</value>
+  </data>
+  <data name="DocumentSerialTypeService.GenerateDocumentSerialExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="DocumentSerialTypeService.GetAllTypesExceptionMessage" xml:space="preserve">
+    <value>Document Serial Typeler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="DocumentSerialTypeService.GetTypeByIdExceptionMessage" xml:space="preserve">
+    <value>Document Serial Type getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="DocumentSerialTypeService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypeCreated" xml:space="preserve">
+    <value>Document Serial Type başarıyla oluşturuldu.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypeDeleted" xml:space="preserve">
+    <value>Document Serial Type başarıyla silindi.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypeNotFound" xml:space="preserve">
+    <value>Document Serial Type bulunamadı.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypeRetrieved" xml:space="preserve">
+    <value>Document Serial Type başarıyla getirildi.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypeUpdated" xml:space="preserve">
+    <value>Document Serial Type başarıyla güncellendi.</value>
+  </data>
+  <data name="DocumentSerialTypeService.TypesRetrieved" xml:space="preserve">
+    <value>Document Serial Typeler başarıyla getirildi.</value>
+  </data>
+  <data name="DocumentSerialTypeService.UpdateTypeExceptionMessage" xml:space="preserve">
+    <value>Document Serial Type güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.DocumentSerialTypeService -->
+
+  <!-- #region Services.JwtService -->
+  <data name="JwtService.MissingSecretKeyExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="JwtService.TokenGeneratedSuccessfully" xml:space="preserve">
+    <value>Token Generated Successfully.</value>
+  </data>
+  <data name="JwtService.TokenGenerationError" xml:space="preserve">
+    <value>Token Generation Error.</value>
+  </data>
+  <data name="JwtService.TokenGenerationExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.JwtService -->
+
+  <!-- #region Services.PricingRuleHeaderService -->
+  <data name="PricingRuleHeaderService.CreateHeaderExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Header oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleHeaderService.DeleteHeaderExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Header silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleHeaderService.GetAllHeadersExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Headerler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleHeaderService.GetHeaderByIdExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Header getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeaderCreated" xml:space="preserve">
+    <value>Pricing Rule Header başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeaderDeleted" xml:space="preserve">
+    <value>Pricing Rule Header başarıyla silindi.</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeaderNotFound" xml:space="preserve">
+    <value>Pricing Rule Header bulunamadı.</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeaderRetrieved" xml:space="preserve">
+    <value>Pricing Rule Header başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeaderUpdated" xml:space="preserve">
+    <value>Pricing Rule Header başarıyla güncellendi.</value>
+  </data>
+  <data name="PricingRuleHeaderService.HeadersRetrieved" xml:space="preserve">
+    <value>Pricing Rule Headerler başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleHeaderService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PricingRuleHeaderService.UpdateHeaderExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Header güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.PricingRuleHeaderService -->
+
+  <!-- #region Services.PricingRuleLineService -->
+  <data name="PricingRuleLineService.CreateLineExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Line oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleLineService.DeleteLineExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Line silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleLineService.GetAllLinesExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Lineler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleLineService.GetLineByIdExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Line getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleLineService.GetLinesByHeaderIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleLineService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PricingRuleLineService.LineCreated" xml:space="preserve">
+    <value>Pricing Rule Line başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PricingRuleLineService.LineDeleted" xml:space="preserve">
+    <value>Pricing Rule Line başarıyla silindi.</value>
+  </data>
+  <data name="PricingRuleLineService.LineNotFound" xml:space="preserve">
+    <value>Pricing Rule Line bulunamadı.</value>
+  </data>
+  <data name="PricingRuleLineService.LineRetrieved" xml:space="preserve">
+    <value>Pricing Rule Line başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleLineService.LineUpdated" xml:space="preserve">
+    <value>Pricing Rule Line başarıyla güncellendi.</value>
+  </data>
+  <data name="PricingRuleLineService.LinesRetrieved" xml:space="preserve">
+    <value>Pricing Rule Lineler başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleLineService.UpdateLineExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Line güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.PricingRuleLineService -->
+
+  <!-- #region Services.PricingRuleSalesmanService -->
+  <data name="PricingRuleSalesmanService.CreateSalesmanExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Salesman oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleSalesmanService.DeleteSalesmanExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Salesman silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleSalesmanService.GetAllSalesmenExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Salesmanler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleSalesmanService.GetSalesmanByIdExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Salesman getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleSalesmanService.GetSalesmenByHeaderIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="PricingRuleSalesmanService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmanCreated" xml:space="preserve">
+    <value>Pricing Rule Salesman başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmanDeleted" xml:space="preserve">
+    <value>Pricing Rule Salesman başarıyla silindi.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmanNotFound" xml:space="preserve">
+    <value>Pricing Rule Salesman bulunamadı.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmanRetrieved" xml:space="preserve">
+    <value>Pricing Rule Salesman başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmanUpdated" xml:space="preserve">
+    <value>Pricing Rule Salesman başarıyla güncellendi.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.SalesmenRetrieved" xml:space="preserve">
+    <value>Pricing Rule Salesman başarıyla getirildi.</value>
+  </data>
+  <data name="PricingRuleSalesmanService.UpdateSalesmanExceptionMessage" xml:space="preserve">
+    <value>Pricing Rule Salesman güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.PricingRuleSalesmanService -->
+
+  <!-- #region Services.QuotationExchangeRateService -->
+  <data name="QuotationExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
+    <value>Quotation Exchange Rate oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.DeleteRateExceptionMessage" xml:space="preserve">
+    <value>Quotation Exchange Rate silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.GetAllRatesExceptionMessage" xml:space="preserve">
+    <value>Quotation Exchange Rateler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.GetRateByIdExceptionMessage" xml:space="preserve">
+    <value>Quotation Exchange Rate getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.GetRatesByQuotationIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RateCreated" xml:space="preserve">
+    <value>Quotation Exchange Rate başarıyla oluşturuldu.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RateDeleted" xml:space="preserve">
+    <value>Quotation Exchange Rate başarıyla silindi.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RateNotFound" xml:space="preserve">
+    <value>Quotation Exchange Rate bulunamadı.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RateRetrieved" xml:space="preserve">
+    <value>Quotation Exchange Rate başarıyla getirildi.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RateUpdated" xml:space="preserve">
+    <value>Quotation Exchange Rate başarıyla güncellendi.</value>
+  </data>
+  <data name="QuotationExchangeRateService.RatesRetrieved" xml:space="preserve">
+    <value>Quotation Exchange Rateler başarıyla getirildi.</value>
+  </data>
+  <data name="QuotationExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
+    <value>Quotation Exchange Rate güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.QuotationExchangeRateService -->
+
+  <!-- #region Services.StockDetailService -->
+  <data name="StockDetailService.CreateStockDetailExceptionMessage" xml:space="preserve">
+    <value>Stock Detail oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="StockDetailService.DeleteStockDetailExceptionMessage" xml:space="preserve">
+    <value>Stock Detail silinirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="StockDetailService.GetAllStockDetailsExceptionMessage" xml:space="preserve">
+    <value>Stock Detailler getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="StockDetailService.GetStockDetailByIdExceptionMessage" xml:space="preserve">
+    <value>Stock Detail getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="StockDetailService.GetStockDetailByStockIdExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="StockDetailService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="StockDetailService.StockDetailAlreadyExists" xml:space="preserve">
+    <value>Stock Detail zaten mevcut.</value>
+  </data>
+  <data name="StockDetailService.StockDetailCreated" xml:space="preserve">
+    <value>Stock Detail başarıyla oluşturuldu.</value>
+  </data>
+  <data name="StockDetailService.StockDetailDeleted" xml:space="preserve">
+    <value>Stock Detail başarıyla silindi.</value>
+  </data>
+  <data name="StockDetailService.StockDetailNotFound" xml:space="preserve">
+    <value>Stock Detail bulunamadı.</value>
+  </data>
+  <data name="StockDetailService.StockDetailRetrieved" xml:space="preserve">
+    <value>Stock Detail başarıyla getirildi.</value>
+  </data>
+  <data name="StockDetailService.StockDetailUpdated" xml:space="preserve">
+    <value>Stock Detail başarıyla güncellendi.</value>
+  </data>
+  <data name="StockDetailService.StockDetailsRetrieved" xml:space="preserve">
+    <value>Stock Detailler başarıyla getirildi.</value>
+  </data>
+  <data name="StockDetailService.StockNotFound" xml:space="preserve">
+    <value>Stock Detail bulunamadı.</value>
+  </data>
+  <data name="StockDetailService.UpdateStockDetailExceptionMessage" xml:space="preserve">
+    <value>Stock Detail güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <!-- #endregion Services.StockDetailService -->
+
+  <!-- Missing General Keys -->
+  <data name="QuotationNotFound" xml:space="preserve">
+    <value>Teklif bulunamadı.</value>
+  </data>
+  <data name="UserDiscountLimitRetrieved" xml:space="preserve">
+    <value>Kullanıcı indirim limiti getirildi.</value>
+  </data>
+  <data name="OperationSuccessful" xml:space="preserve">
+    <value>İşlem başarılı.</value>
+  </data>
+  <data name="ValidationError" xml:space="preserve">
+    <value>Doğrulama hatası.</value>
+  </data>
+  <data name="PasswordResetEmailSubject" xml:space="preserve">
+    <value>Şifre Sıfırlama.</value>
+  </data>
 </root>

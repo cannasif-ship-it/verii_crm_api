@@ -61,641 +61,641 @@
   
   <!-- #region Services.AuthService -->
   <data name="AuthService.InvalidCredentials" xml:space="preserve">
-    <value>Invalid email or password.</value>
+    <value>Ungültige E-Mail oder Passwort.</value>
   </data>
   <data name="AuthService.LoginSuccessful" xml:space="preserve">
-    <value>Login successful.</value>
+    <value>Anmeldung erfolgreich.</value>
   </data>
   <data name="AuthService.UserRegistered" xml:space="preserve">
-    <value>User registered successfully.</value>
+    <value>Benutzer erfolgreich registriert.</value>
   </data>
   <data name="AuthService.EmailAlreadyExists" xml:space="preserve">
-    <value>Email already exists.</value>
+    <value>E-Mail existiert bereits.</value>
   </data>
   <data name="AuthService.UsernameAlreadyExists" xml:space="preserve">
-    <value>Username already exists.</value>
+    <value>Benutzername existiert bereits.</value>
   </data>
   <data name="AuthService.AdminUserNotFound" xml:space="preserve">
-    <value>Admin user not found.</value>
+    <value>Admin-Benutzer nicht gefunden.</value>
   </data>
   <data name="AuthService.AdminLoginSuccessful" xml:space="preserve">
-    <value>Admin login successful.</value>
+    <value>Admin-Anmeldung erfolgreich.</value>
   </data>
   <data name="AuthService.AdminLoginFailed" xml:space="preserve">
-    <value>Admin login failed.</value>
+    <value>Admin-Anmeldung fehlgeschlagen.</value>
   </data>
   <data name="AuthService.UserIdNotFound" xml:space="preserve">
-    <value>User ID not found.</value>
+    <value>Benutzer ID nicht gefunden.</value>
   </data>
   <data name="AuthService.GetProfileFailed" xml:space="preserve">
-    <value>Failed to get profile.</value>
+    <value>Fehler beim Abrufen des Profils.</value>
   </data>
   <data name="AuthService.UserRegisteredSuccessfully" xml:space="preserve">
-    <value>User registered successfully.</value>
+    <value>Benutzer erfolgreich registriert.</value>
   </data>
   <data name="AuthService.RegistrationFailed" xml:space="preserve">
-    <value>Registration failed.</value>
+    <value>Registrierung fehlgeschlagen.</value>
   </data>
   <data name="AuthService.LoginFailed" xml:space="preserve">
-    <value>Login failed.</value>
+    <value>Anmeldung fehlgeschlagen.</value>
   </data>
   <!-- #endregion Services.AuthService -->
   
   <!-- General Messages -->
   <data name="General.OperationSuccessful" xml:space="preserve">
-    <value>Operation successful.</value>
+    <value>Operation erfolgreich.</value>
   </data>
   
   <!-- #region Services.UserService -->
   <data name="UserService.UserNotFound" xml:space="preserve">
-    <value>User not found.</value>
+    <value>Benutzer nicht gefunden.</value>
   </data>
   <data name="UserService.UserCreated" xml:space="preserve">
-    <value>User created successfully.</value>
+    <value>Benutzer erfolgreich erstellt.</value>
   </data>
   <data name="UserService.UserUpdated" xml:space="preserve">
-    <value>User updated successfully.</value>
+    <value>Benutzer erfolgreich aktualisiert.</value>
   </data>
   <data name="UserService.UserDeleted" xml:space="preserve">
-    <value>User deleted successfully.</value>
+    <value>Benutzer erfolgreich gelöscht.</value>
   </data>
   <data name="UserService.UserRetrieved" xml:space="preserve">
-    <value>User retrieved successfully.</value>
+    <value>Benutzer erfolgreich abgerufen.</value>
   </data>
   <data name="UserService.UsersRetrieved" xml:space="preserve">
-    <value>Users retrieved successfully.</value>
+    <value>Benutzer erfolgreich abgerufen.</value>
   </data>
   <!-- #endregion Services.UserService -->
   
   <!-- General Messages -->
   <data name="General.OperationSuccessful" xml:space="preserve">
-    <value>Operation successful.</value>
+    <value>Operation erfolgreich.</value>
   </data>
   <data name="General.ValidationError" xml:space="preserve">
-    <value>Validation error occurred.</value>
+    <value>Validierungsfehler aufgetreten.</value>
   </data>
   <data name="General.InternalServerError" xml:space="preserve">
-    <value>An internal server error occurred.</value>
+    <value>Ein interner Serverfehler ist aufgetreten.</value>
   </data>
   <data name="General.Unauthorized" xml:space="preserve">
-    <value>Unauthorized access.</value>
+    <value>Unbefugter Zugriff.</value>
   </data>
   <data name="General.Forbidden" xml:space="preserve">
-    <value>Access forbidden.</value>
+    <value>Zugriff verweigert.</value>
   </data>
   <data name="General.AccountInactive" xml:space="preserve">
-    <value>Your account is not active.</value>
+    <value>Ihr Konto ist nicht aktiv.</value>
   </data>
   
   <!-- #region Services.CityService -->
   <data name="CityService.CitiesRetrieved" xml:space="preserve">
-    <value>Cities retrieved successfully.</value>
+    <value>Städte erfolgreich abgerufen.</value>
   </data>
   <data name="CityService.CityNotFound" xml:space="preserve">
-    <value>City not found.</value>
+    <value>Stadt nicht gefunden.</value>
   </data>
   <data name="CityService.CityRetrieved" xml:space="preserve">
-    <value>City retrieved successfully.</value>
+    <value>Stadt erfolgreich abgerufen.</value>
   </data>
   <data name="CityService.CityCreated" xml:space="preserve">
-    <value>City created successfully.</value>
+    <value>Stadt erfolgreich erstellt.</value>
   </data>
   <data name="CityService.CityUpdated" xml:space="preserve">
-    <value>City updated successfully.</value>
+    <value>Stadt erfolgreich aktualisiert.</value>
   </data>
   <data name="CityService.CityDeleted" xml:space="preserve">
-    <value>City deleted successfully.</value>
+    <value>Stadt erfolgreich gelöscht.</value>
   </data>
   <data name="CityService.ErrorRetrievingCities" xml:space="preserve">
-    <value>An error occurred while retrieving cities.</value>
+    <value>Fehler beim Abrufen von cities.</value>
   </data>
   <data name="CityService.ErrorRetrievingCity" xml:space="preserve">
-    <value>An error occurred while retrieving the city.</value>
+    <value>Fehler beim Abrufen von the city.</value>
   </data>
   <data name="CityService.ErrorCreatingCity" xml:space="preserve">
-    <value>An error occurred while creating the city.</value>
+    <value>Fehler beim Erstellen von the city.</value>
   </data>
   <data name="CityService.ErrorUpdatingCity" xml:space="preserve">
-    <value>An error occurred while updating the city.</value>
+    <value>Fehler beim Aktualisieren von the city.</value>
   </data>
   <data name="CityService.ErrorDeletingCity" xml:space="preserve">
-    <value>An error occurred while deleting the city.</value>
+    <value>Fehler beim Löschen von the city.</value>
   </data>
   <data name="CityService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="CityService.GetAllCitiesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving cities: {0}</value>
+    <value>Fehler beim Abrufen von cities: {0}</value>
   </data>
   <data name="CityService.GetCityByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the city: {0}</value>
+    <value>Fehler beim Abrufen von the city: {0}</value>
   </data>
   <data name="CityService.CreateCityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the city: {0}</value>
+    <value>Fehler beim Erstellen von the city: {0}</value>
   </data>
   <data name="CityService.UpdateCityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the city: {0}</value>
+    <value>Fehler beim Aktualisieren von the city: {0}</value>
   </data>
   <data name="CityService.DeleteCityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the city: {0}</value>
+    <value>Fehler beim Löschen von the city: {0}</value>
   </data>
   <!-- #endregion Services.CityService -->
   
   <!-- #region Controllers.CityController -->
   <data name="CityController.InvalidModelState" xml:space="preserve">
-    <value>Invalid model state.</value>
+    <value>Ungültiger Modellstatus.</value>
   </data>
   <data name="CityController.InvalidModelStateExceptionMessage" xml:space="preserve">
-    <value>Model validation error: {0}</value>
+    <value>Modellvalidierungsfehler: {0}</value>
   </data>
   <!-- #endregion Controllers.CityController -->
   
   <!-- #region Services.CountryService -->
   <data name="CountryService.CountriesRetrieved" xml:space="preserve">
-    <value>Countries retrieved successfully.</value>
+    <value>Länder erfolgreich abgerufen.</value>
   </data>
   <data name="CountryService.CountryNotFound" xml:space="preserve">
-    <value>Country not found.</value>
+    <value>Land nicht gefunden.</value>
   </data>
   <data name="CountryService.CountryRetrieved" xml:space="preserve">
-    <value>Country retrieved successfully.</value>
+    <value>Land erfolgreich abgerufen.</value>
   </data>
   <data name="CountryService.CountryCreated" xml:space="preserve">
-    <value>Country created successfully.</value>
+    <value>Land erfolgreich erstellt.</value>
   </data>
   <data name="CountryService.CountryUpdated" xml:space="preserve">
-    <value>Country updated successfully.</value>
+    <value>Land erfolgreich aktualisiert.</value>
   </data>
   <data name="CountryService.CountryDeleted" xml:space="preserve">
-    <value>Country deleted successfully.</value>
+    <value>Land erfolgreich gelöscht.</value>
   </data>
   <data name="CountryService.ErrorRetrievingCountries" xml:space="preserve">
-    <value>An error occurred while retrieving countries.</value>
+    <value>Fehler beim Abrufen von countries.</value>
   </data>
   <data name="CountryService.ErrorRetrievingCountry" xml:space="preserve">
-    <value>An error occurred while retrieving the country.</value>
+    <value>Fehler beim Abrufen von the country.</value>
   </data>
   <data name="CountryService.ErrorCreatingCountry" xml:space="preserve">
-    <value>An error occurred while creating the country.</value>
+    <value>Fehler beim Erstellen von the country.</value>
   </data>
   <data name="CountryService.ErrorUpdatingCountry" xml:space="preserve">
-    <value>An error occurred while updating the country.</value>
+    <value>Fehler beim Aktualisieren von the country.</value>
   </data>
   <data name="CountryService.ErrorDeletingCountry" xml:space="preserve">
-    <value>An error occurred while deleting the country.</value>
+    <value>Fehler beim Löschen von the country.</value>
   </data>
   <data name="CountryService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="CountryService.GetAllCountriesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving countries: {0}</value>
+    <value>Fehler beim Abrufen von countries: {0}</value>
   </data>
   <data name="CountryService.GetCountryByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the country: {0}</value>
+    <value>Fehler beim Abrufen von the country: {0}</value>
   </data>
   <data name="CountryService.CreateCountryExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the country: {0}</value>
+    <value>Fehler beim Erstellen von the country: {0}</value>
   </data>
   <data name="CountryService.UpdateCountryExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the country: {0}</value>
+    <value>Fehler beim Aktualisieren von the country: {0}</value>
   </data>
   <data name="CountryService.DeleteCountryExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the country: {0}</value>
+    <value>Fehler beim Löschen von the country: {0}</value>
   </data>
   <!-- #endregion Services.CountryService -->
   
   <!-- #region Controllers.CountryController -->
   <data name="CountryController.InvalidModelState" xml:space="preserve">
-    <value>Invalid model state.</value>
+    <value>Ungültiger Modellstatus.</value>
   </data>
   <data name="CountryController.InvalidModelStateExceptionMessage" xml:space="preserve">
-    <value>Model validation error: {0}</value>
+    <value>Modellvalidierungsfehler: {0}</value>
   </data>
   <!-- #endregion Controllers.CountryController -->
   
   <!-- #region Services.DistrictService -->
   <data name="DistrictService.DistrictsRetrieved" xml:space="preserve">
-    <value>Districts retrieved successfully.</value>
+    <value>Bezirke erfolgreich abgerufen.</value>
   </data>
   <data name="DistrictService.DistrictNotFound" xml:space="preserve">
-    <value>District not found.</value>
+    <value>Bezirk nicht gefunden.</value>
   </data>
   <data name="DistrictService.DistrictRetrieved" xml:space="preserve">
-    <value>District retrieved successfully.</value>
+    <value>Bezirk erfolgreich abgerufen.</value>
   </data>
   <data name="DistrictService.DistrictCreated" xml:space="preserve">
-    <value>District created successfully.</value>
+    <value>Bezirk erfolgreich erstellt.</value>
   </data>
   <data name="DistrictService.DistrictUpdated" xml:space="preserve">
-    <value>District updated successfully.</value>
+    <value>Bezirk erfolgreich aktualisiert.</value>
   </data>
   <data name="DistrictService.DistrictDeleted" xml:space="preserve">
-    <value>District deleted successfully.</value>
+    <value>Bezirk erfolgreich gelöscht.</value>
   </data>
   <data name="DistrictService.ErrorRetrievingDistricts" xml:space="preserve">
-    <value>An error occurred while retrieving districts.</value>
+    <value>Fehler beim Abrufen von districts.</value>
   </data>
   <data name="DistrictService.ErrorRetrievingDistrict" xml:space="preserve">
-    <value>An error occurred while retrieving the district.</value>
+    <value>Fehler beim Abrufen von the district.</value>
   </data>
   <data name="DistrictService.ErrorCreatingDistrict" xml:space="preserve">
-    <value>An error occurred while creating the district.</value>
+    <value>Fehler beim Erstellen von the district.</value>
   </data>
   <data name="DistrictService.ErrorUpdatingDistrict" xml:space="preserve">
-    <value>An error occurred while updating the district.</value>
+    <value>Fehler beim Aktualisieren von the district.</value>
   </data>
   <data name="DistrictService.ErrorDeletingDistrict" xml:space="preserve">
-    <value>An error occurred while deleting the district.</value>
+    <value>Fehler beim Löschen von the district.</value>
   </data>
   <data name="DistrictService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="DistrictService.GetAllDistrictsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving districts: {0}</value>
+    <value>Fehler beim Abrufen von districts: {0}</value>
   </data>
   <data name="DistrictService.GetDistrictByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the district: {0}</value>
+    <value>Fehler beim Abrufen von the district: {0}</value>
   </data>
   <data name="DistrictService.CreateDistrictExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the district: {0}</value>
+    <value>Fehler beim Erstellen von the district: {0}</value>
   </data>
   <data name="DistrictService.UpdateDistrictExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the district: {0}</value>
+    <value>Fehler beim Aktualisieren von the district: {0}</value>
   </data>
   <data name="DistrictService.DeleteDistrictExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the district: {0}</value>
+    <value>Fehler beim Löschen von the district: {0}</value>
   </data>
   <!-- #endregion Services.DistrictService -->
   
   <!-- #region Controllers.DistrictController -->
   <data name="DistrictController.InvalidModelState" xml:space="preserve">
-    <value>Invalid model state.</value>
+    <value>Ungültiger Modellstatus.</value>
   </data>
   <data name="DistrictController.InvalidModelStateExceptionMessage" xml:space="preserve">
-    <value>Model validation error: {0}</value>
+    <value>Modellvalidierungsfehler: {0}</value>
   </data>
   <!-- #endregion Controllers.DistrictController -->
   
   <!-- #region Services.TitleService -->
   <data name="TitleService.TitlesRetrieved" xml:space="preserve">
-    <value>Titles retrieved successfully.</value>
+    <value>Titles erfolgreich abgerufen.</value>
   </data>
   <data name="TitleService.TitleNotFound" xml:space="preserve">
-    <value>Title not found.</value>
+    <value>Title nicht gefunden.</value>
   </data>
   <data name="TitleService.TitleRetrieved" xml:space="preserve">
-    <value>Title retrieved successfully.</value>
+    <value>Title erfolgreich abgerufen.</value>
   </data>
   <data name="TitleService.TitleCreated" xml:space="preserve">
-    <value>Title created successfully.</value>
+    <value>Title erfolgreich erstellt.</value>
   </data>
   <data name="TitleService.TitleUpdated" xml:space="preserve">
-    <value>Title updated successfully.</value>
+    <value>Title erfolgreich aktualisiert.</value>
   </data>
   <data name="TitleService.TitleDeleted" xml:space="preserve">
-    <value>Title deleted successfully.</value>
+    <value>Title erfolgreich gelöscht.</value>
   </data>
   <data name="TitleService.ErrorRetrievingTitles" xml:space="preserve">
-    <value>An error occurred while retrieving titles.</value>
+    <value>Fehler beim Abrufen von titles.</value>
   </data>
   <data name="TitleService.ErrorRetrievingTitle" xml:space="preserve">
-    <value>An error occurred while retrieving the title.</value>
+    <value>Fehler beim Abrufen von the title.</value>
   </data>
   <data name="TitleService.ErrorCreatingTitle" xml:space="preserve">
-    <value>An error occurred while creating the title.</value>
+    <value>Fehler beim Erstellen von the title.</value>
   </data>
   <data name="TitleService.ErrorUpdatingTitle" xml:space="preserve">
-    <value>An error occurred while updating the title.</value>
+    <value>Fehler beim Aktualisieren von the title.</value>
   </data>
   <data name="TitleService.ErrorDeletingTitle" xml:space="preserve">
-    <value>An error occurred while deleting the title.</value>
+    <value>Fehler beim Löschen von the title.</value>
   </data>
   <data name="TitleService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="TitleService.GetAllTitlesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving titles: {0}</value>
+    <value>Fehler beim Abrufen von titles: {0}</value>
   </data>
   <data name="TitleService.GetTitleByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the title: {0}</value>
+    <value>Fehler beim Abrufen von the title: {0}</value>
   </data>
   <data name="TitleService.CreateTitleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the title: {0}</value>
+    <value>Fehler beim Erstellen von the title: {0}</value>
   </data>
   <data name="TitleService.UpdateTitleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the title: {0}</value>
+    <value>Fehler beim Aktualisieren von the title: {0}</value>
   </data>
   <data name="TitleService.DeleteTitleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the title: {0}</value>
+    <value>Fehler beim Löschen von the title: {0}</value>
   </data>
   <!-- #endregion Services.TitleService -->
   
   <!-- #region Controllers.TitleController -->
   <data name="TitleController.InvalidModelState" xml:space="preserve">
-    <value>Invalid model state.</value>
+    <value>Ungültiger Modellstatus.</value>
   </data>
   <data name="TitleController.InvalidModelStateExceptionMessage" xml:space="preserve">
-    <value>Model validation error: {0}</value>
+    <value>Modellvalidierungsfehler: {0}</value>
   </data>
   <!-- #endregion Controllers.TitleController -->
   
   <!-- #region Services.CustomerService -->
   <data name="CustomerService.CustomersRetrieved" xml:space="preserve">
-    <value>Customers retrieved successfully.</value>
+    <value>Kunden erfolgreich abgerufen.</value>
   </data>
   <data name="CustomerService.CustomerNotFound" xml:space="preserve">
-    <value>Customer not found.</value>
+    <value>Kunde nicht gefunden.</value>
   </data>
   <data name="CustomerService.CustomerRetrieved" xml:space="preserve">
-    <value>Customer retrieved successfully.</value>
+    <value>Kunde erfolgreich abgerufen.</value>
   </data>
   <data name="CustomerService.CustomerCreated" xml:space="preserve">
-    <value>Customer created successfully.</value>
+    <value>Kunde erfolgreich erstellt.</value>
   </data>
   <data name="CustomerService.CustomerUpdated" xml:space="preserve">
-    <value>Customer updated successfully.</value>
+    <value>Kunde erfolgreich aktualisiert.</value>
   </data>
   <data name="CustomerService.CustomerDeleted" xml:space="preserve">
-    <value>Customer deleted successfully.</value>
+    <value>Kunde erfolgreich gelöscht.</value>
   </data>
   <data name="CustomerService.ErrorRetrievingCustomers" xml:space="preserve">
-    <value>An error occurred while retrieving customers.</value>
+    <value>Fehler beim Abrufen von customers.</value>
   </data>
   <data name="CustomerService.ErrorRetrievingCustomer" xml:space="preserve">
-    <value>An error occurred while retrieving the customer.</value>
+    <value>Fehler beim Abrufen von the customer.</value>
   </data>
   <data name="CustomerService.ErrorCreatingCustomer" xml:space="preserve">
-    <value>An error occurred while creating the customer.</value>
+    <value>Fehler beim Erstellen von the customer.</value>
   </data>
   <data name="CustomerService.ErrorUpdatingCustomer" xml:space="preserve">
-    <value>An error occurred while updating the customer.</value>
+    <value>Fehler beim Aktualisieren von the customer.</value>
   </data>
   <data name="CustomerService.ErrorDeletingCustomer" xml:space="preserve">
-    <value>An error occurred while deleting the customer.</value>
+    <value>Fehler beim Löschen von the customer.</value>
   </data>
   <data name="CustomerService.CreateCustomerExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Customer: {0}</value>
+    <value>Fehler beim Erstellen von the Kunde: {0}</value>
   </data>
   <data name="CustomerService.DeleteCustomerExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Customer: {0}</value>
+    <value>Fehler beim Löschen von the Kunde: {0}</value>
   </data>
   <data name="CustomerService.GetAllCustomersExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Customers: {0}</value>
+    <value>Fehler beim Abrufen von Kunden: {0}</value>
   </data>
   <data name="CustomerService.GetCustomerByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Customer: {0}</value>
+    <value>Fehler beim Abrufen von the Kunde: {0}</value>
   </data>
   <data name="CustomerService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="CustomerService.UpdateCustomerExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Customer: {0}</value>
+    <value>Fehler beim Aktualisieren von the Kunde: {0}</value>
   </data>
   <!-- #endregion Services.CustomerService -->
   
   <!-- #region Services.CustomerTypeService -->
   <data name="CustomerTypeService.CustomerTypesRetrieved" xml:space="preserve">
-    <value>Customer types retrieved successfully.</value>
+    <value>Kunde types erfolgreich abgerufen.</value>
   </data>
   <data name="CustomerTypeService.CustomerTypeNotFound" xml:space="preserve">
-    <value>Customer type not found.</value>
+    <value>Kunde type nicht gefunden.</value>
   </data>
   <data name="CustomerTypeService.CustomerTypeRetrieved" xml:space="preserve">
-    <value>Customer type retrieved successfully.</value>
+    <value>Kunde type erfolgreich abgerufen.</value>
   </data>
   <data name="CustomerTypeService.CustomerTypeCreated" xml:space="preserve">
-    <value>Customer type created successfully.</value>
+    <value>Kunde type erfolgreich erstellt.</value>
   </data>
   <data name="CustomerTypeService.CustomerTypeUpdated" xml:space="preserve">
-    <value>Customer type updated successfully.</value>
+    <value>Kunde type erfolgreich aktualisiert.</value>
   </data>
   <data name="CustomerTypeService.CustomerTypeDeleted" xml:space="preserve">
-    <value>Customer type deleted successfully.</value>
+    <value>Kunde type erfolgreich gelöscht.</value>
   </data>
   <data name="CustomerTypeService.ErrorRetrievingCustomerTypes" xml:space="preserve">
-    <value>An error occurred while retrieving customer types.</value>
+    <value>Fehler beim Abrufen von customer types.</value>
   </data>
   <data name="CustomerTypeService.ErrorRetrievingCustomerType" xml:space="preserve">
-    <value>An error occurred while retrieving the customer type.</value>
+    <value>Fehler beim Abrufen von the customer type.</value>
   </data>
   <data name="CustomerTypeService.ErrorCreatingCustomerType" xml:space="preserve">
-    <value>An error occurred while creating the customer type.</value>
+    <value>Fehler beim Erstellen von the customer type.</value>
   </data>
   <data name="CustomerTypeService.ErrorUpdatingCustomerType" xml:space="preserve">
-    <value>An error occurred while updating the customer type.</value>
+    <value>Fehler beim Aktualisieren von the customer type.</value>
   </data>
   <data name="CustomerTypeService.ErrorDeletingCustomerType" xml:space="preserve">
-    <value>An error occurred while deleting the customer type.</value>
+    <value>Fehler beim Löschen von the customer type.</value>
   </data>
   <data name="CustomerTypeService.CreateCustomerTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Customer Type: {0}</value>
+    <value>Fehler beim Erstellen von the Kunde Typ: {0}</value>
   </data>
   <data name="CustomerTypeService.DeleteCustomerTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Customer Type: {0}</value>
+    <value>Fehler beim Löschen von the Kunde Typ: {0}</value>
   </data>
   <data name="CustomerTypeService.GetAllCustomerTypesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Customer Types: {0}</value>
+    <value>Fehler beim Abrufen von Kunde Types: {0}</value>
   </data>
   <data name="CustomerTypeService.GetCustomerTypeByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Customer Type: {0}</value>
+    <value>Fehler beim Abrufen von the Kunde Typ: {0}</value>
   </data>
   <data name="CustomerTypeService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="CustomerTypeService.UpdateCustomerTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Customer Type: {0}</value>
+    <value>Fehler beim Aktualisieren von the Kunde Typ: {0}</value>
   </data>
   <!-- #endregion Services.CustomerTypeService -->
   
   <!-- #region Services.ContactService -->
   <data name="ContactService.ContactsRetrieved" xml:space="preserve">
-    <value>Contacts retrieved successfully.</value>
+    <value>Kontakte erfolgreich abgerufen.</value>
   </data>
   <data name="ContactService.ContactNotFound" xml:space="preserve">
-    <value>Contact not found.</value>
+    <value>Kontakt nicht gefunden.</value>
   </data>
   <data name="ContactService.ContactRetrieved" xml:space="preserve">
-    <value>Contact retrieved successfully.</value>
+    <value>Kontakt erfolgreich abgerufen.</value>
   </data>
   <data name="ContactService.ContactCreated" xml:space="preserve">
-    <value>Contact created successfully.</value>
+    <value>Kontakt erfolgreich erstellt.</value>
   </data>
   <data name="ContactService.ContactUpdated" xml:space="preserve">
-    <value>Contact updated successfully.</value>
+    <value>Kontakt erfolgreich aktualisiert.</value>
   </data>
   <data name="ContactService.ContactDeleted" xml:space="preserve">
-    <value>Contact deleted successfully.</value>
+    <value>Kontakt erfolgreich gelöscht.</value>
   </data>
   <data name="ContactService.ErrorRetrievingContacts" xml:space="preserve">
-    <value>An error occurred while retrieving contacts.</value>
+    <value>Fehler beim Abrufen von contacts.</value>
   </data>
   <data name="ContactService.ErrorRetrievingContact" xml:space="preserve">
-    <value>An error occurred while retrieving the contact.</value>
+    <value>Fehler beim Abrufen von the contact.</value>
   </data>
   <data name="ContactService.ErrorCreatingContact" xml:space="preserve">
-    <value>An error occurred while creating the contact.</value>
+    <value>Fehler beim Erstellen von the contact.</value>
   </data>
   <data name="ContactService.ErrorUpdatingContact" xml:space="preserve">
-    <value>An error occurred while updating the contact.</value>
+    <value>Fehler beim Aktualisieren von the contact.</value>
   </data>
   <data name="ContactService.ErrorDeletingContact" xml:space="preserve">
-    <value>An error occurred while deleting the contact.</value>
+    <value>Fehler beim Löschen von the contact.</value>
   </data>
   <data name="ContactService.CreateContactExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Contact: {0}</value>
+    <value>Fehler beim Erstellen von the Kontakt: {0}</value>
   </data>
   <data name="ContactService.DeleteContactExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Contact: {0}</value>
+    <value>Fehler beim Löschen von the Kontakt: {0}</value>
   </data>
   <data name="ContactService.GetAllContactsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Contacts: {0}</value>
+    <value>Fehler beim Abrufen von Kontakte: {0}</value>
   </data>
   <data name="ContactService.GetContactByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Contact: {0}</value>
+    <value>Fehler beim Abrufen von the Kontakt: {0}</value>
   </data>
   <data name="ContactService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ContactService.UpdateContactExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Contact: {0}</value>
+    <value>Fehler beim Aktualisieren von the Kontakt: {0}</value>
   </data>
   <!-- #endregion Services.ContactService -->
   
   <!-- #region Services.ActivityService -->
   <data name="ActivityService.ActivitiesRetrieved" xml:space="preserve">
-    <value>Activities retrieved successfully.</value>
+    <value>Aktivitäten erfolgreich abgerufen.</value>
   </data>
   <data name="ActivityService.ActivityNotFound" xml:space="preserve">
-    <value>Activity not found.</value>
+    <value>Aktivität nicht gefunden.</value>
   </data>
   <data name="ActivityService.ActivityRetrieved" xml:space="preserve">
-    <value>Activity retrieved successfully.</value>
+    <value>Aktivität erfolgreich abgerufen.</value>
   </data>
   <data name="ActivityService.ActivityCreated" xml:space="preserve">
-    <value>Activity created successfully.</value>
+    <value>Aktivität erfolgreich erstellt.</value>
   </data>
   <data name="ActivityService.ActivityUpdated" xml:space="preserve">
-    <value>Activity updated successfully.</value>
+    <value>Aktivität erfolgreich aktualisiert.</value>
   </data>
   <data name="ActivityService.ActivityDeleted" xml:space="preserve">
-    <value>Activity deleted successfully.</value>
+    <value>Aktivität erfolgreich gelöscht.</value>
   </data>
   <data name="ActivityService.CreateActivityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Activity: {0}</value>
+    <value>Fehler beim Erstellen von the Aktivität: {0}</value>
   </data>
   <data name="ActivityService.DeleteActivityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Activity: {0}</value>
+    <value>Fehler beim Löschen von the Aktivität: {0}</value>
   </data>
   <data name="ActivityService.GetActivityByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Activity: {0}</value>
+    <value>Fehler beim Abrufen von the Aktivität: {0}</value>
   </data>
   <data name="ActivityService.GetAllActivitiesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Activitys: {0}</value>
+    <value>Fehler beim Abrufen von Activitys: {0}</value>
   </data>
   <data name="ActivityService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ActivityService.UpdateActivityExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Activity: {0}</value>
+    <value>Fehler beim Aktualisieren von the Aktivität: {0}</value>
   </data>
   <!-- #endregion Services.ActivityService -->
   
   <!-- #region Services.ProductPricingService -->
   <data name="ProductPricingService.ProductPricingsRetrieved" xml:space="preserve">
-    <value>Product pricings retrieved successfully.</value>
+    <value>Produkt pricings erfolgreich abgerufen.</value>
   </data>
   <data name="ProductPricingService.ProductPricingNotFound" xml:space="preserve">
-    <value>Product pricing not found.</value>
+    <value>Produkt pricing nicht gefunden.</value>
   </data>
   <data name="ProductPricingService.ProductPricingRetrieved" xml:space="preserve">
-    <value>Product pricing retrieved successfully.</value>
+    <value>Produkt pricing erfolgreich abgerufen.</value>
   </data>
   <data name="ProductPricingService.ProductPricingCreated" xml:space="preserve">
-    <value>Product pricing created successfully.</value>
+    <value>Produkt pricing erfolgreich erstellt.</value>
   </data>
   <data name="ProductPricingService.ProductPricingUpdated" xml:space="preserve">
-    <value>Product pricing updated successfully.</value>
+    <value>Produkt pricing erfolgreich aktualisiert.</value>
   </data>
   <data name="ProductPricingService.ProductPricingDeleted" xml:space="preserve">
-    <value>Product pricing deleted successfully.</value>
+    <value>Produkt pricing erfolgreich gelöscht.</value>
   </data>
   <data name="ProductPricingService.CreateProductPricingExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Product Pricing: {0}</value>
+    <value>Fehler beim Erstellen von the Produkt Preisgestaltung: {0}</value>
   </data>
   <data name="ProductPricingService.DeleteProductPricingExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Product Pricing: {0}</value>
+    <value>Fehler beim Löschen von the Produkt Preisgestaltung: {0}</value>
   </data>
   <data name="ProductPricingService.GetAllProductPricingsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Product Pricings: {0}</value>
+    <value>Fehler beim Abrufen von Produkt Pricings: {0}</value>
   </data>
   <data name="ProductPricingService.GetProductPricingByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Product Pricing: {0}</value>
+    <value>Fehler beim Abrufen von the Produkt Preisgestaltung: {0}</value>
   </data>
   <data name="ProductPricingService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ProductPricingService.UpdateProductPricingExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Product Pricing: {0}</value>
+    <value>Fehler beim Aktualisieren von the Produkt Preisgestaltung: {0}</value>
   </data>
   <!-- #endregion Services.ProductPricingService -->
   
   <!-- #region Services.ProductPricingGroupByService -->
   <data name="ProductPricingGroupByService.ProductPricingGroupBysRetrieved" xml:space="preserve">
-    <value>Product pricing group bys retrieved successfully.</value>
+    <value>Produkt pricing group bys erfolgreich abgerufen.</value>
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByNotFound" xml:space="preserve">
-    <value>Product pricing group by not found.</value>
+    <value>Produkt pricing group by nicht gefunden.</value>
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByRetrieved" xml:space="preserve">
-    <value>Product pricing group by retrieved successfully.</value>
+    <value>Produkt pricing group by erfolgreich abgerufen.</value>
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByCreated" xml:space="preserve">
-    <value>Product pricing group by created successfully.</value>
+    <value>Produkt pricing group by erfolgreich erstellt.</value>
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByUpdated" xml:space="preserve">
-    <value>Product pricing group by updated successfully.</value>
+    <value>Produkt pricing group by erfolgreich aktualisiert.</value>
   </data>
   <data name="ProductPricingGroupByService.ProductPricingGroupByDeleted" xml:space="preserve">
-    <value>Product pricing group by deleted successfully.</value>
+    <value>Produkt pricing group by erfolgreich gelöscht.</value>
   </data>
   <data name="ProductPricingGroupByService.CreateProductPricingGroupByExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Product Pricing Group By: {0}</value>
+    <value>Fehler beim Erstellen von the Produkt Preisgestaltung Gruppe By: {0}</value>
   </data>
   <data name="ProductPricingGroupByService.DeleteProductPricingGroupByExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Product Pricing Group By: {0}</value>
+    <value>Fehler beim Löschen von the Produkt Preisgestaltung Gruppe By: {0}</value>
   </data>
   <data name="ProductPricingGroupByService.GetAllProductPricingGroupBysExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Product Pricing Group Bys: {0}</value>
+    <value>Fehler beim Abrufen von Produkt Preisgestaltung Gruppe Bys: {0}</value>
   </data>
   <data name="ProductPricingGroupByService.GetProductPricingGroupByByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Product Pricing Group By: {0}</value>
+    <value>Fehler beim Abrufen von the Produkt Preisgestaltung Gruppe By: {0}</value>
   </data>
   <data name="ProductPricingGroupByService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ProductPricingGroupByService.UpdateProductPricingGroupByExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Product Pricing Group By: {0}</value>
+    <value>Fehler beim Aktualisieren von the Produkt Preisgestaltung Gruppe By: {0}</value>
   </data>
   <!-- #endregion Services.ProductPricingGroupByService -->
   
   <!-- #region Services.UserDiscountLimitService -->
   <data name="UserDiscountLimitService.UserDiscountLimitsRetrieved" xml:space="preserve">
-    <value>User discount limits retrieved successfully.</value>
+    <value>Benutzer discount limits erfolgreich abgerufen.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitNotFound" xml:space="preserve">
-    <value>User discount limit not found.</value>
+    <value>Benutzer discount limit nicht gefunden.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitRetrieved" xml:space="preserve">
-    <value>User discount limit retrieved successfully.</value>
+    <value>Benutzer discount limit erfolgreich abgerufen.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitCreated" xml:space="preserve">
-    <value>User discount limit created successfully.</value>
+    <value>Benutzer discount limit erfolgreich erstellt.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitUpdated" xml:space="preserve">
-    <value>User discount limit updated successfully.</value>
+    <value>Benutzer discount limit erfolgreich aktualisiert.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitDeleted" xml:space="preserve">
-    <value>User discount limit deleted successfully.</value>
+    <value>Benutzer discount limit erfolgreich gelöscht.</value>
   </data>
   <data name="UserDiscountLimitService.UserDiscountLimitExistsChecked" xml:space="preserve">
     <value>User discount limit existence checked successfully.</value>
@@ -704,10 +704,10 @@
     <value>UserDiscountLimit for salesperson {0} and group {1} already exists.</value>
   </data>
   <data name="UserDiscountLimitService.CreateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the User Discount Limit: {0}</value>
+    <value>Fehler beim Erstellen von the Benutzer Rabatt Limit: {0}</value>
   </data>
   <data name="UserDiscountLimitService.DeleteExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the User Discount Limit: {0}</value>
+    <value>Fehler beim Löschen von the Benutzer Rabatt Limit: {0}</value>
   </data>
   <data name="UserDiscountLimitService.ExistsBySalespersonAndGroupExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
@@ -716,13 +716,13 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="UserDiscountLimitService.GetAllExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving User Discount Limits: {0}</value>
+    <value>Fehler beim Abrufen von Benutzer Rabatt Limits: {0}</value>
   </data>
   <data name="UserDiscountLimitService.GetByErpProductGroupCodeExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="UserDiscountLimitService.GetByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the User Discount Limit: {0}</value>
+    <value>Fehler beim Abrufen von the Benutzer Rabatt Limit: {0}</value>
   </data>
   <data name="UserDiscountLimitService.GetBySalespersonAndGroupExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
@@ -731,10 +731,10 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="UserDiscountLimitService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="UserDiscountLimitService.UpdateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the User Discount Limit: {0}</value>
+    <value>Fehler beim Aktualisieren von the Benutzer Rabatt Limit: {0}</value>
   </data>
   <!-- #endregion Services.UserDiscountLimitService -->
   
@@ -744,37 +744,37 @@
   
   <!-- #region Services.ErpService -->
   <data name="ErpService.CariRecordsRetrieved" xml:space="preserve">
-    <value>Cari records retrieved successfully.</value>
+    <value>Cari records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErrorRetrievingCariRecords" xml:space="preserve">
-    <value>An error occurred while retrieving Cari records.</value>
+    <value>Fehler beim Abrufen von Cari records.</value>
   </data>
   <data name="ErpService.DepoRecordsRetrieved" xml:space="preserve">
-    <value>Depo records retrieved successfully.</value>
+    <value>Depo records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErrorRetrievingDepoRecords" xml:space="preserve">
-    <value>An error occurred while retrieving Depo records.</value>
+    <value>Fehler beim Abrufen von Depo records.</value>
   </data>
   <data name="ErpService.StokRecordsRetrieved" xml:space="preserve">
-    <value>Stok records retrieved successfully.</value>
+    <value>Stok records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErrorRetrievingStokRecords" xml:space="preserve">
-    <value>An error occurred while retrieving Stok records.</value>
+    <value>Fehler beim Abrufen von Stok records.</value>
   </data>
   <data name="ErpService.ProjeRecordsRetrieved" xml:space="preserve">
-    <value>Proje records retrieved successfully.</value>
+    <value>Proje records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErrorRetrievingProjeRecords" xml:space="preserve">
-    <value>An error occurred while retrieving Proje records.</value>
+    <value>Fehler beim Abrufen von Proje records.</value>
   </data>
   <data name="ErpService.OnHandQuantityRetrieved" xml:space="preserve">
-    <value>OnHand Quantity records retrieved successfully.</value>
+    <value>OnHand Menge records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErrorRetrievingOnHandQuantityRecords" xml:space="preserve">
-    <value>An error occurred while retrieving OnHand Quantity records.</value>
+    <value>Fehler beim Abrufen von OnHand Menge records.</value>
   </data>
   <data name="ErpService.ProductPricingRetrieved" xml:space="preserve">
-    <value>Product pricing retrieved successfully.</value>
+    <value>Produkt pricing erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ErpConnectionSuccessful" xml:space="preserve">
     <value>ERP connection successful.</value>
@@ -789,142 +789,142 @@
     <value>Branch Code Retrieval Error Message.</value>
   </data>
   <data name="ErpService.BranchCodeRetrieved" xml:space="preserve">
-    <value>Erp retrieved successfully.</value>
+    <value>Erp erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.ExchangeRateRecordsRetrieved" xml:space="preserve">
-    <value>Erps retrieved successfully.</value>
+    <value>Erps erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.GetAllErpShippingAddressExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Erps: {0}</value>
+    <value>Fehler beim Abrufen von Erps: {0}</value>
   </data>
   <data name="ErpService.GetAllExchangeRateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Erps: {0}</value>
+    <value>Fehler beim Abrufen von Erps: {0}</value>
   </data>
   <data name="ErpService.GetAllStokExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Erps: {0}</value>
+    <value>Fehler beim Abrufen von Erps: {0}</value>
   </data>
   <data name="ErpService.GetAllStokGroupExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Erps: {0}</value>
+    <value>Fehler beim Abrufen von Erps: {0}</value>
   </data>
   <data name="ErpService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ErpService.StokGroupRecordsRetrieved" xml:space="preserve">
-    <value>Erps retrieved successfully.</value>
+    <value>Erps erfolgreich abgerufen.</value>
   </data>
   <!-- #endregion Services.ErpService -->
   
   <!-- #region Services.PaymentTypeService -->
   <data name="PaymentTypeService.PaymentTypesRetrieved" xml:space="preserve">
-    <value>Payment types retrieved successfully.</value>
+    <value>Zahlung types erfolgreich abgerufen.</value>
   </data>
   <data name="PaymentTypeService.PaymentTypeNotFound" xml:space="preserve">
-    <value>Payment type not found.</value>
+    <value>Zahlung type nicht gefunden.</value>
   </data>
   <data name="PaymentTypeService.PaymentTypeRetrieved" xml:space="preserve">
-    <value>Payment type retrieved successfully.</value>
+    <value>Zahlung type erfolgreich abgerufen.</value>
   </data>
   <data name="PaymentTypeService.PaymentTypeCreated" xml:space="preserve">
-    <value>Payment type created successfully.</value>
+    <value>Zahlung type erfolgreich erstellt.</value>
   </data>
   <data name="PaymentTypeService.PaymentTypeUpdated" xml:space="preserve">
-    <value>Payment type updated successfully.</value>
+    <value>Zahlung type erfolgreich aktualisiert.</value>
   </data>
   <data name="PaymentTypeService.PaymentTypeDeleted" xml:space="preserve">
-    <value>Payment type deleted successfully.</value>
+    <value>Zahlung type erfolgreich gelöscht.</value>
   </data>
   <data name="PaymentTypeService.CreatePaymentTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Payment Type: {0}</value>
+    <value>Fehler beim Erstellen von the Zahlung Typ: {0}</value>
   </data>
   <data name="PaymentTypeService.DeletePaymentTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Payment Type: {0}</value>
+    <value>Fehler beim Löschen von the Zahlung Typ: {0}</value>
   </data>
   <data name="PaymentTypeService.GetAllPaymentTypesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Payment Types: {0}</value>
+    <value>Fehler beim Abrufen von Zahlung Types: {0}</value>
   </data>
   <data name="PaymentTypeService.GetPaymentTypeByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Payment Type: {0}</value>
+    <value>Fehler beim Abrufen von the Zahlung Typ: {0}</value>
   </data>
   <data name="PaymentTypeService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="PaymentTypeService.UpdatePaymentTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Payment Type: {0}</value>
+    <value>Fehler beim Aktualisieren von the Zahlung Typ: {0}</value>
   </data>
   <!-- #endregion Services.PaymentTypeService -->
   
   <!-- #region Services.ShippingAddressService -->
   <data name="ShippingAddressService.ShippingAddressesRetrieved" xml:space="preserve">
-    <value>Shipping addresses retrieved successfully.</value>
+    <value>Shipping addresses erfolgreich abgerufen.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressNotFound" xml:space="preserve">
-    <value>Shipping address not found.</value>
+    <value>Shipping address nicht gefunden.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressRetrieved" xml:space="preserve">
-    <value>Shipping address retrieved successfully.</value>
+    <value>Shipping address erfolgreich abgerufen.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressCreated" xml:space="preserve">
-    <value>Shipping address created successfully.</value>
+    <value>Shipping address erfolgreich erstellt.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressUpdated" xml:space="preserve">
-    <value>Shipping address updated successfully.</value>
+    <value>Shipping address erfolgreich aktualisiert.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressDeleted" xml:space="preserve">
-    <value>Shipping address deleted successfully.</value>
+    <value>Shipping address erfolgreich gelöscht.</value>
   </data>
   <data name="ShippingAddressService.ShippingAddressesByCustomerRetrieved" xml:space="preserve">
-    <value>Customer shipping addresses retrieved successfully.</value>
+    <value>Kunde shipping addresses erfolgreich abgerufen.</value>
   </data>
   <data name="ShippingAddressService.CreateShippingAddressExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Shipping Address: {0}</value>
+    <value>Fehler beim Erstellen von the Shipping Adresse: {0}</value>
   </data>
   <data name="ShippingAddressService.DeleteShippingAddressExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Shipping Address: {0}</value>
+    <value>Fehler beim Löschen von the Shipping Adresse: {0}</value>
   </data>
   <data name="ShippingAddressService.GetAllShippingAddressesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Shipping Addresss: {0}</value>
+    <value>Fehler beim Abrufen von Shipping Addresss: {0}</value>
   </data>
   <data name="ShippingAddressService.GetShippingAddressByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Shipping Address: {0}</value>
+    <value>Fehler beim Abrufen von the Shipping Adresse: {0}</value>
   </data>
   <data name="ShippingAddressService.GetShippingAddressesByCustomerIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="ShippingAddressService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ShippingAddressService.UpdateShippingAddressExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Shipping Address: {0}</value>
+    <value>Fehler beim Aktualisieren von the Shipping Adresse: {0}</value>
   </data>
   <!-- #endregion Services.ShippingAddressService -->
   
   <!-- #region Services.QuotationService -->
   <data name="QuotationService.QuotationsRetrieved" xml:space="preserve">
-    <value>Quotations retrieved successfully.</value>
+    <value>Angebote erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.QuotationNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.QuotationRetrieved" xml:space="preserve">
-    <value>Quotation retrieved successfully.</value>
+    <value>Angebot erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.QuotationCreated" xml:space="preserve">
-    <value>Quotation created successfully.</value>
+    <value>Angebot erfolgreich erstellt.</value>
   </data>
   <data name="QuotationService.QuotationUpdated" xml:space="preserve">
-    <value>Quotation updated successfully.</value>
+    <value>Angebot erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationService.QuotationDeleted" xml:space="preserve">
-    <value>Quotation deleted successfully.</value>
+    <value>Angebot erfolgreich gelöscht.</value>
   </data>
   <data name="QuotationService.QuotationsByPotentialCustomerRetrieved" xml:space="preserve">
-    <value>Quotations by potential customer retrieved successfully.</value>
+    <value>Angebote by potential customer erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.QuotationsByRepresentativeRetrieved" xml:space="preserve">
-    <value>Quotations by representative retrieved successfully.</value>
+    <value>Angebote by representative erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.QuotationsByStatusRetrieved" xml:space="preserve">
-    <value>Quotations by status retrieved successfully.</value>
+    <value>Angebote by status erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.PendingApprovalEmailSubject" xml:space="preserve">
     <value>You Have a Record Pending Approval</value>
@@ -936,7 +936,7 @@
     <value>Approval Action Approved And Next Step Started.</value>
   </data>
   <data name="QuotationService.ApprovalActionNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApprovalActionRejected" xml:space="preserve">
     <value>Approval Action Rejected.</value>
@@ -948,43 +948,43 @@
     <value>Approval Flow Completed.</value>
   </data>
   <data name="QuotationService.ApprovalFlowNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
   </data>
   <data name="QuotationService.ApprovalFlowStepsNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApprovalRequestNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApprovalRoleNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApprovalUsersNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.ApproveExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationService.CreateQuotationBulkExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Quotation: {0}</value>
+    <value>Fehler beim Erstellen von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.CreateQuotationExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Quotation: {0}</value>
+    <value>Fehler beim Erstellen von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.CreateRevisionOfQuotationExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Quotation: {0}</value>
+    <value>Fehler beim Erstellen von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.DeleteQuotationExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Quotation: {0}</value>
+    <value>Fehler beim Löschen von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.DocumentSerialTypeGenerationError" xml:space="preserve">
     <value>Document Serial Type Generation Error.</value>
   </data>
   <data name="QuotationService.GetAllQuotationsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Quotations: {0}</value>
+    <value>Fehler beim Abrufen von Angebote: {0}</value>
   </data>
   <data name="QuotationService.GetPriceOfProductExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
@@ -993,7 +993,7 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationService.GetQuotationByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Quotation: {0}</value>
+    <value>Fehler beim Abrufen von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.GetQuotationsByPotentialCustomerExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
@@ -1008,16 +1008,16 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="QuotationService.PriceOfProductRetrieved" xml:space="preserve">
-    <value>Quotation retrieved successfully.</value>
+    <value>Angebot erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationService.QuotationExistsExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationService.QuotationRevisionCreated" xml:space="preserve">
-    <value>Quotation created successfully.</value>
+    <value>Angebot erfolgreich erstellt.</value>
   </data>
   <data name="QuotationService.RejectExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
@@ -1026,93 +1026,93 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationService.UpdateQuotationExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Quotation: {0}</value>
+    <value>Fehler beim Aktualisieren von the Angebot: {0}</value>
   </data>
   <data name="QuotationService.UserNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="QuotationService.WaitingApprovalsRetrieved" xml:space="preserve">
-    <value>Quotations retrieved successfully.</value>
+    <value>Angebote erfolgreich abgerufen.</value>
   </data>
   <!-- #endregion Services.QuotationService -->
   
   <!-- #region Services.QuotationLineService -->
   <data name="QuotationLineService.QuotationLinesRetrieved" xml:space="preserve">
-    <value>Quotation lines retrieved successfully.</value>
+    <value>Angebot lines erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationLineService.QuotationLineNotFound" xml:space="preserve">
-    <value>Quotation line not found.</value>
+    <value>Angebot line nicht gefunden.</value>
   </data>
   <data name="QuotationLineService.QuotationLineRetrieved" xml:space="preserve">
-    <value>Quotation line retrieved successfully.</value>
+    <value>Angebot line erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationLineService.QuotationLineCreated" xml:space="preserve">
-    <value>Quotation line created successfully.</value>
+    <value>Angebot line erfolgreich erstellt.</value>
   </data>
   <data name="QuotationLineService.QuotationLineUpdated" xml:space="preserve">
-    <value>Quotation line updated successfully.</value>
+    <value>Angebot line erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationLineService.QuotationLineDeleted" xml:space="preserve">
-    <value>Quotation line deleted successfully.</value>
+    <value>Angebot line erfolgreich gelöscht.</value>
   </data>
   <data name="QuotationLineService.ErrorRetrievingQuotationLines" xml:space="preserve">
-    <value>An error occurred while retrieving quotation lines.</value>
+    <value>Fehler beim Abrufen von quotation lines.</value>
   </data>
   <data name="QuotationLineService.ErrorRetrievingQuotationLine" xml:space="preserve">
-    <value>An error occurred while retrieving the quotation line.</value>
+    <value>Fehler beim Abrufen von the quotation line.</value>
   </data>
   <data name="QuotationLineService.ErrorCreatingQuotationLine" xml:space="preserve">
-    <value>An error occurred while creating the quotation line.</value>
+    <value>Fehler beim Erstellen von the quotation line.</value>
   </data>
   <data name="QuotationLineService.ErrorUpdatingQuotationLine" xml:space="preserve">
-    <value>An error occurred while updating the quotation line.</value>
+    <value>Fehler beim Aktualisieren von the quotation line.</value>
   </data>
   <data name="QuotationLineService.ErrorDeletingQuotationLine" xml:space="preserve">
-    <value>An error occurred while deleting the quotation line.</value>
+    <value>Fehler beim Löschen von the quotation line.</value>
   </data>
   <data name="QuotationLineService.QuotationLinesByQuotationRetrieved" xml:space="preserve">
-    <value>Quotation lines by quotation retrieved successfully.</value>
+    <value>Angebot lines by quotation erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationLineService.CreateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Quotation Line: {0}</value>
+    <value>Fehler beim Erstellen von the Angebot Line: {0}</value>
   </data>
   <data name="QuotationLineService.DeleteExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Quotation Line: {0}</value>
+    <value>Fehler beim Löschen von the Angebot Line: {0}</value>
   </data>
   <data name="QuotationLineService.GetAllExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Quotation Lines: {0}</value>
+    <value>Fehler beim Abrufen von Angebot Lines: {0}</value>
   </data>
   <data name="QuotationLineService.GetByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Quotation Line: {0}</value>
+    <value>Fehler beim Abrufen von the Angebot Line: {0}</value>
   </data>
   <data name="QuotationLineService.GetByQuotationIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationLineService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="QuotationLineService.UpdateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Quotation Line: {0}</value>
+    <value>Fehler beim Aktualisieren von the Angebot Line: {0}</value>
   </data>
   <!-- #endregion Services.QuotationLineService -->
   <!-- #region Services.QuotationDocumentTypeService -->
   <data name="QuotationDocumentTypeService.QuotationDocumentTypesRetrieved" xml:space="preserve">
-    <value>Quotation document types retrieved successfully.</value>
+    <value>Angebot document types erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationDocumentTypeNotFound" xml:space="preserve">
-    <value>Quotation document type not found.</value>
+    <value>Angebot document type nicht gefunden.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationDocumentTypeRetrieved" xml:space="preserve">
-    <value>Quotation document type retrieved successfully.</value>
+    <value>Angebot document type erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationDocumentTypeCreated" xml:space="preserve">
-    <value>Quotation document type created successfully.</value>
+    <value>Angebot document type erfolgreich erstellt.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationDocumentTypeUpdated" xml:space="preserve">
-    <value>Quotation document type updated successfully.</value>
+    <value>Angebot document type erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationDocumentTypeDeleted" xml:space="preserve">
-    <value>Quotation document type deleted successfully.</value>
+    <value>Angebot document type erfolgreich gelöscht.</value>
   </data>
   <data name="QuotationDocumentTypeService.QuotationNumberGenerated" xml:space="preserve">
     <value>Quotation number generated successfully.</value>
@@ -1121,142 +1121,142 @@
   
   <!-- #region Services.ApprovalWorkflowService -->
   <data name="ApprovalWorkflowService.ApprovalWorkflowsRetrieved" xml:space="preserve">
-    <value>Approval workflows retrieved successfully.</value>
+    <value>Genehmigung workflows erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalWorkflowService.ApprovalWorkflowNotFound" xml:space="preserve">
-    <value>Approval workflow not found.</value>
+    <value>Genehmigung workflow nicht gefunden.</value>
   </data>
   <data name="ApprovalWorkflowService.ApprovalWorkflowRetrieved" xml:space="preserve">
-    <value>Approval workflow retrieved successfully.</value>
+    <value>Genehmigung workflow erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalWorkflowService.ApprovalWorkflowCreated" xml:space="preserve">
-    <value>Approval workflow created successfully.</value>
+    <value>Genehmigung workflow erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalWorkflowService.ApprovalWorkflowUpdated" xml:space="preserve">
-    <value>Approval workflow updated successfully.</value>
+    <value>Genehmigung workflow erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalWorkflowService.ApprovalWorkflowDeleted" xml:space="preserve">
-    <value>Approval workflow deleted successfully.</value>
+    <value>Genehmigung workflow erfolgreich gelöscht.</value>
   </data>
   <!-- #endregion Services.ApprovalWorkflowService -->
 
   <!-- #region Services.QuotationLineApprovalService -->
   <data name="QuotationLineApprovalService.QuotationLineApprovalsRetrieved" xml:space="preserve">
-    <value>Quotation line approvals retrieved successfully.</value>
+    <value>Angebot line approvals erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationLineApprovalService.QuotationLineApprovalNotFound" xml:space="preserve">
-    <value>Quotation line approval not found.</value>
+    <value>Angebot line approval nicht gefunden.</value>
   </data>
   <data name="QuotationLineApprovalService.QuotationLineApprovalRetrieved" xml:space="preserve">
-    <value>Quotation line approval retrieved successfully.</value>
+    <value>Angebot line approval erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationLineApprovalService.QuotationLineApprovalCreated" xml:space="preserve">
-    <value>Quotation line approval created successfully.</value>
+    <value>Angebot line approval erfolgreich erstellt.</value>
   </data>
   <data name="QuotationLineApprovalService.QuotationLineApprovalUpdated" xml:space="preserve">
-    <value>Quotation line approval updated successfully.</value>
+    <value>Angebot line approval erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationLineApprovalService.QuotationLineApprovalDeleted" xml:space="preserve">
-    <value>Quotation line approval deleted successfully.</value>
+    <value>Angebot line approval erfolgreich gelöscht.</value>
   </data>
   <!-- #endregion Services.QuotationLineApprovalService -->
 
   <!-- #region Services.QuotationApprovalService -->
   <data name="QuotationApprovalService.QuotationApprovalsRetrieved" xml:space="preserve">
-    <value>Quotation approvals retrieved successfully.</value>
+    <value>Angebot approvals erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationApprovalService.QuotationApprovalNotFound" xml:space="preserve">
-    <value>Quotation approval not found.</value>
+    <value>Angebot approval nicht gefunden.</value>
   </data>
   <data name="QuotationApprovalService.QuotationApprovalRetrieved" xml:space="preserve">
-    <value>Quotation approval retrieved successfully.</value>
+    <value>Angebot approval erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationApprovalService.QuotationApprovalCreated" xml:space="preserve">
-    <value>Quotation approval created successfully.</value>
+    <value>Angebot approval erfolgreich erstellt.</value>
   </data>
   <data name="QuotationApprovalService.QuotationApprovalUpdated" xml:space="preserve">
-    <value>Quotation approval updated successfully.</value>
+    <value>Angebot approval erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationApprovalService.QuotationApprovalDeleted" xml:space="preserve">
-    <value>Quotation approval deleted successfully.</value>
+    <value>Angebot approval erfolgreich gelöscht.</value>
   </data>
   <!-- #endregion Services.QuotationApprovalService -->
   
   <!-- #region Services.UserSessionService -->
   <data name="UserSessionService.UserSessionsRetrieved" xml:space="preserve">
-    <value>User sessions retrieved successfully.</value>
+    <value>Benutzer sessions erfolgreich abgerufen.</value>
   </data>
   <data name="UserSessionService.UserSessionNotFound" xml:space="preserve">
-    <value>User session not found.</value>
+    <value>Benutzer session nicht gefunden.</value>
   </data>
   <data name="UserSessionService.UserSessionRetrieved" xml:space="preserve">
-    <value>User session retrieved successfully.</value>
+    <value>Benutzer session erfolgreich abgerufen.</value>
   </data>
   <data name="UserSessionService.UserSessionCreated" xml:space="preserve">
-    <value>User session created successfully.</value>
+    <value>Benutzer session erfolgreich erstellt.</value>
   </data>
   <data name="UserSessionService.UserSessionRevoked" xml:space="preserve">
     <value>User session revoked successfully.</value>
   </data>
   <data name="UserSessionService.UserSessionDeleted" xml:space="preserve">
-    <value>User session deleted successfully.</value>
+    <value>Benutzer session erfolgreich gelöscht.</value>
   </data>
   <!-- #endregion Services.UserSessionService -->
   
   <!-- #region Services.UserAuthorityService -->
   <data name="UserAuthorityService.UserAuthoritiesRetrieved" xml:space="preserve">
-    <value>User authorities retrieved successfully.</value>
+    <value>Benutzer authorities erfolgreich abgerufen.</value>
   </data>
   <data name="UserAuthorityService.UserAuthorityNotFound" xml:space="preserve">
-    <value>User authority not found.</value>
+    <value>Benutzer authority nicht gefunden.</value>
   </data>
   <data name="UserAuthorityService.UserAuthorityRetrieved" xml:space="preserve">
-    <value>User authority retrieved successfully.</value>
+    <value>Benutzer authority erfolgreich abgerufen.</value>
   </data>
   <data name="UserAuthorityService.UserAuthorityCreated" xml:space="preserve">
-    <value>User authority created successfully.</value>
+    <value>Benutzer authority erfolgreich erstellt.</value>
   </data>
   <data name="UserAuthorityService.UserAuthorityUpdated" xml:space="preserve">
-    <value>User authority updated successfully.</value>
+    <value>Benutzer authority erfolgreich aktualisiert.</value>
   </data>
   <data name="UserAuthorityService.UserAuthorityDeleted" xml:space="preserve">
-    <value>User authority deleted successfully.</value>
+    <value>Benutzer authority erfolgreich gelöscht.</value>
   </data>
   <data name="UserAuthorityService.ErrorRetrievingUserAuthorities" xml:space="preserve">
-    <value>An error occurred while retrieving user authorities.</value>
+    <value>Fehler beim Abrufen von user authorities.</value>
   </data>
   <data name="UserAuthorityService.ErrorRetrievingUserAuthority" xml:space="preserve">
-    <value>An error occurred while retrieving the user authority.</value>
+    <value>Fehler beim Abrufen von the user authority.</value>
   </data>
   <data name="UserAuthorityService.ErrorCreatingUserAuthority" xml:space="preserve">
-    <value>An error occurred while creating the user authority.</value>
+    <value>Fehler beim Erstellen von the user authority.</value>
   </data>
   <data name="UserAuthorityService.ErrorUpdatingUserAuthority" xml:space="preserve">
-    <value>An error occurred while updating the user authority.</value>
+    <value>Fehler beim Aktualisieren von the user authority.</value>
   </data>
   <data name="UserAuthorityService.ErrorDeletingUserAuthority" xml:space="preserve">
-    <value>An error occurred while deleting the user authority.</value>
+    <value>Fehler beim Löschen von the user authority.</value>
   </data>
   <data name="UserAuthorityService.ErrorCheckingExists" xml:space="preserve">
     <value>An error occurred while checking user authority existence.</value>
   </data>
   <data name="UserAuthorityService.CreateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the User Authority: {0}</value>
+    <value>Fehler beim Erstellen von the Benutzer Berechtigung: {0}</value>
   </data>
   <data name="UserAuthorityService.ExistsExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="UserAuthorityService.GetAllExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving User Authoritys: {0}</value>
+    <value>Fehler beim Abrufen von Benutzer Authoritys: {0}</value>
   </data>
   <data name="UserAuthorityService.GetByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the User Authority: {0}</value>
+    <value>Fehler beim Abrufen von the Benutzer Berechtigung: {0}</value>
   </data>
   <data name="UserAuthorityService.SoftDeleteExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the User Authority: {0}</value>
+    <value>Fehler beim Löschen von the Benutzer Berechtigung: {0}</value>
   </data>
   <data name="UserAuthorityService.UpdateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the User Authority: {0}</value>
+    <value>Fehler beim Aktualisieren von the Benutzer Berechtigung: {0}</value>
   </data>
   <!-- #endregion Services.UserAuthorityService -->
   
@@ -1286,28 +1286,28 @@
     <value>Invalid file URL. Expected format: {0}, Received: {1}</value>
   </data>
   <data name="FileUploadService.FileDeletedSuccessfully" xml:space="preserve">
-    <value>File deleted successfully.</value>
+    <value>Datei erfolgreich gelöscht.</value>
   </data>
   <data name="FileUploadService.FileDeletionError" xml:space="preserve">
     <value>File deletion error.</value>
   </data>
   <data name="FileUploadService.FileDeletionExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the file: {0}</value>
+    <value>Fehler beim Löschen von the file: {0}</value>
   </data>
   <!-- #endregion Services.FileUploadService -->
   
   <!-- #region Services.UserDetailService -->
   <data name="UserDetailService.UserDetailNotFound" xml:space="preserve">
-    <value>User detail not found.</value>
+    <value>Benutzer detail nicht gefunden.</value>
   </data>
   <data name="UserDetailService.UserDetailRetrievedSuccessfully" xml:space="preserve">
-    <value>User detail retrieved successfully.</value>
+    <value>Benutzer detail erfolgreich abgerufen.</value>
   </data>
   <data name="UserDetailService.UserDetailRetrievalError" xml:space="preserve">
     <value>User detail retrieval error.</value>
   </data>
   <data name="UserDetailService.UserDetailRetrievalExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving user detail: {0}</value>
+    <value>Fehler beim Abrufen von user detail: {0}</value>
   </data>
   <data name="UserDetailService.ProfilePictureUploadError" xml:space="preserve">
     <value>Profile Picture Upload Error.</value>
@@ -1322,7 +1322,7 @@
     <value>User Detail already exists.</value>
   </data>
   <data name="UserDetailService.UserDetailCreatedSuccessfully" xml:space="preserve">
-    <value>User Detail created successfully.</value>
+    <value>Benutzer Detail erfolgreich erstellt.</value>
   </data>
   <data name="UserDetailService.UserDetailCreationError" xml:space="preserve">
     <value>User Detail Creation Error.</value>
@@ -1331,7 +1331,7 @@
     <value>An error occurred: {0}</value>
   </data>
   <data name="UserDetailService.UserDetailDeletedSuccessfully" xml:space="preserve">
-    <value>User Detail deleted successfully.</value>
+    <value>Benutzer Detail erfolgreich gelöscht.</value>
   </data>
   <data name="UserDetailService.UserDetailDeletionError" xml:space="preserve">
     <value>User Detail Deletion Error.</value>
@@ -1343,40 +1343,40 @@
     <value>User Detail Update Error.</value>
   </data>
   <data name="UserDetailService.UserDetailUpdateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the User Detail: {0}</value>
+    <value>Fehler beim Aktualisieren von the Benutzer Detail: {0}</value>
   </data>
   <data name="UserDetailService.UserDetailUpdatedSuccessfully" xml:space="preserve">
-    <value>User Detail updated successfully.</value>
+    <value>Benutzer Detail erfolgreich aktualisiert.</value>
   </data>
   <data name="UserDetailService.UserNotFound" xml:space="preserve">
-    <value>User Detail not found.</value>
+    <value>Benutzer Detail nicht gefunden.</value>
   </data>
   <!-- #endregion Services.UserDetailService -->
   
   <!-- #region Controllers.UserDetailController -->
   <data name="UserDetailController.InvalidModelState" xml:space="preserve">
-    <value>Invalid model state.</value>
+    <value>Ungültiger Modellstatus.</value>
   </data>
   <data name="UserDetailController.InvalidModelStateExceptionMessage" xml:space="preserve">
-    <value>Model validation error: {0}</value>
+    <value>Modellvalidierungsfehler: {0}</value>
   </data>
   <!-- #endregion Controllers.UserDetailController -->
   
   <!-- #region Services.ErpService Exception Messages -->
   <data name="ErpService.GetAllCariExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Cari records: {0}</value>
+    <value>Fehler beim Abrufen von Cari records: {0}</value>
   </data>
   <data name="ErpService.GetProductPricingExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving product pricing: {0}</value>
+    <value>Fehler beim Abrufen von product pricing: {0}</value>
   </data>
   <data name="ErpService.HealthCheckExceptionMessage" xml:space="preserve">
     <value>An error occurred during health check: {0}</value>
   </data>
   <data name="ErpService.BranchesRetrievedSuccessfully" xml:space="preserve">
-    <value>Branch records retrieved successfully.</value>
+    <value>Branch records erfolgreich abgerufen.</value>
   </data>
   <data name="ErpService.BranchesRetrievalError" xml:space="preserve">
-    <value>An error occurred while retrieving branch records: {0}</value>
+    <value>Fehler beim Abrufen von branch records: {0}</value>
   </data>
   <!-- #endregion Services.ErpService Exception Messages -->
   
@@ -1397,28 +1397,28 @@
     <value>Image added successfully.</value>
   </data>
   <data name="StockImageService.ImageDeleted" xml:space="preserve">
-    <value>Image deleted successfully.</value>
+    <value>Bild erfolgreich gelöscht.</value>
   </data>
   <data name="StockImageService.PrimaryImageSet" xml:space="preserve">
     <value>Primary image set successfully.</value>
   </data>
   <data name="StockImageService.ImageNotFound" xml:space="preserve">
-    <value>Image not found.</value>
+    <value>Bild nicht gefunden.</value>
   </data>
   <data name="StockImageService.ImagesRetrieved" xml:space="preserve">
-    <value>Images retrieved successfully.</value>
+    <value>Bilder erfolgreich abgerufen.</value>
   </data>
   <data name="StockImageService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="StockImageService.AddImagesExceptionMessage" xml:space="preserve">
     <value>An error occurred while adding images: {0}</value>
   </data>
   <data name="StockImageService.GetByStockIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving images: {0}</value>
+    <value>Fehler beim Abrufen von images: {0}</value>
   </data>
   <data name="StockImageService.DeleteExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting image: {0}</value>
+    <value>Fehler beim Löschen von image: {0}</value>
   </data>
   <data name="StockImageService.SetPrimaryExceptionMessage" xml:space="preserve">
     <value>An error occurred while setting primary image: {0}</value>
@@ -1439,427 +1439,427 @@
     <value>This stock relation already exists.</value>
   </data>
   <data name="StockRelationService.RelationNotFound" xml:space="preserve">
-    <value>Stock relation not found.</value>
+    <value>Lagerbestand relation nicht gefunden.</value>
   </data>
   <data name="StockRelationService.RelationsRetrieved" xml:space="preserve">
-    <value>Stock relations retrieved successfully.</value>
+    <value>Lagerbestand relations erfolgreich abgerufen.</value>
   </data>
   <data name="StockRelationService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="StockRelationService.CreateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating stock relation: {0}</value>
+    <value>Fehler beim Erstellen von stock relation: {0}</value>
   </data>
   <data name="StockRelationService.GetByStockIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving stock relations: {0}</value>
+    <value>Fehler beim Abrufen von stock relations: {0}</value>
   </data>
   <data name="StockRelationService.DeleteExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting stock relation: {0}</value>
+    <value>Fehler beim Löschen von stock relation: {0}</value>
   </data>
   <!-- #endregion Services.StockRelationService -->
   
   <!-- #region Services.StockService -->
   <data name="StockService.StocksRetrieved" xml:space="preserve">
-    <value>Stocks retrieved successfully.</value>
+    <value>Stocks erfolgreich abgerufen.</value>
   </data>
   <data name="StockService.StockRetrieved" xml:space="preserve">
-    <value>Stock retrieved successfully.</value>
+    <value>Lagerbestand erfolgreich abgerufen.</value>
   </data>
   <data name="StockService.StockNotFound" xml:space="preserve">
-    <value>Stock not found.</value>
+    <value>Lagerbestand nicht gefunden.</value>
   </data>
   <data name="StockService.StockCreated" xml:space="preserve">
-    <value>Stock created successfully.</value>
+    <value>Lagerbestand erfolgreich erstellt.</value>
   </data>
   <data name="StockService.StockUpdated" xml:space="preserve">
-    <value>Stock updated successfully.</value>
+    <value>Lagerbestand erfolgreich aktualisiert.</value>
   </data>
   <data name="StockService.StockDeleted" xml:space="preserve">
-    <value>Stock deleted successfully.</value>
+    <value>Lagerbestand erfolgreich gelöscht.</value>
   </data>
   <data name="StockService.ErpStockCodeAlreadyExists" xml:space="preserve">
     <value>This ERP stock code already exists.</value>
   </data>
   <data name="StockService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="StockService.GetAllStocksExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving stocks: {0}</value>
+    <value>Fehler beim Abrufen von stocks: {0}</value>
   </data>
   <data name="StockService.GetStockByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving stock: {0}</value>
+    <value>Fehler beim Abrufen von stock: {0}</value>
   </data>
   <data name="StockService.CreateStockExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating stock: {0}</value>
+    <value>Fehler beim Erstellen von stock: {0}</value>
   </data>
   <data name="StockService.UpdateStockExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating stock: {0}</value>
+    <value>Fehler beim Aktualisieren von stock: {0}</value>
   </data>
   <data name="StockService.DeleteStockExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting stock: {0}</value>
+    <value>Fehler beim Löschen von stock: {0}</value>
   </data>
   <!-- #endregion Services.StockService -->
   
   <!-- #region Services.ApprovalActionService -->
   <data name="ApprovalActionService.ApprovalActionsRetrieved" xml:space="preserve">
-    <value>Approval actions retrieved successfully.</value>
+    <value>Genehmigung actions erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalActionService.ApprovalActionRetrieved" xml:space="preserve">
-    <value>Approval action retrieved successfully.</value>
+    <value>Genehmigung action erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalActionService.ApprovalActionNotFound" xml:space="preserve">
-    <value>Approval action not found.</value>
+    <value>Genehmigung action nicht gefunden.</value>
   </data>
   <data name="ApprovalActionService.ApprovalActionCreated" xml:space="preserve">
-    <value>Approval action created successfully.</value>
+    <value>Genehmigung action erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalActionService.ApprovalActionUpdated" xml:space="preserve">
-    <value>Approval action updated successfully.</value>
+    <value>Genehmigung action erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalActionService.ApprovalActionDeleted" xml:space="preserve">
-    <value>Approval action deleted successfully.</value>
+    <value>Genehmigung action erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalActionService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalActionService.GetAllApprovalActionsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval actions: {0}</value>
+    <value>Fehler beim Abrufen von approval actions: {0}</value>
   </data>
   <data name="ApprovalActionService.GetApprovalActionByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval action: {0}</value>
+    <value>Fehler beim Abrufen von approval action: {0}</value>
   </data>
   <data name="ApprovalActionService.CreateApprovalActionExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval action: {0}</value>
+    <value>Fehler beim Erstellen von approval action: {0}</value>
   </data>
   <data name="ApprovalActionService.UpdateApprovalActionExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval action: {0}</value>
+    <value>Fehler beim Aktualisieren von approval action: {0}</value>
   </data>
   <data name="ApprovalActionService.DeleteApprovalActionExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval action: {0}</value>
+    <value>Fehler beim Löschen von approval action: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalActionService -->
   
   <!-- #region Services.ApprovalFlowService -->
   <data name="ApprovalFlowService.ApprovalFlowsRetrieved" xml:space="preserve">
-    <value>Approval flows retrieved successfully.</value>
+    <value>Genehmigung flows erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalFlowService.ApprovalFlowRetrieved" xml:space="preserve">
-    <value>Approval flow retrieved successfully.</value>
+    <value>Genehmigung flow erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalFlowService.ApprovalFlowNotFound" xml:space="preserve">
-    <value>Approval flow not found.</value>
+    <value>Genehmigung flow nicht gefunden.</value>
   </data>
   <data name="ApprovalFlowService.ApprovalFlowCreated" xml:space="preserve">
-    <value>Approval flow created successfully.</value>
+    <value>Genehmigung flow erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalFlowService.ApprovalFlowUpdated" xml:space="preserve">
-    <value>Approval flow updated successfully.</value>
+    <value>Genehmigung flow erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalFlowService.ApprovalFlowDeleted" xml:space="preserve">
-    <value>Approval flow deleted successfully.</value>
+    <value>Genehmigung flow erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalFlowService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalFlowService.GetAllApprovalFlowsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval flows: {0}</value>
+    <value>Fehler beim Abrufen von approval flows: {0}</value>
   </data>
   <data name="ApprovalFlowService.GetApprovalFlowByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval flow: {0}</value>
+    <value>Fehler beim Abrufen von approval flow: {0}</value>
   </data>
   <data name="ApprovalFlowService.CreateApprovalFlowExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval flow: {0}</value>
+    <value>Fehler beim Erstellen von approval flow: {0}</value>
   </data>
   <data name="ApprovalFlowService.UpdateApprovalFlowExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval flow: {0}</value>
+    <value>Fehler beim Aktualisieren von approval flow: {0}</value>
   </data>
   <data name="ApprovalFlowService.DeleteApprovalFlowExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval flow: {0}</value>
+    <value>Fehler beim Löschen von approval flow: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalFlowService -->
   
   <!-- #region Services.ApprovalFlowStepService -->
   <data name="ApprovalFlowStepService.ApprovalFlowStepsRetrieved" xml:space="preserve">
-    <value>Approval flow steps retrieved successfully.</value>
+    <value>Genehmigung flow steps erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalFlowStepService.ApprovalFlowStepRetrieved" xml:space="preserve">
-    <value>Approval flow step retrieved successfully.</value>
+    <value>Genehmigung flow step erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalFlowStepService.ApprovalFlowStepNotFound" xml:space="preserve">
-    <value>Approval flow step not found.</value>
+    <value>Genehmigung flow step nicht gefunden.</value>
   </data>
   <data name="ApprovalFlowStepService.ApprovalFlowStepCreated" xml:space="preserve">
-    <value>Approval flow step created successfully.</value>
+    <value>Genehmigung flow step erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalFlowStepService.ApprovalFlowStepUpdated" xml:space="preserve">
-    <value>Approval flow step updated successfully.</value>
+    <value>Genehmigung flow step erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalFlowStepService.ApprovalFlowStepDeleted" xml:space="preserve">
-    <value>Approval flow step deleted successfully.</value>
+    <value>Genehmigung flow step erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalFlowStepService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalFlowStepService.GetAllApprovalFlowStepsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval flow steps: {0}</value>
+    <value>Fehler beim Abrufen von approval flow steps: {0}</value>
   </data>
   <data name="ApprovalFlowStepService.GetApprovalFlowStepByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval flow step: {0}</value>
+    <value>Fehler beim Abrufen von approval flow step: {0}</value>
   </data>
   <data name="ApprovalFlowStepService.CreateApprovalFlowStepExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval flow step: {0}</value>
+    <value>Fehler beim Erstellen von approval flow step: {0}</value>
   </data>
   <data name="ApprovalFlowStepService.UpdateApprovalFlowStepExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval flow step: {0}</value>
+    <value>Fehler beim Aktualisieren von approval flow step: {0}</value>
   </data>
   <data name="ApprovalFlowStepService.DeleteApprovalFlowStepExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval flow step: {0}</value>
+    <value>Fehler beim Löschen von approval flow step: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalFlowStepService -->
   
   <!-- #region Services.ApprovalRequestService -->
   <data name="ApprovalRequestService.ApprovalRequestsRetrieved" xml:space="preserve">
-    <value>Approval requests retrieved successfully.</value>
+    <value>Genehmigung requests erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRequestService.ApprovalRequestRetrieved" xml:space="preserve">
-    <value>Approval request retrieved successfully.</value>
+    <value>Genehmigung request erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRequestService.ApprovalRequestNotFound" xml:space="preserve">
-    <value>Approval request not found.</value>
+    <value>Genehmigung request nicht gefunden.</value>
   </data>
   <data name="ApprovalRequestService.ApprovalRequestCreated" xml:space="preserve">
-    <value>Approval request created successfully.</value>
+    <value>Genehmigung request erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalRequestService.ApprovalRequestUpdated" xml:space="preserve">
-    <value>Approval request updated successfully.</value>
+    <value>Genehmigung request erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalRequestService.ApprovalRequestDeleted" xml:space="preserve">
-    <value>Approval request deleted successfully.</value>
+    <value>Genehmigung request erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalRequestService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalRequestService.GetAllApprovalRequestsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval requests: {0}</value>
+    <value>Fehler beim Abrufen von approval requests: {0}</value>
   </data>
   <data name="ApprovalRequestService.GetApprovalRequestByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval request: {0}</value>
+    <value>Fehler beim Abrufen von approval request: {0}</value>
   </data>
   <data name="ApprovalRequestService.CreateApprovalRequestExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval request: {0}</value>
+    <value>Fehler beim Erstellen von approval request: {0}</value>
   </data>
   <data name="ApprovalRequestService.UpdateApprovalRequestExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval request: {0}</value>
+    <value>Fehler beim Aktualisieren von approval request: {0}</value>
   </data>
   <data name="ApprovalRequestService.DeleteApprovalRequestExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval request: {0}</value>
+    <value>Fehler beim Löschen von approval request: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalRequestService -->
   
   <!-- #region Services.ApprovalRoleGroupService -->
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupsRetrieved" xml:space="preserve">
-    <value>Approval role groups retrieved successfully.</value>
+    <value>Genehmigung role groups erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupRetrieved" xml:space="preserve">
-    <value>Approval role group retrieved successfully.</value>
+    <value>Genehmigung role group erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupNotFound" xml:space="preserve">
-    <value>Approval role group not found.</value>
+    <value>Genehmigung role group nicht gefunden.</value>
   </data>
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupCreated" xml:space="preserve">
-    <value>Approval role group created successfully.</value>
+    <value>Genehmigung role group erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupUpdated" xml:space="preserve">
-    <value>Approval role group updated successfully.</value>
+    <value>Genehmigung role group erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupDeleted" xml:space="preserve">
-    <value>Approval role group deleted successfully.</value>
+    <value>Genehmigung role group erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalRoleGroupService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalRoleGroupService.GetAllApprovalRoleGroupsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval role groups: {0}</value>
+    <value>Fehler beim Abrufen von approval role groups: {0}</value>
   </data>
   <data name="ApprovalRoleGroupService.GetApprovalRoleGroupByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval role group: {0}</value>
+    <value>Fehler beim Abrufen von approval role group: {0}</value>
   </data>
   <data name="ApprovalRoleGroupService.CreateApprovalRoleGroupExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval role group: {0}</value>
+    <value>Fehler beim Erstellen von approval role group: {0}</value>
   </data>
   <data name="ApprovalRoleGroupService.UpdateApprovalRoleGroupExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval role group: {0}</value>
+    <value>Fehler beim Aktualisieren von approval role group: {0}</value>
   </data>
   <data name="ApprovalRoleGroupService.DeleteApprovalRoleGroupExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval role group: {0}</value>
+    <value>Fehler beim Löschen von approval role group: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalRoleGroupService -->
   
   <!-- #region Services.ApprovalRoleService -->
   <data name="ApprovalRoleService.ApprovalRolesRetrieved" xml:space="preserve">
-    <value>Approval roles retrieved successfully.</value>
+    <value>Genehmigung roles erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRoleService.ApprovalRoleRetrieved" xml:space="preserve">
-    <value>Approval role retrieved successfully.</value>
+    <value>Genehmigung role erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalRoleService.ApprovalRoleNotFound" xml:space="preserve">
-    <value>Approval role not found.</value>
+    <value>Genehmigung role nicht gefunden.</value>
   </data>
   <data name="ApprovalRoleService.ApprovalRoleCreated" xml:space="preserve">
-    <value>Approval role created successfully.</value>
+    <value>Genehmigung role erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalRoleService.ApprovalRoleUpdated" xml:space="preserve">
-    <value>Approval role updated successfully.</value>
+    <value>Genehmigung role erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalRoleService.ApprovalRoleDeleted" xml:space="preserve">
-    <value>Approval role deleted successfully.</value>
+    <value>Genehmigung role erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalRoleService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalRoleService.GetAllApprovalRolesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval roles: {0}</value>
+    <value>Fehler beim Abrufen von approval roles: {0}</value>
   </data>
   <data name="ApprovalRoleService.GetApprovalRoleByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval role: {0}</value>
+    <value>Fehler beim Abrufen von approval role: {0}</value>
   </data>
   <data name="ApprovalRoleService.CreateApprovalRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval role: {0}</value>
+    <value>Fehler beim Erstellen von approval role: {0}</value>
   </data>
   <data name="ApprovalRoleService.UpdateApprovalRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval role: {0}</value>
+    <value>Fehler beim Aktualisieren von approval role: {0}</value>
   </data>
   <data name="ApprovalRoleService.DeleteApprovalRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval role: {0}</value>
+    <value>Fehler beim Löschen von approval role: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalRoleService -->
   
   <!-- #region Services.ApprovalUserRoleService -->
   <data name="ApprovalUserRoleService.ApprovalUserRolesRetrieved" xml:space="preserve">
-    <value>Approval user roles retrieved successfully.</value>
+    <value>Genehmigung user roles erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalUserRoleService.ApprovalUserRoleRetrieved" xml:space="preserve">
-    <value>Approval user role retrieved successfully.</value>
+    <value>Genehmigung user role erfolgreich abgerufen.</value>
   </data>
   <data name="ApprovalUserRoleService.ApprovalUserRoleNotFound" xml:space="preserve">
-    <value>Approval user role not found.</value>
+    <value>Genehmigung user role nicht gefunden.</value>
   </data>
   <data name="ApprovalUserRoleService.ApprovalUserRoleCreated" xml:space="preserve">
-    <value>Approval user role created successfully.</value>
+    <value>Genehmigung user role erfolgreich erstellt.</value>
   </data>
   <data name="ApprovalUserRoleService.ApprovalUserRoleUpdated" xml:space="preserve">
-    <value>Approval user role updated successfully.</value>
+    <value>Genehmigung user role erfolgreich aktualisiert.</value>
   </data>
   <data name="ApprovalUserRoleService.ApprovalUserRoleDeleted" xml:space="preserve">
-    <value>Approval user role deleted successfully.</value>
+    <value>Genehmigung user role erfolgreich gelöscht.</value>
   </data>
   <data name="ApprovalUserRoleService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ApprovalUserRoleService.GetAllApprovalUserRolesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval user roles: {0}</value>
+    <value>Fehler beim Abrufen von approval user roles: {0}</value>
   </data>
   <data name="ApprovalUserRoleService.GetApprovalUserRoleByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving approval user role: {0}</value>
+    <value>Fehler beim Abrufen von approval user role: {0}</value>
   </data>
   <data name="ApprovalUserRoleService.CreateApprovalUserRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating approval user role: {0}</value>
+    <value>Fehler beim Erstellen von approval user role: {0}</value>
   </data>
   <data name="ApprovalUserRoleService.UpdateApprovalUserRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating approval user role: {0}</value>
+    <value>Fehler beim Aktualisieren von approval user role: {0}</value>
   </data>
   <data name="ApprovalUserRoleService.DeleteApprovalUserRoleExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting approval user role: {0}</value>
+    <value>Fehler beim Löschen von approval user role: {0}</value>
   </data>
   <!-- #endregion Services.ApprovalUserRoleService -->
 
   <!-- #region Services.ActivityTypeService -->
   <data name="ActivityTypeService.ActivityTypeCreated" xml:space="preserve">
-    <value>Activity Type created successfully.</value>
+    <value>Aktivitätstyp erfolgreich erstellt.</value>
   </data>
   <data name="ActivityTypeService.ActivityTypeDeleted" xml:space="preserve">
-    <value>Activity Type deleted successfully.</value>
+    <value>Aktivitätstyp erfolgreich gelöscht.</value>
   </data>
   <data name="ActivityTypeService.ActivityTypeNotFound" xml:space="preserve">
-    <value>Activity Type not found.</value>
+    <value>Aktivitätstyp nicht gefunden.</value>
   </data>
   <data name="ActivityTypeService.ActivityTypeRetrieved" xml:space="preserve">
-    <value>Activity Type retrieved successfully.</value>
+    <value>Aktivitätstyp erfolgreich abgerufen.</value>
   </data>
   <data name="ActivityTypeService.ActivityTypeUpdated" xml:space="preserve">
-    <value>Activity Type updated successfully.</value>
+    <value>Aktivitätstyp erfolgreich aktualisiert.</value>
   </data>
   <data name="ActivityTypeService.ActivityTypesRetrieved" xml:space="preserve">
-    <value>Activity Types retrieved successfully.</value>
+    <value>Aktivität Types erfolgreich abgerufen.</value>
   </data>
   <data name="ActivityTypeService.CreateActivityTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Activity Type: {0}</value>
+    <value>Fehler beim Erstellen von the Aktivität Typ: {0}</value>
   </data>
   <data name="ActivityTypeService.DeleteActivityTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Activity Type: {0}</value>
+    <value>Fehler beim Löschen von the Aktivität Typ: {0}</value>
   </data>
   <data name="ActivityTypeService.GetActivityTypeByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Activity Type: {0}</value>
+    <value>Fehler beim Abrufen von the Aktivität Typ: {0}</value>
   </data>
   <data name="ActivityTypeService.GetAllActivityTypesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Activity Types: {0}</value>
+    <value>Fehler beim Abrufen von Aktivität Types: {0}</value>
   </data>
   <data name="ActivityTypeService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="ActivityTypeService.UpdateActivityTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Activity Type: {0}</value>
+    <value>Fehler beim Aktualisieren von the Aktivität Typ: {0}</value>
   </data>
   <!-- #endregion Services.ActivityTypeService -->
 
   <!-- #region Services.DocumentSerialTypeService -->
   <data name="DocumentSerialTypeService.CreateTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Document Serial Type: {0}</value>
+    <value>Fehler beim Erstellen von the Dokument Serie Typ: {0}</value>
   </data>
   <data name="DocumentSerialTypeService.DeleteTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Document Serial Type: {0}</value>
+    <value>Fehler beim Löschen von the Dokument Serie Typ: {0}</value>
   </data>
   <data name="DocumentSerialTypeService.DocumentSerialGenerated" xml:space="preserve">
     <value>Document Serial Generated.</value>
   </data>
   <data name="DocumentSerialTypeService.DocumentSerialTypeNotFound" xml:space="preserve">
-    <value>Document Serial Type not found.</value>
+    <value>Dokumentserientyp nicht gefunden.</value>
   </data>
   <data name="DocumentSerialTypeService.DocumentSerialTypesRetrieved" xml:space="preserve">
-    <value>Document Serial Types retrieved successfully.</value>
+    <value>Dokument Serie Types erfolgreich abgerufen.</value>
   </data>
   <data name="DocumentSerialTypeService.GenerateDocumentSerialExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="DocumentSerialTypeService.GetAllTypesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Document Serial Types: {0}</value>
+    <value>Fehler beim Abrufen von Dokument Serie Types: {0}</value>
   </data>
   <data name="DocumentSerialTypeService.GetTypeByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Document Serial Type: {0}</value>
+    <value>Fehler beim Abrufen von the Dokument Serie Typ: {0}</value>
   </data>
   <data name="DocumentSerialTypeService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="DocumentSerialTypeService.TypeCreated" xml:space="preserve">
-    <value>Document Serial Type created successfully.</value>
+    <value>Dokumentserientyp erfolgreich erstellt.</value>
   </data>
   <data name="DocumentSerialTypeService.TypeDeleted" xml:space="preserve">
-    <value>Document Serial Type deleted successfully.</value>
+    <value>Dokumentserientyp erfolgreich gelöscht.</value>
   </data>
   <data name="DocumentSerialTypeService.TypeNotFound" xml:space="preserve">
-    <value>Document Serial Type not found.</value>
+    <value>Dokumentserientyp nicht gefunden.</value>
   </data>
   <data name="DocumentSerialTypeService.TypeRetrieved" xml:space="preserve">
-    <value>Document Serial Type retrieved successfully.</value>
+    <value>Dokumentserientyp erfolgreich abgerufen.</value>
   </data>
   <data name="DocumentSerialTypeService.TypeUpdated" xml:space="preserve">
-    <value>Document Serial Type updated successfully.</value>
+    <value>Dokumentserientyp erfolgreich aktualisiert.</value>
   </data>
   <data name="DocumentSerialTypeService.TypesRetrieved" xml:space="preserve">
-    <value>Document Serial Types retrieved successfully.</value>
+    <value>Dokument Serie Types erfolgreich abgerufen.</value>
   </data>
   <data name="DocumentSerialTypeService.UpdateTypeExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Document Serial Type: {0}</value>
+    <value>Fehler beim Aktualisieren von the Dokument Serie Typ: {0}</value>
   </data>
   <!-- #endregion Services.DocumentSerialTypeService -->
 
@@ -1889,214 +1889,214 @@
 
   <!-- #region Services.PricingRuleHeaderService -->
   <data name="PricingRuleHeaderService.CreateHeaderExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Pricing Rule Header: {0}</value>
+    <value>Fehler beim Erstellen von the Preisgestaltung Rule Header: {0}</value>
   </data>
   <data name="PricingRuleHeaderService.DeleteHeaderExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Pricing Rule Header: {0}</value>
+    <value>Fehler beim Löschen von the Preisgestaltung Rule Header: {0}</value>
   </data>
   <data name="PricingRuleHeaderService.GetAllHeadersExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Pricing Rule Headers: {0}</value>
+    <value>Fehler beim Abrufen von Preisgestaltung Rule Headers: {0}</value>
   </data>
   <data name="PricingRuleHeaderService.GetHeaderByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Pricing Rule Header: {0}</value>
+    <value>Fehler beim Abrufen von the Preisgestaltung Rule Header: {0}</value>
   </data>
   <data name="PricingRuleHeaderService.HeaderCreated" xml:space="preserve">
-    <value>Pricing Rule Header created successfully.</value>
+    <value>Preisgestaltung Rule Header erfolgreich erstellt.</value>
   </data>
   <data name="PricingRuleHeaderService.HeaderDeleted" xml:space="preserve">
-    <value>Pricing Rule Header deleted successfully.</value>
+    <value>Preisgestaltung Rule Header erfolgreich gelöscht.</value>
   </data>
   <data name="PricingRuleHeaderService.HeaderNotFound" xml:space="preserve">
-    <value>Pricing Rule Header not found.</value>
+    <value>Preisgestaltung Rule Header nicht gefunden.</value>
   </data>
   <data name="PricingRuleHeaderService.HeaderRetrieved" xml:space="preserve">
-    <value>Pricing Rule Header retrieved successfully.</value>
+    <value>Preisgestaltung Rule Header erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleHeaderService.HeaderUpdated" xml:space="preserve">
-    <value>Pricing Rule Header updated successfully.</value>
+    <value>Preisgestaltung Rule Header erfolgreich aktualisiert.</value>
   </data>
   <data name="PricingRuleHeaderService.HeadersRetrieved" xml:space="preserve">
-    <value>Pricing Rule Headers retrieved successfully.</value>
+    <value>Preisgestaltung Rule Headers erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleHeaderService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="PricingRuleHeaderService.UpdateHeaderExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Pricing Rule Header: {0}</value>
+    <value>Fehler beim Aktualisieren von the Preisgestaltung Rule Header: {0}</value>
   </data>
   <!-- #endregion Services.PricingRuleHeaderService -->
 
   <!-- #region Services.PricingRuleLineService -->
   <data name="PricingRuleLineService.CreateLineExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Pricing Rule Line: {0}</value>
+    <value>Fehler beim Erstellen von the Preisgestaltung Rule Line: {0}</value>
   </data>
   <data name="PricingRuleLineService.DeleteLineExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Pricing Rule Line: {0}</value>
+    <value>Fehler beim Löschen von the Preisgestaltung Rule Line: {0}</value>
   </data>
   <data name="PricingRuleLineService.GetAllLinesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Pricing Rule Lines: {0}</value>
+    <value>Fehler beim Abrufen von Preisgestaltung Rule Lines: {0}</value>
   </data>
   <data name="PricingRuleLineService.GetLineByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Pricing Rule Line: {0}</value>
+    <value>Fehler beim Abrufen von the Preisgestaltung Rule Line: {0}</value>
   </data>
   <data name="PricingRuleLineService.GetLinesByHeaderIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="PricingRuleLineService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="PricingRuleLineService.LineCreated" xml:space="preserve">
-    <value>Pricing Rule Line created successfully.</value>
+    <value>Preisgestaltung Rule Line erfolgreich erstellt.</value>
   </data>
   <data name="PricingRuleLineService.LineDeleted" xml:space="preserve">
-    <value>Pricing Rule Line deleted successfully.</value>
+    <value>Preisgestaltung Rule Line erfolgreich gelöscht.</value>
   </data>
   <data name="PricingRuleLineService.LineNotFound" xml:space="preserve">
-    <value>Pricing Rule Line not found.</value>
+    <value>Preisgestaltung Rule Line nicht gefunden.</value>
   </data>
   <data name="PricingRuleLineService.LineRetrieved" xml:space="preserve">
-    <value>Pricing Rule Line retrieved successfully.</value>
+    <value>Preisgestaltung Rule Line erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleLineService.LineUpdated" xml:space="preserve">
-    <value>Pricing Rule Line updated successfully.</value>
+    <value>Preisgestaltung Rule Line erfolgreich aktualisiert.</value>
   </data>
   <data name="PricingRuleLineService.LinesRetrieved" xml:space="preserve">
-    <value>Pricing Rule Lines retrieved successfully.</value>
+    <value>Preisgestaltung Rule Lines erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleLineService.UpdateLineExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Pricing Rule Line: {0}</value>
+    <value>Fehler beim Aktualisieren von the Preisgestaltung Rule Line: {0}</value>
   </data>
   <!-- #endregion Services.PricingRuleLineService -->
 
   <!-- #region Services.PricingRuleSalesmanService -->
   <data name="PricingRuleSalesmanService.CreateSalesmanExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Pricing Rule Salesman: {0}</value>
+    <value>Fehler beim Erstellen von the Preisgestaltung Rule Salesman: {0}</value>
   </data>
   <data name="PricingRuleSalesmanService.DeleteSalesmanExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Pricing Rule Salesman: {0}</value>
+    <value>Fehler beim Löschen von the Preisgestaltung Rule Salesman: {0}</value>
   </data>
   <data name="PricingRuleSalesmanService.GetAllSalesmenExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Pricing Rule Salesmans: {0}</value>
+    <value>Fehler beim Abrufen von Preisgestaltung Rule Salesmans: {0}</value>
   </data>
   <data name="PricingRuleSalesmanService.GetSalesmanByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Pricing Rule Salesman: {0}</value>
+    <value>Fehler beim Abrufen von the Preisgestaltung Rule Salesman: {0}</value>
   </data>
   <data name="PricingRuleSalesmanService.GetSalesmenByHeaderIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="PricingRuleSalesmanService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmanCreated" xml:space="preserve">
-    <value>Pricing Rule Salesman created successfully.</value>
+    <value>Preisgestaltung Rule Salesman erfolgreich erstellt.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmanDeleted" xml:space="preserve">
-    <value>Pricing Rule Salesman deleted successfully.</value>
+    <value>Preisgestaltung Rule Salesman erfolgreich gelöscht.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmanNotFound" xml:space="preserve">
-    <value>Pricing Rule Salesman not found.</value>
+    <value>Preisgestaltung Rule Salesman nicht gefunden.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmanRetrieved" xml:space="preserve">
-    <value>Pricing Rule Salesman retrieved successfully.</value>
+    <value>Preisgestaltung Rule Salesman erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmanUpdated" xml:space="preserve">
-    <value>Pricing Rule Salesman updated successfully.</value>
+    <value>Preisgestaltung Rule Salesman erfolgreich aktualisiert.</value>
   </data>
   <data name="PricingRuleSalesmanService.SalesmenRetrieved" xml:space="preserve">
-    <value>Pricing Rule Salesman retrieved successfully.</value>
+    <value>Preisgestaltung Rule Salesman erfolgreich abgerufen.</value>
   </data>
   <data name="PricingRuleSalesmanService.UpdateSalesmanExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Pricing Rule Salesman: {0}</value>
+    <value>Fehler beim Aktualisieren von the Preisgestaltung Rule Salesman: {0}</value>
   </data>
   <!-- #endregion Services.PricingRuleSalesmanService -->
 
   <!-- #region Services.QuotationExchangeRateService -->
   <data name="QuotationExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Quotation Exchange Rate: {0}</value>
+    <value>Fehler beim Erstellen von the Angebot Exchange Rate: {0}</value>
   </data>
   <data name="QuotationExchangeRateService.DeleteRateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Quotation Exchange Rate: {0}</value>
+    <value>Fehler beim Löschen von the Angebot Exchange Rate: {0}</value>
   </data>
   <data name="QuotationExchangeRateService.GetAllRatesExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Quotation Exchange Rates: {0}</value>
+    <value>Fehler beim Abrufen von Angebot Exchange Rates: {0}</value>
   </data>
   <data name="QuotationExchangeRateService.GetRateByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Quotation Exchange Rate: {0}</value>
+    <value>Fehler beim Abrufen von the Angebot Exchange Rate: {0}</value>
   </data>
   <data name="QuotationExchangeRateService.GetRatesByQuotationIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="QuotationExchangeRateService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="QuotationExchangeRateService.RateCreated" xml:space="preserve">
-    <value>Quotation Exchange Rate created successfully.</value>
+    <value>Angebot Exchange Rate erfolgreich erstellt.</value>
   </data>
   <data name="QuotationExchangeRateService.RateDeleted" xml:space="preserve">
-    <value>Quotation Exchange Rate deleted successfully.</value>
+    <value>Angebot Exchange Rate erfolgreich gelöscht.</value>
   </data>
   <data name="QuotationExchangeRateService.RateNotFound" xml:space="preserve">
-    <value>Quotation Exchange Rate not found.</value>
+    <value>Angebot Exchange Rate nicht gefunden.</value>
   </data>
   <data name="QuotationExchangeRateService.RateRetrieved" xml:space="preserve">
-    <value>Quotation Exchange Rate retrieved successfully.</value>
+    <value>Angebot Exchange Rate erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationExchangeRateService.RateUpdated" xml:space="preserve">
-    <value>Quotation Exchange Rate updated successfully.</value>
+    <value>Angebot Exchange Rate erfolgreich aktualisiert.</value>
   </data>
   <data name="QuotationExchangeRateService.RatesRetrieved" xml:space="preserve">
-    <value>Quotation Exchange Rates retrieved successfully.</value>
+    <value>Angebot Exchange Rates erfolgreich abgerufen.</value>
   </data>
   <data name="QuotationExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Quotation Exchange Rate: {0}</value>
+    <value>Fehler beim Aktualisieren von the Angebot Exchange Rate: {0}</value>
   </data>
   <!-- #endregion Services.QuotationExchangeRateService -->
 
   <!-- #region Services.StockDetailService -->
   <data name="StockDetailService.CreateStockDetailExceptionMessage" xml:space="preserve">
-    <value>An error occurred while creating the Stock Detail: {0}</value>
+    <value>Fehler beim Erstellen von the Lagerbestand Detail: {0}</value>
   </data>
   <data name="StockDetailService.DeleteStockDetailExceptionMessage" xml:space="preserve">
-    <value>An error occurred while deleting the Stock Detail: {0}</value>
+    <value>Fehler beim Löschen von the Lagerbestand Detail: {0}</value>
   </data>
   <data name="StockDetailService.GetAllStockDetailsExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving Stock Details: {0}</value>
+    <value>Fehler beim Abrufen von Lagerbestand Details: {0}</value>
   </data>
   <data name="StockDetailService.GetStockDetailByIdExceptionMessage" xml:space="preserve">
-    <value>An error occurred while retrieving the Stock Detail: {0}</value>
+    <value>Fehler beim Abrufen von the Lagerbestand Detail: {0}</value>
   </data>
   <data name="StockDetailService.GetStockDetailByStockIdExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
   <data name="StockDetailService.InternalServerError" xml:space="preserve">
-    <value>Internal server error occurred.</value>
+    <value>Interner Serverfehler aufgetreten.</value>
   </data>
   <data name="StockDetailService.StockDetailAlreadyExists" xml:space="preserve">
     <value>Stock Detail already exists.</value>
   </data>
   <data name="StockDetailService.StockDetailCreated" xml:space="preserve">
-    <value>Stock Detail created successfully.</value>
+    <value>Lagerbestand Detail erfolgreich erstellt.</value>
   </data>
   <data name="StockDetailService.StockDetailDeleted" xml:space="preserve">
-    <value>Stock Detail deleted successfully.</value>
+    <value>Lagerbestand Detail erfolgreich gelöscht.</value>
   </data>
   <data name="StockDetailService.StockDetailNotFound" xml:space="preserve">
-    <value>Stock Detail not found.</value>
+    <value>Lagerbestand Detail nicht gefunden.</value>
   </data>
   <data name="StockDetailService.StockDetailRetrieved" xml:space="preserve">
-    <value>Stock Detail retrieved successfully.</value>
+    <value>Lagerbestand Detail erfolgreich abgerufen.</value>
   </data>
   <data name="StockDetailService.StockDetailUpdated" xml:space="preserve">
-    <value>Stock Detail updated successfully.</value>
+    <value>Lagerbestand Detail erfolgreich aktualisiert.</value>
   </data>
   <data name="StockDetailService.StockDetailsRetrieved" xml:space="preserve">
-    <value>Stock Details retrieved successfully.</value>
+    <value>Lagerbestand Details erfolgreich abgerufen.</value>
   </data>
   <data name="StockDetailService.StockNotFound" xml:space="preserve">
-    <value>Stock Detail not found.</value>
+    <value>Lagerbestand Detail nicht gefunden.</value>
   </data>
   <data name="StockDetailService.UpdateStockDetailExceptionMessage" xml:space="preserve">
-    <value>An error occurred while updating the Stock Detail: {0}</value>
+    <value>Fehler beim Aktualisieren von the Lagerbestand Detail: {0}</value>
   </data>
   <!-- #endregion Services.StockDetailService -->
 
@@ -2111,25 +2111,25 @@
     <value>User already exists.</value>
   </data>
   <data name="QuotationNotFound" xml:space="preserve">
-    <value>Quotation not found.</value>
+    <value>Angebot nicht gefunden.</value>
   </data>
   <data name="UserDiscountLimitRetrieved" xml:space="preserve">
     <value>User discount limit retrieved.</value>
   </data>
   <data name="AuthRegistrationFailed" xml:space="preserve">
-    <value>Registration failed.</value>
+    <value>Registrierung fehlgeschlagen.</value>
   </data>
   <data name="AuthSessionNotFound" xml:space="preserve">
-    <value>Session not found.</value>
+    <value>Session nicht gefunden.</value>
   </data>
   <data name="OperationSuccessful" xml:space="preserve">
-    <value>Operation successful.</value>
+    <value>Operation erfolgreich.</value>
   </data>
   <data name="AuthUserRetrievedSuccessfully" xml:space="preserve">
-    <value>User retrieved successfully.</value>
+    <value>Benutzer erfolgreich abgerufen.</value>
   </data>
   <data name="ActiveUsersRetrievedSuccessfully" xml:space="preserve">
-    <value>Active users retrieved successfully.</value>
+    <value>Aktiv users erfolgreich abgerufen.</value>
   </data>
   <data name="ValidationError" xml:space="preserve">
     <value>Validation error.</value>
@@ -2138,15 +2138,15 @@
     <value>Password Reset.</value>
   </data>
   <data name="AuthUserNotFound" xml:space="preserve">
-    <value>User not found.</value>
+    <value>Benutzer nicht gefunden.</value>
   </data>
   <data name="AuthUserRegisteredSuccessfully" xml:space="preserve">
-    <value>User registered successfully.</value>
+    <value>Benutzer erfolgreich registriert.</value>
   </data>
   <data name="AuthErrorOccurred" xml:space="preserve">
     <value>An error occurred.</value>
   </data>
   <data name="DataRetrievedSuccessfully" xml:space="preserve">
-    <value>Data retrieved successfully.</value>
+    <value>Daten erfolgreich abgerufen.</value>
   </data>
 </root>
