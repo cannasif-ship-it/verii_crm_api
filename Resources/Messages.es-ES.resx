@@ -2149,4 +2149,485 @@
   <data name="DataRetrievedSuccessfully" xml:space="preserve">
     <value>Datos recuperado con éxito.</value>
   </data>
+
+
+<!-- #region Services.DemandService -->
+  <data name="DemandService.DemandsRetrieved" xml:space="preserve">
+    <value>Cotizaciones recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.DemandRetrieved" xml:space="preserve">
+    <value>Demanda recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandCreated" xml:space="preserve">
+    <value>Demanda creado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandUpdated" xml:space="preserve">
+    <value>Demanda actualizado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandDeleted" xml:space="preserve">
+    <value>Demanda eliminado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandsByPotentialCustomerRetrieved" xml:space="preserve">
+    <value>Cotizaciones by potential customer recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandsByRepresentativeRetrieved" xml:space="preserve">
+    <value>Cotizaciones by representative recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandsByStatusRetrieved" xml:space="preserve">
+    <value>Cotizaciones by status recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.PendingApprovalEmailSubject" xml:space="preserve">
+    <value>You Have a Record Pending Approval</value>
+  </data>
+  <data name="DemandService.ApprovalActionApproved" xml:space="preserve">
+    <value>Approval Action Approved.</value>
+  </data>
+  <data name="DemandService.ApprovalActionApprovedAndNextStepStarted" xml:space="preserve">
+    <value>Approval Action Approved And Next Step Started.</value>
+  </data>
+  <data name="DemandService.ApprovalActionNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApprovalActionRejected" xml:space="preserve">
+    <value>Approval Action Rejected.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowAlreadyExists" xml:space="preserve">
+    <value>Demand already exists.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowCompleted" xml:space="preserve">
+    <value>Approval Flow Completed.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowStarted" xml:space="preserve">
+    <value>Approval Flow Started.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowStepsNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApprovalRequestNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApprovalRoleNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApprovalUsersNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.ApproveExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.CreateDemandBulkExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.CreateDemandExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.CreateRevisionOfDemandExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.DeleteDemandExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.DocumentSerialTypeGenerationError" xml:space="preserve">
+    <value>Document Serial Type Generation Error.</value>
+  </data>
+  <data name="DemandService.GetAllDemandsExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Cotizaciones: {0}</value>
+  </data>
+  <data name="DemandService.GetPriceOfProductExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.GetPriceRuleOfDemandExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.GetDemandByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.GetDemandsByPotentialCustomerExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.GetDemandsByRepresentativeExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.GetDemandsByStatusExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.GetWaitingApprovalsExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="DemandService.PriceOfProductRetrieved" xml:space="preserve">
+    <value>Demanda recuperado con éxito.</value>
+  </data>
+  <data name="DemandService.DemandExistsExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.DemandRevisionCreated" xml:space="preserve">
+    <value>Demanda creado con éxito.</value>
+  </data>
+  <data name="DemandService.RejectExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.StartApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandService.UpdateDemandExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Demanda: {0}</value>
+  </data>
+  <data name="DemandService.UserNotFound" xml:space="preserve">
+    <value>Demanda no encontrado.</value>
+  </data>
+  <data name="DemandService.WaitingApprovalsRetrieved" xml:space="preserve">
+    <value>Cotizaciones recuperado con éxito.</value>
+  </data>
+  <!-- #endregion Services.DemandService -->
+
+<!-- #region Services.OrderService -->
+  <data name="OrderService.OrdersRetrieved" xml:space="preserve">
+    <value>Cotizaciones recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.OrderNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.OrderRetrieved" xml:space="preserve">
+    <value>Pedido recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.OrderCreated" xml:space="preserve">
+    <value>Pedido creado con éxito.</value>
+  </data>
+  <data name="OrderService.OrderUpdated" xml:space="preserve">
+    <value>Pedido actualizado con éxito.</value>
+  </data>
+  <data name="OrderService.OrderDeleted" xml:space="preserve">
+    <value>Pedido eliminado con éxito.</value>
+  </data>
+  <data name="OrderService.OrdersByPotentialCustomerRetrieved" xml:space="preserve">
+    <value>Cotizaciones by potential customer recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.OrdersByRepresentativeRetrieved" xml:space="preserve">
+    <value>Cotizaciones by representative recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.OrdersByStatusRetrieved" xml:space="preserve">
+    <value>Cotizaciones by status recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.PendingApprovalEmailSubject" xml:space="preserve">
+    <value>You Have a Record Pending Approval</value>
+  </data>
+  <data name="OrderService.ApprovalActionApproved" xml:space="preserve">
+    <value>Approval Action Approved.</value>
+  </data>
+  <data name="OrderService.ApprovalActionApprovedAndNextStepStarted" xml:space="preserve">
+    <value>Approval Action Approved And Next Step Started.</value>
+  </data>
+  <data name="OrderService.ApprovalActionNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApprovalActionRejected" xml:space="preserve">
+    <value>Approval Action Rejected.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowAlreadyExists" xml:space="preserve">
+    <value>Order already exists.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowCompleted" xml:space="preserve">
+    <value>Approval Flow Completed.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowStarted" xml:space="preserve">
+    <value>Approval Flow Started.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowStepsNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApprovalRequestNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApprovalRoleNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApprovalUsersNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.ApproveExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.CreateOrderBulkExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.CreateOrderExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.CreateRevisionOfOrderExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.DeleteOrderExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.DocumentSerialTypeGenerationError" xml:space="preserve">
+    <value>Document Serial Type Generation Error.</value>
+  </data>
+  <data name="OrderService.GetAllOrdersExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Cotizaciones: {0}</value>
+  </data>
+  <data name="OrderService.GetPriceOfProductExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.GetPriceRuleOfOrderExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.GetOrderByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.GetOrdersByPotentialCustomerExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.GetOrdersByRepresentativeExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.GetOrdersByStatusExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.GetWaitingApprovalsExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="OrderService.PriceOfProductRetrieved" xml:space="preserve">
+    <value>Pedido recuperado con éxito.</value>
+  </data>
+  <data name="OrderService.OrderExistsExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.OrderRevisionCreated" xml:space="preserve">
+    <value>Pedido creado con éxito.</value>
+  </data>
+  <data name="OrderService.RejectExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.StartApprovalFlowExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.UpdateOrderExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Pedido: {0}</value>
+  </data>
+  <data name="OrderService.UserNotFound" xml:space="preserve">
+    <value>Pedido no encontrado.</value>
+  </data>
+  <data name="OrderService.WaitingApprovalsRetrieved" xml:space="preserve">
+    <value>Cotizaciones recuperado con éxito.</value>
+  </data>
+  <!-- #endregion Services.OrderService -->
+
+<!-- #region Services.DemandLineService -->
+  <data name="DemandLineService.DemandLinesRetrieved" xml:space="preserve">
+    <value>Demanda lines recuperado con éxito.</value>
+  </data>
+  <data name="DemandLineService.DemandLineNotFound" xml:space="preserve">
+    <value>Demanda line no encontrado.</value>
+  </data>
+  <data name="DemandLineService.DemandLineRetrieved" xml:space="preserve">
+    <value>Demanda line recuperado con éxito.</value>
+  </data>
+  <data name="DemandLineService.DemandLineCreated" xml:space="preserve">
+    <value>Demanda line creado con éxito.</value>
+  </data>
+  <data name="DemandLineService.DemandLineUpdated" xml:space="preserve">
+    <value>Demanda line actualizado con éxito.</value>
+  </data>
+  <data name="DemandLineService.DemandLineDeleted" xml:space="preserve">
+    <value>Demanda line eliminado con éxito.</value>
+  </data>
+  <data name="DemandLineService.ErrorRetrievingDemandLines" xml:space="preserve">
+    <value>Ocurrió un error al recuperar quotation lines.</value>
+  </data>
+  <data name="DemandLineService.ErrorRetrievingDemandLine" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the quotation line.</value>
+  </data>
+  <data name="DemandLineService.ErrorCreatingDemandLine" xml:space="preserve">
+    <value>Ocurrió un error al crear the quotation line.</value>
+  </data>
+  <data name="DemandLineService.ErrorUpdatingDemandLine" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the quotation line.</value>
+  </data>
+  <data name="DemandLineService.ErrorDeletingDemandLine" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the quotation line.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesByDemandRetrieved" xml:space="preserve">
+    <value>Demanda lines by quotation recuperado con éxito.</value>
+  </data>
+  <data name="DemandLineService.CreateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Demanda Line: {0}</value>
+  </data>
+  <data name="DemandLineService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Demanda Line: {0}</value>
+  </data>
+  <data name="DemandLineService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Demanda Lines: {0}</value>
+  </data>
+  <data name="DemandLineService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Demanda Line: {0}</value>
+  </data>
+  <data name="DemandLineService.GetByDemandIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandLineService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="DemandLineService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Demanda Line: {0}</value>
+  </data>
+  <!-- #endregion Services.DemandLineService -->
+
+<!-- #region Services.OrderLineService -->
+  <data name="OrderLineService.OrderLinesRetrieved" xml:space="preserve">
+    <value>Pedido lines recuperado con éxito.</value>
+  </data>
+  <data name="OrderLineService.OrderLineNotFound" xml:space="preserve">
+    <value>Pedido line no encontrado.</value>
+  </data>
+  <data name="OrderLineService.OrderLineRetrieved" xml:space="preserve">
+    <value>Pedido line recuperado con éxito.</value>
+  </data>
+  <data name="OrderLineService.OrderLineCreated" xml:space="preserve">
+    <value>Pedido line creado con éxito.</value>
+  </data>
+  <data name="OrderLineService.OrderLineUpdated" xml:space="preserve">
+    <value>Pedido line actualizado con éxito.</value>
+  </data>
+  <data name="OrderLineService.OrderLineDeleted" xml:space="preserve">
+    <value>Pedido line eliminado con éxito.</value>
+  </data>
+  <data name="OrderLineService.ErrorRetrievingOrderLines" xml:space="preserve">
+    <value>Ocurrió un error al recuperar quotation lines.</value>
+  </data>
+  <data name="OrderLineService.ErrorRetrievingOrderLine" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the quotation line.</value>
+  </data>
+  <data name="OrderLineService.ErrorCreatingOrderLine" xml:space="preserve">
+    <value>Ocurrió un error al crear the quotation line.</value>
+  </data>
+  <data name="OrderLineService.ErrorUpdatingOrderLine" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the quotation line.</value>
+  </data>
+  <data name="OrderLineService.ErrorDeletingOrderLine" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the quotation line.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesByOrderRetrieved" xml:space="preserve">
+    <value>Pedido lines by quotation recuperado con éxito.</value>
+  </data>
+  <data name="OrderLineService.CreateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Pedido Line: {0}</value>
+  </data>
+  <data name="OrderLineService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Pedido Line: {0}</value>
+  </data>
+  <data name="OrderLineService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Pedido Lines: {0}</value>
+  </data>
+  <data name="OrderLineService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Pedido Line: {0}</value>
+  </data>
+  <data name="OrderLineService.GetByOrderIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderLineService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="OrderLineService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Pedido Line: {0}</value>
+  </data>
+  <!-- #endregion Services.OrderLineService -->
+
+<!-- #region Services.DemandExchangeRateService -->
+  <data name="DemandExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Demanda Exchange Rate: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.DeleteRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Demanda Exchange Rate: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.GetAllRatesExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Demanda Exchange Rates: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.GetRateByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Demanda Exchange Rate: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.GetRatesByDemandIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="DemandExchangeRateService.RateCreated" xml:space="preserve">
+    <value>Demanda Exchange Rate creado con éxito.</value>
+  </data>
+  <data name="DemandExchangeRateService.RateDeleted" xml:space="preserve">
+    <value>Demanda Exchange Rate eliminado con éxito.</value>
+  </data>
+  <data name="DemandExchangeRateService.RateNotFound" xml:space="preserve">
+    <value>Demanda Exchange Rate no encontrado.</value>
+  </data>
+  <data name="DemandExchangeRateService.RateRetrieved" xml:space="preserve">
+    <value>Demanda Exchange Rate recuperado con éxito.</value>
+  </data>
+  <data name="DemandExchangeRateService.RateUpdated" xml:space="preserve">
+    <value>Demanda Exchange Rate actualizado con éxito.</value>
+  </data>
+  <data name="DemandExchangeRateService.RatesRetrieved" xml:space="preserve">
+    <value>Demanda Exchange Rates recuperado con éxito.</value>
+  </data>
+  <data name="DemandExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Demanda Exchange Rate: {0}</value>
+  </data>
+  <!-- #endregion Services.DemandExchangeRateService -->
+
+<!-- #region Services.OrderExchangeRateService -->
+  <data name="OrderExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al crear the Pedido Exchange Rate: {0}</value>
+  </data>
+  <data name="OrderExchangeRateService.DeleteRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al eliminar the Pedido Exchange Rate: {0}</value>
+  </data>
+  <data name="OrderExchangeRateService.GetAllRatesExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar Pedido Exchange Rates: {0}</value>
+  </data>
+  <data name="OrderExchangeRateService.GetRateByIdExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al recuperar the Pedido Exchange Rate: {0}</value>
+  </data>
+  <data name="OrderExchangeRateService.GetRatesByOrderIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderExchangeRateService.InternalServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del server.</value>
+  </data>
+  <data name="OrderExchangeRateService.RateCreated" xml:space="preserve">
+    <value>Pedido Exchange Rate creado con éxito.</value>
+  </data>
+  <data name="OrderExchangeRateService.RateDeleted" xml:space="preserve">
+    <value>Pedido Exchange Rate eliminado con éxito.</value>
+  </data>
+  <data name="OrderExchangeRateService.RateNotFound" xml:space="preserve">
+    <value>Pedido Exchange Rate no encontrado.</value>
+  </data>
+  <data name="OrderExchangeRateService.RateRetrieved" xml:space="preserve">
+    <value>Pedido Exchange Rate recuperado con éxito.</value>
+  </data>
+  <data name="OrderExchangeRateService.RateUpdated" xml:space="preserve">
+    <value>Pedido Exchange Rate actualizado con éxito.</value>
+  </data>
+  <data name="OrderExchangeRateService.RatesRetrieved" xml:space="preserve">
+    <value>Pedido Exchange Rates recuperado con éxito.</value>
+  </data>
+  <data name="OrderExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
+    <value>Ocurrió un error al actualizar the Pedido Exchange Rate: {0}</value>
+  </data>
+  <!-- #endregion Services.OrderExchangeRateService -->
 </root>
