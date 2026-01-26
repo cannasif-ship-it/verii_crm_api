@@ -41,6 +41,12 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<QuotationLine>? _quotationLines;
         private IGenericRepository<UserSession>? _userSessions;
         private IGenericRepository<QuotationExchangeRate>? _quotationExchangeRates;
+        private IGenericRepository<Demand>? _demands;
+        private IGenericRepository<DemandLine>? _demandLines;
+        private IGenericRepository<DemandExchangeRate>? _demandExchangeRates;
+        private IGenericRepository<Order>? _orders;
+        private IGenericRepository<OrderLine>? _orderLines;
+        private IGenericRepository<OrderExchangeRate>? _orderExchangeRates;
         private IGenericRepository<UserDetail>? _userDetails;
         private IGenericRepository<PricingRuleHeader>? _pricingRuleHeaders;
         private IGenericRepository<PricingRuleLine>? _pricingRuleLines;
@@ -87,6 +93,12 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<QuotationLine> QuotationLines{get{_quotationLines ??= new GenericRepository<QuotationLine>(_context, _httpContextAccessor);return _quotationLines;}}
         public IGenericRepository<UserSession> UserSessions{get{_userSessions ??= new GenericRepository<UserSession>(_context, _httpContextAccessor);return _userSessions;}}
        public IGenericRepository<QuotationExchangeRate> QuotationExchangeRates{get{_quotationExchangeRates ??= new GenericRepository<QuotationExchangeRate>(_context, _httpContextAccessor);return _quotationExchangeRates;}}
+        public IGenericRepository<Demand> Demands{get{_demands ??= new GenericRepository<Demand>(_context, _httpContextAccessor);return _demands;}}
+        public IGenericRepository<DemandLine> DemandLines{get{_demandLines ??= new GenericRepository<DemandLine>(_context, _httpContextAccessor);return _demandLines;}}
+        public IGenericRepository<DemandExchangeRate> DemandExchangeRates{get{_demandExchangeRates ??= new GenericRepository<DemandExchangeRate>(_context, _httpContextAccessor);return _demandExchangeRates;}}
+        public IGenericRepository<Order> Orders{get{_orders ??= new GenericRepository<Order>(_context, _httpContextAccessor);return _orders;}}
+        public IGenericRepository<OrderLine> OrderLines{get{_orderLines ??= new GenericRepository<OrderLine>(_context, _httpContextAccessor);return _orderLines;}}
+        public IGenericRepository<OrderExchangeRate> OrderExchangeRates{get{_orderExchangeRates ??= new GenericRepository<OrderExchangeRate>(_context, _httpContextAccessor);return _orderExchangeRates;}}
        public IGenericRepository<UserDetail> UserDetails{get{_userDetails ??= new GenericRepository<UserDetail>(_context, _httpContextAccessor);return _userDetails;}}
         public IGenericRepository<PricingRuleHeader> PricingRuleHeaders{get{_pricingRuleHeaders ??= new GenericRepository<PricingRuleHeader>(_context, _httpContextAccessor);return _pricingRuleHeaders;}}
         public IGenericRepository<PricingRuleLine> PricingRuleLines{get{_pricingRuleLines ??= new GenericRepository<PricingRuleLine>(_context, _httpContextAccessor);return _pricingRuleLines;}}
