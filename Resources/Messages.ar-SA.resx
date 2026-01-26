@@ -1,51 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   
-  <!-- #region Services.AuthService -->
+  
   <data name="AuthService.InvalidCredentials" xml:space="preserve">
     <value>البريد الإلكتروني أو كلمة المرور غير صالحة.</value>
   </data>
@@ -99,14 +99,14 @@
   <data name="AuthService.LoginFailed" xml:space="preserve">
     <value>فشل تسجيل الدخول.</value>
   </data>
-  <!-- #endregion Services.AuthService -->
   
-  <!-- General Messages -->
+  
+  
   <data name="General.OperationSuccessful" xml:space="preserve">
     <value>العملية ناجحة.</value>
   </data>
   
-  <!-- #region Services.UserService -->
+  
   <data name="UserService.UserNotFound" xml:space="preserve">
     <value>مستخدم غير موجود.</value>
   </data>
@@ -125,9 +125,9 @@
   <data name="UserService.UsersRetrieved" xml:space="preserve">
     <value>مستخدمين تم استرجاعه بنجاح.</value>
   </data>
-  <!-- #endregion Services.UserService -->
   
-  <!-- General Messages -->
+  
+  
   <data name="General.OperationSuccessful" xml:space="preserve">
     <value>العملية ناجحة.</value>
   </data>
@@ -147,7 +147,7 @@
     <value>حسابك غير نشط.</value>
   </data>
   
-  <!-- #region Services.CityService -->
+  
   <data name="CityService.CitiesRetrieved" xml:space="preserve">
     <value>مدن تم استرجاعه بنجاح.</value>
   </data>
@@ -199,18 +199,18 @@
   <data name="CityService.DeleteCityExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف the city: {0}</value>
   </data>
-  <!-- #endregion Services.CityService -->
   
-  <!-- #region Controllers.CityController -->
+  
+  
   <data name="CityController.InvalidModelState" xml:space="preserve">
     <value>حالة النموذج غير صالحة.</value>
   </data>
   <data name="CityController.InvalidModelStateExceptionMessage" xml:space="preserve">
     <value>خطأ في التحقق من النموذج: {0}</value>
   </data>
-  <!-- #endregion Controllers.CityController -->
   
-  <!-- #region Services.CountryService -->
+  
+  
   <data name="CountryService.CountriesRetrieved" xml:space="preserve">
     <value>بلدان تم استرجاعه بنجاح.</value>
   </data>
@@ -262,18 +262,18 @@
   <data name="CountryService.DeleteCountryExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف the country: {0}</value>
   </data>
-  <!-- #endregion Services.CountryService -->
   
-  <!-- #region Controllers.CountryController -->
+  
+  
   <data name="CountryController.InvalidModelState" xml:space="preserve">
     <value>حالة النموذج غير صالحة.</value>
   </data>
   <data name="CountryController.InvalidModelStateExceptionMessage" xml:space="preserve">
     <value>خطأ في التحقق من النموذج: {0}</value>
   </data>
-  <!-- #endregion Controllers.CountryController -->
   
-  <!-- #region Services.DistrictService -->
+  
+  
   <data name="DistrictService.DistrictsRetrieved" xml:space="preserve">
     <value>مناطق تم استرجاعه بنجاح.</value>
   </data>
@@ -325,18 +325,18 @@
   <data name="DistrictService.DeleteDistrictExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف the district: {0}</value>
   </data>
-  <!-- #endregion Services.DistrictService -->
   
-  <!-- #region Controllers.DistrictController -->
+  
+  
   <data name="DistrictController.InvalidModelState" xml:space="preserve">
     <value>حالة النموذج غير صالحة.</value>
   </data>
   <data name="DistrictController.InvalidModelStateExceptionMessage" xml:space="preserve">
     <value>خطأ في التحقق من النموذج: {0}</value>
   </data>
-  <!-- #endregion Controllers.DistrictController -->
   
-  <!-- #region Services.TitleService -->
+  
+  
   <data name="TitleService.TitlesRetrieved" xml:space="preserve">
     <value>Titles تم استرجاعه بنجاح.</value>
   </data>
@@ -388,18 +388,18 @@
   <data name="TitleService.DeleteTitleExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف the title: {0}</value>
   </data>
-  <!-- #endregion Services.TitleService -->
   
-  <!-- #region Controllers.TitleController -->
+  
+  
   <data name="TitleController.InvalidModelState" xml:space="preserve">
     <value>حالة النموذج غير صالحة.</value>
   </data>
   <data name="TitleController.InvalidModelStateExceptionMessage" xml:space="preserve">
     <value>خطأ في التحقق من النموذج: {0}</value>
   </data>
-  <!-- #endregion Controllers.TitleController -->
   
-  <!-- #region Services.CustomerService -->
+  
+  
   <data name="CustomerService.CustomersRetrieved" xml:space="preserve">
     <value>عملاء تم استرجاعه بنجاح.</value>
   </data>
@@ -451,9 +451,9 @@
   <data name="CustomerService.UpdateCustomerExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the عميل: {0}</value>
   </data>
-  <!-- #endregion Services.CustomerService -->
   
-  <!-- #region Services.CustomerTypeService -->
+  
+  
   <data name="CustomerTypeService.CustomerTypesRetrieved" xml:space="preserve">
     <value>عميل types تم استرجاعه بنجاح.</value>
   </data>
@@ -505,9 +505,9 @@
   <data name="CustomerTypeService.UpdateCustomerTypeExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the عميل نوع: {0}</value>
   </data>
-  <!-- #endregion Services.CustomerTypeService -->
   
-  <!-- #region Services.ContactService -->
+  
+  
   <data name="ContactService.ContactsRetrieved" xml:space="preserve">
     <value>جهات اتصال تم استرجاعه بنجاح.</value>
   </data>
@@ -559,9 +559,9 @@
   <data name="ContactService.UpdateContactExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the جهة اتصال: {0}</value>
   </data>
-  <!-- #endregion Services.ContactService -->
   
-  <!-- #region Services.ActivityService -->
+  
+  
   <data name="ActivityService.ActivitiesRetrieved" xml:space="preserve">
     <value>أنشطة تم استرجاعه بنجاح.</value>
   </data>
@@ -598,9 +598,9 @@
   <data name="ActivityService.UpdateActivityExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the نشاط: {0}</value>
   </data>
-  <!-- #endregion Services.ActivityService -->
   
-  <!-- #region Services.ProductPricingService -->
+  
+  
   <data name="ProductPricingService.ProductPricingsRetrieved" xml:space="preserve">
     <value>منتج pricings تم استرجاعه بنجاح.</value>
   </data>
@@ -637,9 +637,9 @@
   <data name="ProductPricingService.UpdateProductPricingExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the منتج تسعير: {0}</value>
   </data>
-  <!-- #endregion Services.ProductPricingService -->
   
-  <!-- #region Services.ProductPricingGroupByService -->
+  
+  
   <data name="ProductPricingGroupByService.ProductPricingGroupBysRetrieved" xml:space="preserve">
     <value>منتج pricing group bys تم استرجاعه بنجاح.</value>
   </data>
@@ -676,9 +676,9 @@
   <data name="ProductPricingGroupByService.UpdateProductPricingGroupByExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the منتج تسعير مجموعة By: {0}</value>
   </data>
-  <!-- #endregion Services.ProductPricingGroupByService -->
   
-  <!-- #region Services.UserDiscountLimitService -->
+  
+  
   <data name="UserDiscountLimitService.UserDiscountLimitsRetrieved" xml:space="preserve">
     <value>مستخدم discount limits تم استرجاعه بنجاح.</value>
   </data>
@@ -736,13 +736,13 @@
   <data name="UserDiscountLimitService.UpdateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the مستخدم خصم Limit: {0}</value>
   </data>
-  <!-- #endregion Services.UserDiscountLimitService -->
+  
   
   <data name="UserService.UserAlreadyExists" xml:space="preserve">
     <value>User already exists.</value>
   </data>
   
-  <!-- #region Services.ErpService -->
+  
   <data name="ErpService.CariRecordsRetrieved" xml:space="preserve">
     <value>Cari records تم استرجاعه بنجاح.</value>
   </data>
@@ -812,9 +812,9 @@
   <data name="ErpService.StokGroupRecordsRetrieved" xml:space="preserve">
     <value>Erps تم استرجاعه بنجاح.</value>
   </data>
-  <!-- #endregion Services.ErpService -->
   
-  <!-- #region Services.PaymentTypeService -->
+  
+  
   <data name="PaymentTypeService.PaymentTypesRetrieved" xml:space="preserve">
     <value>دفعة types تم استرجاعه بنجاح.</value>
   </data>
@@ -851,9 +851,9 @@
   <data name="PaymentTypeService.UpdatePaymentTypeExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the دفعة نوع: {0}</value>
   </data>
-  <!-- #endregion Services.PaymentTypeService -->
   
-  <!-- #region Services.ShippingAddressService -->
+  
+  
   <data name="ShippingAddressService.ShippingAddressesRetrieved" xml:space="preserve">
     <value>Shipping addresses تم استرجاعه بنجاح.</value>
   </data>
@@ -896,9 +896,9 @@
   <data name="ShippingAddressService.UpdateShippingAddressExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the Shipping عنوان: {0}</value>
   </data>
-  <!-- #endregion Services.ShippingAddressService -->
   
-  <!-- #region Services.QuotationService -->
+  
+  
   <data name="QuotationService.QuotationsRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
@@ -1034,9 +1034,9 @@
   <data name="QuotationService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
-  <!-- #endregion Services.QuotationService -->
   
-  <!-- #region Services.QuotationLineService -->
+  
+  
   <data name="QuotationLineService.QuotationLinesRetrieved" xml:space="preserve">
     <value>عرض سعر lines تم استرجاعه بنجاح.</value>
   </data>
@@ -1094,8 +1094,8 @@
   <data name="QuotationLineService.UpdateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the عرض سعر Line: {0}</value>
   </data>
-  <!-- #endregion Services.QuotationLineService -->
-  <!-- #region Services.QuotationDocumentTypeService -->
+  
+  
   <data name="QuotationDocumentTypeService.QuotationDocumentTypesRetrieved" xml:space="preserve">
     <value>عرض سعر document types تم استرجاعه بنجاح.</value>
   </data>
@@ -1117,9 +1117,9 @@
   <data name="QuotationDocumentTypeService.QuotationNumberGenerated" xml:space="preserve">
     <value>Quotation number generated successfully.</value>
   </data>
-  <!-- #endregion Services.QuotationDocumentTypeService -->
   
-  <!-- #region Services.ApprovalWorkflowService -->
+  
+  
   <data name="ApprovalWorkflowService.ApprovalWorkflowsRetrieved" xml:space="preserve">
     <value>موافقة workflows تم استرجاعه بنجاح.</value>
   </data>
@@ -1138,9 +1138,9 @@
   <data name="ApprovalWorkflowService.ApprovalWorkflowDeleted" xml:space="preserve">
     <value>موافقة workflow تم حذفه بنجاح.</value>
   </data>
-  <!-- #endregion Services.ApprovalWorkflowService -->
+  
 
-  <!-- #region Services.QuotationLineApprovalService -->
+  
   <data name="QuotationLineApprovalService.QuotationLineApprovalsRetrieved" xml:space="preserve">
     <value>عرض سعر line approvals تم استرجاعه بنجاح.</value>
   </data>
@@ -1159,9 +1159,9 @@
   <data name="QuotationLineApprovalService.QuotationLineApprovalDeleted" xml:space="preserve">
     <value>عرض سعر line approval تم حذفه بنجاح.</value>
   </data>
-  <!-- #endregion Services.QuotationLineApprovalService -->
+  
 
-  <!-- #region Services.QuotationApprovalService -->
+  
   <data name="QuotationApprovalService.QuotationApprovalsRetrieved" xml:space="preserve">
     <value>عرض سعر approvals تم استرجاعه بنجاح.</value>
   </data>
@@ -1180,9 +1180,9 @@
   <data name="QuotationApprovalService.QuotationApprovalDeleted" xml:space="preserve">
     <value>عرض سعر approval تم حذفه بنجاح.</value>
   </data>
-  <!-- #endregion Services.QuotationApprovalService -->
   
-  <!-- #region Services.UserSessionService -->
+  
+  
   <data name="UserSessionService.UserSessionsRetrieved" xml:space="preserve">
     <value>مستخدم sessions تم استرجاعه بنجاح.</value>
   </data>
@@ -1201,9 +1201,9 @@
   <data name="UserSessionService.UserSessionDeleted" xml:space="preserve">
     <value>مستخدم session تم حذفه بنجاح.</value>
   </data>
-  <!-- #endregion Services.UserSessionService -->
   
-  <!-- #region Services.UserAuthorityService -->
+  
+  
   <data name="UserAuthorityService.UserAuthoritiesRetrieved" xml:space="preserve">
     <value>مستخدم authorities تم استرجاعه بنجاح.</value>
   </data>
@@ -1258,9 +1258,9 @@
   <data name="UserAuthorityService.UpdateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the مستخدم صلاحية: {0}</value>
   </data>
-  <!-- #endregion Services.UserAuthorityService -->
   
-  <!-- #region Services.FileUploadService -->
+  
+  
   <data name="FileUploadService.FileRequired" xml:space="preserve">
     <value>File is required.</value>
   </data>
@@ -1294,9 +1294,9 @@
   <data name="FileUploadService.FileDeletionExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف the file: {0}</value>
   </data>
-  <!-- #endregion Services.FileUploadService -->
   
-  <!-- #region Services.UserDetailService -->
+  
+  
   <data name="UserDetailService.UserDetailNotFound" xml:space="preserve">
     <value>مستخدم detail غير موجود.</value>
   </data>
@@ -1351,18 +1351,18 @@
   <data name="UserDetailService.UserNotFound" xml:space="preserve">
     <value>مستخدم Detail غير موجود.</value>
   </data>
-  <!-- #endregion Services.UserDetailService -->
   
-  <!-- #region Controllers.UserDetailController -->
+  
+  
   <data name="UserDetailController.InvalidModelState" xml:space="preserve">
     <value>حالة النموذج غير صالحة.</value>
   </data>
   <data name="UserDetailController.InvalidModelStateExceptionMessage" xml:space="preserve">
     <value>خطأ في التحقق من النموذج: {0}</value>
   </data>
-  <!-- #endregion Controllers.UserDetailController -->
   
-  <!-- #region Services.ErpService Exception Messages -->
+  
+  
   <data name="ErpService.GetAllCariExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء استرجاع Cari records: {0}</value>
   </data>
@@ -1378,9 +1378,9 @@
   <data name="ErpService.BranchesRetrievalError" xml:space="preserve">
     <value>حدث خطأ أثناء استرجاع branch records: {0}</value>
   </data>
-  <!-- #endregion Services.ErpService Exception Messages -->
   
-  <!-- #region BackgroundJobs.StockSyncJob -->
+  
+  
   <data name="StockSyncJob.Started" xml:space="preserve">
     <value>ERP stock synchronization started.</value>
   </data>
@@ -1390,9 +1390,9 @@
   <data name="StockSyncJob.Failed" xml:space="preserve">
     <value>ERP stock synchronization failed.</value>
   </data>
-  <!-- #endregion BackgroundJobs.StockSyncJob -->
   
-  <!-- #region Services.StockImageService -->
+  
+  
   <data name="StockImageService.ImageAdded" xml:space="preserve">
     <value>Image added successfully.</value>
   </data>
@@ -1426,9 +1426,9 @@
   <data name="StockImageService.UploadImagesExceptionMessage" xml:space="preserve">
     <value>An error occurred while uploading images: {0}</value>
   </data>
-  <!-- #endregion Services.StockImageService -->
   
-  <!-- #region Services.StockRelationService -->
+  
+  
   <data name="StockRelationService.RelationAdded" xml:space="preserve">
     <value>Stock relation added successfully.</value>
   </data>
@@ -1456,9 +1456,9 @@
   <data name="StockRelationService.DeleteExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف stock relation: {0}</value>
   </data>
-  <!-- #endregion Services.StockRelationService -->
   
-  <!-- #region Services.StockService -->
+  
+  
   <data name="StockService.StocksRetrieved" xml:space="preserve">
     <value>Stocks تم استرجاعه بنجاح.</value>
   </data>
@@ -1498,9 +1498,9 @@
   <data name="StockService.DeleteStockExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف stock: {0}</value>
   </data>
-  <!-- #endregion Services.StockService -->
   
-  <!-- #region Services.ApprovalActionService -->
+  
+  
   <data name="ApprovalActionService.ApprovalActionsRetrieved" xml:space="preserve">
     <value>موافقة actions تم استرجاعه بنجاح.</value>
   </data>
@@ -1537,9 +1537,9 @@
   <data name="ApprovalActionService.DeleteApprovalActionExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval action: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalActionService -->
   
-  <!-- #region Services.ApprovalFlowService -->
+  
+  
   <data name="ApprovalFlowService.ApprovalFlowsRetrieved" xml:space="preserve">
     <value>موافقة flows تم استرجاعه بنجاح.</value>
   </data>
@@ -1576,9 +1576,9 @@
   <data name="ApprovalFlowService.DeleteApprovalFlowExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval flow: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalFlowService -->
   
-  <!-- #region Services.ApprovalFlowStepService -->
+  
+  
   <data name="ApprovalFlowStepService.ApprovalFlowStepsRetrieved" xml:space="preserve">
     <value>موافقة flow steps تم استرجاعه بنجاح.</value>
   </data>
@@ -1615,9 +1615,9 @@
   <data name="ApprovalFlowStepService.DeleteApprovalFlowStepExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval flow step: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalFlowStepService -->
   
-  <!-- #region Services.ApprovalRequestService -->
+  
+  
   <data name="ApprovalRequestService.ApprovalRequestsRetrieved" xml:space="preserve">
     <value>موافقة requests تم استرجاعه بنجاح.</value>
   </data>
@@ -1654,9 +1654,9 @@
   <data name="ApprovalRequestService.DeleteApprovalRequestExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval request: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalRequestService -->
   
-  <!-- #region Services.ApprovalRoleGroupService -->
+  
+  
   <data name="ApprovalRoleGroupService.ApprovalRoleGroupsRetrieved" xml:space="preserve">
     <value>موافقة role groups تم استرجاعه بنجاح.</value>
   </data>
@@ -1693,9 +1693,9 @@
   <data name="ApprovalRoleGroupService.DeleteApprovalRoleGroupExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval role group: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalRoleGroupService -->
   
-  <!-- #region Services.ApprovalRoleService -->
+  
+  
   <data name="ApprovalRoleService.ApprovalRolesRetrieved" xml:space="preserve">
     <value>موافقة roles تم استرجاعه بنجاح.</value>
   </data>
@@ -1732,9 +1732,9 @@
   <data name="ApprovalRoleService.DeleteApprovalRoleExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval role: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalRoleService -->
   
-  <!-- #region Services.ApprovalUserRoleService -->
+  
+  
   <data name="ApprovalUserRoleService.ApprovalUserRolesRetrieved" xml:space="preserve">
     <value>موافقة user roles تم استرجاعه بنجاح.</value>
   </data>
@@ -1771,9 +1771,9 @@
   <data name="ApprovalUserRoleService.DeleteApprovalUserRoleExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء حذف approval user role: {0}</value>
   </data>
-  <!-- #endregion Services.ApprovalUserRoleService -->
+  
 
-  <!-- #region Services.ActivityTypeService -->
+  
   <data name="ActivityTypeService.ActivityTypeCreated" xml:space="preserve">
     <value>نوع النشاط تم إنشاؤه بنجاح.</value>
   </data>
@@ -1810,9 +1810,9 @@
   <data name="ActivityTypeService.UpdateActivityTypeExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the نشاط نوع: {0}</value>
   </data>
-  <!-- #endregion Services.ActivityTypeService -->
+  
 
-  <!-- #region Services.DocumentSerialTypeService -->
+  
   <data name="DocumentSerialTypeService.CreateTypeExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the مستند تسلسل نوع: {0}</value>
   </data>
@@ -1861,18 +1861,18 @@
   <data name="DocumentSerialTypeService.UpdateTypeExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the مستند تسلسل نوع: {0}</value>
   </data>
-  <!-- #endregion Services.DocumentSerialTypeService -->
+  
 
-  <!-- #region Error -->
+  
   <data name="Error.User.InvalidCredentials" xml:space="preserve">
     <value>User.</value>
   </data>
   <data name="Error.User.LoginFailed" xml:space="preserve">
     <value>User.</value>
   </data>
-  <!-- #endregion Error -->
+  
 
-  <!-- #region Services.JwtService -->
+  
   <data name="JwtService.MissingSecretKeyExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
@@ -1885,9 +1885,9 @@
   <data name="JwtService.TokenGenerationExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
-  <!-- #endregion Services.JwtService -->
+  
 
-  <!-- #region Services.PricingRuleHeaderService -->
+  
   <data name="PricingRuleHeaderService.CreateHeaderExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the تسعير Rule Header: {0}</value>
   </data>
@@ -1924,9 +1924,9 @@
   <data name="PricingRuleHeaderService.UpdateHeaderExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the تسعير Rule Header: {0}</value>
   </data>
-  <!-- #endregion Services.PricingRuleHeaderService -->
+  
 
-  <!-- #region Services.PricingRuleLineService -->
+  
   <data name="PricingRuleLineService.CreateLineExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the تسعير Rule Line: {0}</value>
   </data>
@@ -1966,9 +1966,9 @@
   <data name="PricingRuleLineService.UpdateLineExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the تسعير Rule Line: {0}</value>
   </data>
-  <!-- #endregion Services.PricingRuleLineService -->
+  
 
-  <!-- #region Services.PricingRuleSalesmanService -->
+  
   <data name="PricingRuleSalesmanService.CreateSalesmanExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the تسعير Rule Salesman: {0}</value>
   </data>
@@ -2008,9 +2008,9 @@
   <data name="PricingRuleSalesmanService.UpdateSalesmanExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the تسعير Rule Salesman: {0}</value>
   </data>
-  <!-- #endregion Services.PricingRuleSalesmanService -->
+  
 
-  <!-- #region Services.QuotationExchangeRateService -->
+  
   <data name="QuotationExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the عرض سعر Exchange Rate: {0}</value>
   </data>
@@ -2050,9 +2050,9 @@
   <data name="QuotationExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the عرض سعر Exchange Rate: {0}</value>
   </data>
-  <!-- #endregion Services.QuotationExchangeRateService -->
+  
 
-  <!-- #region Services.StockDetailService -->
+  
   <data name="StockDetailService.CreateStockDetailExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the مخزون Detail: {0}</value>
   </data>
@@ -2098,15 +2098,15 @@
   <data name="StockDetailService.UpdateStockDetailExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the مخزون Detail: {0}</value>
   </data>
-  <!-- #endregion Services.StockDetailService -->
+  
 
-  <!-- #region Success -->
+  
   <data name="Success.User.LoginSuccessful" xml:space="preserve">
     <value>User.</value>
   </data>
-  <!-- #endregion Success -->
+  
 
-  <!-- Missing General Keys -->
+  
   <data name="AuthUserAlreadyExists" xml:space="preserve">
     <value>User already exists.</value>
   </data>
@@ -2151,7 +2151,7 @@
   </data>
 
 
-<!-- #region Services.DemandService -->
+
   <data name="DemandService.DemandsRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
@@ -2287,9 +2287,9 @@
   <data name="DemandService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
-  <!-- #endregion Services.DemandService -->
+  
 
-<!-- #region Services.OrderService -->
+
   <data name="OrderService.OrdersRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
@@ -2425,9 +2425,9 @@
   <data name="OrderService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>عروض أسعار تم استرجاعه بنجاح.</value>
   </data>
-  <!-- #endregion Services.OrderService -->
+  
 
-<!-- #region Services.DemandLineService -->
+
   <data name="DemandLineService.DemandLinesRetrieved" xml:space="preserve">
     <value>طلب lines تم استرجاعه بنجاح.</value>
   </data>
@@ -2485,9 +2485,9 @@
   <data name="DemandLineService.UpdateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the طلب Line: {0}</value>
   </data>
-  <!-- #endregion Services.DemandLineService -->
+  
 
-<!-- #region Services.OrderLineService -->
+
   <data name="OrderLineService.OrderLinesRetrieved" xml:space="preserve">
     <value>أمر lines تم استرجاعه بنجاح.</value>
   </data>
@@ -2545,9 +2545,9 @@
   <data name="OrderLineService.UpdateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the أمر Line: {0}</value>
   </data>
-  <!-- #endregion Services.OrderLineService -->
+  
 
-<!-- #region Services.DemandExchangeRateService -->
+
   <data name="DemandExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the طلب Exchange Rate: {0}</value>
   </data>
@@ -2587,9 +2587,9 @@
   <data name="DemandExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the طلب Exchange Rate: {0}</value>
   </data>
-  <!-- #endregion Services.DemandExchangeRateService -->
+  
 
-<!-- #region Services.OrderExchangeRateService -->
+
   <data name="OrderExchangeRateService.CreateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء إنشاء the أمر Exchange Rate: {0}</value>
   </data>
@@ -2629,5 +2629,5 @@
   <data name="OrderExchangeRateService.UpdateRateExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء تحديث the أمر Exchange Rate: {0}</value>
   </data>
-  <!-- #endregion Services.OrderExchangeRateService -->
-</root>
+  
+<data name="DemandDocumentTypeService.DemandDocumentTypesRetrieved" xml:space="preserve"><value>عرض سعر document types تم استرجاعه بنجاح.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypesRetrieved" xml:space="preserve"><value>عرض سعر document types تم استرجاعه بنجاح.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeNotFound" xml:space="preserve"><value>عرض سعر document type غير موجود.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeNotFound" xml:space="preserve"><value>عرض سعر document type غير موجود.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeRetrieved" xml:space="preserve"><value>عرض سعر document type تم استرجاعه بنجاح.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeRetrieved" xml:space="preserve"><value>عرض سعر document type تم استرجاعه بنجاح.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeCreated" xml:space="preserve"><value>عرض سعر document type تم إنشاؤه بنجاح.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeCreated" xml:space="preserve"><value>عرض سعر document type تم إنشاؤه بنجاح.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeUpdated" xml:space="preserve"><value>عرض سعر document type تم تحديثه بنجاح.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeUpdated" xml:space="preserve"><value>عرض سعر document type تم تحديثه بنجاح.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeDeleted" xml:space="preserve"><value>عرض سعر document type تم حذفه بنجاح.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeDeleted" xml:space="preserve"><value>عرض سعر document type تم حذفه بنجاح.</value></data><data name="DemandDocumentTypeService.DemandNumberGenerated" xml:space="preserve"><value>Demand number generated successfully.</value></data><data name="OrderDocumentTypeService.OrderNumberGenerated" xml:space="preserve"><value>Order number generated successfully.</value></data><data name="DemandLineApprovalService.DemandLineApprovalsRetrieved" xml:space="preserve"><value>عرض سعر line approvals تم استرجاعه بنجاح.</value></data><data name="OrderLineApprovalService.OrderLineApprovalsRetrieved" xml:space="preserve"><value>عرض سعر line approvals تم استرجاعه بنجاح.</value></data><data name="DemandLineApprovalService.DemandLineApprovalNotFound" xml:space="preserve"><value>عرض سعر line approval غير موجود.</value></data><data name="OrderLineApprovalService.OrderLineApprovalNotFound" xml:space="preserve"><value>عرض سعر line approval غير موجود.</value></data><data name="DemandLineApprovalService.DemandLineApprovalRetrieved" xml:space="preserve"><value>عرض سعر line approval تم استرجاعه بنجاح.</value></data><data name="OrderLineApprovalService.OrderLineApprovalRetrieved" xml:space="preserve"><value>عرض سعر line approval تم استرجاعه بنجاح.</value></data><data name="DemandLineApprovalService.DemandLineApprovalCreated" xml:space="preserve"><value>عرض سعر line approval تم إنشاؤه بنجاح.</value></data><data name="OrderLineApprovalService.OrderLineApprovalCreated" xml:space="preserve"><value>عرض سعر line approval تم إنشاؤه بنجاح.</value></data><data name="DemandLineApprovalService.DemandLineApprovalUpdated" xml:space="preserve"><value>عرض سعر line approval تم تحديثه بنجاح.</value></data><data name="OrderLineApprovalService.OrderLineApprovalUpdated" xml:space="preserve"><value>عرض سعر line approval تم تحديثه بنجاح.</value></data><data name="DemandLineApprovalService.DemandLineApprovalDeleted" xml:space="preserve"><value>عرض سعر line approval تم حذفه بنجاح.</value></data><data name="OrderLineApprovalService.OrderLineApprovalDeleted" xml:space="preserve"><value>عرض سعر line approval تم حذفه بنجاح.</value></data><data name="DemandApprovalService.DemandApprovalsRetrieved" xml:space="preserve"><value>عرض سعر approvals تم استرجاعه بنجاح.</value></data><data name="OrderApprovalService.OrderApprovalsRetrieved" xml:space="preserve"><value>عرض سعر approvals تم استرجاعه بنجاح.</value></data><data name="DemandApprovalService.DemandApprovalNotFound" xml:space="preserve"><value>عرض سعر approval غير موجود.</value></data><data name="OrderApprovalService.OrderApprovalNotFound" xml:space="preserve"><value>عرض سعر approval غير موجود.</value></data><data name="DemandApprovalService.DemandApprovalRetrieved" xml:space="preserve"><value>عرض سعر approval تم استرجاعه بنجاح.</value></data><data name="OrderApprovalService.OrderApprovalRetrieved" xml:space="preserve"><value>عرض سعر approval تم استرجاعه بنجاح.</value></data><data name="DemandApprovalService.DemandApprovalCreated" xml:space="preserve"><value>عرض سعر approval تم إنشاؤه بنجاح.</value></data><data name="OrderApprovalService.OrderApprovalCreated" xml:space="preserve"><value>عرض سعر approval تم إنشاؤه بنجاح.</value></data><data name="DemandApprovalService.DemandApprovalUpdated" xml:space="preserve"><value>عرض سعر approval تم تحديثه بنجاح.</value></data><data name="OrderApprovalService.OrderApprovalUpdated" xml:space="preserve"><value>عرض سعر approval تم تحديثه بنجاح.</value></data><data name="DemandApprovalService.DemandApprovalDeleted" xml:space="preserve"><value>عرض سعر approval تم حذفه بنجاح.</value></data><data name="OrderApprovalService.OrderApprovalDeleted" xml:space="preserve"><value>عرض سعر approval تم حذفه بنجاح.</value></data><data name="DemandNotFound" xml:space="preserve"><value>عرض سعر غير موجود.</value></data><data name="OrderNotFound" xml:space="preserve"><value>عرض سعر غير موجود.</value></data></root>
