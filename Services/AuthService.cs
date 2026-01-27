@@ -134,6 +134,12 @@ namespace crm_api.Services
                     var msg = _localizationService.GetLocalizedString("Error.User.InvalidCredentials");
                     return ApiResponse<string>.ErrorResult(msg, msg, 401);
                 }
+
+                if (!user.IsActive)
+                {
+                    var msg = _localizationService.GetLocalizedString("Error.User.AccountInactive");
+                    return ApiResponse<string>.ErrorResult(msg, msg, 401);
+                }
                 
                 if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
                 {
@@ -304,7 +310,6 @@ namespace crm_api.Services
                     _context.Set<PasswordResetRequest>().Add(reset);
                     await _context.SaveChangesAsync();
                     
-                    // Send password reset email via Hangfire background job
                     var fullName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
                     if (string.IsNullOrWhiteSpace(fullName))
                     {
@@ -316,52 +321,12 @@ namespace crm_api.Services
                     var resetLink = $"{frontendBaseUrl}{resetPasswordPath}?token={token}";
 
                     var emailSubject = _localizationService.GetLocalizedString("PasswordResetEmailSubject") ?? "Password Reset Request";
-                    var emailBody = $@"
-                        <html>
-                        <head>
-                            <style>
-                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                                .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
-                                .content {{ padding: 20px; background-color: #f9f9f9; }}
-                                .button {{ display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
-                                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
-                            </style>
-                        </head>
-                        <body>
-                            <div class=""container"">
-                                <div class=""header"">
-                                    <h2>Password Reset Request</h2>
-                                </div>
-                                <div class=""content"">
-                                    <p>Hello {fullName},</p>
-                                    <p>You have requested to reset your password. Please click the button below to reset your password:</p>
-                                    <p style=""text-align: center;"">
-                                        <a href=""{resetLink}"" class=""button"">Reset Password</a>
-                                    </p>
-                                    <p>Or copy and paste this link into your browser:</p>
-                                    <p style=""word-break: break-all; color: #4CAF50;"">{resetLink}</p>
-                                    <p><strong>This link will expire in 30 minutes.</strong></p>
-                                    <p>If you did not request a password reset, please ignore this email.</p>
-                                </div>
-                                <div class=""footer"">
-                                    <p>This is an automated message, please do not reply to this email.</p>
-                                </div>
-                            </div>
-                        </body>
-                        </html>";
-
                     BackgroundJob.Enqueue<IMailJob>(job =>
-                        job.SendEmailAsync(
+                        job.SendPasswordResetEmailAsync(
                             user.Email,
-                            emailSubject,
-                            emailBody,
-                            true,
-                            null,
-                            null,
-                            null
-                        )
-                    );
+                            fullName,
+                            resetLink,
+                            emailSubject));
                 }
 
                 var msg = _localizationService.GetLocalizedString("OperationSuccessful");
