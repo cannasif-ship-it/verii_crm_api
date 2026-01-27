@@ -967,63 +967,19 @@ namespace crm_api.Services
                 // Transaction'ı commit et
                 await _unitOfWork.CommitTransactionAsync();
 
-                // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
                 var userIdToActionId = actions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
                 var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                 var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
                 var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
-                var demandLink = $"{baseUrl}/{demandPath}/{request.EntityId}";
 
-                // Onaya düşen her kullanıcıya "Onay bekleyen kaydınız bulunmaktadır" maili (Onayla/Reddet + Talebe Git butonları)
-                var emailSubject = _localizationService.GetLocalizedString("DemandService.PendingApprovalEmailSubject")
-                    ?? "Onay Bekleyen Kaydınız Bulunmaktadır";
-                foreach (var (email, fullName, uid) in usersToNotify)
-                {
-                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
-                    var actionId = userIdToActionId.GetValueOrDefault(uid);
-                    var approvalLink = actionId != 0
-                        ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
-                        : $"{baseUrl}/{approvalPath}";
-
-                    var emailBody = $@"
-                        <html>
-                        <head>
-                            <style>
-                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                                .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
-                                .content {{ padding: 20px; background-color: #f9f9f9; }}
-                                .btn {{ display: inline-block; padding: 12px 24px; color: white; text-decoration: none; border-radius: 6px; margin: 8px 4px; font-weight: bold; }}
-                                .btn-approve {{ background-color: #4CAF50; }}
-                                .btn-approve:hover {{ background-color: #45a049; }}
-                                .btn-demand {{ background-color: #2196F3; }}
-                                .btn-demand:hover {{ background-color: #0b7dda; }}
-                                .buttons {{ margin: 20px 0; text-align: center; }}
-                                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
-                            </style>
-                        </head>
-                        <body>
-                            <div class=""container"">
-                                <div class=""header"">
-                                    <h2>Onay Bekleyen Kaydınız Bulunmaktadır</h2>
-                                </div>
-                                <div class=""content"">
-                                    <p>Sayın {displayName},</p>
-                                    <p>Onay bekleyen kaydınız bulunmaktadır. Aşağıdaki butonlarla onaylayabilir/reddedebilir veya talebe gidebilirsiniz.</p>
-                                    <div class=""buttons"">
-                                        <a href=""{approvalLink}"" class=""btn btn-approve"">Onayla / Reddet</a>
-                                        <a href=""{demandLink}"" class=""btn btn-demand"">Talebe Git</a>
-                                    </div>
-                                </div>
-                                <div class=""footer"">
-                                    <p>Bu e-posta otomatik olarak gönderilmiştir, lütfen yanıtlamayınız.</p>
-                                </div>
-                            </div>
-                        </body>
-                        </html>";
-                    BackgroundJob.Enqueue<IMailJob>(job =>
-                        job.SendEmailAsync(email, emailSubject, emailBody, true, null, null, null));
-                }
+                BackgroundJob.Enqueue<IMailJob>(job =>
+                    job.SendDemandApprovalPendingEmailsAsync(
+                        usersToNotify.ToList(),
+                        userIdToActionId,
+                        baseUrl,
+                        approvalPath,
+                        demandPath,
+                        request.EntityId));
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -1372,10 +1328,44 @@ namespace crm_api.Services
 
                 await _unitOfWork.CommitTransactionAsync();
 
-                // 📌 Burada:
-                // - Teklif sahibine mail gönderilebilir
-                // - UI'da "Reddedildi" gösterilebilir
-                // - Düzelt → yeniden başlat işlemi yapılabilir
+                // Talep sahibine mail gönder (eğer reddeden kişi talep sahibi değilse)
+                try 
+                {
+                    var demandForMail = await _unitOfWork.Repository<Demand>().Query()
+                        .Include(q => q.CreatedByUser)
+                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId);
+
+                    if (demandForMail != null && demandForMail.CreatedBy != userId)
+                    {
+                        var rejectorUser = await _context.Users.FindAsync(userId);
+                        if (rejectorUser != null && demandForMail.CreatedByUser != null)
+                        {
+                            var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                            var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
+                            var demandLink = $"{baseUrl}/{demandPath}/{demandForMail.Id}";
+                            
+                            var creatorFullName = $"{demandForMail.CreatedByUser.FirstName} {demandForMail.CreatedByUser.LastName}".Trim();
+                            if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = demandForMail.CreatedByUser.Username;
+
+                            var rejectorFullName = $"{rejectorUser.FirstName} {rejectorUser.LastName}".Trim();
+                            if (string.IsNullOrWhiteSpace(rejectorFullName)) rejectorFullName = rejectorUser.Username;
+
+                            BackgroundJob.Enqueue<IMailJob>(job => 
+                                job.SendDemandRejectedEmailAsync(
+                                    demandForMail.CreatedByUser.Email,
+                                    creatorFullName,
+                                    rejectorFullName,
+                                    demandForMail.RevisionNo ?? "",
+                                    request.RejectReason ?? "Belirtilmedi",
+                                    demandLink
+                                ));
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,

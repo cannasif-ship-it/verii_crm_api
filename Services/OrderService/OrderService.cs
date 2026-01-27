@@ -973,58 +973,15 @@ namespace crm_api.Services
                 var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                 var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
                 var orderPath = _configuration["FrontendSettings:OrderDetailPath"]?.TrimStart('/') ?? "orders";
-                var orderLink = $"{baseUrl}/{orderPath}/{request.EntityId}";
 
-                // Onaya düşen her kullanıcıya "Onay bekleyen kaydınız bulunmaktadır" maili (Onayla/Reddet + Siparişe Git butonları)
-                var emailSubject = _localizationService.GetLocalizedString("OrderService.PendingApprovalEmailSubject")
-                    ?? "Onay Bekleyen Kaydınız Bulunmaktadır";
-                foreach (var (email, fullName, uid) in usersToNotify)
-                {
-                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
-                    var actionId = userIdToActionId.GetValueOrDefault(uid);
-                    var approvalLink = actionId != 0
-                        ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
-                        : $"{baseUrl}/{approvalPath}";
-
-                    var emailBody = $@"
-                        <html>
-                        <head>
-                            <style>
-                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                                .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
-                                .content {{ padding: 20px; background-color: #f9f9f9; }}
-                                .btn {{ display: inline-block; padding: 12px 24px; color: white; text-decoration: none; border-radius: 6px; margin: 8px 4px; font-weight: bold; }}
-                                .btn-approve {{ background-color: #4CAF50; }}
-                                .btn-approve:hover {{ background-color: #45a049; }}
-                                .btn-order {{ background-color: #2196F3; }}
-                                .btn-order:hover {{ background-color: #0b7dda; }}
-                                .buttons {{ margin: 20px 0; text-align: center; }}
-                                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
-                            </style>
-                        </head>
-                        <body>
-                            <div class=""container"">
-                                <div class=""header"">
-                                    <h2>Onay Bekleyen Kaydınız Bulunmaktadır</h2>
-                                </div>
-                                <div class=""content"">
-                                    <p>Sayın {displayName},</p>
-                                    <p>Onay bekleyen kaydınız bulunmaktadır. Aşağıdaki butonlarla onaylayabilir/reddedebilir veya siparişe gidebilirsiniz.</p>
-                                    <div class=""buttons"">
-                                        <a href=""{approvalLink}"" class=""btn btn-approve"">Onayla / Reddet</a>
-                                        <a href=""{orderLink}"" class=""btn btn-order"">Siparişe Git</a>
-                                    </div>
-                                </div>
-                                <div class=""footer"">
-                                    <p>Bu e-posta otomatik olarak gönderilmiştir, lütfen yanıtlamayınız.</p>
-                                </div>
-                            </div>
-                        </body>
-                        </html>";
-                    BackgroundJob.Enqueue<IMailJob>(job =>
-                        job.SendEmailAsync(email, emailSubject, emailBody, true, null, null, null));
-                }
+                BackgroundJob.Enqueue<IMailJob>(job =>
+                    job.SendBulkOrderApprovalPendingEmailsAsync(
+                        usersToNotify.ToList(),
+                        userIdToActionId,
+                        baseUrl,
+                        approvalPath,
+                        orderPath,
+                        request.EntityId));
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -1373,6 +1330,45 @@ namespace crm_api.Services
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
+
+                // Sipariş sahibine mail gönder (eğer reddeden kişi sipariş sahibi değilse)
+                try 
+                {
+                    var orderForMail = await _context.Orders
+                        .Include(q => q.CreatedByUser)
+                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId);
+
+                    if (orderForMail != null && orderForMail.CreatedBy != userId)
+                    {
+                        var rejectorUser = await _context.Users.FindAsync(userId);
+                        if (rejectorUser != null && orderForMail.CreatedByUser != null)
+                        {
+                            var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                            var orderPath = _configuration["FrontendSettings:OrderDetailPath"]?.TrimStart('/') ?? "orders";
+                            var orderLink = $"{baseUrl}/{orderPath}/{orderForMail.Id}";
+                            
+                            var creatorFullName = $"{orderForMail.CreatedByUser.FirstName} {orderForMail.CreatedByUser.LastName}".Trim();
+                            if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = orderForMail.CreatedByUser.Username;
+
+                            var rejectorFullName = $"{rejectorUser.FirstName} {rejectorUser.LastName}".Trim();
+                            if (string.IsNullOrWhiteSpace(rejectorFullName)) rejectorFullName = rejectorUser.Username;
+
+                            BackgroundJob.Enqueue<IMailJob>(job => 
+                                job.SendOrderRejectedEmailAsync(
+                                    orderForMail.CreatedByUser.Email,
+                                    creatorFullName,
+                                    rejectorFullName,
+                                    orderForMail.RevisionNo ?? "",
+                                    request.RejectReason ?? "Belirtilmedi",
+                                    orderLink
+                                ));
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
