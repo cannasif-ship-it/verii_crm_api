@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Hangfire;
+using Infrastructure.BackgroundJobs.Interfaces;
 
 namespace crm_api.Services
 {
@@ -20,10 +23,13 @@ namespace crm_api.Services
         private readonly ILocalizationService _loc;
         private readonly CmsDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IConfiguration _configuration;
+
+        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
             _uow = uow; _mapper = mapper; _loc = loc; _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
         }
 
         public async Task<ApiResponse<long>> GetCurrentUserIdAsync()
@@ -137,7 +143,11 @@ namespace crm_api.Services
         {
             try
             {
+                dto.RoleId = 3;
+                dto.Password = "123456";
                 var entity = _mapper.Map<User>(dto);
+                entity.IsEmailConfirmed = true;
+                entity.IsActive = true;
                 entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
                 entity.CreatedDate = DateTime.UtcNow;
                 await _uow.Users.AddAsync(entity);
@@ -152,6 +162,11 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(u => u.Id == entity.Id && !u.IsDeleted);
 
                 var outDto = _mapper.Map<UserDto>(userWithNav ?? entity);
+                
+                    var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                    BackgroundJob.Enqueue<IMailJob>(job =>
+                        job.SendUserCreatedEmailAsync(dto.Email, dto.Username, dto.Password, dto.FirstName, dto.LastName, baseUrl));
+
                 return ApiResponse<UserDto>.SuccessResult(outDto, _loc.GetLocalizedString("UserService.UserCreated"));
             }
             catch (Exception ex)
@@ -167,11 +182,12 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _uow.Users.GetByIdAsync(id);
+                var entity = await _uow.Users.GetByIdForUpdateAsync(id);
                 if (entity == null) return ApiResponse<UserDto>.ErrorResult(
                     _loc.GetLocalizedString("UserService.UserNotFound"),
                     null,
                     StatusCodes.Status404NotFound);
+                dto.RoleId = entity.RoleId;
                 _mapper.Map(dto, entity);
                 entity.UpdatedDate = DateTime.UtcNow;
                 await _uow.Users.UpdateAsync(entity);

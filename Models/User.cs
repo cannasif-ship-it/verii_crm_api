@@ -18,6 +18,7 @@ namespace crm_api.Models
         public string? PhoneNumber { get; set; }
 
         public long RoleId { get; set; } = 0;
+
         public UserAuthority? RoleNavigation { get; set; }
 
         public bool IsEmailConfirmed { get; set; } = false;
