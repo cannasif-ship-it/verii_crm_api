@@ -13,6 +13,8 @@ using System.Linq;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
+using crm_api.Models.Notification;
+using crm_api.DTOs.NotificationDto;
 
 
 namespace crm_api.Services
@@ -28,6 +30,8 @@ namespace crm_api.Services
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly INotificationService _notificationService;
+
         public QuotationService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -37,7 +41,8 @@ namespace crm_api.Services
             IErpService erpService,
             IDocumentSerialTypeService documentSerialTypeService,
             IConfiguration configuration,
-            IUserService userService)
+            IUserService userService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -48,6 +53,7 @@ namespace crm_api.Services
             _documentSerialTypeService = documentSerialTypeService;
             _configuration = configuration;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<PagedResponse<QuotationGetDto>>> GetAllQuotationsAsync(PagedRequest request)
@@ -1026,6 +1032,31 @@ namespace crm_api.Services
                 var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
                 var quotationPath = _configuration["FrontendSettings:QuotationDetailPath"]?.TrimStart('/') ?? "quotations";
 
+                // Send Notifications
+                foreach (var user in usersToNotify)
+                {
+                    try
+                    {
+                        var notificationResult = await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                        {
+                            UserId = user.UserId,
+                            TitleKey = "Notification.QuotationApproval.Title", // "Onay Bekleyen Teklif"
+                            TitleArgs = new object[] { quotation.Id }, 
+                            MessageKey = "Notification.QuotationApproval.Message", // "{0} numaralı teklif onay beklemektedir."
+                            MessageArgs = new object[] { quotation.RevisionNo ?? "" },
+                            NotificationType = NotificationType.QuotationApproval,
+                            RelatedEntityName = "Quotation",
+                            RelatedEntityId = quotation.Id
+                        });
+                        
+         
+                    }
+                    catch (Exception)
+                    {
+                      // ignore
+                   }
+                }
+
                 BackgroundJob.Enqueue<IMailJob>(job =>
                     job.SendBulkQuotationApprovalPendingEmailsAsync(
                         usersToNotify.ToList(),
@@ -1207,6 +1238,68 @@ namespace crm_api.Services
                     await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
 
+                    // Teklif sahibine onaylandı bildirimi ve mail gönder (eğer onaylayan kişi teklif sahibi değilse)
+                    if (quotation.CreatedBy > 0 && quotation.CreatedBy != userId)
+                    {
+                        try
+                        {
+                            var quotationForNotification = await _unitOfWork.Quotations.Query()
+                                .Include(q => q.CreatedByUser)
+                                .FirstOrDefaultAsync(q => q.Id == quotation.Id);
+
+                            if (quotationForNotification != null && quotationForNotification.CreatedByUser != null)
+                            {
+                                // Bildirim oluştur
+                                try
+                                {
+                                    await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                    {
+                                        UserId = quotationForNotification.CreatedBy ?? 0L,
+                                        TitleKey = "Notification.QuotationApproved.Title", // "Teklif Onaylandı"
+                                        TitleArgs = new object[] { quotationForNotification.Id },
+                                        MessageKey = "Notification.QuotationApproved.Message", // "{0} numaralı teklif onaylandı."
+                                        MessageArgs = new object[] { quotationForNotification.RevisionNo ?? "" },
+                                        NotificationType = NotificationType.QuotationDetail,
+                                        RelatedEntityName = "Quotation",
+                                        RelatedEntityId = quotationForNotification.Id
+                                    });
+                                }
+                                catch (Exception)
+                                {
+                                    // ignore
+                                }
+
+                                // Mail gönder
+                                var approverUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                                if (approverUser != null && !string.IsNullOrWhiteSpace(quotationForNotification.CreatedByUser.Email))
+                                {
+                                    var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                                    var quotationPath = _configuration["FrontendSettings:QuotationDetailPath"]?.TrimStart('/') ?? "quotations";
+                                    var quotationLink = $"{baseUrl}/{quotationPath}/{quotationForNotification.Id}";
+
+                                    var creatorFullName = $"{quotationForNotification.CreatedByUser.FirstName} {quotationForNotification.CreatedByUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = quotationForNotification.CreatedByUser.Username;
+
+                                    var approverFullName = $"{approverUser.FirstName} {approverUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(approverFullName)) approverFullName = approverUser.Username;
+
+                                    BackgroundJob.Enqueue<IMailJob>(job =>
+                                        job.SendQuotationApprovedEmailAsync(
+                                            quotationForNotification.CreatedByUser.Email,
+                                            creatorFullName,
+                                            approverFullName,
+                                            quotationForNotification.RevisionNo ?? "",
+                                            quotationLink
+                                        ));
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                        }
+                    }
+
                     return ApiResponse<bool>.SuccessResult(
                         true,
                         _localizationService.GetLocalizedString("QuotationService.ApprovalFlowCompleted"));
@@ -1277,6 +1370,73 @@ namespace crm_api.Services
                 await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
+
+                // Yeni step için onaycılara bildirim ve mail gönder
+                try
+                {
+                    var quotationForNotification = await _unitOfWork.Quotations.Query()
+                        .FirstOrDefaultAsync(q => q.Id == quotation.Id);
+
+                    if (quotationForNotification != null)
+                    {
+                        // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
+                        var userIdToActionId = newActions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
+                        var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                        var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
+                        var quotationPath = _configuration["FrontendSettings:QuotationDetailPath"]?.TrimStart('/') ?? "quotations";
+
+                        var usersToNotify = new List<(string Email, string FullName, long UserId)>();
+
+                        foreach (var newUserId in userIds)
+                        {
+                            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
+                            if (user != null && !string.IsNullOrWhiteSpace(user.Email))
+                            {
+                                usersToNotify.Add((user.Email, user.FullName, newUserId));
+                            }
+                        }
+
+                        // Bildirim gönder
+                        foreach (var user in usersToNotify)
+                        {
+                            try
+                            {
+                                await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                {
+                                    UserId = user.UserId,
+                                    TitleKey = "Notification.QuotationApproval.Title", // "Onay Bekleyen Teklif"
+                                    TitleArgs = new object[] { quotationForNotification.Id },
+                                    MessageKey = "Notification.QuotationApproval.Message", // "{0} numaralı teklif onay beklemektedir."
+                                    MessageArgs = new object[] { quotationForNotification.RevisionNo ?? "" },
+                                    NotificationType = NotificationType.QuotationApproval,
+                                    RelatedEntityName = "Quotation",
+                                    RelatedEntityId = quotationForNotification.Id
+                                });
+                            }
+                            catch (Exception)
+                            {
+                                // ignore
+                            }
+                        }
+
+                        // Mail gönder
+                        if (usersToNotify.Any())
+                        {
+                            BackgroundJob.Enqueue<IMailJob>(job =>
+                                job.SendBulkQuotationApprovalPendingEmailsAsync(
+                                    usersToNotify,
+                                    userIdToActionId,
+                                    baseUrl,
+                                    approvalPath,
+                                    quotationPath,
+                                    quotationForNotification.Id));
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -1383,28 +1543,48 @@ namespace crm_api.Services
                 await _unitOfWork.CommitTransactionAsync();
 
                 // Teklif sahibine mail gönder (eğer reddeden kişi teklif sahibi değilse)
-                try 
+                try
                 {
-                    var quotationForMail = await _context.Quotations
+                    var quotationForMail = await _unitOfWork.Quotations.Query()
                         .Include(q => q.CreatedByUser)
                         .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId);
 
                     if (quotationForMail != null && quotationForMail.CreatedBy != userId)
                     {
-                        var rejectorUser = await _context.Users.FindAsync(userId);
+                        // Bildirim oluştur
+                        try
+                        {
+                            await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                            {
+                                UserId = quotationForMail.CreatedBy ?? 0L,
+                                TitleKey = "Notification.QuotationRejected.Title", // "Teklif Reddedildi"
+                                TitleArgs = new object[] { quotationForMail.Id },
+                                MessageKey = "Notification.QuotationRejected.Message", // "{0} numaralı teklif reddedildi."
+                                MessageArgs = new object[] { quotationForMail.RevisionNo ?? "" },
+                                NotificationType = NotificationType.QuotationDetail,
+                                RelatedEntityName = "Quotation",
+                                RelatedEntityId = quotationForMail.Id
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            // ignore
+                        }
+
+                        var rejectorUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
                         if (rejectorUser != null && quotationForMail.CreatedByUser != null)
                         {
                             var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                             var quotationPath = _configuration["FrontendSettings:QuotationDetailPath"]?.TrimStart('/') ?? "quotations";
                             var quotationLink = $"{baseUrl}/{quotationPath}/{quotationForMail.Id}";
-                            
+
                             var creatorFullName = $"{quotationForMail.CreatedByUser.FirstName} {quotationForMail.CreatedByUser.LastName}".Trim();
                             if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = quotationForMail.CreatedByUser.Username;
 
                             var rejectorFullName = $"{rejectorUser.FirstName} {rejectorUser.LastName}".Trim();
                             if (string.IsNullOrWhiteSpace(rejectorFullName)) rejectorFullName = rejectorUser.Username;
 
-                            BackgroundJob.Enqueue<IMailJob>(job => 
+                            BackgroundJob.Enqueue<IMailJob>(job =>
                                 job.SendQuotationRejectedEmailAsync(
                                     quotationForMail.CreatedByUser.Email,
                                     creatorFullName,

@@ -33,7 +33,7 @@ namespace crm_api.Services
         {
             try
             {
-                var query = _unitOfWork.Repository<DemandLine>().Query()
+                var query = _unitOfWork.DemandLines.Query()
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
                     .ApplyFilters(request.Filters);
@@ -73,7 +73,7 @@ namespace crm_api.Services
         {
             try
             {
-                var line = await _unitOfWork.Repository<DemandLine>().GetByIdAsync(id);
+                var line = await _unitOfWork.DemandLines.GetByIdAsync(id);
                 if (line == null)
                 {
                     return ApiResponse<DemandLineGetDto>.ErrorResult(
@@ -100,7 +100,7 @@ namespace crm_api.Services
                 var entity = _mapper.Map<DemandLine>(createDemandLineDto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Repository<DemandLine>().AddAsync(entity);
+                await _unitOfWork.DemandLines.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<DemandLineDto>(entity);
@@ -118,7 +118,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.Repository<DemandLine>().GetByIdAsync(id);
+                var existing = await _unitOfWork.DemandLines.GetByIdAsync(id);
                 if (existing == null)
                 {
                     return ApiResponse<DemandLineDto>.ErrorResult(
@@ -130,7 +130,7 @@ namespace crm_api.Services
                 _mapper.Map(updateDemandLineDto, existing);
                 existing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Repository<DemandLine>().UpdateAsync(existing);
+                await _unitOfWork.DemandLines.UpdateAsync(existing);
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<DemandLineDto>(existing);
@@ -148,7 +148,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.Repository<DemandLine>().GetByIdAsync(id);
+                var existing = await _unitOfWork.DemandLines.GetByIdAsync(id);
                 if (existing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -157,7 +157,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<DemandLine>().SoftDeleteAsync(id);
+                await _unitOfWork.DemandLines.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("DemandLineService.DemandLineDeleted"));
@@ -174,7 +174,7 @@ namespace crm_api.Services
         {
             try
             {
-                var dtos = await _unitOfWork.Repository<DemandLine>()
+                var dtos = await _unitOfWork.DemandLines
                     .Query()
                     .Where(q => q.DemandId == demandId && !q.IsDeleted)
                     .Join(

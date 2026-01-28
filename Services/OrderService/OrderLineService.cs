@@ -69,7 +69,7 @@ namespace crm_api.Services
         {
             try
             {
-                var line = await _unitOfWork.Repository<OrderLine>().GetByIdAsync(id);
+                var line = await _unitOfWork.OrderLines.GetByIdAsync(id);
                 if (line == null)
                 {
                     return ApiResponse<OrderLineGetDto>.ErrorResult(
@@ -96,7 +96,7 @@ namespace crm_api.Services
                 var entity = _mapper.Map<OrderLine>(createOrderLineDto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Repository<OrderLine>().AddAsync(entity);
+                await _unitOfWork.OrderLines.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<OrderLineDto>(entity);
@@ -114,7 +114,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.Repository<OrderLine>().GetByIdAsync(id);
+                var existing = await _unitOfWork.OrderLines.GetByIdAsync(id);
                 if (existing == null)
                 {
                     return ApiResponse<OrderLineDto>.ErrorResult(
@@ -126,7 +126,7 @@ namespace crm_api.Services
                 _mapper.Map(updateOrderLineDto, existing);
                 existing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Repository<OrderLine>().UpdateAsync(existing);
+                await _unitOfWork.OrderLines.UpdateAsync(existing);
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<OrderLineDto>(existing);
@@ -144,7 +144,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.Repository<OrderLine>().GetByIdAsync(id);
+                var existing = await _unitOfWork.OrderLines.GetByIdAsync(id);
                 if (existing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -153,7 +153,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<OrderLine>().SoftDeleteAsync(id);
+                await _unitOfWork.OrderLines.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("OrderLineService.OrderLineDeleted"));
@@ -170,7 +170,7 @@ namespace crm_api.Services
         {
             try
             {
-                var dtos = await _unitOfWork.Repository<OrderLine>()
+                var dtos = await _unitOfWork.OrderLines
                     .Query()
                     .Where(q => q.OrderId == orderId && !q.IsDeleted)
                     .Join(

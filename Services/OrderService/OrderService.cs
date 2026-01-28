@@ -13,6 +13,8 @@ using System.Linq;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
+using crm_api.Models.Notification;
+using crm_api.DTOs.NotificationDto;
 
 
 namespace crm_api.Services
@@ -28,6 +30,7 @@ namespace crm_api.Services
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly INotificationService _notificationService;
 
         public OrderService(
             IUnitOfWork unitOfWork,
@@ -38,7 +41,8 @@ namespace crm_api.Services
             IErpService erpService,
             IDocumentSerialTypeService documentSerialTypeService,
             IConfiguration configuration,
-            IUserService userService)
+            IUserService userService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -49,6 +53,7 @@ namespace crm_api.Services
             _documentSerialTypeService = documentSerialTypeService;
             _configuration = configuration;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<PagedResponse<OrderGetDto>>> GetAllOrdersAsync(PagedRequest request)
@@ -974,6 +979,29 @@ namespace crm_api.Services
                 var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
                 var orderPath = _configuration["FrontendSettings:OrderDetailPath"]?.TrimStart('/') ?? "orders";
 
+                // Send Notifications
+                foreach (var user in usersToNotify)
+                {
+                    try
+                    {
+                        await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                        {
+                            UserId = user.UserId,
+                            TitleKey = "Notification.OrderApproval.Title", // "Onay Bekleyen Sipariş"
+                            TitleArgs = new object[] { order.Id },
+                            MessageKey = "Notification.OrderApproval.Message", // "{0} numaralı sipariş onay beklemektedir."
+                            MessageArgs = new object[] { order.OfferNo ?? "" },
+                            NotificationType = NotificationType.OrderApproval,
+                            RelatedEntityName = "Order",
+                            RelatedEntityId = order.Id
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
+
                 BackgroundJob.Enqueue<IMailJob>(job =>
                     job.SendBulkOrderApprovalPendingEmailsAsync(
                         usersToNotify.ToList(),
@@ -1155,6 +1183,68 @@ namespace crm_api.Services
                     await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
 
+                    // Sipariş sahibine onaylandı bildirimi ve mail gönder (eğer onaylayan kişi sipariş sahibi değilse)
+                    if (order.CreatedBy > 0 && order.CreatedBy != userId)
+                    {
+                        try
+                        {
+                            var orderForNotification = await _unitOfWork.Orders.Query()
+                                .Include(o => o.CreatedByUser)
+                                .FirstOrDefaultAsync(o => o.Id == order.Id);
+
+                            if (orderForNotification != null && orderForNotification.CreatedByUser != null)
+                            {
+                                // Bildirim oluştur
+                                try
+                                {
+                                    await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                    {
+                                        UserId = orderForNotification.CreatedBy ?? 0L,
+                                        TitleKey = "Notification.OrderApproved.Title", // "Sipariş Onaylandı"
+                                        TitleArgs = new object[] { orderForNotification.Id },
+                                        MessageKey = "Notification.OrderApproved.Message", // "{0} numaralı sipariş onaylandı."
+                                        MessageArgs = new object[] { orderForNotification.OfferNo ?? "" },
+                                        NotificationType = NotificationType.OrderDetail,
+                                        RelatedEntityName = "Order",
+                                        RelatedEntityId = orderForNotification.Id
+                                    });
+                                }
+                                catch (Exception)
+                                {
+                                    // ignore
+                                }
+
+                                // Mail gönder
+                                var approverUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                                if (approverUser != null && !string.IsNullOrWhiteSpace(orderForNotification.CreatedByUser.Email))
+                                {
+                                    var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                                    var orderPath = _configuration["FrontendSettings:OrderDetailPath"]?.TrimStart('/') ?? "orders";
+                                    var orderLink = $"{baseUrl}/{orderPath}/{orderForNotification.Id}";
+
+                                    var creatorFullName = $"{orderForNotification.CreatedByUser.FirstName} {orderForNotification.CreatedByUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = orderForNotification.CreatedByUser.Username;
+
+                                    var approverFullName = $"{approverUser.FirstName} {approverUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(approverFullName)) approverFullName = approverUser.Username;
+
+                                    BackgroundJob.Enqueue<IMailJob>(job =>
+                                        job.SendOrderApprovedEmailAsync(
+                                            orderForNotification.CreatedByUser.Email,
+                                            creatorFullName,
+                                            approverFullName,
+                                            orderForNotification.OfferNo ?? "",
+                                            orderLink
+                                        ));
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                        }
+                    }
+
                     return ApiResponse<bool>.SuccessResult(
                         true,
                         _localizationService.GetLocalizedString("OrderService.ApprovalFlowCompleted"));
@@ -1225,6 +1315,73 @@ namespace crm_api.Services
                 await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
+
+                // Yeni step için onaycılara bildirim ve mail gönder
+                try
+                {
+                    var orderForNotification = await _unitOfWork.Orders.Query()
+                        .FirstOrDefaultAsync(o => o.Id == order.Id);
+
+                    if (orderForNotification != null)
+                    {
+                        // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
+                        var userIdToActionId = newActions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
+                        var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                        var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
+                        var orderPath = _configuration["FrontendSettings:OrderDetailPath"]?.TrimStart('/') ?? "orders";
+
+                        var usersToNotify = new List<(string Email, string FullName, long UserId)>();
+
+                        foreach (var newUserId in userIds)
+                        {
+                            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
+                            if (user != null && !string.IsNullOrWhiteSpace(user.Email))
+                            {
+                                usersToNotify.Add((user.Email, user.FullName, newUserId));
+                            }
+                        }
+
+                        // Bildirim gönder
+                        foreach (var user in usersToNotify)
+                        {
+                            try
+                            {
+                                await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                {
+                                    UserId = user.UserId,
+                                    TitleKey = "Notification.OrderApproval.Title", // "Onay Bekleyen Sipariş"
+                                    TitleArgs = new object[] { orderForNotification.Id },
+                                    MessageKey = "Notification.OrderApproval.Message", // "{0} numaralı sipariş onay beklemektedir."
+                                    MessageArgs = new object[] { orderForNotification.OfferNo ?? "" },
+                                    NotificationType = NotificationType.OrderApproval,
+                                    RelatedEntityName = "Order",
+                                    RelatedEntityId = orderForNotification.Id
+                                });
+                            }
+                            catch (Exception)
+                            {
+                                // ignore
+                            }
+                        }
+
+                        // Mail gönder
+                        if (usersToNotify.Any())
+                        {
+                            BackgroundJob.Enqueue<IMailJob>(job =>
+                                job.SendBulkOrderApprovalPendingEmailsAsync(
+                                    usersToNotify,
+                                    userIdToActionId,
+                                    baseUrl,
+                                    approvalPath,
+                                    orderPath,
+                                    orderForNotification.Id));
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -1340,6 +1497,26 @@ namespace crm_api.Services
 
                     if (orderForMail != null && orderForMail.CreatedBy != userId)
                     {
+                        // Bildirim oluştur
+                        try
+                        {
+                            await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                            {
+                                UserId = orderForMail.CreatedBy ?? 0L,
+                                TitleKey = "Notification.OrderRejected.Title", // "Sipariş Reddedildi"
+                                TitleArgs = new object[] { orderForMail.Id },
+                                MessageKey = "Notification.OrderRejected.Message", // "{0} numaralı sipariş reddedildi."
+                                MessageArgs = new object[] { orderForMail.OfferNo ?? "" },
+                                NotificationType = NotificationType.OrderDetail,
+                                RelatedEntityName = "Order",
+                                RelatedEntityId = orderForMail.Id
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            // ignore
+                        }
+
                         var rejectorUser = await _context.Users.FindAsync(userId);
                         if (rejectorUser != null && orderForMail.CreatedByUser != null)
                         {
@@ -1358,7 +1535,7 @@ namespace crm_api.Services
                                     orderForMail.CreatedByUser.Email,
                                     creatorFullName,
                                     rejectorFullName,
-                                    orderForMail.RevisionNo ?? "",
+                                    orderForMail.OfferNo ?? "",
                                     request.RejectReason ?? "Belirtilmedi",
                                     orderLink
                                 ));

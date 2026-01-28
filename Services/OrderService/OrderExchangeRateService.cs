@@ -35,7 +35,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _unitOfWork.Repository<OrderExchangeRate>()
+                var query = _unitOfWork.OrderExchangeRates
                     .Query()
                     .Where(e => !e.IsDeleted)
                     .Include(e => e.Order)
@@ -78,7 +78,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<OrderExchangeRate>()
+                var exchangeRate = await _unitOfWork.OrderExchangeRates
                     .Query()
                     .Include(e => e.Order)
                     .Include(e => e.CreatedByUser)
@@ -111,11 +111,11 @@ namespace crm_api.Services
             try
             {
                 var exchangeRate = _mapper.Map<OrderExchangeRate>(createDto);
-                await _unitOfWork.Repository<OrderExchangeRate>().AddAsync(exchangeRate);
+                await _unitOfWork.OrderExchangeRates.AddAsync(exchangeRate);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties
-                var exchangeRateWithNav = await _unitOfWork.Repository<OrderExchangeRate>()
+                var exchangeRateWithNav = await _unitOfWork.OrderExchangeRates
                     .Query()
                     .Include(e => e.Order)
                     .Include(e => e.CreatedByUser)
@@ -147,7 +147,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<OrderExchangeRate>().GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.OrderExchangeRates.GetByIdAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<OrderExchangeRateGetDto>.ErrorResult(
@@ -157,11 +157,11 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(updateDto, exchangeRate);
-                await _unitOfWork.Repository<OrderExchangeRate>().UpdateAsync(exchangeRate);
+                await _unitOfWork.OrderExchangeRates.UpdateAsync(exchangeRate);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties
-                var exchangeRateWithNav = await _unitOfWork.Repository<OrderExchangeRate>()
+                var exchangeRateWithNav = await _unitOfWork.OrderExchangeRates
                     .Query()
                     .Include(e => e.Order)
                     .Include(e => e.CreatedByUser)
@@ -193,7 +193,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<OrderExchangeRate>().GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.OrderExchangeRates.GetByIdAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -202,7 +202,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<OrderExchangeRate>().SoftDeleteAsync(id);
+                await _unitOfWork.OrderExchangeRates.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("OrderExchangeRateService.RateDeleted"));
@@ -220,7 +220,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRates = await _unitOfWork.Repository<OrderExchangeRate>()
+                var exchangeRates = await _unitOfWork.OrderExchangeRates
                     .Query()
                     .Where(e => e.OrderId == orderId && !e.IsDeleted)
                     .Include(e => e.CreatedByUser)

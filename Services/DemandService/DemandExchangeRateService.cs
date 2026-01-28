@@ -40,7 +40,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _unitOfWork.Repository<DemandExchangeRate>()
+                var query = _unitOfWork.DemandExchangeRates
                     .Query()
                     .Where(e => !e.IsDeleted)
                     .Include(e => e.Demand)
@@ -83,7 +83,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<DemandExchangeRate>()
+                var exchangeRate = await _unitOfWork.DemandExchangeRates
                     .Query()
                     .Include(e => e.Demand)
                     .Include(e => e.CreatedByUser)
@@ -116,11 +116,11 @@ namespace crm_api.Services
             try
             {
                 var exchangeRate = _mapper.Map<DemandExchangeRate>(createDto);
-                await _unitOfWork.Repository<DemandExchangeRate>().AddAsync(exchangeRate);
+                await _unitOfWork.DemandExchangeRates.AddAsync(exchangeRate);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties
-                var exchangeRateWithNav = await _unitOfWork.Repository<DemandExchangeRate>()
+                var exchangeRateWithNav = await _unitOfWork.DemandExchangeRates
                     .Query()
                     .Include(e => e.Demand)
                     .Include(e => e.CreatedByUser)
@@ -152,7 +152,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<DemandExchangeRate>().GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.DemandExchangeRates.GetByIdAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<DemandExchangeRateGetDto>.ErrorResult(
@@ -162,11 +162,11 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(updateDto, exchangeRate);
-                await _unitOfWork.Repository<DemandExchangeRate>().UpdateAsync(exchangeRate);
+                await _unitOfWork.DemandExchangeRates.UpdateAsync(exchangeRate);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties
-                var exchangeRateWithNav = await _unitOfWork.Repository<DemandExchangeRate>()
+                var exchangeRateWithNav = await _unitOfWork.DemandExchangeRates
                     .Query()
                     .Include(e => e.Demand)
                     .Include(e => e.CreatedByUser)
@@ -198,7 +198,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.Repository<DemandExchangeRate>().GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.DemandExchangeRates.GetByIdAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -207,7 +207,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<DemandExchangeRate>().SoftDeleteAsync(id);
+                await _unitOfWork.DemandExchangeRates.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("DemandExchangeRateService.RateDeleted"));
@@ -225,7 +225,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRates = await _unitOfWork.Repository<DemandExchangeRate>()
+                var exchangeRates = await _unitOfWork.DemandExchangeRates
                     .Query()
                     .Where(e => e.DemandId == demandId && !e.IsDeleted)
                     .Include(e => e.Demand)

@@ -13,6 +13,8 @@ using System.Linq;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
+using crm_api.Models.Notification;
+using crm_api.DTOs.NotificationDto;
 
 
 namespace crm_api.Services
@@ -28,6 +30,8 @@ namespace crm_api.Services
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly INotificationService _notificationService;
+        
         public DemandService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -37,7 +41,8 @@ namespace crm_api.Services
             IErpService erpService,
             IDocumentSerialTypeService documentSerialTypeService,
             IConfiguration configuration,
-            IUserService userService)
+            IUserService userService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -48,6 +53,7 @@ namespace crm_api.Services
             _documentSerialTypeService = documentSerialTypeService;
             _configuration = configuration;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<PagedResponse<DemandGetDto>>> GetAllDemandsAsync(PagedRequest request)
@@ -109,7 +115,7 @@ namespace crm_api.Services
         {
             try
             {
-                var demand = await _unitOfWork.Repository<Demand>().GetByIdAsync(id);
+                var demand = await _unitOfWork.Demands.GetByIdAsync(id);
                 if (demand == null)
                 {
                     return ApiResponse<DemandGetDto>.ErrorResult(
@@ -119,7 +125,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var demandWithNav = await _unitOfWork.Repository<Demand>().Query()
+                var demandWithNav = await _unitOfWork.Demands.Query()
                     .AsNoTracking()
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
@@ -146,7 +152,7 @@ namespace crm_api.Services
                 var demand = _mapper.Map<Demand>(createDemandDto);
                 demand.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Repository<Demand>().AddAsync(demand);
+                await _unitOfWork.Demands.AddAsync(demand);
                 await _unitOfWork.SaveChangesAsync();
 
                 var demandDto = _mapper.Map<DemandDto>(demand);
@@ -175,7 +181,7 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                var demand = await _unitOfWork.Repository<Demand>().Query()
+                var demand = await _unitOfWork.Demands.Query()
                     .Include(q => q.Lines)
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
 
@@ -206,7 +212,7 @@ namespace crm_api.Services
                 demand.Total = total;
                 demand.GrandTotal = grandTotal;
 
-                await _unitOfWork.Repository<Demand>().UpdateAsync(demand);
+                await _unitOfWork.Demands.UpdateAsync(demand);
                 await _unitOfWork.SaveChangesAsync();
 
                 var demandDto = _mapper.Map<DemandDto>(demand);
@@ -236,7 +242,7 @@ namespace crm_api.Services
                 var userId = userIdResponse.Data;
 
 
-                var demand = await _unitOfWork.Repository<Demand>().GetByIdAsync(id);
+                var demand = await _unitOfWork.Demands.GetByIdAsync(id);
                 if (demand == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -247,7 +253,7 @@ namespace crm_api.Services
 
 
                 // 3. Soft delete
-                await _unitOfWork.Repository<Demand>().SoftDeleteAsync(id);
+                await _unitOfWork.Demands.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("DemandService.DemandDeleted"));
@@ -264,7 +270,7 @@ namespace crm_api.Services
         {
             try
             {
-                var demands = await _unitOfWork.Repository<Demand>().FindAsync(q => q.PotentialCustomerId == potentialCustomerId);
+                var demands = await _unitOfWork.Demands.FindAsync(q => q.PotentialCustomerId == potentialCustomerId);
                 var demandDtos = _mapper.Map<List<DemandGetDto>>(demands.ToList());
                 return ApiResponse<List<DemandGetDto>>.SuccessResult(demandDtos, _localizationService.GetLocalizedString("DemandService.DemandsByPotentialCustomerRetrieved"));
             }
@@ -280,7 +286,7 @@ namespace crm_api.Services
         {
             try
             {
-                var demands = await _unitOfWork.Repository<Demand>().FindAsync(q => q.RepresentativeId == representativeId);
+                var demands = await _unitOfWork.Demands.FindAsync(q => q.RepresentativeId == representativeId);
                 var demandDtos = _mapper.Map<List<DemandGetDto>>(demands.ToList());
                 return ApiResponse<List<DemandGetDto>>.SuccessResult(demandDtos, _localizationService.GetLocalizedString("DemandService.DemandsByRepresentativeRetrieved"));
             }
@@ -296,7 +302,7 @@ namespace crm_api.Services
         {
             try
             {
-                var demands = await _unitOfWork.Repository<Demand>().FindAsync(q => (int?)q.Status == status);
+                var demands = await _unitOfWork.Demands.FindAsync(q => (int?)q.Status == status);
                 var demandDtos = _mapper.Map<List<DemandGetDto>>(demands.ToList());
                 return ApiResponse<List<DemandGetDto>>.SuccessResult(demandDtos, _localizationService.GetLocalizedString("DemandService.DemandsByStatusRetrieved"));
             }
@@ -312,7 +318,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.Repository<Demand>().ExistsAsync(id);
+                var exists = await _unitOfWork.Demands.ExistsAsync(id);
                 return ApiResponse<bool>.SuccessResult(exists, exists ? _localizationService.GetLocalizedString("DemandService.DemandRetrieved") : _localizationService.GetLocalizedString("DemandService.DemandNotFound"));
             }
             catch (Exception ex)
@@ -950,7 +956,7 @@ namespace crm_api.Services
                 await _unitOfWork.ApprovalActions.AddAllAsync(actions);
                 await _unitOfWork.SaveChangesAsync();
 
-                var demand = await _unitOfWork.Repository<Demand>().GetByIdAsync(request.EntityId);
+                var demand = await _unitOfWork.Demands.GetByIdAsync(request.EntityId);
                 if (demand == null)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
@@ -961,7 +967,7 @@ namespace crm_api.Services
                 }
                 demand.Status = ApprovalStatus.Waiting;
 
-                await _unitOfWork.Repository<Demand>().UpdateAsync(demand);
+                await _unitOfWork.Demands.UpdateAsync(demand);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Transaction'ı commit et
@@ -971,6 +977,29 @@ namespace crm_api.Services
                 var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                 var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
                 var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
+
+                // Send Notifications
+                foreach (var user in usersToNotify)
+                {
+                    try
+                    {
+                        await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                        {
+                            UserId = user.UserId,
+                            TitleKey = "Notification.DemandApproval.Title", // "Onay Bekleyen Talep"
+                            TitleArgs = new object[] { demand.Id },
+                            MessageKey = "Notification.DemandApproval.Message", // "{0} numaralı talep onay beklemektedir."
+                            MessageArgs = new object[] { demand.OfferNo ?? "" },
+                            NotificationType = NotificationType.DemandApproval,
+                            RelatedEntityName = "Demand",
+                            RelatedEntityId = demand.Id
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
 
                 BackgroundJob.Enqueue<IMailJob>(job =>
                     job.SendDemandApprovalPendingEmailsAsync(
@@ -1108,7 +1137,7 @@ namespace crm_api.Services
                 }
 
                 // Demand'ı al (hem akış bittiğinde hem de sonraki step için gerekli)
-                var demand = await _unitOfWork.Repository<Demand>().Query()
+                var demand = await _unitOfWork.Demands.Query()
                     .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
 
                 if (demand == null)
@@ -1138,7 +1167,7 @@ namespace crm_api.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     // DemandLine'ların ApprovalStatus'unu Approved yap
-                    var demandLines = await _unitOfWork.Repository<DemandLine>().Query()
+                    var demandLines = await _unitOfWork.DemandLines.Query()
                         .Where(ql => ql.DemandId == demand.Id && !ql.IsDeleted)
                         .ToListAsync();
 
@@ -1147,11 +1176,73 @@ namespace crm_api.Services
                         line.ApprovalStatus = ApprovalStatus.Approved;
                         line.UpdatedDate = DateTime.UtcNow;
                         line.UpdatedBy = userId;
-                        await _unitOfWork.Repository<DemandLine>().UpdateAsync(line);
+                        await _unitOfWork.DemandLines.UpdateAsync(line);
                     }
 
                     await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
+
+                    // Talep sahibine onaylandı bildirimi ve mail gönder (eğer onaylayan kişi talep sahibi değilse)
+                    if (demand.CreatedBy > 0 && demand.CreatedBy != userId)
+                    {
+                        try
+                        {
+                            var demandForNotification = await _unitOfWork.Demands.Query()
+                                .Include(d => d.CreatedByUser)
+                                .FirstOrDefaultAsync(d => d.Id == demand.Id);
+
+                            if (demandForNotification != null && demandForNotification.CreatedByUser != null)
+                            {
+                                // Bildirim oluştur
+                                try
+                                {
+                                    await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                    {
+                                        UserId = demandForNotification.CreatedBy ?? 0L,
+                                        TitleKey = "Notification.DemandApproved.Title", // "Talep Onaylandı"
+                                        TitleArgs = new object[] { demandForNotification.Id },
+                                        MessageKey = "Notification.DemandApproved.Message", // "{0} numaralı talep onaylandı."
+                                        MessageArgs = new object[] { demandForNotification.OfferNo ?? "" },
+                                        NotificationType = NotificationType.DemandDetail,
+                                        RelatedEntityName = "Demand",
+                                        RelatedEntityId = demandForNotification.Id
+                                    });
+                                }
+                                catch (Exception)
+                                {
+                                    // ignore
+                                }
+
+                                // Mail gönder
+                                var approverUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                                if (approverUser != null && !string.IsNullOrWhiteSpace(demandForNotification.CreatedByUser.Email))
+                                {
+                                    var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                                    var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
+                                    var demandLink = $"{baseUrl}/{demandPath}/{demandForNotification.Id}";
+
+                                    var creatorFullName = $"{demandForNotification.CreatedByUser.FirstName} {demandForNotification.CreatedByUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = demandForNotification.CreatedByUser.Username;
+
+                                    var approverFullName = $"{approverUser.FirstName} {approverUser.LastName}".Trim();
+                                    if (string.IsNullOrWhiteSpace(approverFullName)) approverFullName = approverUser.Username;
+
+                                    BackgroundJob.Enqueue<IMailJob>(job =>
+                                        job.SendDemandApprovedEmailAsync(
+                                            demandForNotification.CreatedByUser.Email,
+                                            creatorFullName,
+                                            approverFullName,
+                                            demandForNotification.OfferNo ?? "",
+                                            demandLink
+                                        ));
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                        }
+                    }
 
                     return ApiResponse<bool>.SuccessResult(
                         true,
@@ -1223,6 +1314,73 @@ namespace crm_api.Services
                 await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
+
+                // Yeni step için onaycılara bildirim ve mail gönder
+                try
+                {
+                    var demandForNotification = await _unitOfWork.Demands.Query()
+                        .FirstOrDefaultAsync(d => d.Id == demand.Id);
+
+                    if (demandForNotification != null)
+                    {
+                        // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
+                        var userIdToActionId = newActions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
+                        var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+                        var approvalPath = _configuration["FrontendSettings:ApprovalPendingPath"]?.TrimStart('/') ?? "approvals/pending";
+                        var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
+
+                        var usersToNotify = new List<(string Email, string FullName, long UserId)>();
+
+                        foreach (var newUserId in userIds)
+                        {
+                            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
+                            if (user != null && !string.IsNullOrWhiteSpace(user.Email))
+                            {
+                                usersToNotify.Add((user.Email, user.FullName, newUserId));
+                            }
+                        }
+
+                        // Bildirim gönder
+                        foreach (var user in usersToNotify)
+                        {
+                            try
+                            {
+                                await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                                {
+                                    UserId = user.UserId,
+                                    TitleKey = "Notification.DemandApproval.Title", // "Onay Bekleyen Talep"
+                                    TitleArgs = new object[] { demandForNotification.Id },
+                                    MessageKey = "Notification.DemandApproval.Message", // "{0} numaralı talep onay beklemektedir."
+                                    MessageArgs = new object[] { demandForNotification.OfferNo ?? "" },
+                                    NotificationType = NotificationType.DemandApproval,
+                                    RelatedEntityName = "Demand",
+                                    RelatedEntityId = demandForNotification.Id
+                                });
+                            }
+                            catch (Exception)
+                            {
+                                // ignore
+                            }
+                        }
+
+                        // Mail gönder
+                        if (usersToNotify.Any())
+                        {
+                            BackgroundJob.Enqueue<IMailJob>(job =>
+                                job.SendDemandApprovalPendingEmailsAsync(
+                                    usersToNotify,
+                                    userIdToActionId,
+                                    baseUrl,
+                                    approvalPath,
+                                    demandPath,
+                                    demandForNotification.Id));
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Bildirim ve mail gönderimi başarısız olsa bile işlem başarılı sayılmalı
+                }
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -1305,12 +1463,12 @@ namespace crm_api.Services
                 // DemandLine'ların ApprovalStatus'unu Rejected yap
                 if (approvalRequest.CurrentStep == 1)
                 {
-                    var demand = await _unitOfWork.Repository<Demand>().Query()
+                    var demand =    await _unitOfWork.Demands.Query()
                         .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
 
                     if (demand != null && demand.CreatedBy == userId)
                     {
-                        var demandLines = await _unitOfWork.Repository<DemandLine>().Query()
+                        var demandLines = await _unitOfWork.DemandLines.Query()
                             .Where(ql => ql.DemandId == demand.Id && !ql.IsDeleted)
                             .ToListAsync();
 
@@ -1319,7 +1477,7 @@ namespace crm_api.Services
                             line.ApprovalStatus = ApprovalStatus.Rejected;
                             line.UpdatedDate = DateTime.UtcNow;
                             line.UpdatedBy = userId;
-                            await _unitOfWork.Repository<DemandLine>().UpdateAsync(line);
+                            await _unitOfWork.DemandLines.UpdateAsync(line);
                         }
 
                         await _unitOfWork.SaveChangesAsync();
@@ -1331,12 +1489,32 @@ namespace crm_api.Services
                 // Talep sahibine mail gönder (eğer reddeden kişi talep sahibi değilse)
                 try 
                 {
-                    var demandForMail = await _unitOfWork.Repository<Demand>().Query()
+                    var demandForMail = await _unitOfWork.Demands.Query()
                         .Include(q => q.CreatedByUser)
                         .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId);
 
                     if (demandForMail != null && demandForMail.CreatedBy != userId)
                     {
+                        // Bildirim oluştur
+                        try
+                        {
+                            await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+                            {
+                                UserId = demandForMail.CreatedBy ?? 0L,
+                                TitleKey = "Notification.DemandRejected.Title", // "Talep Reddedildi"
+                                TitleArgs = new object[] { demandForMail.Id },
+                                MessageKey = "Notification.DemandRejected.Message", // "{0} numaralı talep reddedildi."
+                                MessageArgs = new object[] { demandForMail.OfferNo ?? "" },
+                                NotificationType = NotificationType.DemandDetail,
+                                RelatedEntityName = "Demand",
+                                RelatedEntityId = demandForMail.Id
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            // ignore
+                        }
+
                         var rejectorUser = await _context.Users.FindAsync(userId);
                         if (rejectorUser != null && demandForMail.CreatedByUser != null)
                         {
@@ -1355,7 +1533,7 @@ namespace crm_api.Services
                                     demandForMail.CreatedByUser.Email,
                                     creatorFullName,
                                     rejectorFullName,
-                                    demandForMail.RevisionNo ?? "",
+                                    demandForMail.OfferNo ?? "",
                                     request.RejectReason ?? "Belirtilmedi",
                                     demandLink
                                 ));
