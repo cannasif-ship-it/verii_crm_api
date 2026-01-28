@@ -1560,5 +1560,193 @@ namespace crm_api.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
+
+        public async Task<ApiResponse<PagedResponse<OrderGetDto>>> GetRelatedOrders(PagedRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    request = new PagedRequest();
+                }
+
+                if (request.Filters == null)
+                {
+                    request.Filters = new List<Filter>();
+                }
+
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
+                {
+                    return ApiResponse<PagedResponse<OrderGetDto>>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                var userId = userIdResponse.Data;
+
+                var avaibleUsersResponse = await GetOrderRelatedUsersAsync(userId);
+                if (!avaibleUsersResponse.Success)
+                {
+                    return ApiResponse<PagedResponse<OrderGetDto>>.ErrorResult(
+                        avaibleUsersResponse.Message,
+                        avaibleUsersResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                var avaibleUsers = avaibleUsersResponse.Data;
+                var avaibleUsersIds = avaibleUsers.Select(x => x.UserId).ToList();
+
+
+                var query = _context.Orders
+                    .AsNoTracking()
+                    .Where(q => !q.IsDeleted && (q.CreatedBy == userId || avaibleUsersIds.Contains(q.RepresentativeId.Value)))
+                    .Include(q => q.CreatedByUser)
+                    .Include(q => q.UpdatedByUser)
+                    .Include(q => q.DeletedByUser)
+                    .Include(q => q.DocumentSerialType)
+                    .ApplyFilters(request.Filters);
+
+                var sortBy = request.SortBy ?? nameof(Order.Id);
+                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+                query = query.ApplySorting(sortBy, request.SortDirection);
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .ApplyPagination(request.PageNumber, request.PageSize)
+                    .ToListAsync();
+
+                var dtos = items.Select(x => _mapper.Map<OrderGetDto>(x)).ToList();
+
+                var pagedResponse = new PagedResponse<OrderGetDto>
+                {
+                    Items = dtos,
+                    TotalCount = totalCount,
+                    PageNumber = request.PageNumber,
+                    PageSize = request.PageSize
+                };
+
+                return ApiResponse<PagedResponse<OrderGetDto>>.SuccessResult(pagedResponse, _localizationService.GetLocalizedString("OrderService.OrdersRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<PagedResponse<OrderGetDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("OrderService.InternalServerError"),
+                    _localizationService.GetLocalizedString("OrderService.GetAllOrdersExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<ApprovalScopeUserDto>>> GetOrderRelatedUsersAsync(long userId)
+        {
+            try
+            {
+                /* -------------------------------------------------------
+                 * 1️ Kullanıcının bulunduğu flow + max step
+                 * -------------------------------------------------------*/
+                var myFlowSteps = await
+                (
+                    from ur in _unitOfWork.ApprovalUserRoles.Query()
+                    join ar in _unitOfWork.ApprovalRoles.Query()
+                        on ur.ApprovalRoleId equals ar.Id
+                    join fs in _unitOfWork.ApprovalFlowSteps.Query()
+                        on ar.ApprovalRoleGroupId equals fs.ApprovalRoleGroupId
+                    join f in _unitOfWork.ApprovalFlows.Query()
+                        on fs.ApprovalFlowId equals f.Id
+                    where ur.UserId == userId
+                          && !ur.IsDeleted
+                          && !ar.IsDeleted
+                          && !fs.IsDeleted
+                          && !f.IsDeleted
+                          && f.IsActive
+                          && f.DocumentType == PricingRuleType.Order
+                    group fs by fs.ApprovalFlowId into g
+                    select new MyFlowStepDto
+                    {
+                        ApprovalFlowId = g.Key,
+                        MaxStepOrder = g.Max(x => x.StepOrder)
+                    }
+                ).ToListAsync();
+
+                if (!myFlowSteps.Any())
+                    return ApiResponse<List<ApprovalScopeUserDto>>
+                        .SuccessResult(new List<ApprovalScopeUserDto>(), "");
+
+                var flowStepMap = myFlowSteps
+                    .ToDictionary(x => x.ApprovalFlowId, x => x.MaxStepOrder);
+
+                /* -------------------------------------------------------
+                 * 2️ Flow altındaki kullanıcılar
+                 * -------------------------------------------------------*/
+                var rawUsers =
+                    (
+                        from fs in _unitOfWork.ApprovalFlowSteps.Query()
+                        join ar in _unitOfWork.ApprovalRoles.Query()
+                            on fs.ApprovalRoleGroupId equals ar.ApprovalRoleGroupId
+                        join ur in _unitOfWork.ApprovalUserRoles.Query()
+                            on ar.Id equals ur.ApprovalRoleId
+                        join u in _unitOfWork.Users.Query()
+                            on ur.UserId equals u.Id
+                        join rg in _unitOfWork.ApprovalRoleGroups.Query()
+                            on fs.ApprovalRoleGroupId equals rg.Id
+                        where !fs.IsDeleted
+                              && !ar.IsDeleted
+                              && !ur.IsDeleted
+                              && !u.IsDeleted
+                        select new
+                        {
+                            fs.ApprovalFlowId,
+                            fs.StepOrder,
+                            u.Id,
+                            u.FirstName,
+                            u.LastName,
+                            RoleGroupName = rg.Name
+                        }
+                    )
+                    .AsEnumerable(); // SQL → Memory geçişi
+
+                var usersUnderMe = rawUsers
+                    .Where(x =>
+                        flowStepMap.TryGetValue(x.ApprovalFlowId, out var maxStep)
+                        && (
+                            x.StepOrder < maxStep
+                            || (x.StepOrder == maxStep && x.Id == userId)
+                        )
+                    )
+                    .Select(x => new ApprovalScopeUserDto
+                    {
+                        FlowId = x.ApprovalFlowId,
+                        UserId = x.Id,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        RoleGroupName = x.RoleGroupName,
+                        StepOrder = x.StepOrder
+                    })
+                    .Distinct()
+                    .OrderBy(x => x.FlowId)
+                    .ThenBy(x => x.StepOrder)
+                    .ToList();
+
+                return ApiResponse<List<ApprovalScopeUserDto>>
+                    .SuccessResult(
+                        usersUnderMe,
+                        _localizationService.GetLocalizedString(
+                            "OrderService.OrderApproverUsersRetrieved"
+                        )
+                    );
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<ApprovalScopeUserDto>>
+                    .ErrorResult(
+                        _localizationService.GetLocalizedString(
+                            "OrderService.InternalServerError"
+                        ),
+                        ex.Message,
+                        StatusCodes.Status500InternalServerError
+                    );
+            }
+        }
     }
 }

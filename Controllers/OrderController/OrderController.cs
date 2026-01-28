@@ -31,6 +31,17 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Kullanıcıya göre siparişleri getirir
+        /// </summary>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related")]
+        public async Task<IActionResult> GetRelatedOrders([FromQuery] PagedRequest request)
+        {
+            var result = await _orderService.GetRelatedOrders(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// ID'ye göre sipariş getirir
         /// </summary>
         /// <param name="id">Sipariş ID</param>
@@ -229,6 +240,18 @@ namespace crm_api.Controllers
         public async Task<IActionResult> GetOrdersByStatus(int status)
         {
             var result = await _orderService.GetOrdersByStatusAsync(status);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Kullanıcıya göre sipariş ile ilgili kullanıcıları getirir
+        /// </summary>
+        /// <param name="userId">Kullanıcı ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related-users/{userId}")]
+        public async Task<IActionResult> GetOrderRelatedUsers(long userId)
+        {
+            var result = await _orderService.GetOrderRelatedUsersAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
     }
