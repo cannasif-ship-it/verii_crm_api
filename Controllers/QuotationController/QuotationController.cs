@@ -31,6 +31,17 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Kullanıcıya göre teklifleri getirir
+        /// </summary>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related")]
+        public async Task<IActionResult> GetRelatedQuotations([FromQuery] PagedRequest request)
+        {
+            var result = await _quotationService.GetRelatedQutotations(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// ID'ye göre teklif getirir
         /// </summary>
         /// <param name="id">Teklif ID</param>
@@ -229,6 +240,18 @@ namespace crm_api.Controllers
         public async Task<IActionResult> GetQuotationsByStatus(int status)
         {
             var result = await _quotationService.GetQuotationsByStatusAsync(status);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Kullanıcıya göre teklif ile ilgili kullanıcıları getirir
+        /// </summary>
+        /// <param name="userId">Kullanıcı ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related-users/{userId}")]
+        public async Task<IActionResult> GetQuotationRelatedUsers(long userId)
+        {
+            var result = await _quotationService.GetQuotationRelatedUsersAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
     }

@@ -6,6 +6,7 @@ namespace crm_api.Interfaces
     public interface IQuotationService
     {
         Task<ApiResponse<PagedResponse<QuotationGetDto>>> GetAllQuotationsAsync(PagedRequest request);
+        Task<ApiResponse<PagedResponse<QuotationGetDto>>> GetRelatedQutotations(PagedRequest request);
         Task<ApiResponse<QuotationGetDto>> GetQuotationByIdAsync(long id);
         Task<ApiResponse<QuotationDto>> CreateQuotationAsync(CreateQuotationDto createQuotationDto);
         Task<ApiResponse<QuotationDto>> UpdateQuotationAsync(long id, UpdateQuotationDto updateQuotationDto);
@@ -22,5 +23,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync();
         Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request);
         Task<ApiResponse<bool>> RejectAsync(RejectActionDto request);
+        Task<ApiResponse<List<ApprovalScopeUserDto>>> GetQuotationRelatedUsersAsync(long userId);
     }
 }
