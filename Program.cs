@@ -80,6 +80,7 @@ builder.Services.AddScoped<IUserAuthorityService, UserAuthorityService>();
 
 // Register Localization Services
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Register ERP Services
 builder.Services.AddScoped<IErpService, ErpService>();
@@ -234,8 +235,12 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
             
-            // SignalR Hub için token yakala
-            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/api/authHub") || path.StartsWithSegments("/authHub")))
+            // SignalR Hub için token yakala (AuthHub ve NotificationHub)
+            if (!string.IsNullOrEmpty(accessToken) && (
+                path.StartsWithSegments("/api/authHub") || 
+                path.StartsWithSegments("/authHub") ||
+                path.StartsWithSegments("/api/notificationHub") || 
+                path.StartsWithSegments("/notificationHub")))
             {
                 context.Token = accessToken;
             }
@@ -460,6 +465,7 @@ app.UseAuthorization();
 // Endpoint mapping
 // SignalR hubs must be mapped before MapControllers() for proper routing
 app.MapHub<AuthHub>("/authHub");
+app.MapHub<crm_api.Hubs.NotificationHub>("/notificationHub");
 app.MapControllers();
 
 // Hangfire Dashboard

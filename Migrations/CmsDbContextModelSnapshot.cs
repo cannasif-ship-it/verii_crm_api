@@ -1678,6 +1678,88 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DOCUMENT_SERIAL_TYPE", (string)null);
                 });
 
+            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MessageArgs")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("MessageKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<long?>("RelatedEntityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("RelatedEntityName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TitleArgs")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("TitleKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsRead");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("crm_api.Models.Order", b =>
                 {
                     b.Property<long>("Id")
@@ -4846,6 +4928,38 @@ namespace crm_api.Migrations
                     b.Navigation("SalesRep");
 
                     b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
+                {
+                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("crm_api.Models.Order", b =>

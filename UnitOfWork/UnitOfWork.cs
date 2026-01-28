@@ -61,6 +61,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<ApprovalRoleGroup>? _approvalRoleGroups;
         private IGenericRepository<ApprovalRole>? _approvalRoles;
         private IGenericRepository<ApprovalUserRole>? _approvalUserRoles;
+        private IGenericRepository<crm_api.Models.Notification.Notification>? _notifications;
 
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
@@ -113,7 +114,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<ApprovalRoleGroup> ApprovalRoleGroups{get{_approvalRoleGroups ??= new GenericRepository<ApprovalRoleGroup>(_context, _httpContextAccessor);return _approvalRoleGroups;}}
         public IGenericRepository<ApprovalRole> ApprovalRoles{get{_approvalRoles ??= new GenericRepository<ApprovalRole>(_context, _httpContextAccessor);return _approvalRoles;}}
         public IGenericRepository<ApprovalUserRole> ApprovalUserRoles{get{_approvalUserRoles ??= new GenericRepository<ApprovalUserRole>(_context, _httpContextAccessor);return _approvalUserRoles;}}
-
+        public IGenericRepository<crm_api.Models.Notification.Notification> Notifications{get{_notifications ??= new GenericRepository<crm_api.Models.Notification.Notification>(_context, _httpContextAccessor);return _notifications;}}
 
         /// <summary>
         /// Get repository for any entity type

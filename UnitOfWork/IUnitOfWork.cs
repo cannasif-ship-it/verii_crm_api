@@ -51,6 +51,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<ApprovalRoleGroup> ApprovalRoleGroups { get; }
         IGenericRepository<ApprovalRole> ApprovalRoles { get; }
         IGenericRepository<ApprovalUserRole> ApprovalUserRoles { get; }
+        IGenericRepository<crm_api.Models.Notification.Notification> Notifications { get; }
 
         /// <summary>
         /// Save all changes to the database within a transaction
