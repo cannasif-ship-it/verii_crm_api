@@ -236,6 +236,27 @@ namespace Infrastructure.BackgroundJobs
             }
         }
 
+        public async Task SendQuotationApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string quotationNo,
+            string quotationLink)
+        {
+            var subject = $"{quotationNo} Numaralı Teklifiniz Onaylanmıştır";
+            var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
+            
+            var content = $@"
+                <p>Sayın {displayName},</p>
+                <p><strong>{quotationNo}</strong> numaralı teklifiniz <strong>{approverFullName}</strong> tarafından onaylanmıştır.</p>
+                <div style=""text-align: center; margin: 30px 0;"">
+                    <a href=""{quotationLink}"" class=""btn"">Teklifi Görüntüle</a>
+                </div>";
+
+            var body = GetEmailTemplate("Teklif Onaylandı", content);
+            await SendEmailAsync(creatorEmail, subject, body, true);
+        }
+
         public async Task SendQuotationRejectedEmailAsync(
             string creatorEmail,
             string creatorFullName,
@@ -261,6 +282,27 @@ namespace Infrastructure.BackgroundJobs
             await SendEmailAsync(creatorEmail, subject, body, true);
         }
 
+        public async Task SendDemandApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string demandNo,
+            string demandLink)
+        {
+            var subject = $"{demandNo} Numaralı Talebiniz Onaylanmıştır";
+            var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
+            
+            var content = $@"
+                <p>Sayın {displayName},</p>
+                <p><strong>{demandNo}</strong> numaralı talebiniz <strong>{approverFullName}</strong> tarafından onaylanmıştır.</p>
+                <div style=""text-align: center; margin: 30px 0;"">
+                    <a href=""{demandLink}"" class=""btn"">Talebi Görüntüle</a>
+                </div>";
+
+            var body = GetEmailTemplate("Talep Onaylandı", content);
+            await SendEmailAsync(creatorEmail, subject, body, true);
+        }
+
         public async Task SendDemandRejectedEmailAsync(
             string creatorEmail,
             string creatorFullName,
@@ -283,6 +325,27 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Talep Reddedildi", content);
+            await SendEmailAsync(creatorEmail, subject, body, true);
+        }
+
+        public async Task SendOrderApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string orderNo,
+            string orderLink)
+        {
+            var subject = $"{orderNo} Numaralı Siparişiniz Onaylanmıştır";
+            var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
+            
+            var content = $@"
+                <p>Sayın {displayName},</p>
+                <p><strong>{orderNo}</strong> numaralı siparişiniz <strong>{approverFullName}</strong> tarafından onaylanmıştır.</p>
+                <div style=""text-align: center; margin: 30px 0;"">
+                    <a href=""{orderLink}"" class=""btn"">Siparişi Görüntüle</a>
+                </div>";
+
+            var body = GetEmailTemplate("Sipariş Onaylandı", content);
             await SendEmailAsync(creatorEmail, subject, body, true);
         }
 

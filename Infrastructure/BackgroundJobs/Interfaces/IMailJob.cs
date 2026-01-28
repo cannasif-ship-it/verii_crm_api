@@ -35,6 +35,13 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string quotationPath,
             long quotationId);
 
+        Task SendQuotationApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string quotationNo,
+            string quotationLink);
+
         Task SendQuotationRejectedEmailAsync(
             string creatorEmail,
             string creatorFullName,
@@ -43,6 +50,13 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string rejectReason,
             string quotationLink);
 
+        Task SendDemandApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string demandNo,
+            string demandLink);
+
         Task SendDemandRejectedEmailAsync(
             string creatorEmail,
             string creatorFullName,
@@ -50,6 +64,13 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string demandNo,
             string rejectReason,
             string demandLink);
+
+        Task SendOrderApprovedEmailAsync(
+            string creatorEmail,
+            string creatorFullName,
+            string approverFullName,
+            string orderNo,
+            string orderLink);
 
         Task SendOrderRejectedEmailAsync(
             string creatorEmail,
