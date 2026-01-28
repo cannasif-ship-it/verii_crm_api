@@ -1034,6 +1034,9 @@
   <data name="QuotationService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>Cotizaciones recuperado con éxito.</value>
   </data>
+  <data name="QuotationService.QuotationApproverUsersRetrieved" xml:space="preserve">
+    <value>Usuarios aprobadores de cotizaciones recuperados con éxito.</value>
+  </data>
   
   
   
@@ -2287,6 +2290,9 @@
   <data name="DemandService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>Cotizaciones recuperado con éxito.</value>
   </data>
+  <data name="DemandService.DemandApproverUsersRetrieved" xml:space="preserve">
+    <value>Usuarios aprobadores de demandas recuperados con éxito.</value>
+  </data>
   
 
 
@@ -2412,6 +2418,9 @@
   </data>
   <data name="OrderService.RejectExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.OrderApproverUsersRetrieved" xml:space="preserve">
+    <value>Usuarios aprobadores de pedidos recuperados con éxito.</value>
   </data>
   <data name="OrderService.StartApprovalFlowExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>

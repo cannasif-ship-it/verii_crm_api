@@ -1034,6 +1034,9 @@
   <data name="QuotationService.WaitingApprovalsRetrieved" xml:space="preserve">
     <value>Devis récupéré(e) avec succès.</value>
   </data>
+  <data name="QuotationService.QuotationApproverUsersRetrieved" xml:space="preserve">
+    <value>Utilisateurs approbateurs de devis récupérés avec succès.</value>
+  </data>
   
   
   
@@ -2412,6 +2415,9 @@
   </data>
   <data name="OrderService.RejectExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
+  </data>
+  <data name="OrderService.OrderApproverUsersRetrieved" xml:space="preserve">
+    <value>Utilisateurs approbateurs de commandes récupérés avec succès.</value>
   </data>
   <data name="OrderService.StartApprovalFlowExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
