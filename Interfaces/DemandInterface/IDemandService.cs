@@ -22,5 +22,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync();
         Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request);
         Task<ApiResponse<bool>> RejectAsync(RejectActionDto request);
+        Task<ApiResponse<PagedResponse<DemandGetDto>>> GetRelatedDemands(PagedRequest request);
+        Task<ApiResponse<List<ApprovalScopeUserDto>>> GetDemandRelatedUsersAsync(long userId);
     }
 }

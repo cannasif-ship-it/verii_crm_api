@@ -31,6 +31,17 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Kullanıcıya göre talepleri getirir
+        /// </summary>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related")]
+        public async Task<IActionResult> GetRelatedDemands([FromQuery] PagedRequest request)
+        {
+            var result = await _demandService.GetRelatedDemands(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// ID'ye göre talep getirir
         /// </summary>
         /// <param name="id">Talep ID</param>
@@ -229,6 +240,18 @@ namespace crm_api.Controllers
         public async Task<IActionResult> GetDemandsByStatus(int status)
         {
             var result = await _demandService.GetDemandsByStatusAsync(status);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Kullanıcıya göre talep ile ilgili kullanıcıları getirir
+        /// </summary>
+        /// <param name="userId">Kullanıcı ID</param>
+        /// <returns>ApiResponse</returns>
+        [HttpGet("related-users/{userId}")]
+        public async Task<IActionResult> GetDemandRelatedUsers(long userId)
+        {
+            var result = await _demandService.GetDemandRelatedUsersAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
     }
