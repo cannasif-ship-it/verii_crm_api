@@ -17,13 +17,15 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
+        private readonly IUserService _userService;
 
-        public QuotationLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public QuotationLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _context = context;
+            _userService = userService;
         }
 
         public async Task<ApiResponse<PagedResponse<QuotationLineGetDto>>> GetAllQuotationLinesAsync(PagedRequest request)
@@ -109,6 +111,24 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("QuotationLineService.CreateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
+        
+        public async Task<ApiResponse<List<QuotationLineDto>>> CreateQuotationLinesAsync(List<CreateQuotationLineDto> createQuotationLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<QuotationLine>>(createQuotationLineDtos);
+                await _unitOfWork.QuotationLines.AddAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<QuotationLineDto>>(entities);
+                return ApiResponse<List<QuotationLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesCreated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<QuotationLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationLineService.CreateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
 
         public async Task<ApiResponse<QuotationLineDto>> UpdateQuotationLineAsync(long id, UpdateQuotationLineDto updateQuotationLineDto)
         {
@@ -139,12 +159,25 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("QuotationLineService.UpdateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
-
         public async Task<ApiResponse<object>> DeleteQuotationLineAsync(long id)
         {
             try
             {
-                var existing = await _unitOfWork.QuotationLines.GetByIdAsync(id);
+                var currentUserResponse = await _userService.GetCurrentUserIdAsync();
+                if (!currentUserResponse.Success)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        currentUserResponse.Message,
+                        currentUserResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                long currentUserId = currentUserResponse.Data;
+                var existing = await _unitOfWork.QuotationLines
+                    .Query()
+                    .Where(x => x.Id == id && !x.IsDeleted)
+                    .Select(x => new { x.RelatedProductKey, x.QuotationId })
+                    .FirstOrDefaultAsync();
+
                 if (existing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -153,18 +186,36 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.QuotationLines.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                var rowsAffected = await _unitOfWork.QuotationLines.Query()
+                    .Where(x => x.RelatedProductKey == existing.RelatedProductKey
+                            && x.QuotationId == existing.QuotationId
+                            && !x.IsDeleted)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.IsDeleted, true)
+                        .SetProperty(p => p.DeletedDate, DateTime.UtcNow)
+                        .SetProperty(p => p.DeletedBy, currentUserId));
 
-                return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("QuotationLineService.QuotationLineDeleted"));
+                if (rowsAffected == 0)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationLineService.QuotationLineNotDeleted"),
+                        _localizationService.GetLocalizedString("QuotationLineService.QuotationLineNotDeleted"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("QuotationLineService.QuotationLineDeleted"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<object>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationLineService.InternalServerError"),
-                    _localizationService.GetLocalizedString("QuotationLineService.DeleteExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+                    _localizationService.GetLocalizedString("QuotationLineService.DeleteExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
             }
         }
+
 
         public async Task<ApiResponse<List<QuotationLineGetDto>>> GetQuotationLinesByQuotationIdAsync(long quotationId)
         {

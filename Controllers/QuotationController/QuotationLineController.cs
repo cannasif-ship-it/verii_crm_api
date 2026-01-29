@@ -57,6 +57,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("create-multiple")]
+        public async Task<IActionResult> CreateQuotationLines([FromBody] List<CreateQuotationLineDto> createQuotationLineDtos)
+        {
+            var result = await _quotationLineService.CreateQuotationLinesAsync(createQuotationLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
         /// <summary>
         /// Teklif satırını günceller
         /// </summary>
