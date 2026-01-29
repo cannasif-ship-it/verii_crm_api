@@ -8,6 +8,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<QuotationExchangeRateGetDto>> GetQuotationExchangeRateByIdAsync(long id);
         Task<ApiResponse<QuotationExchangeRateGetDto>> CreateQuotationExchangeRateAsync(QuotationExchangeRateCreateDto createDto);
         Task<ApiResponse<QuotationExchangeRateGetDto>> UpdateQuotationExchangeRateAsync(long id, QuotationExchangeRateUpdateDto updateDto);
+        Task<ApiResponse<bool>> UpdateExchangeRateInQuotation(List<QuotationExchangeRateGetDto> updateDtos);
         Task<ApiResponse<object>> DeleteQuotationExchangeRateAsync(long id);
         Task<ApiResponse<List<QuotationExchangeRateGetDto>>> GetQuotationExchangeRatesByQuotationIdAsync(long quotationId);
     }

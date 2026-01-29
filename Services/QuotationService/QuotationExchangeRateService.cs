@@ -189,6 +189,42 @@ namespace crm_api.Services
             }
         }
 
+            public async Task<ApiResponse<bool>> UpdateExchangeRateInQuotation(List<QuotationExchangeRateGetDto> updateDtos){
+                try
+                {
+                    foreach (var dto in updateDtos)
+                    {
+                        var exchangeRate = await _unitOfWork.QuotationExchangeRates.GetByIdForUpdateAsync(dto.Id);
+
+                        if (exchangeRate == null)
+                        {
+                            return ApiResponse<bool>.ErrorResult(
+                                _localizationService.GetLocalizedString("QuotationExchangeRateService.ExchangeRateNotFound"),
+                                _localizationService.GetLocalizedString("QuotationExchangeRateService.ExchangeRateNotFound"),
+                                StatusCodes.Status404NotFound);
+                        }
+
+                        // Mapper sadece gelen alanları değiştirir
+                        _mapper.Map(dto, exchangeRate);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+
+                    return ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("QuotationExchangeRateService.ExchangeRateUpdated"));
+                }
+                catch (Exception ex)
+                {
+                    return ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationExchangeRateService.InternalServerError"),
+                        _localizationService.GetLocalizedString("QuotationExchangeRateService.UpdateExchangeRateInQuotationExceptionMessage", ex.Message),
+                        StatusCodes.Status500InternalServerError);
+                }
+            }
+
+
+
         public async Task<ApiResponse<object>> DeleteQuotationExchangeRateAsync(long id)
         {
             try

@@ -52,6 +52,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPut("update-exchange-rate-in-quotation")]
+        public async Task<IActionResult> UpdateExchangeRateInQuotation([FromBody] List<QuotationExchangeRateGetDto> updateDtos)
+        {
+            var result = await _quotationExchangeRateService.UpdateExchangeRateInQuotation(updateDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
