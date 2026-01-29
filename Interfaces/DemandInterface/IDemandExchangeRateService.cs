@@ -8,6 +8,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<DemandExchangeRateGetDto>> GetDemandExchangeRateByIdAsync(long id);
         Task<ApiResponse<DemandExchangeRateGetDto>> CreateDemandExchangeRateAsync(DemandExchangeRateCreateDto createDto);
         Task<ApiResponse<DemandExchangeRateGetDto>> UpdateDemandExchangeRateAsync(long id, DemandExchangeRateUpdateDto updateDto);
+        Task<ApiResponse<bool>> UpdateExchangeRateInDemand(List<DemandExchangeRateGetDto> updateDtos);
         Task<ApiResponse<object>> DeleteDemandExchangeRateAsync(long id);
         Task<ApiResponse<List<DemandExchangeRateGetDto>>> GetDemandExchangeRatesByDemandIdAsync(long demandId);
     }
