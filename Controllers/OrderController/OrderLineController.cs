@@ -58,6 +58,16 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Birden fazla sipariş satırı oluşturur
+        /// </summary>
+        [HttpPost("create-multiple")]
+        public async Task<IActionResult> CreateOrderLines([FromBody] List<CreateOrderLineDto> createOrderLineDtos)
+        {
+            var result = await _orderLineService.CreateOrderLinesAsync(createOrderLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// Sipariş satırını günceller
         /// </summary>
         [HttpPut("{id}")]

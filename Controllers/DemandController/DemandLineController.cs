@@ -58,6 +58,16 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Birden fazla talep satırı oluşturur
+        /// </summary>
+        [HttpPost("create-multiple")]
+        public async Task<IActionResult> CreateDemandLines([FromBody] List<CreateDemandLineDto> createDemandLineDtos)
+        {
+            var result = await _demandLineService.CreateDemandLinesAsync(createDemandLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// Talep satırını günceller
         /// </summary>
         [HttpPut("{id}")]

@@ -57,6 +57,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Birden fazla teklif satırı oluşturur
+        /// </summary>
         [HttpPost("create-multiple")]
         public async Task<IActionResult> CreateQuotationLines([FromBody] List<CreateQuotationLineDto> createQuotationLineDtos)
         {

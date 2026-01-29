@@ -17,6 +17,9 @@ namespace crm_api.Controllers
             _demandExchangeRateService = demandExchangeRateService;
         }
 
+        /// <summary>
+        /// Tüm talep döviz kurlarını getirir
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request)
         {
@@ -24,6 +27,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// ID'ye göre talep döviz kurunu getirir
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(long id)
         {
@@ -31,6 +37,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Talebe göre talep döviz kurlarını getirir
+        /// </summary>
         [HttpGet("demand/{demandId}")]
         public async Task<IActionResult> GetByDemandId(long demandId)
         {
@@ -38,6 +47,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Yeni talep döviz kuru oluşturur
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] DemandExchangeRateCreateDto createDto)
         {
@@ -45,6 +57,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Talep döviz kurunu günceller
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] DemandExchangeRateUpdateDto updateDto)
         {
@@ -52,6 +67,19 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Talep içindeki döviz kurlarını toplu günceller
+        /// </summary>
+        [HttpPut("update-exchange-rate-in-demand")]
+        public async Task<IActionResult> UpdateExchangeRateInDemand([FromBody] List<DemandExchangeRateGetDto> updateDtos)
+        {
+            var result = await _demandExchangeRateService.UpdateExchangeRateInDemand(updateDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Talep döviz kurunu siler
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {

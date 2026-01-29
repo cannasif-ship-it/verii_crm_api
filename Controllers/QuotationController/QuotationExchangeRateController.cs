@@ -17,6 +17,9 @@ namespace crm_api.Controllers
             _quotationExchangeRateService = quotationExchangeRateService;
         }
 
+        /// <summary>
+        /// Tüm teklif döviz kurlarını getirir
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request)
         {
@@ -24,6 +27,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// ID'ye göre teklif döviz kurunu getirir
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(long id)
         {
@@ -31,6 +37,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Teklife göre teklif döviz kurlarını getirir
+        /// </summary>
         [HttpGet("quotation/{quotationId}")]
         public async Task<IActionResult> GetByQuotationId(long quotationId)
         {
@@ -38,6 +47,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Yeni teklif döviz kuru oluşturur
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] QuotationExchangeRateCreateDto createDto)
         {
@@ -45,6 +57,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Teklif döviz kurunu günceller
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] QuotationExchangeRateUpdateDto updateDto)
         {
@@ -52,6 +67,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Teklif içindeki döviz kurlarını toplu günceller
+        /// </summary>
         [HttpPut("update-exchange-rate-in-quotation")]
         public async Task<IActionResult> UpdateExchangeRateInQuotation([FromBody] List<QuotationExchangeRateGetDto> updateDtos)
         {
@@ -59,6 +77,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Teklif döviz kurunu siler
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
