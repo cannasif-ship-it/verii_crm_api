@@ -17,19 +17,31 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
+        private readonly IUserService _userService;
 
-        public OrderLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public OrderLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _context = context;
+            _userService = userService;
         }
 
         public async Task<ApiResponse<PagedResponse<OrderLineGetDto>>> GetAllOrderLinesAsync(PagedRequest request)
         {
             try
             {
+                if (request == null)
+                {
+                    request = new PagedRequest();
+                }
+
+                if (request.Filters == null)
+                {
+                    request.Filters = new List<Filter>();
+                }
+
                 var query = _context.OrderLines
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
@@ -110,6 +122,24 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<OrderLineDto>>> CreateOrderLinesAsync(List<CreateOrderLineDto> createOrderLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<OrderLine>>(createOrderLineDtos);
+                await _unitOfWork.OrderLines.AddAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<OrderLineDto>>(entities);
+                return ApiResponse<List<OrderLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderLineService.OrderLinesCreated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<OrderLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("OrderLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("OrderLineService.CreateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
         public async Task<ApiResponse<OrderLineDto>> UpdateOrderLineAsync(long id, UpdateOrderLineDto updateOrderLineDto)
         {
             try
@@ -144,7 +174,21 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.OrderLines.GetByIdAsync(id);
+                var currentUserResponse = await _userService.GetCurrentUserIdAsync();
+                if (!currentUserResponse.Success)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        currentUserResponse.Message,
+                        currentUserResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                long currentUserId = currentUserResponse.Data;
+                var existing = await _unitOfWork.OrderLines
+                    .Query()
+                    .Where(x => x.Id == id && !x.IsDeleted)
+                    .Select(x => new { x.RelatedProductKey, x.OrderId })
+                    .FirstOrDefaultAsync();
+
                 if (existing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -153,16 +197,33 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.OrderLines.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                var rowsAffected = await _unitOfWork.OrderLines.Query()
+                    .Where(x => x.RelatedProductKey == existing.RelatedProductKey
+                            && x.OrderId == existing.OrderId
+                            && !x.IsDeleted)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.IsDeleted, true)
+                        .SetProperty(p => p.DeletedDate, DateTime.UtcNow)
+                        .SetProperty(p => p.DeletedBy, currentUserId));
 
-                return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("OrderLineService.OrderLineDeleted"));
+                if (rowsAffected == 0)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderLineService.OrderLineNotDeleted"),
+                        _localizationService.GetLocalizedString("OrderLineService.OrderLineNotDeleted"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("OrderLineService.OrderLineDeleted"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<object>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderLineService.InternalServerError"),
-                    _localizationService.GetLocalizedString("OrderLineService.DeleteExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+                    _localizationService.GetLocalizedString("OrderLineService.DeleteExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -185,6 +246,11 @@ namespace crm_api.Services
                         })
                     .Select(x => new OrderLineGetDto
                     {
+                        Id = x.OrderLine.Id,
+                        CreatedDate = x.OrderLine.CreatedDate,
+                        UpdatedDate = x.OrderLine.UpdatedDate,
+                        IsDeleted = x.OrderLine.IsDeleted,
+                        DeletedDate = x.OrderLine.DeletedDate,
                         OrderId = x.OrderLine.OrderId,
                         ProductCode = x.OrderLine.ProductCode,
                         ProductName = x.ProductName,

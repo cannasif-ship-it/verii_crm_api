@@ -70,7 +70,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _unitOfWork.Demands.Query()
+                var query = _context.Demands
                     .AsNoTracking()
                     .Where(q => !q.IsDeleted)
                     .Include(q => q.CreatedByUser)

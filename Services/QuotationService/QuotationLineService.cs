@@ -111,7 +111,7 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("QuotationLineService.CreateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
-        
+
         public async Task<ApiResponse<List<QuotationLineDto>>> CreateQuotationLinesAsync(List<CreateQuotationLineDto> createQuotationLineDtos)
         {
             try
@@ -236,6 +236,11 @@ namespace crm_api.Services
                         })
                     .Select(x => new QuotationLineGetDto
                     {
+                        Id = x.QuotationLine.Id,
+                        CreatedDate = x.QuotationLine.CreatedDate,
+                        UpdatedDate = x.QuotationLine.UpdatedDate,
+                        IsDeleted = x.QuotationLine.IsDeleted,
+                        DeletedDate = x.QuotationLine.DeletedDate,
                         QuotationId = x.QuotationLine.QuotationId,
                         ProductCode = x.QuotationLine.ProductCode,
                         ProductName = x.ProductName,
@@ -270,5 +275,6 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("QuotationLineService.GetByQuotationIdExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
+  
     }
 }

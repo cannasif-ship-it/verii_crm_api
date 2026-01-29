@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace crm_api.Services
 {
@@ -20,20 +17,32 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
+        private readonly IUserService _userService;
 
-        public DemandLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public DemandLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _context = context;
+            _userService = userService;
         }
 
         public async Task<ApiResponse<PagedResponse<DemandLineGetDto>>> GetAllDemandLinesAsync(PagedRequest request)
         {
             try
             {
-                var query = _unitOfWork.DemandLines.Query()
+                if (request == null)
+                {
+                    request = new PagedRequest();
+                }
+
+                if (request.Filters == null)
+                {
+                    request.Filters = new List<Filter>();
+                }
+
+                var query = _context.DemandLines
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
                     .ApplyFilters(request.Filters);
@@ -114,6 +123,24 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<DemandLineDto>>> CreateDemandLinesAsync(List<CreateDemandLineDto> createDemandLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<DemandLine>>(createDemandLineDtos);
+                await _unitOfWork.DemandLines.AddAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<DemandLineDto>>(entities);
+                return ApiResponse<List<DemandLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("DemandLineService.DemandLinesCreated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<DemandLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("DemandLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DemandLineService.CreateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
         public async Task<ApiResponse<DemandLineDto>> UpdateDemandLineAsync(long id, UpdateDemandLineDto updateDemandLineDto)
         {
             try
@@ -148,7 +175,21 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.DemandLines.GetByIdAsync(id);
+                var currentUserResponse = await _userService.GetCurrentUserIdAsync();
+                if (!currentUserResponse.Success)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        currentUserResponse.Message,
+                        currentUserResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                long currentUserId = currentUserResponse.Data;
+                var existing = await _unitOfWork.DemandLines
+                    .Query()
+                    .Where(x => x.Id == id && !x.IsDeleted)
+                    .Select(x => new { x.RelatedProductKey, x.DemandId })
+                    .FirstOrDefaultAsync();
+
                 if (existing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -157,16 +198,33 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.DemandLines.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                var rowsAffected = await _unitOfWork.DemandLines.Query()
+                    .Where(x => x.RelatedProductKey == existing.RelatedProductKey
+                            && x.DemandId == existing.DemandId
+                            && !x.IsDeleted)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.IsDeleted, true)
+                        .SetProperty(p => p.DeletedDate, DateTime.UtcNow)
+                        .SetProperty(p => p.DeletedBy, currentUserId));
 
-                return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("DemandLineService.DemandLineDeleted"));
+                if (rowsAffected == 0)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandLineService.DemandLineNotDeleted"),
+                        _localizationService.GetLocalizedString("DemandLineService.DemandLineNotDeleted"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("DemandLineService.DemandLineDeleted"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<object>.ErrorResult(
                     _localizationService.GetLocalizedString("DemandLineService.InternalServerError"),
-                    _localizationService.GetLocalizedString("DemandLineService.DeleteExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+                    _localizationService.GetLocalizedString("DemandLineService.DeleteExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -189,6 +247,11 @@ namespace crm_api.Services
                         })
                     .Select(x => new DemandLineGetDto
                     {
+                        Id = x.DemandLine.Id,
+                        CreatedDate = x.DemandLine.CreatedDate,
+                        UpdatedDate = x.DemandLine.UpdatedDate,
+                        IsDeleted = x.DemandLine.IsDeleted,
+                        DeletedDate = x.DemandLine.DeletedDate,
                         DemandId = x.DemandLine.DemandId,
                         ProductCode = x.DemandLine.ProductCode,
                         ProductName = x.ProductName,

@@ -152,7 +152,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.DemandExchangeRates.GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.DemandExchangeRates.GetByIdForUpdateAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<DemandExchangeRateGetDto>.ErrorResult(
@@ -190,6 +190,39 @@ namespace crm_api.Services
                 return ApiResponse<DemandExchangeRateGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("DemandExchangeRateService.InternalServerError"),
                     _localizationService.GetLocalizedString("DemandExchangeRateService.UpdateRateExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> UpdateExchangeRateInDemand(List<DemandExchangeRateGetDto> updateDtos)
+        {
+            try
+            {
+                foreach (var dto in updateDtos)
+                {
+                    var exchangeRate = await _unitOfWork.DemandExchangeRates.GetByIdForUpdateAsync(dto.Id);
+
+                    if (exchangeRate == null)
+                    {
+                        return ApiResponse<bool>.ErrorResult(
+                            _localizationService.GetLocalizedString("DemandExchangeRateService.ExchangeRateNotFound"),
+                            _localizationService.GetLocalizedString("DemandExchangeRateService.ExchangeRateNotFound"),
+                            StatusCodes.Status404NotFound);
+                    }
+                    exchangeRate.ExchangeRate = dto.ExchangeRate;
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("DemandExchangeRateService.ExchangeRateUpdated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("DemandExchangeRateService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DemandExchangeRateService.UpdateExchangeRateInDemandExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
         }

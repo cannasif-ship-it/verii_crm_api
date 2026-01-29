@@ -203,9 +203,7 @@ namespace crm_api.Services
                                 _localizationService.GetLocalizedString("QuotationExchangeRateService.ExchangeRateNotFound"),
                                 StatusCodes.Status404NotFound);
                         }
-
-                        // Mapper sadece gelen alanları değiştirir
-                        _mapper.Map(dto, exchangeRate);
+                        exchangeRate.ExchangeRate = dto.ExchangeRate;
                     }
 
                     await _unitOfWork.SaveChangesAsync();

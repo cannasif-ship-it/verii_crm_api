@@ -345,6 +345,7 @@ namespace crm_api.Services
                         StatusCodes.Status500InternalServerError);
                 }
                 bulkDto.Order.OfferNo = documentSerialType.Data;
+                bulkDto.Order.RevisionNo = documentSerialType.Data;
                 bulkDto.Order.Status = ApprovalStatus.HavenotStarted;
 
                 // 1. Header map
@@ -1385,7 +1386,7 @@ namespace crm_api.Services
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
-                    _localizationService.GetLocalizedString("OrderService.ApprovalActionApproved"));
+                    _localizationService.GetLocalizedString("OrderService.ApprovalActionApprovedAndNextStepStarted"));
 
             }
             catch (Exception ex)

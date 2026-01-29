@@ -101,7 +101,7 @@ namespace crm_api.Services
             {
                 return ApiResponse<OrderExchangeRateGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderExchangeRateService.InternalServerError"),
-                    _localizationService.GetLocalizedString("OrderExchangeRateService.GetByIdExceptionMessage", ex.Message),
+                    _localizationService.GetLocalizedString("OrderExchangeRateService.GetRateByIdExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
         }
@@ -147,7 +147,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exchangeRate = await _unitOfWork.OrderExchangeRates.GetByIdAsync(id);
+                var exchangeRate = await _unitOfWork.OrderExchangeRates.GetByIdForUpdateAsync(id);
                 if (exchangeRate == null)
                 {
                     return ApiResponse<OrderExchangeRateGetDto>.ErrorResult(
@@ -189,6 +189,39 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<bool>> UpdateExchangeRateInOrder(List<OrderExchangeRateGetDto> updateDtos)
+        {
+            try
+            {
+                foreach (var dto in updateDtos)
+                {
+                    var exchangeRate = await _unitOfWork.OrderExchangeRates.GetByIdForUpdateAsync(dto.Id);
+
+                    if (exchangeRate == null)
+                    {
+                        return ApiResponse<bool>.ErrorResult(
+                            _localizationService.GetLocalizedString("OrderExchangeRateService.ExchangeRateNotFound"),
+                            _localizationService.GetLocalizedString("OrderExchangeRateService.ExchangeRateNotFound"),
+                            StatusCodes.Status404NotFound);
+                    }
+                    exchangeRate.ExchangeRate = dto.ExchangeRate;
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("OrderExchangeRateService.ExchangeRateUpdated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("OrderExchangeRateService.InternalServerError"),
+                    _localizationService.GetLocalizedString("OrderExchangeRateService.UpdateExchangeRateInOrderExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         public async Task<ApiResponse<object>> DeleteOrderExchangeRateAsync(long id)
         {
             try
@@ -223,19 +256,20 @@ namespace crm_api.Services
                 var exchangeRates = await _unitOfWork.OrderExchangeRates
                     .Query()
                     .Where(e => e.OrderId == orderId && !e.IsDeleted)
+                    .Include(e => e.Order)
                     .Include(e => e.CreatedByUser)
                     .Include(e => e.UpdatedByUser)
                     .Include(e => e.DeletedByUser)
                     .ToListAsync();
 
-                var dtos = _mapper.Map<List<OrderExchangeRateGetDto>>(exchangeRates);
-                return ApiResponse<List<OrderExchangeRateGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderExchangeRateService.RatesByOrderRetrieved"));
+                var dtos = exchangeRates.Select(x => _mapper.Map<OrderExchangeRateGetDto>(x)).ToList();
+                return ApiResponse<List<OrderExchangeRateGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderExchangeRateService.RatesRetrieved"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<List<OrderExchangeRateGetDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderExchangeRateService.InternalServerError"),
-                    _localizationService.GetLocalizedString("OrderExchangeRateService.GetByOrderIdExceptionMessage", ex.Message),
+                    _localizationService.GetLocalizedString("OrderExchangeRateService.GetRatesByOrderIdExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
         }
