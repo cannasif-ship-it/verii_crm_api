@@ -129,4 +129,5 @@ namespace crm_api.DTOs
         public bool IsMainRelatedProduct { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
+
 }
