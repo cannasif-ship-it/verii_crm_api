@@ -140,6 +140,25 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<OrderLineDto>>> UpdateOrderLinesAsync(List<OrderLineDto> orderLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<OrderLine>>(orderLineDtos);
+                await _unitOfWork.OrderLines.UpdateAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<OrderLineDto>>(entities);
+                return ApiResponse<List<OrderLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderLineService.OrderLinesUpdated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<OrderLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("OrderLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("OrderLineService.UpdateExceptionMessage",
+                     ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
         public async Task<ApiResponse<OrderLineDto>> UpdateOrderLineAsync(long id, UpdateOrderLineDto updateOrderLineDto)
         {
             try

@@ -66,6 +66,16 @@ namespace crm_api.Controllers
             var result = await _orderLineService.CreateOrderLinesAsync(createOrderLineDtos);
             return StatusCode(result.StatusCode, result);
         }
+        
+        /// <summary>
+        /// Birden fazla sipariş satırını günceller
+        /// </summary>
+        [HttpPut("update-multiple")]
+        public async Task<IActionResult> UpdateOrderLines([FromBody] List<OrderLineDto> orderLineDtos)
+        {
+            var result = await _orderLineService.UpdateOrderLinesAsync(orderLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
 
         /// <summary>
         /// Sipariş satırını günceller

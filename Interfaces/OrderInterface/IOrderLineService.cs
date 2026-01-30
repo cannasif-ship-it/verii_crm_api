@@ -8,6 +8,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<OrderLineGetDto>> GetOrderLineByIdAsync(long id);
         Task<ApiResponse<OrderLineDto>> CreateOrderLineAsync(CreateOrderLineDto createOrderLineDto);
         Task<ApiResponse<List<OrderLineDto>>> CreateOrderLinesAsync(List<CreateOrderLineDto> createOrderLineDtos);
+        Task<ApiResponse<List<OrderLineDto>>> UpdateOrderLinesAsync(List<OrderLineDto> orderLineDtos);
         Task<ApiResponse<OrderLineDto>> UpdateOrderLineAsync(long id, UpdateOrderLineDto updateOrderLineDto);
         Task<ApiResponse<object>> DeleteOrderLineAsync(long id);
         Task<ApiResponse<List<OrderLineGetDto>>> GetOrderLinesByOrderIdAsync(long orderId);
