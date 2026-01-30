@@ -141,6 +141,25 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<DemandLineDto>>> UpdateDemandLinesAsync(List<DemandLineDto> demandLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<DemandLine>>(demandLineDtos);
+                await _unitOfWork.DemandLines.UpdateAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<DemandLineDto>>(entities);
+                return ApiResponse<List<DemandLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("DemandLineService.DemandLinesUpdated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<DemandLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("DemandLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DemandLineService.UpdateExceptionMessage",
+                     ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
         public async Task<ApiResponse<DemandLineDto>> UpdateDemandLineAsync(long id, UpdateDemandLineDto updateDemandLineDto)
         {
             try

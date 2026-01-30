@@ -8,6 +8,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<DemandLineGetDto>> GetDemandLineByIdAsync(long id);
         Task<ApiResponse<DemandLineDto>> CreateDemandLineAsync(CreateDemandLineDto createDemandLineDto);
         Task<ApiResponse<List<DemandLineDto>>> CreateDemandLinesAsync(List<CreateDemandLineDto> createDemandLineDtos);
+        Task<ApiResponse<List<DemandLineDto>>> UpdateDemandLinesAsync(List<DemandLineDto> demandLineDtos);
         Task<ApiResponse<DemandLineDto>> UpdateDemandLineAsync(long id, UpdateDemandLineDto updateDemandLineDto);
         Task<ApiResponse<object>> DeleteDemandLineAsync(long id);
         Task<ApiResponse<List<DemandLineGetDto>>> GetDemandLinesByDemandIdAsync(long demandId);

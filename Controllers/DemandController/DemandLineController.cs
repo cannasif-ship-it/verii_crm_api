@@ -66,6 +66,16 @@ namespace crm_api.Controllers
             var result = await _demandLineService.CreateDemandLinesAsync(createDemandLineDtos);
             return StatusCode(result.StatusCode, result);
         }
+        
+        /// <summary>
+        /// Birden fazla talep satırını günceller
+        /// </summary>
+        [HttpPut("update-multiple")]
+        public async Task<IActionResult> UpdateDemandLines([FromBody] List<DemandLineDto> demandLineDtos)
+        {
+            var result = await _demandLineService.UpdateDemandLinesAsync(demandLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
 
         /// <summary>
         /// Talep satırını günceller
