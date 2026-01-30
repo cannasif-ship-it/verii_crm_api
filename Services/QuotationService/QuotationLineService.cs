@@ -130,6 +130,24 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<QuotationLineDto>>> UpdateQuotationLinesAsync(List<QuotationLineDto> quotationLineDtos)
+        {
+            try
+            {
+                var entities = _mapper.Map<List<QuotationLine>>(quotationLineDtos);
+                await _unitOfWork.QuotationLines.UpdateAllAsync(entities);
+                await _unitOfWork.SaveChangesAsync();
+                var dtos = _mapper.Map<List<QuotationLineDto>>(entities);
+                return ApiResponse<List<QuotationLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesUpdated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<QuotationLineDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationLineService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationLineService.UpdateExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
         public async Task<ApiResponse<QuotationLineDto>> UpdateQuotationLineAsync(long id, UpdateQuotationLineDto updateQuotationLineDto)
         {
             try

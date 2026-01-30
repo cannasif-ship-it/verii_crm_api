@@ -68,6 +68,16 @@ namespace crm_api.Controllers
         }
 
         /// <summary>
+        /// Birden fazla teklif satırını günceller
+        /// </summary>
+        [HttpPut("update-multiple")]
+        public async Task<IActionResult> UpdateQuotationLines([FromBody] List<QuotationLineDto> quotationLineDtos)
+        {
+            var result = await _quotationLineService.UpdateQuotationLinesAsync(quotationLineDtos);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
         /// Teklif satırını günceller
         /// </summary>
         [HttpPut("{id}")]
