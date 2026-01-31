@@ -3,7 +3,6 @@ using crm_api.DTOs;
 using crm_api.Models;
 using crm_api.Interfaces;
 using crm_api.UnitOfWork;
-using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
@@ -24,7 +23,6 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IErpService _erpService;
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
@@ -36,7 +34,6 @@ namespace crm_api.Services
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILocalizationService localizationService,
-            CmsDbContext context,
             IHttpContextAccessor httpContextAccessor,
             IErpService erpService,
             IDocumentSerialTypeService documentSerialTypeService,
@@ -47,7 +44,6 @@ namespace crm_api.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
             _httpContextAccessor = httpContextAccessor;
             _erpService = erpService;
             _documentSerialTypeService = documentSerialTypeService;
@@ -70,7 +66,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.Demands
+                var query = _unitOfWork.Demands.Query()
                     .AsNoTracking()
                     .Where(q => !q.IsDeleted)
                     .Include(q => q.CreatedByUser)
@@ -805,7 +801,7 @@ namespace crm_api.Services
                 var startedByUserId = startedByUserIdResponse.Data;
 
                 // 1️⃣ Daha önce başlatılmış mı?
-                bool exists = await _context.ApprovalRequests
+                bool exists = await _unitOfWork.ApprovalRequests.Query()
                     .AnyAsync(x =>
                         x.EntityId == request.EntityId &&
                         x.DocumentType == request.DocumentType &&
@@ -822,7 +818,7 @@ namespace crm_api.Services
                 }
 
                 // 2️⃣ Aktif flow bul
-                var flow = await _context.ApprovalFlows
+                var flow = await _unitOfWork.ApprovalFlows.Query()
                     .FirstOrDefaultAsync(x =>
                         x.DocumentType == request.DocumentType &&
                         x.IsActive &&
@@ -834,6 +830,8 @@ namespace crm_api.Services
                     var quotationId = await ConvertToQuotationAsync(request.EntityId);
                     if (quotationId.Success)
                     {
+                        // Transaction'ı commit et
+                        await _unitOfWork.CommitTransactionAsync();
                         return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("DemandService.ApprovalFlowStarted"));
                     }
                     else
@@ -843,7 +841,7 @@ namespace crm_api.Services
                 }
 
                 // 3️⃣ Step'leri sırayla al
-                var steps = await _context.ApprovalFlowSteps
+                var steps = await _unitOfWork.ApprovalFlowSteps.Query()
                     .Where(x =>
                         x.ApprovalFlowId == flow.Id &&
                         !x.IsDeleted)
@@ -865,7 +863,7 @@ namespace crm_api.Services
 
                 foreach (var step in steps)
                 {
-                    var roles = await _context.ApprovalRoles
+                    var roles = await _unitOfWork.ApprovalRoles.Query()
                         .Where(r =>
                             r.ApprovalRoleGroupId == step.ApprovalRoleGroupId &&
                             r.MaxAmount >= request.TotalAmount &&
@@ -907,7 +905,7 @@ namespace crm_api.Services
 
                 // 6️⃣ Bu step için onaylayacak kullanıcıları bul
                 var roleIds = validRoles.Select(r => r.Id).ToList();
-                var userIds = await _context.ApprovalUserRoles
+                var userIds = await _unitOfWork.ApprovalUserRoles.Query()
                     .Where(x =>
                         roleIds.Contains(x.ApprovalRoleId) &&
                         !x.IsDeleted)
@@ -930,7 +928,7 @@ namespace crm_api.Services
 
                 foreach (var userId in userIds)
                 {
-                    var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                    var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
                     if (user == null)
                     {
                         await _unitOfWork.RollbackTransactionAsync();
@@ -1044,7 +1042,7 @@ namespace crm_api.Services
                 }
                 var targetUserId = targetUserIdResponse.Data;
 
-                var approvalActions = await _context.ApprovalActions
+                var approvalActions = await _unitOfWork.ApprovalActions.Query()
                     .Where(x =>
                         x.ApprovalRequest.DocumentType == PricingRuleType.Demand &&
                         x.ApprovedByUserId == targetUserId &&
@@ -1085,7 +1083,7 @@ namespace crm_api.Services
                 var userId = userIdResponse.Data;
 
                 // Onay kaydını bul
-                var action = await _context.ApprovalActions
+                var action = await _unitOfWork.ApprovalActions.Query()
                     .Include(a => a.ApprovalRequest)
                     .FirstOrDefaultAsync(x =>
                         x.Id == request.ApprovalActionId &&
@@ -1111,7 +1109,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Aynı step'te bekleyen var mı?
-                bool anyWaiting = await _context.ApprovalActions
+                bool anyWaiting = await _unitOfWork.ApprovalActions.Query()
                     .AnyAsync(x =>
                         x.ApprovalRequestId == action.ApprovalRequestId &&
                         x.StepOrder == action.StepOrder &&
@@ -1128,7 +1126,7 @@ namespace crm_api.Services
                 }
 
                 // Step tamamlandı → sonraki step'e geç
-                var approvalRequest = await _context.ApprovalRequests
+                var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
                     .Include(ar => ar.ApprovalFlow)
                     .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
 
@@ -1156,7 +1154,7 @@ namespace crm_api.Services
 
                 int nextStepOrder = approvalRequest.CurrentStep + 1;
 
-                var nextStep = await _context.ApprovalFlowSteps
+                var nextStep = await _unitOfWork.ApprovalFlowSteps.Query()
                     .FirstOrDefaultAsync(x =>
                         x.ApprovalFlowId == approvalRequest.ApprovalFlowId &&
                         x.StepOrder == nextStepOrder &&
@@ -1271,7 +1269,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Yeni step için rolleri bul (StartApprovalFlow'daki mantık)
-                var validRoles = await _context.ApprovalRoles
+                var validRoles = await _unitOfWork.ApprovalRoles.Query()
                     .Where(r =>
                         r.ApprovalRoleGroupId == nextStep.ApprovalRoleGroupId &&
                         r.MaxAmount >= demand.GrandTotal &&
@@ -1289,7 +1287,7 @@ namespace crm_api.Services
 
                 // Onaylayacak kullanıcıları bul
                 var roleIds = validRoles.Select(r => r.Id).ToList();
-                var userIds = await _context.ApprovalUserRoles
+                var userIds = await _unitOfWork.ApprovalUserRoles.Query()
                     .Where(x =>
                         roleIds.Contains(x.ApprovalRoleId) &&
                         !x.IsDeleted)
@@ -1348,7 +1346,7 @@ namespace crm_api.Services
 
                         foreach (var newUserId in userIds)
                         {
-                            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
+                            var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
                             if (user != null && !string.IsNullOrWhiteSpace(user.Email))
                             {
                                 usersToNotify.Add((user.Email, user.FullName, newUserId));
@@ -1429,7 +1427,7 @@ namespace crm_api.Services
                 var userId = userIdResponse.Data;
 
                 // Onay kaydını bul
-                var action = await _context.ApprovalActions
+                var action = await _unitOfWork.ApprovalActions.Query()
                     .Include(a => a.ApprovalRequest)
                     .FirstOrDefaultAsync(x =>
                         x.Id == request.ApprovalActionId &&
@@ -1455,7 +1453,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // ApprovalRequest'i reddedildi olarak işaretle
-                var approvalRequest = await _context.ApprovalRequests
+                var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
                     .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
 
                 if (approvalRequest == null)
@@ -1530,7 +1528,7 @@ namespace crm_api.Services
                             // ignore
                         }
 
-                        var rejectorUser = await _context.Users.FindAsync(userId);
+                        var rejectorUser = await _unitOfWork.Users.GetByIdAsync(userId);
                         if (rejectorUser != null && demandForMail.CreatedByUser != null)
                         {
                             var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
@@ -1610,7 +1608,7 @@ namespace crm_api.Services
                 var avaibleUsersIds = avaibleUsers.Select(x => x.UserId).ToList();
 
 
-                var query = _context.Demands
+                var query = _unitOfWork.Demands.Query()
                     .AsNoTracking()
                     .Where(q => !q.IsDeleted && (q.CreatedBy == userId || avaibleUsersIds.Contains(q.RepresentativeId.Value)))
                     .Include(q => q.CreatedByUser)
@@ -1684,7 +1682,7 @@ namespace crm_api.Services
 
                 if (!myFlowSteps.Any())
                 {
-                    var userData = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+                    var userData = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId);
                     if (userData == null)
                     {
                         return ApiResponse<List<ApprovalScopeUserDto>>
@@ -1794,7 +1792,7 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                var demand = await _context.Demands.FirstOrDefaultAsync(d => d.Id == demandId && !d.IsDeleted);
+                var demand = await _unitOfWork.Demands.GetByIdForUpdateAsync(demandId);
                 if (demand == null)
                 {
                     return ApiResponse<long>.ErrorResult(
@@ -1802,8 +1800,26 @@ namespace crm_api.Services
                         _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
                         StatusCodes.Status404NotFound);
                 }
+                demand.Status = ApprovalStatus.Approved;
+                demand.UpdatedDate = DateTime.UtcNow;
+                demand.UpdatedBy = userId;
 
-                var demandLines = await _context.DemandLines.Where(dl => dl.DemandId == demandId && !dl.IsDeleted).ToListAsync();
+                var demandsForReject = await _unitOfWork.Demands.Query(tracking: true)
+                    .Where(d => d.OfferNo == demand.OfferNo && !d.IsDeleted)
+                    .ToListAsync();
+                if (demandsForReject != null && demandsForReject.Any())
+                {
+                    foreach (var demandForReject in demandsForReject)
+                    {
+                        demandForReject.Status = ApprovalStatus.Rejected;
+                        demandForReject.UpdatedDate = DateTime.UtcNow;
+                        demandForReject.UpdatedBy = userId;
+                    }
+                }
+
+                var demandLines = await _unitOfWork.DemandLines.Query()
+                    .Where(dl => dl.DemandId == demandId && !dl.IsDeleted)
+                    .ToListAsync();
                 if (demandLines == null || !demandLines.Any())
                 {
                     return ApiResponse<long>.ErrorResult(
@@ -1812,10 +1828,13 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                var demandExchangeRates = await _context.DemandExchangeRates.Where(der => der.DemandId == demandId && !der.IsDeleted).ToListAsync();
+                    var demandExchangeRates = await _unitOfWork.DemandExchangeRates.Query()
+                    .Where(der => der.DemandId == demandId && !der.IsDeleted)
+                    .ToListAsync();
 
-                var quotationDocumentSerialType = await _context.DocumentSerialTypes
-                    .FirstOrDefaultAsync(d => d.RuleType == PricingRuleType.Quotation && !d.IsDeleted);
+                var quotationDocumentSerialType = await _unitOfWork.DocumentSerialTypes.Query()
+                    .Where(d => d.RuleType == PricingRuleType.Quotation && !d.IsDeleted)
+                    .FirstOrDefaultAsync();
                 if (quotationDocumentSerialType == null)
                 {
                     return ApiResponse<long>.ErrorResult(

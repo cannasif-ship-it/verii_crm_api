@@ -3,7 +3,6 @@ using crm_api.DTOs;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
-using crm_api.Data;
 using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -16,15 +15,13 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
         private readonly IUserService _userService;
 
-        public DemandLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context, IUserService userService)
+        public DemandLineService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
             _userService = userService;
         }
 
@@ -42,7 +39,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.DemandLines
+                var query = _unitOfWork.DemandLines.Query()
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
                     .ApplyFilters(request.Filters);
