@@ -1515,7 +1515,7 @@ namespace crm_api.Services
                             // ignore
                         }
 
-                        var rejectorUser = await _unitOfWork.Users.Query().FindAsync(userId);
+                        var rejectorUser = await _unitOfWork.Users.Query().Where(x => x.Id == userId).FirstOrDefaultAsync();
                         if (rejectorUser != null && orderForMail.CreatedByUser != null)
                         {
                             var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
