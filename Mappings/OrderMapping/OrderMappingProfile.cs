@@ -36,7 +36,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
                 .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
-                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore());
+                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
+                .ForMember(dest => dest.Quotation, opt => opt.Ignore());
 
             CreateMap<UpdateOrderDto, Order>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -51,7 +52,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
                 .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
-                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore());
+                .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
+                .ForMember(dest => dest.Quotation, opt => opt.Ignore());
         }
     }
 }

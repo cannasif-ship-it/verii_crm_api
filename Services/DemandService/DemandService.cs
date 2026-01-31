@@ -31,7 +31,7 @@ namespace crm_api.Services
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
-        
+
         public DemandService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -452,7 +452,7 @@ namespace crm_api.Services
             }
         }
 
-        private static LineCalculationResult CalculateLine(decimal quantity,decimal unitPrice,decimal discountRate1,decimal discountRate2,decimal discountRate3,decimal discountAmount1,decimal discountAmount2,decimal discountAmount3,decimal vatRate)
+        private static LineCalculationResult CalculateLine(decimal quantity, decimal unitPrice, decimal discountRate1, decimal discountRate2, decimal discountRate3, decimal discountAmount1, decimal discountAmount2, decimal discountAmount3, decimal vatRate)
         {
             decimal gross = quantity * unitPrice;
 
@@ -492,9 +492,9 @@ namespace crm_api.Services
         }
 
 
-      public async Task<ApiResponse<DemandGetDto>> CreateRevisionOfDemandAsync(long demandId)
+        public async Task<ApiResponse<DemandGetDto>> CreateRevisionOfDemandAsync(long demandId)
         {
-        await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 var userIdResponse = await _userService.GetCurrentUserIdAsync();
@@ -508,107 +508,107 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                    var demand = await _unitOfWork.Demands.GetByIdAsync(demandId);
-                    if (demand == null)
-                    {
-                        return ApiResponse<DemandGetDto>.ErrorResult(
-                            _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
-                            _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
-                            StatusCodes.Status404NotFound);
-                    }
+                var demand = await _unitOfWork.Demands.GetByIdAsync(demandId);
+                if (demand == null)
+                {
+                    return ApiResponse<DemandGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
+                        _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
 
-                    var demandLines = await _unitOfWork.DemandLines.Query()
-                    .Where(x => !x.IsDeleted && x.DemandId == demandId).ToListAsync();
+                var demandLines = await _unitOfWork.DemandLines.Query()
+                .Where(x => !x.IsDeleted && x.DemandId == demandId).ToListAsync();
 
-                    var DemandExchangeRates = await _unitOfWork.DemandExchangeRates.Query()
-                    .Where(x => !x.IsDeleted && x.DemandId == demandId).ToListAsync();
-                    
-                    var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(demand.DocumentSerialTypeId, false,demand.RevisionNo);
-                    if (!documentSerialTypeWithRevision.Success)
-                    {
-                        return ApiResponse<DemandGetDto>.ErrorResult(
-                            _localizationService.GetLocalizedString("DemandService.DocumentSerialTypeGenerationError"),
-                            documentSerialTypeWithRevision.Message,
-                            StatusCodes.Status500InternalServerError);
-                    }
+                var DemandExchangeRates = await _unitOfWork.DemandExchangeRates.Query()
+                .Where(x => !x.IsDeleted && x.DemandId == demandId).ToListAsync();
 
-                    var newDemand = new Demand();
-                    newDemand.OfferType = demand.OfferType;
-                    newDemand.RevisionId = demand.Id;
-                    newDemand.OfferDate = demand.OfferDate;
-                    newDemand.OfferNo = demand.OfferNo;
-                    newDemand.RevisionNo = documentSerialTypeWithRevision.Data;
-                    newDemand.OfferDate = demand.OfferDate;
-                    newDemand.Currency = demand.Currency;
-                    newDemand.Total = demand.Total;
-                    newDemand.GrandTotal = demand.GrandTotal;
-                    newDemand.CreatedBy = userId;
-                    newDemand.CreatedDate = DateTime.UtcNow;
-                    newDemand.PotentialCustomerId = demand.PotentialCustomerId;
-                    newDemand.ErpCustomerCode = demand.ErpCustomerCode;
-                    newDemand.ContactId = demand.ContactId;
-                    newDemand.ValidUntil = demand.ValidUntil;
-                    newDemand.DeliveryDate = demand.DeliveryDate;
-                    newDemand.ShippingAddressId = demand.ShippingAddressId;
-                    newDemand.RepresentativeId = demand.RepresentativeId;
-                    newDemand.ActivityId = demand.ActivityId;
-                    newDemand.Description = demand.Description;
-                    newDemand.PaymentTypeId = demand.PaymentTypeId;
-                    newDemand.HasCustomerSpecificDiscount = demand.HasCustomerSpecificDiscount;
-                    newDemand.Status = (int)ApprovalStatus.HavenotStarted;
+                var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(demand.DocumentSerialTypeId, false, demand.RevisionNo);
+                if (!documentSerialTypeWithRevision.Success)
+                {
+                    return ApiResponse<DemandGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DocumentSerialTypeGenerationError"),
+                        documentSerialTypeWithRevision.Message,
+                        StatusCodes.Status500InternalServerError);
+                }
 
-                    await _unitOfWork.Demands.AddAsync(newDemand);
-                    await _unitOfWork.SaveChangesAsync();
+                var newDemand = new Demand();
+                newDemand.OfferType = demand.OfferType;
+                newDemand.RevisionId = demand.Id;
+                newDemand.OfferDate = demand.OfferDate;
+                newDemand.OfferNo = demand.OfferNo;
+                newDemand.RevisionNo = documentSerialTypeWithRevision.Data;
+                newDemand.OfferDate = demand.OfferDate;
+                newDemand.Currency = demand.Currency;
+                newDemand.Total = demand.Total;
+                newDemand.GrandTotal = demand.GrandTotal;
+                newDemand.CreatedBy = userId;
+                newDemand.CreatedDate = DateTime.UtcNow;
+                newDemand.PotentialCustomerId = demand.PotentialCustomerId;
+                newDemand.ErpCustomerCode = demand.ErpCustomerCode;
+                newDemand.ContactId = demand.ContactId;
+                newDemand.ValidUntil = demand.ValidUntil;
+                newDemand.DeliveryDate = demand.DeliveryDate;
+                newDemand.ShippingAddressId = demand.ShippingAddressId;
+                newDemand.RepresentativeId = demand.RepresentativeId;
+                newDemand.ActivityId = demand.ActivityId;
+                newDemand.Description = demand.Description;
+                newDemand.PaymentTypeId = demand.PaymentTypeId;
+                newDemand.HasCustomerSpecificDiscount = demand.HasCustomerSpecificDiscount;
+                newDemand.Status = (int)ApprovalStatus.HavenotStarted;
 
-                    var newDemandLines = new List<DemandLine>();
-                    foreach (var line in demandLines)
-                    {
-                        var newLine = new DemandLine();
-                        newLine.DemandId = newDemand.Id;
-                        newLine.ProductCode = line.ProductCode;
-                        newLine.Quantity = line.Quantity;
-                        newLine.UnitPrice = line.UnitPrice;
-                        newLine.DiscountRate1 = line.DiscountRate1;
-                        newLine.DiscountRate2 = line.DiscountRate2;
-                        newLine.DiscountRate3 = line.DiscountRate3;
-                        newLine.DiscountAmount1 = line.DiscountAmount1;
-                        newLine.DiscountAmount2 = line.DiscountAmount2;
-                        newLine.DiscountAmount3 = line.DiscountAmount3;
-                        newLine.VatRate = line.VatRate;
-                        newLine.LineTotal = line.LineTotal;
-                        newLine.VatAmount = line.VatAmount;
-                        newLine.LineGrandTotal = line.LineGrandTotal;
-                        newLine.Description = line.Description;
-                        newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
-                        newLine.RelatedStockId = line.RelatedStockId;
-                        newLine.RelatedProductKey = line.RelatedProductKey;
-                        newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
-                        newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
-                        newDemandLines.Add(newLine);
-                    }
-                    await _unitOfWork.DemandLines.AddAllAsync(newDemandLines);
-                    await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Demands.AddAsync(newDemand);
+                await _unitOfWork.SaveChangesAsync();
 
-                    var newDemandExchangeRates = new List<DemandExchangeRate>();
-                    foreach (var exchangeRate in DemandExchangeRates)
-                    {
-                        var newExchangeRate = new DemandExchangeRate();
-                        newExchangeRate.DemandId = newDemand.Id;
-                        newExchangeRate.Currency = exchangeRate.Currency;
-                        newExchangeRate.ExchangeRate = exchangeRate.ExchangeRate;
-                        newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
-                        newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
-                        newExchangeRate.CreatedDate = DateTime.UtcNow;
-                        newExchangeRate.CreatedBy = userId;
-                        newDemandExchangeRates.Add(newExchangeRate);
-                    }
-                    await _unitOfWork.DemandExchangeRates.AddAllAsync(newDemandExchangeRates);
-                    await _unitOfWork.SaveChangesAsync();
+                var newDemandLines = new List<DemandLine>();
+                foreach (var line in demandLines)
+                {
+                    var newLine = new DemandLine();
+                    newLine.DemandId = newDemand.Id;
+                    newLine.ProductCode = line.ProductCode;
+                    newLine.Quantity = line.Quantity;
+                    newLine.UnitPrice = line.UnitPrice;
+                    newLine.DiscountRate1 = line.DiscountRate1;
+                    newLine.DiscountRate2 = line.DiscountRate2;
+                    newLine.DiscountRate3 = line.DiscountRate3;
+                    newLine.DiscountAmount1 = line.DiscountAmount1;
+                    newLine.DiscountAmount2 = line.DiscountAmount2;
+                    newLine.DiscountAmount3 = line.DiscountAmount3;
+                    newLine.VatRate = line.VatRate;
+                    newLine.LineTotal = line.LineTotal;
+                    newLine.VatAmount = line.VatAmount;
+                    newLine.LineGrandTotal = line.LineGrandTotal;
+                    newLine.Description = line.Description;
+                    newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
+                    newLine.RelatedStockId = line.RelatedStockId;
+                    newLine.RelatedProductKey = line.RelatedProductKey;
+                    newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
+                    newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
+                    newDemandLines.Add(newLine);
+                }
+                await _unitOfWork.DemandLines.AddAllAsync(newDemandLines);
+                await _unitOfWork.SaveChangesAsync();
 
-                    await _unitOfWork.CommitTransactionAsync();
+                var newDemandExchangeRates = new List<DemandExchangeRate>();
+                foreach (var exchangeRate in DemandExchangeRates)
+                {
+                    var newExchangeRate = new DemandExchangeRate();
+                    newExchangeRate.DemandId = newDemand.Id;
+                    newExchangeRate.Currency = exchangeRate.Currency;
+                    newExchangeRate.ExchangeRate = exchangeRate.ExchangeRate;
+                    newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
+                    newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
+                    newExchangeRate.CreatedDate = DateTime.UtcNow;
+                    newExchangeRate.CreatedBy = userId;
+                    newDemandExchangeRates.Add(newExchangeRate);
+                }
+                await _unitOfWork.DemandExchangeRates.AddAllAsync(newDemandExchangeRates);
+                await _unitOfWork.SaveChangesAsync();
 
-                    var dto = _mapper.Map<DemandGetDto>(newDemand);
-                    return ApiResponse<DemandGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("DemandService.RevisionCreated"));
+                await _unitOfWork.CommitTransactionAsync();
+
+                var dto = _mapper.Map<DemandGetDto>(newDemand);
+                return ApiResponse<DemandGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("DemandService.RevisionCreated"));
             }
             catch (Exception ex)
             {
@@ -631,7 +631,7 @@ namespace crm_api.Services
                         _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"),
                         StatusCodes.Status500InternalServerError);
                 }
-                
+
                 short branchCode = branchCodeRequest.Data;
 
                 // 1️⃣ Ortak filtre (tek doğruluk kaynağı)
@@ -823,24 +823,29 @@ namespace crm_api.Services
 
                 // 2️⃣ Aktif flow bul
                 var flow = await _context.ApprovalFlows
-                    .FirstOrDefaultAsync(x => 
-                        x.DocumentType == request.DocumentType && 
-                        x.IsActive && 
+                    .FirstOrDefaultAsync(x =>
+                        x.DocumentType == request.DocumentType &&
+                        x.IsActive &&
                         !x.IsDeleted);
 
                 if (flow == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("DemandService.ApprovalFlowNotFound"),
-                        "Bu belge tipi için onay akışı tanımlı değil.",
-                        StatusCodes.Status404NotFound);
+                    // if there is no flow then Convert to quotation end return success
+                    var quotationId = await ConvertToQuotationAsync(request.EntityId);
+                    if (quotationId.Success)
+                    {
+                        return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("DemandService.ApprovalFlowStarted"));
+                    }
+                    else
+                    {
+                        return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
+                    }
                 }
 
                 // 3️⃣ Step'leri sırayla al
                 var steps = await _context.ApprovalFlowSteps
-                    .Where(x => 
-                        x.ApprovalFlowId == flow.Id && 
+                    .Where(x =>
+                        x.ApprovalFlowId == flow.Id &&
                         !x.IsDeleted)
                     .OrderBy(x => x.StepOrder)
                     .ToListAsync();
@@ -903,8 +908,8 @@ namespace crm_api.Services
                 // 6️⃣ Bu step için onaylayacak kullanıcıları bul
                 var roleIds = validRoles.Select(r => r.Id).ToList();
                 var userIds = await _context.ApprovalUserRoles
-                    .Where(x => 
-                        roleIds.Contains(x.ApprovalRoleId) && 
+                    .Where(x =>
+                        roleIds.Contains(x.ApprovalRoleId) &&
                         !x.IsDeleted)
                     .Select(x => x.UserId)
                     .Distinct()
@@ -1159,7 +1164,16 @@ namespace crm_api.Services
 
                 if (nextStep == null)
                 {
+
                     // 🎉 AKIŞ BİTTİ
+                    // if there is no flow then Convert to quotation end return success
+                    var quotationId = await ConvertToQuotationAsync(demand.Id);
+                    if (!quotationId.Success)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
+                    }
+
                     approvalRequest.Status = ApprovalStatus.Approved;
                     approvalRequest.UpdatedDate = DateTime.UtcNow;
                     approvalRequest.UpdatedBy = userId;
@@ -1313,6 +1327,7 @@ namespace crm_api.Services
 
                 await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
                 await _unitOfWork.SaveChangesAsync();
+
                 await _unitOfWork.CommitTransactionAsync();
 
                 // Yeni step için onaycılara bildirim ve mail gönder
@@ -1463,7 +1478,7 @@ namespace crm_api.Services
                 // DemandLine'ların ApprovalStatus'unu Rejected yap
                 if (approvalRequest.CurrentStep == 1)
                 {
-                    var demand =    await _unitOfWork.Demands.Query()
+                    var demand = await _unitOfWork.Demands.Query()
                         .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
 
                     if (demand != null && demand.CreatedBy == userId)
@@ -1487,7 +1502,7 @@ namespace crm_api.Services
                 await _unitOfWork.CommitTransactionAsync();
 
                 // Talep sahibine mail gönder (eğer reddeden kişi talep sahibi değilse)
-                try 
+                try
                 {
                     var demandForMail = await _unitOfWork.Demands.Query()
                         .Include(q => q.CreatedByUser)
@@ -1521,14 +1536,14 @@ namespace crm_api.Services
                             var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                             var demandPath = _configuration["FrontendSettings:DemandDetailPath"]?.TrimStart('/') ?? "demands";
                             var demandLink = $"{baseUrl}/{demandPath}/{demandForMail.Id}";
-                            
+
                             var creatorFullName = $"{demandForMail.CreatedByUser.FirstName} {demandForMail.CreatedByUser.LastName}".Trim();
                             if (string.IsNullOrWhiteSpace(creatorFullName)) creatorFullName = demandForMail.CreatedByUser.Username;
 
                             var rejectorFullName = $"{rejectorUser.FirstName} {rejectorUser.LastName}".Trim();
                             if (string.IsNullOrWhiteSpace(rejectorFullName)) rejectorFullName = rejectorUser.Username;
 
-                            BackgroundJob.Enqueue<IMailJob>(job => 
+                            BackgroundJob.Enqueue<IMailJob>(job =>
                                 job.SendDemandRejectedEmailAsync(
                                     demandForMail.CreatedByUser.Email,
                                     creatorFullName,
@@ -1746,5 +1761,148 @@ namespace crm_api.Services
                     );
             }
         }
+
+        public async Task<ApiResponse<long>> ConvertToQuotationAsync(long demandId)
+        {
+            try
+            {
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                var userId = userIdResponse.Data;
+
+                var demand = await _context.Demands.FirstOrDefaultAsync(d => d.Id == demandId && !d.IsDeleted);
+                if (demand == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
+                        _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var demandLines = await _context.DemandLines.Where(dl => dl.DemandId == demandId && !dl.IsDeleted).ToListAsync();
+                if (demandLines == null || !demandLines.Any())
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DemandLinesNotFound"),
+                        _localizationService.GetLocalizedString("DemandService.DemandLinesNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var demandExchangeRates = await _context.DemandExchangeRates.Where(der => der.DemandId == demandId && !der.IsDeleted).ToListAsync();
+
+                var quotationDocumentSerialType = await _context.DocumentSerialTypes
+                    .FirstOrDefaultAsync(d => d.RuleType == PricingRuleType.Quotation && !d.IsDeleted);
+                if (quotationDocumentSerialType == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.QuotationDocumentSerialTypeNotFound"),
+                        _localizationService.GetLocalizedString("DemandService.QuotationDocumentSerialTypeNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var documentSerialResult = await _documentSerialTypeService.GenerateDocumentSerialAsync(quotationDocumentSerialType.Id);
+                if (!documentSerialResult.Success)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DocumentSerialTypeGenerationError"),
+                        documentSerialResult.Message,
+                        StatusCodes.Status500InternalServerError);
+                }
+
+                var quotation = new Quotation
+                {
+                    PotentialCustomerId = demand.PotentialCustomerId,
+                    ErpCustomerCode = demand.ErpCustomerCode,
+                    ContactId = demand.ContactId,
+                    ValidUntil = demand.ValidUntil,
+                    DeliveryDate = demand.DeliveryDate,
+                    ShippingAddressId = demand.ShippingAddressId,
+                    RepresentativeId = demand.RepresentativeId,
+                    ActivityId = demand.ActivityId,
+                    Description = demand.Description,
+                    PaymentTypeId = demand.PaymentTypeId,
+                    DocumentSerialTypeId = quotationDocumentSerialType.Id,
+                    OfferType = demand.OfferType,
+                    OfferDate = demand.OfferDate ?? DateTime.UtcNow,
+                    OfferNo = documentSerialResult.Data,
+                    RevisionNo = documentSerialResult.Data,
+                    Currency = demand.Currency,
+                    HasCustomerSpecificDiscount = demand.HasCustomerSpecificDiscount,
+                    Total = demand.Total,
+                    GrandTotal = demand.GrandTotal,
+                    DemandId = demand.Id,
+                    Status = ApprovalStatus.HavenotStarted,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Quotations.AddAsync(quotation);
+                await _unitOfWork.SaveChangesAsync();
+
+                var quotationLines = new List<QuotationLine>();
+                foreach (var line in demandLines)
+                {
+                    quotationLines.Add(new QuotationLine
+                    {
+                        QuotationId = quotation.Id,
+                        ProductCode = line.ProductCode,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.UnitPrice,
+                        DiscountRate1 = line.DiscountRate1,
+                        DiscountRate2 = line.DiscountRate2,
+                        DiscountRate3 = line.DiscountRate3,
+                        DiscountAmount1 = line.DiscountAmount1,
+                        DiscountAmount2 = line.DiscountAmount2,
+                        DiscountAmount3 = line.DiscountAmount3,
+                        VatRate = line.VatRate,
+                        VatAmount = line.VatAmount,
+                        LineTotal = line.LineTotal,
+                        LineGrandTotal = line.LineGrandTotal,
+                        Description = line.Description,
+                        PricingRuleHeaderId = line.PricingRuleHeaderId,
+                        RelatedStockId = line.RelatedStockId,
+                        RelatedProductKey = line.RelatedProductKey,
+                        IsMainRelatedProduct = line.IsMainRelatedProduct,
+                        ApprovalStatus = ApprovalStatus.HavenotStarted,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = userId
+                    });
+                }
+                await _unitOfWork.QuotationLines.AddAllAsync(quotationLines);
+
+                if (demandExchangeRates != null && demandExchangeRates.Any())
+                {
+                    var quotationExchangeRates = demandExchangeRates.Select(rate => new QuotationExchangeRate
+                    {
+                        QuotationId = quotation.Id,
+                        Currency = rate.Currency,
+                        ExchangeRate = rate.ExchangeRate,
+                        ExchangeRateDate = rate.ExchangeRateDate,
+                        IsOfficial = rate.IsOfficial,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = userId
+                    }).ToList();
+                    await _unitOfWork.QuotationExchangeRates.AddAllAsync(quotationExchangeRates);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return ApiResponse<long>.SuccessResult(quotation.Id, _localizationService.GetLocalizedString("DemandService.QuotationConvertedSuccessfully"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<long>.ErrorResult(
+                    _localizationService.GetLocalizedString("DemandService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DemandService.ConvertToQuotationExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
     }
 }

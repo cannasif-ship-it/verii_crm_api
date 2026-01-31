@@ -81,6 +81,10 @@ namespace crm_api.Models
 
         [Column(TypeName = "decimal(18,6)")]
         public decimal GrandTotal { get; set; } = 0m; // KDV dahil toplam
+
+        public long? DemandId { get; set; }
+        [ForeignKey("DemandId")]
+        public Demand? Demand { get; set; }
         
         //navigation
         public ICollection<QuotationLine> Lines { get; set; } = new List<QuotationLine>();

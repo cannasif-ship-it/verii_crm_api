@@ -141,6 +141,15 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(0m);
 
+            // Demand relationship
+            builder.Property(e => e.DemandId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.Demand)
+                .WithMany()
+                .HasForeignKey(e => e.DemandId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // Navigation - Lines
             builder.HasMany(e => e.Lines)
                 .WithOne(l => l.Quotation)

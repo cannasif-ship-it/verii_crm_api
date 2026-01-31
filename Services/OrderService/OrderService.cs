@@ -516,6 +516,7 @@ namespace crm_api.Services
                 newOrder.Description = order.Description;
                 newOrder.PaymentTypeId = order.PaymentTypeId;
                 newOrder.HasCustomerSpecificDiscount = order.HasCustomerSpecificDiscount;
+                newOrder.QuotationId = order.QuotationId;
                 newOrder.Status = (int)ApprovalStatus.HavenotStarted;
 
                 await _unitOfWork.Orders.AddAsync(newOrder);

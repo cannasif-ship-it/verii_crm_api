@@ -1070,6 +1070,21 @@
   <data name="QuotationService.QuotationApproverUsersRetrieved" xml:space="preserve">
     <value>Teklif onaylayıcı kullanıcıları başarıyla getirildi.</value>
   </data>
+  <data name="QuotationService.QuotationLinesNotFound" xml:space="preserve">
+    <value>Teklif satırları bulunamadı.</value>
+  </data>
+  <data name="QuotationService.QuotationExchangeRatesNotFound" xml:space="preserve">
+    <value>Teklif döviz kurları bulunamadı.</value>
+  </data>
+  <data name="QuotationService.OrderDocumentSerialTypeNotFound" xml:space="preserve">
+    <value>Sipariş belge seri tipi bulunamadı.</value>
+  </data>
+  <data name="QuotationService.OrderConvertedSuccessfully" xml:space="preserve">
+    <value>Sipariş başarıyla oluşturuldu.</value>
+  </data>
+  <data name="QuotationService.ConvertToOrderExceptionMessage" xml:space="preserve">
+    <value>Teklif siparişe dönüştürülürken bir hata oluştu: {0}</value>
+  </data>
   
   
   
@@ -2283,6 +2298,21 @@
   </data>
   <data name="DemandService.DemandApproverUsersRetrieved" xml:space="preserve">
     <value>Talep onaylayıcı kullanıcıları başarıyla getirildi.</value>
+  </data>
+  <data name="DemandService.DemandLinesNotFound" xml:space="preserve">
+    <value>Talep satırları bulunamadı.</value>
+  </data>
+  <data name="DemandService.DemandExchangeRatesNotFound" xml:space="preserve">
+    <value>Talep döviz kurları bulunamadı.</value>
+  </data>
+  <data name="DemandService.QuotationDocumentSerialTypeNotFound" xml:space="preserve">
+    <value>Teklif belge seri tipi bulunamadı.</value>
+  </data>
+  <data name="DemandService.QuotationConvertedSuccessfully" xml:space="preserve">
+    <value>Teklif başarıyla oluşturuldu.</value>
+  </data>
+  <data name="DemandService.ConvertToQuotationExceptionMessage" xml:space="preserve">
+    <value>Talep teklife dönüştürülürken bir hata oluştu: {0}</value>
   </data>
   
 

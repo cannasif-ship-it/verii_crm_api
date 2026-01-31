@@ -89,6 +89,18 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Talebi teklife dönüştürür
+        /// </summary>
+        /// <param name="demandId">Talep ID</param>
+        /// <returns>Oluşturulan teklif ID</returns>
+        [HttpPost("convert-to-quotation/{demandId}")]
+        public async Task<IActionResult> ConvertToQuotation(long demandId)
+        {
+            var result = await _demandService.ConvertToQuotationAsync(demandId);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("price-rule-of-demand")]
         public async Task<IActionResult> GetPriceRuleOfDemand([FromQuery] string customerCode,[FromQuery] long salesmenId,[FromQuery] DateTime demandDate)
         {

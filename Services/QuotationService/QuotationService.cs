@@ -136,7 +136,7 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                var avaibleUsersResponse = await  GetQuotationRelatedUsersAsync(userId);
+                var avaibleUsersResponse = await GetQuotationRelatedUsersAsync(userId);
                 if (!avaibleUsersResponse.Success)
                 {
                     return ApiResponse<PagedResponse<QuotationGetDto>>.ErrorResult(
@@ -150,7 +150,7 @@ namespace crm_api.Services
 
                 var query = _context.Quotations
                     .AsNoTracking()
-                    .Where(q => !q.IsDeleted && (q.CreatedBy == userId || avaibleUsersIds.Contains(q.RepresentativeId.Value) ))
+                    .Where(q => !q.IsDeleted && (q.CreatedBy == userId || avaibleUsersIds.Contains(q.RepresentativeId.Value)))
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
@@ -531,7 +531,7 @@ namespace crm_api.Services
             }
         }
 
-        private static LineCalculationResult CalculateLine(decimal quantity,decimal unitPrice,decimal discountRate1,decimal discountRate2,decimal discountRate3,decimal discountAmount1,decimal discountAmount2,decimal discountAmount3,decimal vatRate)
+        private static LineCalculationResult CalculateLine(decimal quantity, decimal unitPrice, decimal discountRate1, decimal discountRate2, decimal discountRate3, decimal discountAmount1, decimal discountAmount2, decimal discountAmount3, decimal vatRate)
         {
             decimal gross = quantity * unitPrice;
 
@@ -602,7 +602,7 @@ namespace crm_api.Services
 
                 if (!myFlowSteps.Any())
                     return ApiResponse<List<ApprovalScopeUserDto>>
-                        .SuccessResult(new List<ApprovalScopeUserDto>(),"");
+                        .SuccessResult(new List<ApprovalScopeUserDto>(), "");
 
                 var flowStepMap = myFlowSteps
                     .ToDictionary(x => x.ApprovalFlowId, x => x.MaxStepOrder);
@@ -732,6 +732,7 @@ namespace crm_api.Services
                 newQuotation.Description = quotation.Description;
                 newQuotation.PaymentTypeId = quotation.PaymentTypeId;
                 newQuotation.HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount;
+                newQuotation.DemandId = quotation.DemandId;
                 newQuotation.Status = (int)ApprovalStatus.HavenotStarted;
 
                 await _unitOfWork.Quotations.AddAsync(newQuotation);
@@ -804,7 +805,7 @@ namespace crm_api.Services
                         _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"),
                         StatusCodes.Status500InternalServerError);
                 }
-                
+
                 short branchCode = branchCodeRequest.Data;
 
                 // 1️⃣ Ortak filtre (tek doğruluk kaynağı)
@@ -996,24 +997,29 @@ namespace crm_api.Services
 
                 // 2️⃣ Aktif flow bul
                 var flow = await _context.ApprovalFlows
-                    .FirstOrDefaultAsync(x => 
-                        x.DocumentType == request.DocumentType && 
-                        x.IsActive && 
+                    .FirstOrDefaultAsync(x =>
+                        x.DocumentType == request.DocumentType &&
+                        x.IsActive &&
                         !x.IsDeleted);
 
                 if (flow == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowNotFound"),
-                        "Bu belge tipi için onay akışı tanımlı değil.",
-                        StatusCodes.Status404NotFound);
+                    var quotationId = await ConvertToOrderAsync(request.EntityId);
+                    if (!quotationId.Success)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
+                    }
+                    else
+                    {
+                        return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
+                    }
                 }
 
                 // 3️⃣ Step'leri sırayla al
                 var steps = await _context.ApprovalFlowSteps
-                    .Where(x => 
-                        x.ApprovalFlowId == flow.Id && 
+                    .Where(x =>
+                        x.ApprovalFlowId == flow.Id &&
                         !x.IsDeleted)
                     .OrderBy(x => x.StepOrder)
                     .ToListAsync();
@@ -1076,8 +1082,8 @@ namespace crm_api.Services
                 // 6️⃣ Bu step için onaylayacak kullanıcıları bul
                 var roleIds = validRoles.Select(r => r.Id).ToList();
                 var userIds = await _context.ApprovalUserRoles
-                    .Where(x => 
-                        roleIds.Contains(x.ApprovalRoleId) && 
+                    .Where(x =>
+                        roleIds.Contains(x.ApprovalRoleId) &&
                         !x.IsDeleted)
                     .Select(x => x.UserId)
                     .Distinct()
@@ -1161,20 +1167,20 @@ namespace crm_api.Services
                         {
                             UserId = user.UserId,
                             TitleKey = "Notification.QuotationApproval.Title", // "Onay Bekleyen Teklif"
-                            TitleArgs = new object[] { quotation.Id }, 
+                            TitleArgs = new object[] { quotation.Id },
                             MessageKey = "Notification.QuotationApproval.Message", // "{0} numaralı teklif onay beklemektedir."
                             MessageArgs = new object[] { quotation.RevisionNo ?? "" },
                             NotificationType = NotificationType.QuotationApproval,
                             RelatedEntityName = "Quotation",
                             RelatedEntityId = quotation.Id
                         });
-                        
-         
+
+
                     }
                     catch (Exception)
                     {
-                      // ignore
-                   }
+                        // ignore
+                    }
                 }
 
                 BackgroundJob.Enqueue<IMailJob>(job =>
@@ -1336,6 +1342,15 @@ namespace crm_api.Services
                 if (nextStep == null)
                 {
                     // 🎉 AKIŞ BİTTİ
+
+                    var quotationId = await ConvertToOrderAsync(quotation.Id);
+                    if (!quotationId.Success)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
+                    }
+
+
                     approvalRequest.Status = ApprovalStatus.Approved;
                     approvalRequest.UpdatedDate = DateTime.UtcNow;
                     approvalRequest.UpdatedBy = userId;
@@ -1731,6 +1746,156 @@ namespace crm_api.Services
                 return ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
                     _localizationService.GetLocalizedString("QuotationService.RejectExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+        
+        public async Task<ApiResponse<long>> ConvertToOrderAsync(long quotationId)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                if (!userIdResponse.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<long>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                var userId = userIdResponse.Data;
+
+                var quotation = await _context.Quotations.FirstOrDefaultAsync(q => q.Id == quotationId && !q.IsDeleted);
+                if (quotation == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var quotationLines = await _context.QuotationLines.Where(ql => ql.QuotationId == quotationId && !ql.IsDeleted).ToListAsync();
+                if (quotationLines == null || !quotationLines.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationLinesNotFound"),
+                        _localizationService.GetLocalizedString("QuotationService.QuotationLinesNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var quotationExchangeRates = await _context.QuotationExchangeRates.Where(qer => qer.QuotationId == quotationId && !qer.IsDeleted).ToListAsync();
+
+                var orderDocumentSerialType = await _context.DocumentSerialTypes
+                    .FirstOrDefaultAsync(d => d.RuleType == PricingRuleType.Order && !d.IsDeleted);
+                if (orderDocumentSerialType == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.OrderDocumentSerialTypeNotFound"),
+                        _localizationService.GetLocalizedString("QuotationService.OrderDocumentSerialTypeNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var documentSerialResult = await _documentSerialTypeService.GenerateDocumentSerialAsync(orderDocumentSerialType.Id);
+                if (!documentSerialResult.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderService.DocumentSerialTypeGenerationError"),
+                        documentSerialResult.Message,
+                        StatusCodes.Status500InternalServerError);
+                }
+
+                var order = new Order
+                {
+                    PotentialCustomerId = quotation.PotentialCustomerId,
+                    ErpCustomerCode = quotation.ErpCustomerCode,
+                    ContactId = quotation.ContactId,
+                    ValidUntil = quotation.ValidUntil,
+                    DeliveryDate = quotation.DeliveryDate,
+                    ShippingAddressId = quotation.ShippingAddressId,
+                    RepresentativeId = quotation.RepresentativeId,
+                    ActivityId = quotation.ActivityId,
+                    Description = quotation.Description,
+                    PaymentTypeId = quotation.PaymentTypeId,
+                    DocumentSerialTypeId = orderDocumentSerialType.Id,
+                    OfferType = quotation.OfferType,
+                    OfferDate = quotation.OfferDate ?? DateTime.UtcNow,
+                    OfferNo = documentSerialResult.Data,
+                    RevisionNo = documentSerialResult.Data,
+                    Currency = quotation.Currency,
+                    HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount,
+                    Total = quotation.Total,
+                    GrandTotal = quotation.GrandTotal,
+                    QuotationId = quotation.Id,
+                    Status = ApprovalStatus.HavenotStarted,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Orders.AddAsync(order);
+                await _unitOfWork.SaveChangesAsync();
+
+                var orderLines = new List<OrderLine>();
+                foreach (var line in quotationLines)
+                {
+                    orderLines.Add(new OrderLine
+                    {
+                        OrderId = order.Id,
+                        ProductCode = line.ProductCode,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.UnitPrice,
+                        DiscountRate1 = line.DiscountRate1,
+                        DiscountRate2 = line.DiscountRate2,
+                        DiscountRate3 = line.DiscountRate3,
+                        DiscountAmount1 = line.DiscountAmount1,
+                        DiscountAmount2 = line.DiscountAmount2,
+                        DiscountAmount3 = line.DiscountAmount3,
+                        VatRate = line.VatRate,
+                        VatAmount = line.VatAmount,
+                        LineTotal = line.LineTotal,
+                        LineGrandTotal = line.LineGrandTotal,
+                        Description = line.Description,
+                        PricingRuleHeaderId = line.PricingRuleHeaderId,
+                        RelatedStockId = line.RelatedStockId,
+                        RelatedProductKey = line.RelatedProductKey,
+                        IsMainRelatedProduct = line.IsMainRelatedProduct,
+                        ApprovalStatus = ApprovalStatus.HavenotStarted,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = userId
+                    });
+                }
+                await _unitOfWork.OrderLines.AddAllAsync(orderLines);
+
+                if (quotationExchangeRates != null && quotationExchangeRates.Any())
+                {
+                    var orderExchangeRates = quotationExchangeRates.Select(rate => new OrderExchangeRate
+                    {
+                        OrderId = order.Id,
+                        Currency = rate.Currency,
+                        ExchangeRate = rate.ExchangeRate,
+                        ExchangeRateDate = rate.ExchangeRateDate,
+                        IsOfficial = rate.IsOfficial,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = userId
+                    }).ToList();
+                    await _unitOfWork.OrderExchangeRates.AddAllAsync(orderExchangeRates);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                return ApiResponse<long>.SuccessResult(order.Id, _localizationService.GetLocalizedString("QuotationService.OrderConvertedSuccessfully"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<long>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.ConvertToOrderExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
         }

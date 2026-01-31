@@ -1037,6 +1037,21 @@
   <data name="QuotationService.QuotationApproverUsersRetrieved" xml:space="preserve">
     <value>Quotation approver users retrieved successfully.</value>
   </data>
+  <data name="QuotationService.QuotationLinesNotFound" xml:space="preserve">
+    <value>Quotation lines not found.</value>
+  </data>
+  <data name="QuotationService.QuotationExchangeRatesNotFound" xml:space="preserve">
+    <value>Quotation exchange rates not found.</value>
+  </data>
+  <data name="QuotationService.OrderDocumentSerialTypeNotFound" xml:space="preserve">
+    <value>Order document serial type not found.</value>
+  </data>
+  <data name="QuotationService.OrderConvertedSuccessfully" xml:space="preserve">
+    <value>Order created successfully.</value>
+  </data>
+  <data name="QuotationService.ConvertToOrderExceptionMessage" xml:space="preserve">
+    <value>An error occurred while converting quotation to order: {0}</value>
+  </data>
   
   
   
@@ -2292,6 +2307,21 @@
   </data>
   <data name="DemandService.DemandApproverUsersRetrieved" xml:space="preserve">
     <value>Demand approver users retrieved successfully.</value>
+  </data>
+  <data name="DemandService.DemandLinesNotFound" xml:space="preserve">
+    <value>Demand lines not found.</value>
+  </data>
+  <data name="DemandService.DemandExchangeRatesNotFound" xml:space="preserve">
+    <value>Demand exchange rates not found.</value>
+  </data>
+  <data name="DemandService.QuotationDocumentSerialTypeNotFound" xml:space="preserve">
+    <value>Quotation document serial type not found.</value>
+  </data>
+  <data name="DemandService.QuotationConvertedSuccessfully" xml:space="preserve">
+    <value>Quotation created successfully.</value>
+  </data>
+  <data name="DemandService.ConvertToQuotationExceptionMessage" xml:space="preserve">
+    <value>An error occurred while converting demand to quotation: {0}</value>
   </data>
   
 

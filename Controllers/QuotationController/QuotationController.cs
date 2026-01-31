@@ -89,6 +89,18 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        /// <summary>
+        /// Teklifi siparişe dönüştürür
+        /// </summary>
+        /// <param name="quotationId">Teklif ID</param>
+        /// <returns>Oluşturulan sipariş ID</returns>
+        [HttpPost("convert-to-order/{quotationId}")]
+        public async Task<IActionResult> ConvertToOrder(long quotationId)
+        {
+            var result = await _quotationService.ConvertToOrderAsync(quotationId);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("price-rule-of-quotation")]
         public async Task<IActionResult> GetPriceRuleOfQuotation([FromQuery] string customerCode,[FromQuery] long salesmenId,[FromQuery] DateTime quotationDate)
         {

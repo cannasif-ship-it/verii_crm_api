@@ -141,6 +141,15 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(0m);
 
+            // Quotation relationship
+            builder.Property(e => e.QuotationId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.Quotation)
+                .WithMany()
+                .HasForeignKey(e => e.QuotationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // Navigation - Lines
             builder.HasMany(e => e.Lines)
                 .WithOne(l => l.Order)
@@ -220,6 +229,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.DocumentSerialTypeId)
                 .HasDatabaseName("IX_Order_DocumentSerialTypeId");
+
+            builder.HasIndex(e => e.QuotationId)
+                .HasDatabaseName("IX_Order_QuotationId");
 
             builder.HasIndex(e => e.Status)
                 .HasDatabaseName("IX_Order_Status");
