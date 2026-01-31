@@ -601,8 +601,26 @@ namespace crm_api.Services
                 ).ToListAsync();
 
                 if (!myFlowSteps.Any())
+                {
+                    var userData = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+                    if (userData == null)
+                    {
+                        return ApiResponse<List<ApprovalScopeUserDto>>
+                            .SuccessResult(new List<ApprovalScopeUserDto>(), "");
+                    }
+                    var approvalScopeUserDtos = new List<ApprovalScopeUserDto>();
+                    approvalScopeUserDtos.Add(new ApprovalScopeUserDto
+                    {
+                        FlowId = 0,
+                        UserId = userId,
+                        FirstName = userData.FirstName ?? "",
+                        LastName = userData.LastName ?? "",
+                        RoleGroupName = "Teklif Sahibi",
+                        StepOrder = 0
+                    });
                     return ApiResponse<List<ApprovalScopeUserDto>>
-                        .SuccessResult(new List<ApprovalScopeUserDto>(), "");
+                        .SuccessResult(approvalScopeUserDtos, "");
+                }
 
                 var flowStepMap = myFlowSteps
                     .ToDictionary(x => x.ApprovalFlowId, x => x.MaxStepOrder);
