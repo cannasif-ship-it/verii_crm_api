@@ -4,7 +4,6 @@ using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
-using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,14 +15,12 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
 
-        public ProductPricingService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public ProductPricingService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
         }
 
         public async Task<ApiResponse<PagedResponse<ProductPricingGetDto>>> GetAllProductPricingsAsync(PagedRequest request)
@@ -40,7 +37,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.ProductPricings
+                var query = _unitOfWork.ProductPricings.Query()
                     .AsNoTracking()
                     .Where(pp => !pp.IsDeleted)
                     .Include(pp => pp.CreatedByUser)
@@ -94,7 +91,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var productPricingWithNav = await _context.ProductPricings
+                var productPricingWithNav = await _unitOfWork.ProductPricings.Query()
                     .AsNoTracking()
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)
@@ -124,7 +121,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var productPricingWithNav = await _context.ProductPricings
+                var productPricingWithNav = await _unitOfWork.ProductPricings.Query()
                     .AsNoTracking()
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)
@@ -163,7 +160,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var productPricingWithNav = await _context.ProductPricings
+                var productPricingWithNav = await _unitOfWork.ProductPricings.Query()
                     .AsNoTracking()
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)

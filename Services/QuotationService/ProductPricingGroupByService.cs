@@ -3,7 +3,6 @@ using crm_api.DTOs;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
-using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
@@ -17,14 +16,12 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
 
-        public ProductPricingGroupByService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public ProductPricingGroupByService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
         }
 
         public async Task<ApiResponse<PagedResponse<ProductPricingGroupByDto>>> GetAllProductPricingGroupBysAsync(PagedRequest request)
@@ -41,7 +38,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.ProductPricingGroupBys
+                var query = _unitOfWork.ProductPricingGroupBys.Query()
                     .AsNoTracking()
                     .Where(ppgb => !ppgb.IsDeleted)
                     .Include(ppgb => ppgb.CreatedByUser)
@@ -95,7 +92,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var productPricingGroupByWithNav = await _context.ProductPricingGroupBys
+                var productPricingGroupByWithNav = await _unitOfWork.ProductPricingGroupBys.Query()
                     .AsNoTracking()
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)
@@ -126,7 +123,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var productPricingGroupByWithNav = await _context.ProductPricingGroupBys
+                var productPricingGroupByWithNav = await _unitOfWork.ProductPricingGroupBys.Query()
                     .AsNoTracking()
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)
@@ -165,7 +162,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var productPricingGroupByWithNav = await _context.ProductPricingGroupBys
+                var productPricingGroupByWithNav = await _unitOfWork.ProductPricingGroupBys.Query()
                     .AsNoTracking()
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)

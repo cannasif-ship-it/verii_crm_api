@@ -4,7 +4,6 @@ using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
-using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,14 +15,12 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
 
-        public PaymentTypeService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public PaymentTypeService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
         }
 
         public async Task<ApiResponse<PagedResponse<PaymentTypeGetDto>>> GetAllPaymentTypesAsync(PagedRequest request)
@@ -40,7 +37,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.PaymentTypes
+                var query = _unitOfWork.PaymentTypes.Query()
                     .AsNoTracking()
                     .Where(pt => !pt.IsDeleted)
                     .Include(pt => pt.CreatedByUser)
@@ -94,7 +91,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var paymentTypeWithNav = await _context.PaymentTypes
+                var paymentTypeWithNav = await _unitOfWork.PaymentTypes.Query()
                     .AsNoTracking()
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
@@ -125,7 +122,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var paymentTypeWithNav = await _context.PaymentTypes
+                var paymentTypeWithNav = await _unitOfWork.PaymentTypes.Query()
                     .AsNoTracking()
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
@@ -165,7 +162,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var paymentTypeWithNav = await _context.PaymentTypes
+                var paymentTypeWithNav = await _unitOfWork.PaymentTypes.Query()
                     .AsNoTracking()
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
