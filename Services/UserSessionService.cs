@@ -3,7 +3,6 @@ using crm_api.DTOs;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
-using crm_api.Data;
 using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +16,10 @@ namespace crm_api.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _loc;
-        private readonly CmsDbContext _context;
 
-        public UserSessionService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context)
+        public UserSessionService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc)
         {
-            _uow = uow; _mapper = mapper; _loc = loc; _context = context;
+            _uow = uow; _mapper = mapper; _loc = loc;
         }
 
         public async Task<ApiResponse<PagedResponse<UserSessionDto>>> GetAllSessionsAsync(PagedRequest request)
@@ -38,7 +36,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.UserSessions
+                var query = _uow.UserSessions.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
                     .Include(u => u.CreatedByUser)
@@ -89,7 +87,7 @@ namespace crm_api.Services
                     StatusCodes.Status404NotFound);
 
                 // Reload with navigation properties for mapping
-                var itemWithNav = await _context.UserSessions
+                var itemWithNav = await _uow.UserSessions.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -117,7 +115,7 @@ namespace crm_api.Services
                 await _uow.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var itemWithNav = await _context.UserSessions
+                var itemWithNav = await _uow.UserSessions.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)

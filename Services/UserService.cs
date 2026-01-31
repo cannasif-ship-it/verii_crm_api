@@ -3,7 +3,6 @@ using crm_api.DTOs;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
-using crm_api.Data;
 using Microsoft.AspNetCore.Http;
 using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +20,12 @@ namespace crm_api.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _loc;
-        private readonly CmsDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
 
-        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, CmsDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
+        public UserService(IUnitOfWork uow, IMapper mapper, ILocalizationService loc, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
-            _uow = uow; _mapper = mapper; _loc = loc; _context = context;
+            _uow = uow; _mapper = mapper; _loc = loc;
             _httpContextAccessor = httpContextAccessor;
             _configuration = configuration;
         }
@@ -69,7 +67,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.Users
+                var query = _uow.Users.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
                     .Include(u => u.CreatedByUser)
@@ -120,7 +118,7 @@ namespace crm_api.Services
                     StatusCodes.Status404NotFound);
 
                 // Reload with navigation properties for mapping
-                var userWithNav = await _context.Users
+                var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -154,7 +152,7 @@ namespace crm_api.Services
                 await _uow.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var userWithNav = await _context.Users
+                var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -194,7 +192,7 @@ namespace crm_api.Services
                 await _uow.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var userWithNav = await _context.Users
+                var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)

@@ -5,7 +5,6 @@ using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
-using crm_api.Data;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography.X509Certificates;
 
@@ -17,15 +16,13 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly IFileUploadService _fileUploadService;
-        private readonly CmsDbContext _context;
 
-        public UserDetailService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IFileUploadService fileUploadService, CmsDbContext context)
+        public UserDetailService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IFileUploadService fileUploadService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _fileUploadService = fileUploadService;
-            _context = context;
         }
 
         public async Task<ApiResponse<UserDetailDto>> GetByIdAsync(long id)
@@ -42,7 +39,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserDetails
+                var entityWithNav = await _unitOfWork.UserDetails.Query()
                     .Where(x => x.Id == id && !x.IsDeleted)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -65,7 +62,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _context.UserDetails
+                var entity = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Where(x => x.UserId == userId && !x.IsDeleted)
                     .Include(u => u.CreatedByUser)
@@ -89,7 +86,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entities = await _context.UserDetails
+                var entities = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Where(x => !x.IsDeleted)
                     .ToListAsync();
@@ -113,7 +110,7 @@ namespace crm_api.Services
                 if (request.PageNumber < 1) request.PageNumber = 1;
                 if (request.PageSize < 1) request.PageSize = 20;
 
-                var query = _context.UserDetails
+                var query = _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
                     .Include(u => u.CreatedByUser)
@@ -166,7 +163,7 @@ namespace crm_api.Services
                 }
 
                 // Check if user detail already exists
-                var existingDetail = await _context.UserDetails
+                var existingDetail = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Where(x => !x.IsDeleted)
                     .FirstOrDefaultAsync(x => x.UserId == dto.UserId && !x.IsDeleted);
@@ -184,7 +181,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserDetails
+                var entityWithNav = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -231,7 +228,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserDetails
+                var entityWithNav = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -310,7 +307,7 @@ namespace crm_api.Services
                 }
 
                 // Get or create user detail
-                var userDetail = await _context.UserDetails
+                var userDetail = await _unitOfWork.UserDetails.Query()
                     .AsNoTracking()
                     .Where(x => !x.IsDeleted)
                     .FirstOrDefaultAsync(x => x.UserId == userId && !x.IsDeleted);
