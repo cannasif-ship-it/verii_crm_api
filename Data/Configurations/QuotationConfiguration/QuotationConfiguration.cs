@@ -261,6 +261,9 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Quotation_IsDeleted");
 
+            builder.HasIndex(e => e.DemandId)
+                .HasDatabaseName("IX_Quotation_DemandId");
+
             // Global Query Filter for soft delete
             builder.HasQueryFilter(e => !e.IsDeleted);
         }
