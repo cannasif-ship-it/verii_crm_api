@@ -1470,9 +1470,22 @@ namespace crm_api.Services
                 approvalRequest.UpdatedBy = userId;
 
                 await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+
+                // Talep durumunu ve red sebebini güncelle (raporlama için)
+                var demandForReject = await _unitOfWork.Demands.Query(tracking: true)
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+                if (demandForReject != null)
+                {
+                    demandForReject.Status = ApprovalStatus.Rejected;
+                    demandForReject.RejectedReason = request.RejectReason;
+                    demandForReject.UpdatedDate = DateTime.UtcNow;
+                    demandForReject.UpdatedBy = userId;
+                    await _unitOfWork.Demands.UpdateAsync(demandForReject);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
-                // Eğer reddeden kullanıcı teklifi oluşturan kullanıcıysa ve en alt aşamadaysa (CurrentStep == 1)
+                // Eğer reddeden kullanıcı talebi oluşturan kullanıcıysa ve en alt aşamadaysa (CurrentStep == 1)
                 // DemandLine'ların ApprovalStatus'unu Rejected yap
                 if (approvalRequest.CurrentStep == 1)
                 {
@@ -1941,5 +1954,138 @@ namespace crm_api.Services
             }
         }
 
+        /// <summary>
+        /// Talep onay akışı raporu - Aşamalar, kimler onayladı, kimler bekledi, kim reddetti ve ne yazdı
+        /// </summary>
+        /// <param name="demandId">Talep ID</param>
+        /// <returns>Onay akışının aşama bazlı detaylı raporu</returns>
+        public async Task<ApiResponse<DemandApprovalFlowReportDto>> GetApprovalFlowReportAsync(long demandId)
+        {
+            try
+            {
+                var demand = await _unitOfWork.Demands.Query()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(q => q.Id == demandId && !q.IsDeleted);
+
+                if (demand == null)
+                {
+                    return ApiResponse<DemandApprovalFlowReportDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandService.DemandNotFound"),
+                        "Talep bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var report = new DemandApprovalFlowReportDto
+                {
+                    DemandId = demand.Id,
+                    DemandOfferNo = demand.RevisionNo ?? demand.OfferNo ?? demand.Id.ToString(),
+                    HasApprovalRequest = false,
+                    OverallStatus = (int?)demand.Status,
+                    OverallStatusName = GetApprovalStatusName(demand.Status),
+                    RejectedReason = demand.RejectedReason,
+                    Steps = new List<ApprovalFlowStepReportDto>()
+                };
+
+                var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
+                    .AsNoTracking()
+                    .Include(ar => ar.ApprovalFlow)
+                    .FirstOrDefaultAsync(x =>
+                        x.EntityId == demandId &&
+                        x.DocumentType == PricingRuleType.Demand &&
+                        !x.IsDeleted);
+
+                if (approvalRequest == null)
+                {
+                    report.HasApprovalRequest = false;
+                    return ApiResponse<DemandApprovalFlowReportDto>.SuccessResult(
+                        report,
+                        _localizationService.GetLocalizedString("DemandService.ApprovalFlowReportRetrieved"));
+                }
+
+                report.HasApprovalRequest = true;
+                report.CurrentStep = approvalRequest.CurrentStep;
+                report.OverallStatus = (int)approvalRequest.Status;
+                report.OverallStatusName = GetApprovalStatusName(approvalRequest.Status);
+                if (string.IsNullOrEmpty(report.RejectedReason))
+                    report.RejectedReason = demand.RejectedReason;
+                report.FlowDescription = approvalRequest.ApprovalFlow?.Description;
+
+                var steps = await _unitOfWork.ApprovalFlowSteps.Query()
+                    .AsNoTracking()
+                    .Include(s => s.ApprovalRoleGroup)
+                    .Where(x => x.ApprovalFlowId == approvalRequest.ApprovalFlowId && !x.IsDeleted)
+                    .OrderBy(x => x.StepOrder)
+                    .ToListAsync();
+
+                var allActions = await _unitOfWork.ApprovalActions.Query()
+                    .AsNoTracking()
+                    .Include(a => a.ApprovedByUser)
+                    .Where(x => x.ApprovalRequestId == approvalRequest.Id && !x.IsDeleted)
+                    .ToListAsync();
+
+                foreach (var step in steps)
+                {
+                    var stepActions = allActions.Where(a => a.StepOrder == step.StepOrder).ToList();
+                    var stepReport = new ApprovalFlowStepReportDto
+                    {
+                        StepOrder = step.StepOrder,
+                        StepName = step.ApprovalRoleGroup?.Name ?? $"Adım {step.StepOrder}",
+                        StepStatus = GetStepStatus(step, approvalRequest, stepActions),
+                        Actions = stepActions.Select(a => new ApprovalActionDetailDto
+                        {
+                            UserId = a.ApprovedByUserId,
+                            UserFullName = a.ApprovedByUser != null
+                                ? $"{a.ApprovedByUser.FirstName} {a.ApprovedByUser.LastName}".Trim()
+                                : null,
+                            UserEmail = a.ApprovedByUser?.Email,
+                            Status = (int)a.Status,
+                            StatusName = GetApprovalStatusName(a.Status),
+                            ActionDate = a.Status != ApprovalStatus.Waiting ? a.ActionDate : null,
+                            RejectedReason = a.Status == ApprovalStatus.Rejected ? demand.RejectedReason : null
+                        }).ToList()
+                    };
+                    report.Steps.Add(stepReport);
+                }
+
+                return ApiResponse<DemandApprovalFlowReportDto>.SuccessResult(
+                    report,
+                    _localizationService.GetLocalizedString("DemandService.ApprovalFlowReportRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<DemandApprovalFlowReportDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("DemandService.InternalServerError"),
+                    _localizationService.GetLocalizedString("DemandService.ApprovalFlowReportExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        private static string GetApprovalStatusName(ApprovalStatus? status)
+        {
+            if (status == null) return "Belirsiz";
+            return status switch
+            {
+                ApprovalStatus.HavenotStarted => "Başlamadı",
+                ApprovalStatus.Waiting => "Beklemede",
+                ApprovalStatus.Approved => "Onaylandı",
+                ApprovalStatus.Rejected => "Reddedildi",
+                _ => "Belirsiz"
+            };
+        }
+
+        private static string GetStepStatus(ApprovalFlowStep step, ApprovalRequest request, List<ApprovalAction> stepActions)
+        {
+            if (request.Status == ApprovalStatus.Rejected)
+            {
+                var rejectedInStep = stepActions.Any(a => a.Status == ApprovalStatus.Rejected);
+                return rejectedInStep ? "Rejected" : (step.StepOrder < request.CurrentStep ? "Completed" : "NotStarted");
+            }
+
+            if (step.StepOrder < request.CurrentStep)
+                return "Completed";
+            if (step.StepOrder == request.CurrentStep)
+                return "InProgress";
+            return "NotStarted";
+        }
     }
 }

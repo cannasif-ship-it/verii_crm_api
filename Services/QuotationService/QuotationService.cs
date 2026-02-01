@@ -1663,6 +1663,19 @@ namespace crm_api.Services
                 approvalRequest.UpdatedBy = userId;
 
                 await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+
+                // Teklif durumunu ve red sebebini güncelle (raporlama için)
+                var quotationForReject = await _unitOfWork.Quotations.Query(tracking: true)
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+                if (quotationForReject != null)
+                {
+                    quotationForReject.Status = ApprovalStatus.Rejected;
+                    quotationForReject.RejectedReason = request.RejectReason;
+                    quotationForReject.UpdatedDate = DateTime.UtcNow;
+                    quotationForReject.UpdatedBy = userId;
+                    await _unitOfWork.Quotations.UpdateAsync(quotationForReject);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 // Eğer reddeden kullanıcı teklifi oluşturan kullanıcıysa ve en alt aşamadaysa (CurrentStep == 1)
@@ -1764,7 +1777,7 @@ namespace crm_api.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
-        
+
         public async Task<ApiResponse<long>> ConvertToOrderAsync(long quotationId)
         {
             await _unitOfWork.BeginTransactionAsync();
@@ -1935,6 +1948,141 @@ namespace crm_api.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
- 
+
+        /// <summary>
+        /// Teklif onay akışı raporu - Aşamalar, kimler onayladı, kimler bekledi, kim reddetti ve ne yazdı
+        /// </summary>
+        /// <param name="quotationId">Teklif ID</param>
+        /// <returns>Onay akışının aşama bazlı detaylı raporu</returns>
+        public async Task<ApiResponse<QuotationApprovalFlowReportDto>> GetApprovalFlowReportAsync(long quotationId)
+        {
+            try
+            {
+                var quotation = await _unitOfWork.Quotations.Query()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(q => q.Id == quotationId && !q.IsDeleted);
+
+                if (quotation == null)
+                {
+                    return ApiResponse<QuotationApprovalFlowReportDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        "Teklif bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var report = new QuotationApprovalFlowReportDto
+                {
+                    QuotationId = quotation.Id,
+                    QuotationOfferNo = quotation.RevisionNo ?? quotation.OfferNo ?? quotation.Id.ToString(),
+                    HasApprovalRequest = false,
+                    OverallStatus = (int?)quotation.Status,
+                    OverallStatusName = GetApprovalStatusName(quotation.Status),
+                    RejectedReason = quotation.RejectedReason,
+                    Steps = new List<ApprovalFlowStepReportDto>()
+                };
+
+                var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
+                    .AsNoTracking()
+                    .Include(ar => ar.ApprovalFlow)
+                    .FirstOrDefaultAsync(x =>
+                        x.EntityId == quotationId &&
+                        x.DocumentType == PricingRuleType.Quotation &&
+                        !x.IsDeleted);
+
+                if (approvalRequest == null)
+                {
+                    report.HasApprovalRequest = false;
+                    return ApiResponse<QuotationApprovalFlowReportDto>.SuccessResult(
+                        report,
+                        _localizationService.GetLocalizedString("QuotationService.ApprovalFlowReportRetrieved"));
+                }
+
+                report.HasApprovalRequest = true;
+                report.CurrentStep = approvalRequest.CurrentStep;
+                report.OverallStatus = (int)approvalRequest.Status;
+                report.OverallStatusName = GetApprovalStatusName(approvalRequest.Status);
+                if (string.IsNullOrEmpty(report.RejectedReason))
+                    report.RejectedReason = quotation.RejectedReason;
+                report.FlowDescription = approvalRequest.ApprovalFlow?.Description;
+
+                var steps = await _unitOfWork.ApprovalFlowSteps.Query()
+                    .AsNoTracking()
+                    .Include(s => s.ApprovalRoleGroup)
+                    .Where(x => x.ApprovalFlowId == approvalRequest.ApprovalFlowId && !x.IsDeleted)
+                    .OrderBy(x => x.StepOrder)
+                    .ToListAsync();
+
+                var allActions = await _unitOfWork.ApprovalActions.Query()
+                    .AsNoTracking()
+                    .Include(a => a.ApprovedByUser)
+                    .Where(x => x.ApprovalRequestId == approvalRequest.Id && !x.IsDeleted)
+                    .ToListAsync();
+
+                foreach (var step in steps)
+                {
+                    var stepActions = allActions.Where(a => a.StepOrder == step.StepOrder).ToList();
+                    var stepReport = new ApprovalFlowStepReportDto
+                    {
+                        StepOrder = step.StepOrder,
+                        StepName = step.ApprovalRoleGroup?.Name ?? $"Adım {step.StepOrder}",
+                        StepStatus = GetStepStatus(step, approvalRequest, stepActions),
+                        Actions = stepActions.Select(a => new ApprovalActionDetailDto
+                        {
+                            UserId = a.ApprovedByUserId,
+                            UserFullName = a.ApprovedByUser != null
+                                ? $"{a.ApprovedByUser.FirstName} {a.ApprovedByUser.LastName}".Trim()
+                                : null,
+                            UserEmail = a.ApprovedByUser?.Email,
+                            Status = (int)a.Status,
+                            StatusName = GetApprovalStatusName(a.Status),
+                            ActionDate = a.Status != ApprovalStatus.Waiting ? a.ActionDate : null,
+                            RejectedReason = a.Status == ApprovalStatus.Rejected ? quotation.RejectedReason : null
+                        }).ToList()
+                    };
+                    report.Steps.Add(stepReport);
+                }
+
+                return ApiResponse<QuotationApprovalFlowReportDto>.SuccessResult(
+                    report,
+                    _localizationService.GetLocalizedString("QuotationService.ApprovalFlowReportRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<QuotationApprovalFlowReportDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.ApprovalFlowReportExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        private static string GetApprovalStatusName(ApprovalStatus? status)
+        {
+            if (status == null) return "Belirsiz";
+            return status switch
+            {
+                ApprovalStatus.HavenotStarted => "Başlamadı",
+                ApprovalStatus.Waiting => "Beklemede",
+                ApprovalStatus.Approved => "Onaylandı",
+                ApprovalStatus.Rejected => "Reddedildi",
+                _ => "Belirsiz"
+            };
+        }
+
+        private static string GetStepStatus(ApprovalFlowStep step, ApprovalRequest request, List<ApprovalAction> stepActions)
+        {
+            if (request.Status == ApprovalStatus.Rejected)
+            {
+                var rejectedInStep = stepActions.Any(a => a.Status == ApprovalStatus.Rejected);
+                return rejectedInStep ? "Rejected" : (step.StepOrder < request.CurrentStep ? "Completed" : "NotStarted");
+            }
+
+            if (step.StepOrder < request.CurrentStep)
+                return "Completed";
+            if (step.StepOrder == request.CurrentStep)
+                return "InProgress";
+            return "NotStarted";
+        }
+   
+   
     }
 }

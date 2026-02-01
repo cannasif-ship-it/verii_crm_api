@@ -25,5 +25,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<bool>> RejectAsync(RejectActionDto request);
         Task<ApiResponse<List<ApprovalScopeUserDto>>> GetQuotationRelatedUsersAsync(long userId);
         Task<ApiResponse<long>> ConvertToOrderAsync(long quotationId);
+        Task<ApiResponse<QuotationApprovalFlowReportDto>> GetApprovalFlowReportAsync(long quotationId);
     }
 }

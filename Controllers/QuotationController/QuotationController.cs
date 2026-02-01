@@ -266,5 +266,17 @@ namespace crm_api.Controllers
             var result = await _quotationService.GetQuotationRelatedUsersAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
+
+        /// <summary>
+        /// Teklif onay akışı raporu - Aşamalar, kimler onayladı, kimler bekledi, kim reddetti
+        /// </summary>
+        /// <param name="quotationId">Teklif ID</param>
+        /// <returns>Onay akışının aşama bazlı detaylı raporu</returns>
+        [HttpGet("{quotationId}/approval-flow-report")]
+        public async Task<IActionResult> GetApprovalFlowReport(long quotationId)
+        {
+            var result = await _quotationService.GetApprovalFlowReportAsync(quotationId);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

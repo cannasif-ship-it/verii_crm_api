@@ -266,5 +266,17 @@ namespace crm_api.Controllers
             var result = await _demandService.GetDemandRelatedUsersAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
+
+        /// <summary>
+        /// Talep onay akışı raporu - Aşamalar, kimler onayladı, kimler bekledi, kim reddetti
+        /// </summary>
+        /// <param name="demandId">Talep ID</param>
+        /// <returns>Onay akışının aşama bazlı detaylı raporu</returns>
+        [HttpGet("{demandId}/approval-flow-report")]
+        public async Task<IActionResult> GetApprovalFlowReport(long demandId)
+        {
+            var result = await _demandService.GetApprovalFlowReportAsync(demandId);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

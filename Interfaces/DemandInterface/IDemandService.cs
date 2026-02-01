@@ -25,5 +25,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<PagedResponse<DemandGetDto>>> GetRelatedDemands(PagedRequest request);
         Task<ApiResponse<List<ApprovalScopeUserDto>>> GetDemandRelatedUsersAsync(long userId);
         Task<ApiResponse<long>> ConvertToQuotationAsync(long demandId);
+        Task<ApiResponse<DemandApprovalFlowReportDto>> GetApprovalFlowReportAsync(long demandId);
     }
 }
