@@ -986,6 +986,12 @@
   <data name="QuotationService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
   </data>
+  <data name="QuotationService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Onay akışı raporu başarıyla getirildi.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value>
+  </data>
   <data name="QuotationService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Quotation bulunamadı.</value>
   </data>
@@ -2215,6 +2221,12 @@
   <data name="DemandService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
   </data>
+  <data name="DemandService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Onay akışı raporu başarıyla getirildi.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value>
+  </data>
   <data name="DemandService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Demand bulunamadı.</value>
   </data>
@@ -2370,6 +2382,12 @@
   </data>
   <data name="OrderService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Onay akışı raporu başarıyla getirildi.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value>
   </data>
   <data name="OrderService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Order bulunamadı.</value>

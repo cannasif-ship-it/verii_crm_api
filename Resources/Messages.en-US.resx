@@ -953,6 +953,12 @@
   <data name="QuotationService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
   </data>
+  <data name="QuotationService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Approval flow report retrieved successfully.</value>
+  </data>
+  <data name="QuotationService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>An error occurred while retrieving approval flow report: {0}</value>
+  </data>
   <data name="QuotationService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Quotation not found.</value>
   </data>
@@ -2224,6 +2230,12 @@
   <data name="DemandService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
   </data>
+  <data name="DemandService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Approval flow report retrieved successfully.</value>
+  </data>
+  <data name="DemandService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>An error occurred while retrieving approval flow report: {0}</value>
+  </data>
   <data name="DemandService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Demand not found.</value>
   </data>
@@ -2379,6 +2391,12 @@
   </data>
   <data name="OrderService.ApprovalFlowStarted" xml:space="preserve">
     <value>Approval Flow Started.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowReportRetrieved" xml:space="preserve">
+    <value>Approval flow report retrieved successfully.</value>
+  </data>
+  <data name="OrderService.ApprovalFlowReportExceptionMessage" xml:space="preserve">
+    <value>An error occurred while retrieving approval flow report: {0}</value>
   </data>
   <data name="OrderService.ApprovalFlowStepsNotFound" xml:space="preserve">
     <value>Order not found.</value>
