@@ -56,6 +56,7 @@ namespace crm_api.Data
         public DbSet<ApprovalRole> ApprovalRoles { get; set; }
         public DbSet<ApprovalUserRole> ApprovalUserRoles { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ReportTemplate> ReportTemplates { get; set; }
 
 
 
