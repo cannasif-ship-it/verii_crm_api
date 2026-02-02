@@ -115,11 +115,33 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricingGroupBy = _mapper.Map<ProductPricingGroupBy>(createDto);
-                productPricingGroupBy.CreatedDate = DateTime.UtcNow;
-                productPricingGroupBy.IsDeleted = false;
+                // Aynı ErpGroupCode ile mevcut kayıt var mı kontrol et (silinmiş dahil)
+                var existing = await _unitOfWork.ProductPricingGroupBys.Query(tracking: true, ignoreQueryFilters: true)
+                    .FirstOrDefaultAsync(ppgb => ppgb.ErpGroupCode == createDto.ErpGroupCode);
 
-                await _unitOfWork.ProductPricingGroupBys.AddAsync(productPricingGroupBy);
+                ProductPricingGroupBy productPricingGroupBy;
+
+                if (existing != null)
+                {
+                    // Var olan kaydı geri yükle ve güncelle (upsert)
+                    _mapper.Map(createDto, existing);
+                    existing.IsDeleted = false;
+                    existing.DeletedDate = null;
+                    existing.DeletedBy = null;
+
+                    await _unitOfWork.ProductPricingGroupBys.UpdateAsync(existing);
+                    productPricingGroupBy = existing;
+                }
+                else
+                {
+                    // Yeni kayıt oluştur
+                    productPricingGroupBy = _mapper.Map<ProductPricingGroupBy>(createDto);
+                    productPricingGroupBy.CreatedDate = DateTime.UtcNow;
+                    productPricingGroupBy.IsDeleted = false;
+
+                    await _unitOfWork.ProductPricingGroupBys.AddAsync(productPricingGroupBy);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
@@ -131,7 +153,8 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(ppgb => ppgb.Id == productPricingGroupBy.Id && !ppgb.IsDeleted);
 
                 var productPricingGroupByDto = _mapper.Map<ProductPricingGroupByDto>(productPricingGroupByWithNav ?? productPricingGroupBy);
-                return ApiResponse<ProductPricingGroupByDto>.SuccessResult(productPricingGroupByDto, _localizationService.GetLocalizedString("ProductPricingGroupByService.ProductPricingGroupByCreated"));
+                var messageKey = existing != null ? "ProductPricingGroupByService.ProductPricingGroupByUpdated" : "ProductPricingGroupByService.ProductPricingGroupByCreated";
+                return ApiResponse<ProductPricingGroupByDto>.SuccessResult(productPricingGroupByDto, _localizationService.GetLocalizedString(messageKey));
             }
             catch (Exception ex)
             {
