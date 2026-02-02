@@ -162,8 +162,15 @@ builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IMailJob, In
 // Register File Upload Services
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
+// Register Report Template Services
+builder.Services.AddScoped<IReportTemplateService, ReportTemplateService>();
+builder.Services.AddScoped<IReportPdfGeneratorService, ReportPdfGeneratorService>();
+
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
+
+// Add HttpClient for external requests (e.g., image loading in PDF generation)
+builder.Services.AddHttpClient();
 
 // Localization Configuration
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
