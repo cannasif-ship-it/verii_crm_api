@@ -152,15 +152,7 @@ namespace crm_api.Services
         {
             try
             {
-                string input = tarih.ToString();
-
-                DateTime dt = DateTime.ParseExact(
-                    input,
-                    "dd.MM.yyyy HH:mm:ss",
-                    CultureInfo.InvariantCulture
-                );
-
-                string resultDate = dt.ToString("yyyy-MM-dd");
+                string resultDate = tarih.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 var result = await _cmsContext.Set<RII_FN_KUR>()
                 .FromSqlRaw("SELECT * FROM dbo.RII_FN_KUR({0}, {1})", resultDate, fiyatTipi)
                 .AsNoTracking()
