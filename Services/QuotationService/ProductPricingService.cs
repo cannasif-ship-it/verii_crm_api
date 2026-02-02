@@ -114,10 +114,33 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricing = _mapper.Map<ProductPricing>(createProductPricingDto);
-                productPricing.CreatedDate = DateTime.UtcNow;
+                // Aynı ErpProductCode + ErpGroupCode ile mevcut kayıt var mı kontrol et (silinmiş dahil)
+                var existing = await _unitOfWork.ProductPricings.Query(tracking: true, ignoreQueryFilters: true)
+                    .FirstOrDefaultAsync(pp => pp.ErpProductCode == createProductPricingDto.ErpProductCode && pp.ErpGroupCode == createProductPricingDto.ErpGroupCode);
 
-                await _unitOfWork.ProductPricings.AddAsync(productPricing);
+                ProductPricing productPricing;
+
+                if (existing != null)
+                {
+                    // Var olan kaydı geri yükle ve güncelle (upsert)
+                    _mapper.Map(createProductPricingDto, existing);
+                    existing.IsDeleted = false;
+                    existing.DeletedDate = null;
+                    existing.DeletedBy = null;
+
+                    await _unitOfWork.ProductPricings.UpdateAsync(existing);
+                    productPricing = existing;
+                }
+                else
+                {
+                    // Yeni kayıt oluştur
+                    productPricing = _mapper.Map<ProductPricing>(createProductPricingDto);
+                    productPricing.CreatedDate = DateTime.UtcNow;
+                    productPricing.IsDeleted = false;
+
+                    await _unitOfWork.ProductPricings.AddAsync(productPricing);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
@@ -129,7 +152,8 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(pp => pp.Id == productPricing.Id && !pp.IsDeleted);
 
                 var productPricingDto = _mapper.Map<ProductPricingGetDto>(productPricingWithNav ?? productPricing);
-                return ApiResponse<ProductPricingGetDto>.SuccessResult(productPricingDto, _localizationService.GetLocalizedString("ProductPricingService.ProductPricingCreated"));
+                var messageKey = existing != null ? "ProductPricingService.ProductPricingUpdated" : "ProductPricingService.ProductPricingCreated";
+                return ApiResponse<ProductPricingGetDto>.SuccessResult(productPricingDto, _localizationService.GetLocalizedString(messageKey));
             }
             catch (Exception ex)
             {
