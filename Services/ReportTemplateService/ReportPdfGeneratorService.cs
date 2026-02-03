@@ -49,40 +49,48 @@ namespace crm_api.Services
             // Convert page size from px to points (96 DPI to 72 DPI)
             var pageWidthPt = ConvertToPoints(templateData.Page.Width, templateData.Page.Unit);
             var pageHeightPt = ConvertToPoints(templateData.Page.Height, templateData.Page.Unit);
+            var unit = templateData.Page.Unit ?? "px";
 
-            // Generate PDF using simple layout
+            // All elements in template order (Y then X) for absolute positioning on full page
+            var orderedElements = templateData.Elements
+                .OrderBy(e => e.Y)
+                .ThenBy(e => e.X)
+                .ToList();
+
+            // Generate PDF with absolute positions from template (x, y, width, height, color, fontSize, fontFamily)
             var document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(new PageSize((float)pageWidthPt, (float)pageHeightPt));
-                    page.Margin(20);
+                    page.Margin(0); // Full page so template coordinates match
 
-                    // Header section
-                    var headerElements = templateData.Elements.Where(e => e.Section == "header").ToList();
-                    if (headerElements.Any())
-                    {
-                        page.Header().Column(column =>
-                        {
-                            RenderElementsSimple(column, headerElements, entityData);
-                        });
-                    }
-
-                    // Footer section
-                    var footerElements = templateData.Elements.Where(e => e.Section == "footer").ToList();
-                    if (footerElements.Any())
-                    {
-                        page.Footer().Column(column =>
-                        {
-                            RenderElementsSimple(column, footerElements, entityData);
-                        });
-                    }
-
-                    // Content section
-                    var contentElements = templateData.Elements.Where(e => e.Section == "content").ToList();
                     page.Content().Column(column =>
                     {
-                        RenderElementsSimple(column, contentElements, entityData);
+                        float cumulativeY = 0f;
+                        foreach (var element in orderedElements)
+                        {
+                            var xPt = (float)ConvertToPoints(element.X, unit);
+                            var yPt = (float)ConvertToPoints(element.Y, unit);
+                            var wPt = (float)ConvertToPoints(element.Width > 0 ? element.Width : 200, unit);
+                            var hPt = (float)ConvertToPoints(element.Height > 0 ? element.Height : 50, unit);
+
+                            var paddingTop = yPt - cumulativeY;
+                            cumulativeY = yPt + hPt;
+
+                            column.Item()
+                                .PaddingTop(paddingTop >= 0 ? paddingTop : 0)
+                                .PaddingLeft(xPt)
+                                .Width(wPt)
+                                .Height(hPt)
+                                .Element(c =>
+                                {
+                                    if (paddingTop < 0)
+                                        c.TranslateY(paddingTop).Element(inner => RenderElementWithStyle(inner, element, entityData));
+                                    else
+                                        RenderElementWithStyle(c, element, entityData);
+                                });
+                        }
                     });
                 });
             });
@@ -227,42 +235,51 @@ namespace crm_api.Services
             };
         }
 
-        private void RenderElementsSimple(ColumnDescriptor column, List<ReportElement> elements, object entityData)
+        private void RenderElementWithStyle(IContainer container, ReportElement element, object entityData)
         {
-            foreach (var element in elements.OrderBy(e => e.Y).ThenBy(e => e.X))
+            switch (element.Type.ToLower())
             {
-                switch (element.Type.ToLower())
-                {
-                    case "text":
-                        RenderTextElementSimple(column, element);
-                        break;
+                case "text":
+                    RenderTextWithStyle(container, element);
+                    break;
 
-                    case "field":
-                        RenderFieldElementSimple(column, element, entityData);
-                        break;
+                case "field":
+                    RenderFieldWithStyle(container, element, entityData);
+                    break;
 
-                    case "image":
-                        RenderImageElementSimple(column, element);
-                        break;
+                case "image":
+                    RenderImageWithStyle(container, element);
+                    break;
 
-                    case "table":
-                        RenderTableElementSimple(column, element, entityData);
-                        break;
-                }
+                case "table":
+                    RenderTableWithStyle(container, element, entityData);
+                    break;
             }
         }
 
-        private void RenderTextElementSimple(ColumnDescriptor column, ReportElement element)
+        private void ApplyTextStyleAndText(IContainer container, ReportElement element, string content)
+        {
+            var fontSize = (float)(element.FontSize ?? 12);
+            container.DefaultTextStyle(style =>
+            {
+                var s = style.FontSize(fontSize);
+                if (!string.IsNullOrEmpty(element.Color))
+                    s = s.FontColor(element.Color);
+                if (!string.IsNullOrEmpty(element.FontFamily))
+                    s = s.FontFamily(element.FontFamily);
+                return s;
+            }).Text(content);
+        }
+
+        private void RenderTextWithStyle(IContainer container, ReportElement element)
         {
             if (string.IsNullOrEmpty(element.Text))
                 return;
 
-            var fontSize = element.FontSize ?? 12;
-            
-            column.Item().Text(element.Text).FontSize((float)fontSize);
+            ApplyTextStyleAndText(container, element, element.Text);
         }
 
-        private void RenderFieldElementSimple(ColumnDescriptor column, ReportElement element, object entityData)
+        private void RenderFieldWithStyle(IContainer container, ReportElement element, object entityData)
         {
             if (string.IsNullOrEmpty(element.Path))
                 return;
@@ -270,12 +287,10 @@ namespace crm_api.Services
             var value = ResolvePropertyPath(entityData, element.Path);
             var displayValue = value?.ToString() ?? string.Empty;
 
-            var fontSize = element.FontSize ?? 12;
-            
-            column.Item().Text(displayValue).FontSize((float)fontSize);
+            ApplyTextStyleAndText(container, element, displayValue);
         }
 
-        private void RenderImageElementSimple(ColumnDescriptor column, ReportElement element)
+        private void RenderImageWithStyle(IContainer container, ReportElement element)
         {
             if (string.IsNullOrEmpty(element.Value))
                 return;
@@ -297,7 +312,7 @@ namespace crm_api.Services
                     imageBytes = httpClient.GetByteArrayAsync(element.Value).GetAwaiter().GetResult();
                 }
 
-                column.Item().Image(imageBytes);
+                container.Image(imageBytes);
             }
             catch (Exception ex)
             {
@@ -305,12 +320,11 @@ namespace crm_api.Services
             }
         }
 
-        private void RenderTableElementSimple(ColumnDescriptor column, ReportElement element, object entityData)
+        private void RenderTableWithStyle(IContainer container, ReportElement element, object entityData)
         {
             if (element.Columns == null || !element.Columns.Any())
                 return;
 
-            // Get table data
             var firstColumnPath = element.Columns[0].Path;
             var collectionName = firstColumnPath.Contains('.') ? firstColumnPath.Split('.')[0] : firstColumnPath;
             var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
@@ -320,9 +334,8 @@ namespace crm_api.Services
 
             var rows = collection.ToList();
 
-            column.Item().Table(table =>
+            container.Table(table =>
             {
-                // Define columns
                 foreach (var col in element.Columns)
                 {
                     table.ColumnsDefinition(columns =>
@@ -331,7 +344,6 @@ namespace crm_api.Services
                     });
                 }
 
-                // Header row
                 table.Header(header =>
                 {
                     foreach (var col in element.Columns)
@@ -340,14 +352,12 @@ namespace crm_api.Services
                     }
                 });
 
-                // Data rows
                 foreach (var row in rows)
                 {
                     foreach (var col in element.Columns)
                     {
                         var propertyPath = col.Path.Contains('.') ? col.Path.Split('.', 2)[1] : col.Path;
                         var cellValue = ResolvePropertyPath(row, propertyPath)?.ToString() ?? string.Empty;
-                        
                         table.Cell().Border(1).Padding(5).Text(cellValue).FontSize(9);
                     }
                 }
