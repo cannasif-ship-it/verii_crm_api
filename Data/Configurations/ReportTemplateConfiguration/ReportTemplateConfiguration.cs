@@ -8,7 +8,7 @@ namespace crm_api.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ReportTemplate> builder)
         {
-            builder.ToTable("ReportTemplates");
+            builder.ToTable("RII_REPORT_TEMPLATES");
 
             builder.HasKey(rt => rt.Id);
 
@@ -28,6 +28,13 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.Property(rt => rt.Default)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.HasIndex(rt => new { rt.RuleType, rt.Default })
+                .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_Default");
+
             builder.Property(rt => rt.CreatedByUserId)
                 .IsRequired(false);
 
@@ -36,13 +43,13 @@ namespace crm_api.Data.Configurations
 
             // Indexes
             builder.HasIndex(rt => rt.RuleType)
-                .HasDatabaseName("IX_ReportTemplates_RuleType");
+                .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType");
 
             builder.HasIndex(rt => rt.IsActive)
-                .HasDatabaseName("IX_ReportTemplates_IsActive");
+                .HasDatabaseName("IX_RII_REPORT_TEMPLATES_IsActive");
 
             builder.HasIndex(rt => new { rt.RuleType, rt.IsActive })
-                .HasDatabaseName("IX_ReportTemplates_RuleType_IsActive");
+                .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_IsActive");
         }
     }
 }

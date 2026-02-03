@@ -14,6 +14,8 @@ namespace crm_api.DTOs
         public string Title { get; set; } = string.Empty;
         public ReportTemplateData? TemplateData { get; set; }
         public bool IsActive { get; set; }
+        /// <summary>Her RuleType için tek bir şablon default olabilir.</summary>
+        public bool Default { get; set; }
         public long? CreatedByUserId { get; set; }
         public long? UpdatedByUserId { get; set; }
     }
@@ -34,6 +36,9 @@ namespace crm_api.DTOs
         public ReportTemplateData TemplateData { get; set; } = new ReportTemplateData();
 
         public bool IsActive { get; set; } = true;
+
+        /// <summary>true ise bu şablon o RuleType için default olur; aynı tipteki diğerleri false yapılır.</summary>
+        public bool Default { get; set; } = false;
     }
 
     /// <summary>
@@ -52,6 +57,9 @@ namespace crm_api.DTOs
         public ReportTemplateData TemplateData { get; set; } = new ReportTemplateData();
 
         public bool IsActive { get; set; } = true;
+
+        /// <summary>true ise bu şablon o RuleType için default olur; aynı tipteki diğerleri false yapılır.</summary>
+        public bool Default { get; set; } = false;
     }
 
     /// <summary>

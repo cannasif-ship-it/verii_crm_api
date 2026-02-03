@@ -7,7 +7,7 @@ namespace crm_api.Models
     /// <summary>
     /// Report template entity for storing JSON-based report designs
     /// </summary>
-    [Table("ReportTemplates")]
+    [Table("RII_REPORT_TEMPLATES")]
     public class ReportTemplate : BaseEntity
     {
         /// <summary>
@@ -34,6 +34,11 @@ namespace crm_api.Models
         /// Is this template active/enabled
         /// </summary>
         public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        /// Her RuleType için tek bir şablon default olabilir; PDF oluştururken default şablon kullanılabilir.
+        /// </summary>
+        public bool Default { get; set; } = false;
 
         /// <summary>
         /// User ID who created this template
