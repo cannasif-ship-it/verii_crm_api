@@ -76,6 +76,7 @@ namespace crm_api.Services
                     Title = template.Title,
                     TemplateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson),
                     IsActive = template.IsActive,
+                    Default = template.Default,
                     CreatedByUserId = template.CreatedByUserId,
                     UpdatedByUserId = template.UpdatedByUserId,
                     CreatedDate = template.CreatedDate,
@@ -127,6 +128,7 @@ namespace crm_api.Services
                     Title = template.Title,
                     TemplateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson),
                     IsActive = template.IsActive,
+                    Default = template.Default,
                     CreatedByUserId = template.CreatedByUserId,
                     UpdatedByUserId = template.UpdatedByUserId,
                     CreatedDate = template.CreatedDate,
@@ -158,12 +160,30 @@ namespace crm_api.Services
                     WriteIndented = false
                 });
 
+                // Her RuleType için tek default: yeni Default=true ise diğerlerini false yap; ilk şablon ise Default=true yap
+                var sameTypeCount = await _context.ReportTemplates.CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
+                var isFirstForType = sameTypeCount == 0;
+                var setAsDefault = dto.Default || isFirstForType;
+
+                if (setAsDefault && !isFirstForType)
+                {
+                    var others = await _context.ReportTemplates
+                        .Where(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted)
+                        .ToListAsync();
+                    foreach (var o in others)
+                    {
+                        o.Default = false;
+                        _context.ReportTemplates.Update(o);
+                    }
+                }
+
                 var template = new ReportTemplate
                 {
                     RuleType = dto.RuleType,
                     Title = dto.Title,
                     TemplateJson = templateJson,
                     IsActive = dto.IsActive,
+                    Default = setAsDefault,
                     CreatedByUserId = userId,
                     CreatedDate = DateTime.UtcNow
                 };
@@ -178,6 +198,7 @@ namespace crm_api.Services
                     Title = template.Title,
                     TemplateData = dto.TemplateData,
                     IsActive = template.IsActive,
+                    Default = template.Default,
                     CreatedByUserId = template.CreatedByUserId,
                     CreatedDate = template.CreatedDate
                 };
@@ -223,8 +244,38 @@ namespace crm_api.Services
                 template.Title = dto.Title;
                 template.TemplateJson = templateJson;
                 template.IsActive = dto.IsActive;
+                template.Default = dto.Default;
                 template.UpdatedByUserId = userId;
                 template.UpdatedDate = DateTime.UtcNow;
+
+                if (dto.Default)
+                {
+                    var others = await _context.ReportTemplates
+                        .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
+                        .ToListAsync();
+                    foreach (var o in others)
+                    {
+                        o.Default = false;
+                        _context.ReportTemplates.Update(o);
+                    }
+                }
+                else
+                {
+                    // Mevcut default kaldırılıyorsa, aynı RuleType'ta başka birini default yap (en küçük Id)
+                    var currentWasDefault = template.Default;
+                    if (currentWasDefault)
+                    {
+                        var newDefault = await _context.ReportTemplates
+                            .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
+                            .OrderBy(rt => rt.Id)
+                            .FirstOrDefaultAsync();
+                        if (newDefault != null)
+                        {
+                            newDefault.Default = true;
+                            _context.ReportTemplates.Update(newDefault);
+                        }
+                    }
+                }
 
                 _context.ReportTemplates.Update(template);
                 await _context.SaveChangesAsync();
@@ -236,6 +287,7 @@ namespace crm_api.Services
                     Title = template.Title,
                     TemplateData = dto.TemplateData,
                     IsActive = template.IsActive,
+                    Default = template.Default,
                     CreatedByUserId = template.CreatedByUserId,
                     UpdatedByUserId = template.UpdatedByUserId,
                     CreatedDate = template.CreatedDate,
