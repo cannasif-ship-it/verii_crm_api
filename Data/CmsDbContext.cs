@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using crm_api.Models;
 using crm_api.Models.Notification;
+using crm_api.Models.ReportBuilder;
 using crm_api.Data.Configurations;
 using depoWebAPI.Models;
 
@@ -57,6 +58,7 @@ namespace crm_api.Data
         public DbSet<ApprovalUserRole> ApprovalUserRoles { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
+        public DbSet<ReportDefinition> ReportDefinitions { get; set; }
 
 
 

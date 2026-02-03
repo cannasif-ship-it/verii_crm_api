@@ -166,6 +166,12 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IReportTemplateService, ReportTemplateService>();
 builder.Services.AddScoped<IReportPdfGeneratorService, ReportPdfGeneratorService>();
 
+// Report Builder (no allowlist; connection + datasource check + preview + CRUD)
+builder.Services.AddScoped<IReportingConnectionService, crm_api.Services.ReportBuilderService.ReportingConnectionService>();
+builder.Services.AddScoped<IReportingCatalogService, crm_api.Services.ReportBuilderService.ReportingCatalogService>();
+builder.Services.AddScoped<IReportService, crm_api.Services.ReportBuilderService.ReportService>();
+builder.Services.AddScoped<IReportPreviewService, crm_api.Services.ReportBuilderService.ReportPreviewService>();
+
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
 
