@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -75,21 +76,37 @@ namespace crm_api.Services
                             var wPt = (float)ConvertToPoints(element.Width > 0 ? element.Width : 200, unit);
                             var hPt = (float)ConvertToPoints(element.Height > 0 ? element.Height : 50, unit);
 
-                            var paddingTop = yPt - cumulativeY;
-                            cumulativeY = yPt + hPt;
+                            var isTable = element.Type.Equals("table", StringComparison.OrdinalIgnoreCase);
+                            float hPtForLayout = hPt;
 
-                            column.Item()
+                            if (isTable)
+                            {
+                                // Tablo: sabit Height vermiyoruz, tüm satırlar tek blokta alt alta kalsın; sadece min yükseklik
+                                var rowCount = GetTableRowCount(element, entityData);
+                                float estimatedTableHeight = 28f + (rowCount * 22f); // header ~28pt, her satır ~22pt
+                                hPtForLayout = Math.Max(hPt, Math.Max(60f, estimatedTableHeight));
+                            }
+
+                            var paddingTop = yPt - cumulativeY;
+                            cumulativeY = yPt + hPtForLayout;
+
+                            var item = column.Item()
                                 .PaddingTop(paddingTop >= 0 ? paddingTop : 0)
                                 .PaddingLeft(xPt)
-                                .Width(wPt)
-                                .Height(hPt)
-                                .Element(c =>
-                                {
-                                    if (paddingTop < 0)
-                                        c.TranslateY(paddingTop).Element(inner => RenderElementWithStyle(inner, element, entityData));
-                                    else
-                                        RenderElementWithStyle(c, element, entityData);
-                                });
+                                .Width(wPt);
+
+                            if (isTable)
+                                item = item.MinHeight(60f); // Tablo kendi yüksekliğini alsın, tüm satırlar tek sayfada
+                            else
+                                item = item.Height(hPt);
+
+                            item.Element(c =>
+                            {
+                                if (paddingTop < 0)
+                                    c.TranslateY(paddingTop).Element(inner => RenderElementWithStyle(inner, element, entityData));
+                                else
+                                    RenderElementWithStyle(c, element, entityData);
+                            });
                         }
                     });
                 });
@@ -122,13 +139,16 @@ namespace crm_api.Services
                         d.Currency,
                         d.CreatedBy,
                         d.UpdatedBy,
+                        ExchangeRates = (from er in _context.DemandExchangeRates
+                                         where er.DemandId == d.Id && !er.IsDeleted
+                                         select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from dl in _context.DemandLines
                                  where dl.DemandId == d.Id && !dl.IsDeleted
                                  select new
                                  {
                                      dl.ProductCode,
-                                     ProductName = dl.ProductCode, // Model'de ProductName yok, ProductCode kullan
-                                     GroupCode = "", // Model'de GroupCode yok
+                                     ProductName = dl.ProductCode,
+                                     GroupCode = "",
                                      dl.Quantity,
                                      dl.UnitPrice,
                                      dl.DiscountRate1,
@@ -141,7 +161,13 @@ namespace crm_api.Services
                                      dl.VatAmount,
                                      dl.LineTotal,
                                      dl.LineGrandTotal,
-                                     dl.Description
+                                     dl.Description,
+                                     HtmlDescription = dl.RelatedStockId.HasValue
+                                         ? (_context.StockDetails.Where(sd => sd.StockId == dl.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                         : "",
+                                     DefaultImagePath = dl.RelatedStockId.HasValue
+                                         ? (_context.StockImages.Where(si => si.StockId == dl.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                         : ""
                                  }).ToList()
                     }).FirstOrDefaultAsync(),
 
@@ -165,13 +191,16 @@ namespace crm_api.Services
                         q.Currency,
                         q.CreatedBy,
                         q.UpdatedBy,
+                        ExchangeRates = (from er in _context.QuotationExchangeRates
+                                         where er.QuotationId == q.Id && !er.IsDeleted
+                                         select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from ql in _context.QuotationLines
                                  where ql.QuotationId == q.Id && !ql.IsDeleted
                                  select new
                                  {
                                      ql.ProductCode,
-                                     ProductName = ql.ProductCode, // Model'de ProductName yok, ProductCode kullan
-                                     GroupCode = "", // Model'de GroupCode yok
+                                     ProductName = ql.ProductCode,
+                                     GroupCode = "",
                                      ql.Quantity,
                                      ql.UnitPrice,
                                      ql.DiscountRate1,
@@ -184,7 +213,13 @@ namespace crm_api.Services
                                      ql.VatAmount,
                                      ql.LineTotal,
                                      ql.LineGrandTotal,
-                                     ql.Description
+                                     ql.Description,
+                                     HtmlDescription = ql.RelatedStockId.HasValue
+                                         ? (_context.StockDetails.Where(sd => sd.StockId == ql.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                         : "",
+                                     DefaultImagePath = ql.RelatedStockId.HasValue
+                                         ? (_context.StockImages.Where(si => si.StockId == ql.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                         : ""
                                  }).ToList()
                     }).FirstOrDefaultAsync(),
 
@@ -208,13 +243,16 @@ namespace crm_api.Services
                         o.Currency,
                         o.CreatedBy,
                         o.UpdatedBy,
+                        ExchangeRates = (from er in _context.OrderExchangeRates
+                                         where er.OrderId == o.Id && !er.IsDeleted
+                                         select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from ol in _context.OrderLines
                                  where ol.OrderId == o.Id && !ol.IsDeleted
                                  select new
                                  {
                                      ol.ProductCode,
-                                     ProductName = ol.ProductCode, // Model'de ProductName yok, ProductCode kullan
-                                     GroupCode = "", // Model'de GroupCode yok
+                                     ProductName = ol.ProductCode,
+                                     GroupCode = "",
                                      ol.Quantity,
                                      ol.UnitPrice,
                                      ol.DiscountRate1,
@@ -227,7 +265,13 @@ namespace crm_api.Services
                                      ol.VatAmount,
                                      ol.LineTotal,
                                      ol.LineGrandTotal,
-                                     ol.Description
+                                     ol.Description,
+                                     HtmlDescription = ol.RelatedStockId.HasValue
+                                         ? (_context.StockDetails.Where(sd => sd.StockId == ol.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                         : "",
+                                     DefaultImagePath = ol.RelatedStockId.HasValue
+                                         ? (_context.StockImages.Where(si => si.StockId == ol.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                         : ""
                                  }).ToList()
                     }).FirstOrDefaultAsync(),
 
@@ -286,8 +330,23 @@ namespace crm_api.Services
 
             var value = ResolvePropertyPath(entityData, element.Path);
             var displayValue = value?.ToString() ?? string.Empty;
+            // PDF'te HTML etiketleri gösterilmez; stok HtmlDescription vb. düz metne çevrilir
+            if (displayValue.IndexOf('<') >= 0)
+                displayValue = StripHtml(displayValue);
 
             ApplyTextStyleAndText(container, element, displayValue);
+        }
+
+        /// <summary>
+        /// HTML etiketlerini kaldırır; stok HtmlDescription gibi alanlar PDF'te düz metin olarak basılır.
+        /// </summary>
+        private static string StripHtml(string html)
+        {
+            if (string.IsNullOrEmpty(html))
+                return html;
+            var stripped = Regex.Replace(html, @"<[^>]+>", " ");
+            stripped = Regex.Replace(stripped, @"\s+", " ").Trim();
+            return stripped;
         }
 
         private void RenderImageWithStyle(IContainer container, ReportElement element)
@@ -312,12 +371,26 @@ namespace crm_api.Services
                     imageBytes = httpClient.GetByteArrayAsync(element.Value).GetAwaiter().GetResult();
                 }
 
-                container.Image(imageBytes);
+                // FitArea: görseli verilen alana sığdırır (en-boy oranı korunur); AspectRatio taşması önlenir
+                container.Image(imageBytes).FitArea();
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to load image from {Source}", element.Value);
             }
+        }
+
+        /// <summary>
+        /// Tablo elemanı için satır sayısı (cumulativeY tahmini için).
+        /// </summary>
+        private int GetTableRowCount(ReportElement element, object entityData)
+        {
+            if (element.Columns == null || !element.Columns.Any())
+                return 0;
+            var firstColumnPath = element.Columns[0].Path;
+            var collectionName = firstColumnPath.Contains('.') ? firstColumnPath.Split('.')[0] : firstColumnPath;
+            var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
+            return collection?.Count() ?? 0;
         }
 
         private void RenderTableWithStyle(IContainer container, ReportElement element, object entityData)
@@ -336,13 +409,11 @@ namespace crm_api.Services
 
             container.Table(table =>
             {
-                foreach (var col in element.Columns)
+                table.ColumnsDefinition(columns =>
                 {
-                    table.ColumnsDefinition(columns =>
-                    {
+                    foreach (var _ in element.Columns)
                         columns.RelativeColumn();
-                    });
-                }
+                });
 
                 table.Header(header =>
                 {
@@ -358,6 +429,8 @@ namespace crm_api.Services
                     {
                         var propertyPath = col.Path.Contains('.') ? col.Path.Split('.', 2)[1] : col.Path;
                         var cellValue = ResolvePropertyPath(row, propertyPath)?.ToString() ?? string.Empty;
+                        if (cellValue.IndexOf('<') >= 0)
+                            cellValue = StripHtml(cellValue);
                         table.Cell().Border(1).Padding(5).Text(cellValue).FontSize(9);
                     }
                 }

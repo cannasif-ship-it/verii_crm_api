@@ -17,6 +17,11 @@ namespace crm_api.DTOs
         /// Line (satır) seviye field'lar - Tablolarda kullanılır
         /// </summary>
         public List<FieldDefinition> LineFields { get; set; } = new List<FieldDefinition>();
+
+        /// <summary>
+        /// Döviz kuru tablosu field'ları - ExchangeRates tablosunda kullanılır
+        /// </summary>
+        public List<FieldDefinition> ExchangeRateFields { get; set; } = new List<FieldDefinition>();
     }
 
     /// <summary>
@@ -115,6 +120,15 @@ namespace crm_api.DTOs
                     
                     // Diğer
                     new FieldDefinition { Label = "Açıklama", Path = "Lines.Description", DataType = "string", ExampleValue = "Özel not" },
+                    new FieldDefinition { Label = "Stok HTML Açıklama", Path = "Lines.HtmlDescription", DataType = "string", Description = "Stok detayındaki HTML editör içeriği", ExampleValue = "<p>Ürün açıklaması</p>" },
+                    new FieldDefinition { Label = "Stok Varsayılan Görsel", Path = "Lines.DefaultImagePath", DataType = "string", Description = "Stok ana görseli (FilePath)", ExampleValue = "uploads/stock/abc.jpg" },
+                },
+                ExchangeRateFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Para Birimi", Path = "ExchangeRates.Currency", DataType = "string", ExampleValue = "USD" },
+                    new FieldDefinition { Label = "Kur", Path = "ExchangeRates.ExchangeRate", DataType = "number", ExampleValue = "34.50" },
+                    new FieldDefinition { Label = "Kur Tarihi", Path = "ExchangeRates.ExchangeRateDate", DataType = "date", ExampleValue = "2024-01-15" },
+                    new FieldDefinition { Label = "Resmi Kur", Path = "ExchangeRates.IsOfficial", DataType = "boolean", ExampleValue = "true" },
                 }
             };
         }
@@ -185,6 +199,15 @@ namespace crm_api.DTOs
                     
                     // Diğer
                     new FieldDefinition { Label = "Açıklama", Path = "Lines.Description", DataType = "string", ExampleValue = "Özel not" },
+                    new FieldDefinition { Label = "Stok HTML Açıklama", Path = "Lines.HtmlDescription", DataType = "string", Description = "Stok detayındaki HTML editör içeriği", ExampleValue = "<p>Ürün açıklaması</p>" },
+                    new FieldDefinition { Label = "Stok Varsayılan Görsel", Path = "Lines.DefaultImagePath", DataType = "string", Description = "Stok ana görseli (FilePath)", ExampleValue = "uploads/stock/abc.jpg" },
+                },
+                ExchangeRateFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Para Birimi", Path = "ExchangeRates.Currency", DataType = "string", ExampleValue = "USD" },
+                    new FieldDefinition { Label = "Kur", Path = "ExchangeRates.ExchangeRate", DataType = "number", ExampleValue = "34.50" },
+                    new FieldDefinition { Label = "Kur Tarihi", Path = "ExchangeRates.ExchangeRateDate", DataType = "date", ExampleValue = "2024-01-15" },
+                    new FieldDefinition { Label = "Resmi Kur", Path = "ExchangeRates.IsOfficial", DataType = "boolean", ExampleValue = "true" },
                 }
             };
         }
@@ -255,6 +278,15 @@ namespace crm_api.DTOs
                     
                     // Diğer
                     new FieldDefinition { Label = "Açıklama", Path = "Lines.Description", DataType = "string", ExampleValue = "Özel not" },
+                    new FieldDefinition { Label = "Stok HTML Açıklama", Path = "Lines.HtmlDescription", DataType = "string", Description = "Stok detayındaki HTML editör içeriği", ExampleValue = "<p>Ürün açıklaması</p>" },
+                    new FieldDefinition { Label = "Stok Varsayılan Görsel", Path = "Lines.DefaultImagePath", DataType = "string", Description = "Stok ana görseli (FilePath)", ExampleValue = "uploads/stock/abc.jpg" },
+                },
+                ExchangeRateFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Para Birimi", Path = "ExchangeRates.Currency", DataType = "string", ExampleValue = "USD" },
+                    new FieldDefinition { Label = "Kur", Path = "ExchangeRates.ExchangeRate", DataType = "number", ExampleValue = "34.50" },
+                    new FieldDefinition { Label = "Kur Tarihi", Path = "ExchangeRates.ExchangeRateDate", DataType = "date", ExampleValue = "2024-01-15" },
+                    new FieldDefinition { Label = "Resmi Kur", Path = "ExchangeRates.IsOfficial", DataType = "boolean", ExampleValue = "true" },
                 }
             };
         }
