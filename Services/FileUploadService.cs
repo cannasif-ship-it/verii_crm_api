@@ -397,24 +397,26 @@ namespace crm_api.Services
                     // Ignore if IIS_IUSRS doesn't exist (e.g., running outside IIS)
                 }
 
-                // Add permissions for Everyone (for development/testing)
-                // In production, you might want to remove this or make it more restrictive
-                try
+                // Add permissions for Everyone (development only)
+                if (_environment.IsDevelopment())
                 {
-                    var everyone = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
-                    var everyoneAccessRule = new FileSystemAccessRule(
-                        everyone,
-                        FileSystemRights.ReadAndExecute | FileSystemRights.Write,
-                        InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                        PropagationFlags.None,
-                        AccessControlType.Allow);
+                    try
+                    {
+                        var everyone = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+                        var everyoneAccessRule = new FileSystemAccessRule(
+                            everyone,
+                            FileSystemRights.ReadAndExecute | FileSystemRights.Write,
+                            InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                            PropagationFlags.None,
+                            AccessControlType.Allow);
 
-                    directorySecurity.AddAccessRule(everyoneAccessRule);
-                    directoryInfo.SetAccessControl(directorySecurity);
-                }
-                catch
-                {
-                    // Ignore if setting permissions fails
+                        directorySecurity.AddAccessRule(everyoneAccessRule);
+                        directoryInfo.SetAccessControl(directorySecurity);
+                    }
+                    catch
+                    {
+                        // Ignore if setting permissions fails
+                    }
                 }
             }
             catch (Exception)
