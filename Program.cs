@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Http;
 using crm_api.Data;
 using crm_api.Interfaces;
 using crm_api.Mappings;
@@ -24,6 +25,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Centralized validation response
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var localization = context.HttpContext.RequestServices.GetRequiredService<crm_api.Interfaces.ILocalizationService>();
+        var errors = context.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+        var response = crm_api.DTOs.ApiResponse<object>.ErrorResult(
+            localization.GetLocalizedString("General.ValidationError"),
+            localization.GetLocalizedString("General.ValidationError"),
+            StatusCodes.Status400BadRequest);
+        response.Errors = errors;
+        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(response);
+    };
+});
+
 
 // ✅ SMTP için: MemoryCache + DataProtection
 builder.Services.AddMemoryCache();
@@ -412,18 +430,21 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Database migration and initialization
-using (var scope = app.Services.CreateScope())
+// Database migration and initialization (dev only, unless explicitly enabled)
+if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
-    var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        context.Database.Migrate();
-        Console.WriteLine("Database migrated successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error migrating database: {ex.Message}");
+        var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
+        try
+        {
+            context.Database.Migrate();
+            Console.WriteLine("Database migrated successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error migrating database: {ex.Message}");
+        }
     }
 }
 
