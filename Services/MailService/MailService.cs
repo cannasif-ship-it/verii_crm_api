@@ -1,101 +1,100 @@
 using System.Net;
 using System.Net.Mail;
 using crm_api.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace crm_api.Services
 {
     public class MailService : IMailService
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger<MailService> _logger;
+        private readonly ISmtpSettingsService _smtpSettingsService;
 
-        public MailService(IConfiguration configuration, ILogger<MailService> logger)
+        public MailService(ISmtpSettingsService smtpSettingsService, ILogger<MailService> logger)
         {
-            _configuration = configuration;
+            _smtpSettingsService = smtpSettingsService;
             _logger = logger;
         }
 
-        public async Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = true, string? cc = null, string? bcc = null, List<string>? attachments = null)
+        public async Task<bool> SendEmailAsync(
+            string to,
+            string subject,
+            string body,
+            bool isHtml = true,
+            string? cc = null,
+            string? bcc = null,
+            List<string>? attachments = null)
         {
-            var fromEmail = _configuration["SmtpSettings:FromEmail"];
-            var fromName = _configuration["SmtpSettings:FromName"];
-            return await SendEmailAsync(to, subject, body, fromEmail, fromName, isHtml, cc, bcc, attachments);
+            return await SendEmailAsync(to, subject, body, null, null, isHtml, cc, bcc, attachments);
         }
 
-        public async Task<bool> SendEmailAsync(string to, string subject, string body, string? fromEmail = null, string? fromName = null, bool isHtml = true, string? cc = null, string? bcc = null, List<string>? attachments = null)
+        public async Task<bool> SendEmailAsync(
+            string to,
+            string subject,
+            string body,
+            string? fromEmail = null,
+            string? fromName = null,
+            bool isHtml = true,
+            string? cc = null,
+            string? bcc = null,
+            List<string>? attachments = null)
         {
             try
             {
-                var smtpHost = _configuration["SmtpSettings:Host"];
-                var smtpPort = int.Parse(_configuration["SmtpSettings:Port"] ?? "587");
-                var enableSsl = bool.Parse(_configuration["SmtpSettings:EnableSsl"] ?? "true");
-                var smtpUsername = _configuration["SmtpSettings:Username"];
-                var smtpPassword = _configuration["SmtpSettings:Password"];
-                var timeout = int.Parse(_configuration["SmtpSettings:Timeout"] ?? "30");
+                var smtp = await _smtpSettingsService.GetRuntimeAsync();
 
-                var defaultFromEmail = _configuration["SmtpSettings:FromEmail"] ?? "noreply@v3rii.com";
-                var defaultFromName = _configuration["SmtpSettings:FromName"] ?? "V3RII CRM System";
-
-                if (string.IsNullOrWhiteSpace(smtpHost))
+                if (string.IsNullOrWhiteSpace(smtp.Host))
                 {
-                    _logger.LogError("SMTP Host is not configured");
+                    _logger.LogError("SMTP Host is not configured (DB).");
                     return false;
                 }
 
-                if (string.IsNullOrWhiteSpace(smtpUsername) || string.IsNullOrWhiteSpace(smtpPassword))
+                if (string.IsNullOrWhiteSpace(smtp.Username) || string.IsNullOrWhiteSpace(smtp.Password))
                 {
-                    _logger.LogError("SMTP Username or Password is not configured");
+                    _logger.LogError("SMTP Username or Password is not configured (DB).");
                     return false;
                 }
 
-                using var client = new SmtpClient(smtpHost, smtpPort)
+                using var client = new SmtpClient(smtp.Host, smtp.Port)
                 {
-                    EnableSsl = enableSsl,
-                    Credentials = new NetworkCredential(smtpUsername, smtpPassword),
-                    Timeout = timeout * 1000
+                    EnableSsl = smtp.EnableSsl,
+                    Credentials = new NetworkCredential(smtp.Username, smtp.Password),
+                    Timeout = smtp.Timeout * 1000
                 };
 
                 using var message = new MailMessage();
 
-                // From
-                var fromAddress = new MailAddress(fromEmail ?? defaultFromEmail, fromName ?? defaultFromName);
-                message.From = fromAddress;
+                var resolvedFromEmail = !string.IsNullOrWhiteSpace(fromEmail) ? fromEmail : smtp.FromEmail;
+                var resolvedFromName = !string.IsNullOrWhiteSpace(fromName) ? fromName : smtp.FromName;
 
-                // To
+                if (string.IsNullOrWhiteSpace(resolvedFromEmail))
+                {
+                    _logger.LogError("FromEmail is not configured (DB).");
+                    return false;
+                }
+
+                message.From = new MailAddress(resolvedFromEmail, resolvedFromName);
+
                 message.To.Add(to);
 
-                // CC
                 if (!string.IsNullOrWhiteSpace(cc))
-                {
                     message.CC.Add(cc);
-                }
 
-                // BCC
                 if (!string.IsNullOrWhiteSpace(bcc))
-                {
                     message.Bcc.Add(bcc);
-                }
 
-                // Subject & Body
                 message.Subject = subject;
                 message.Body = body;
                 message.IsBodyHtml = isHtml;
 
-                // Attachments
                 if (attachments != null && attachments.Any())
                 {
                     foreach (var attachmentPath in attachments)
                     {
                         if (File.Exists(attachmentPath))
-                        {
                             message.Attachments.Add(new Attachment(attachmentPath));
-                        }
                         else
-                        {
                             _logger.LogWarning($"Attachment file not found: {attachmentPath}");
-                        }
                     }
                 }
 

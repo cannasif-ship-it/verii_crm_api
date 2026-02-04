@@ -4,6 +4,8 @@ using crm_api.Models.Notification;
 using crm_api.Models.ReportBuilder;
 using crm_api.Data.Configurations;
 using depoWebAPI.Models;
+using crm_api.Models.PowerBi;
+
 
 namespace crm_api.Data
 {
@@ -60,6 +62,12 @@ namespace crm_api.Data
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
+
+        //Power BI DbSet'leri
+        public DbSet<PowerBIReportDefinition> PowerBIReportDefinitions { get; set; }
+        public DbSet<PowerBIGroup> PowerBIGroups { get; set; }
+        public DbSet<UserPowerBIGroup> UserPowerBIGroups { get; set; }
+        public DbSet<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; set; }
 
 
 

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
+using crm_api.Models.PowerBi;
 
 namespace crm_api.UnitOfWork
 {
@@ -64,6 +65,10 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<crm_api.Models.Notification.Notification>? _notifications;
         private IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>? _reportDefinitions;
         private IGenericRepository<SmtpSetting>? _smtpSettings;
+        private IGenericRepository<PowerBIReportDefinition>? _powerBIReportDefinitions;
+        private IGenericRepository<PowerBIGroup>? _powerBIGroups;
+        private IGenericRepository<UserPowerBIGroup>? _userPowerBIGroups;
+        private IGenericRepository<PowerBIGroupReportDefinition>? _powerBIGroupReportDefinitions;
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -118,6 +123,10 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<crm_api.Models.Notification.Notification> Notifications{get{_notifications ??= new GenericRepository<crm_api.Models.Notification.Notification>(_context, _httpContextAccessor);return _notifications;}}
         public IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions{get{_reportDefinitions ??= new GenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>(_context, _httpContextAccessor);return _reportDefinitions;}}
         public IGenericRepository<SmtpSetting> SmtpSettings{get{_smtpSettings ??= new GenericRepository<SmtpSetting>(_context, _httpContextAccessor);return _smtpSettings;}}
+        public IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions{get{_powerBIReportDefinitions ??= new GenericRepository<PowerBIReportDefinition>(_context, _httpContextAccessor);return _powerBIReportDefinitions;}}
+        public IGenericRepository<PowerBIGroup> PowerBIGroups{get{_powerBIGroups ??= new GenericRepository<PowerBIGroup>(_context, _httpContextAccessor);return _powerBIGroups;}}
+        public IGenericRepository<UserPowerBIGroup> UserPowerBIGroups{get{_userPowerBIGroups ??= new GenericRepository<UserPowerBIGroup>(_context, _httpContextAccessor);return _userPowerBIGroups;}}
+        public IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions{get{_powerBIGroupReportDefinitions ??= new GenericRepository<PowerBIGroupReportDefinition>(_context, _httpContextAccessor);return _powerBIGroupReportDefinitions;}}
 
         /// <summary>
         /// Get repository for any entity type

@@ -1,5 +1,6 @@
 using crm_api.Models;
 using crm_api.Repositories;
+using crm_api.Models.PowerBi;
 
 namespace crm_api.UnitOfWork
 {
@@ -54,6 +55,10 @@ namespace crm_api.UnitOfWork
         IGenericRepository<crm_api.Models.Notification.Notification> Notifications { get; }
         IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions { get; }
         IGenericRepository<SmtpSetting> SmtpSettings { get; }
+        IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions { get; }
+        IGenericRepository<PowerBIGroup> PowerBIGroups { get; }
+        IGenericRepository<UserPowerBIGroup> UserPowerBIGroups { get; }
+        IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; }
 
         /// <summary>
         /// Save all changes to the database within a transaction
