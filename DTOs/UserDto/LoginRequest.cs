@@ -1,0 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace crm_api.DTOs
+{
+    public class LoginRequest
+    {
+        [Required]
+        public string Email { get; set; } = string.Empty; // Email veya Username olarak kullanılacak
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+
+        /// <summary>true: token localStorage; false: token sessionStorage (frontend)</summary>
+        public bool RememberMe { get; set; } = false;
+    }
+}
