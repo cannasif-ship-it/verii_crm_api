@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
     public class Activity : BaseEntity
@@ -11,7 +9,6 @@ namespace crm_api.Models
         public string? Description { get; set; }
 
         public long? ActivityTypeId { get; set; }  // Foreign key to ActivityType
-        [ForeignKey("ActivityTypeId")]
         public ActivityType? ActivityType { get; set; }
 
         public long? PotentialCustomerId { get; set; }
@@ -33,4 +30,3 @@ namespace crm_api.Models
         public DateTime? ActivityDate { get; set; }
     }
 }
-

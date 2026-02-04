@@ -1,20 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
-    [Table("RII_DOCUMENT_SERIAL_TYPE")]
     public class DocumentSerialType : BaseEntity
     {
         public PricingRuleType RuleType { get; set; }
 
         public long? CustomerTypeId { get; set; }   // Bayi, Perakende vs
-        [ForeignKey("CustomerTypeId")]
         public CustomerType? CustomerType { get; set; }
 
         public long? SalesRepId { get; set; }        // Plasiyer
-        [ForeignKey("SalesRepId")]
         public User? SalesRep { get; set; }
         public string? SerialPrefix { get; set; }
         public int? SerialLength { get; set; }  // 4 basamaklı, 5 basamaklı, vs
@@ -23,4 +18,3 @@ namespace crm_api.Models
         public int? SerialIncrement { get; set; }  // 1
     }
 }
-

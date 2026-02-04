@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace depoWebAPI.Models
 {
     public class RII_FN_KUR

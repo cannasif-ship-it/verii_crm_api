@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
-    [Table("RII_STOCK")]
     public class Stock : BaseEntity
     {
         // ERP'den gelen ana ürün kodu
@@ -42,4 +39,3 @@ namespace crm_api.Models
 
     }
 }
-

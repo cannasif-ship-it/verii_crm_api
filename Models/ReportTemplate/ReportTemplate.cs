@@ -1,33 +1,24 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
     /// <summary>
     /// Report template entity for storing JSON-based report designs
     /// </summary>
-    [Table("RII_REPORT_TEMPLATES")]
     public class ReportTemplate : BaseEntity
     {
         /// <summary>
         /// Document type: 0=Demand/Talep, 1=Quotation/Teklif, 2=Order/Sipariş
         /// </summary>
-        [Required]
         public DocumentRuleType RuleType { get; set; }
 
         /// <summary>
         /// Template title/description (Başlık)
         /// </summary>
-        [Required]
-        [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// JSON template data (page config + elements array)
         /// </summary>
-        [Required]
-        [Column(TypeName = "nvarchar(max)")]
         public string TemplateJson { get; set; } = string.Empty;
 
         /// <summary>

@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
-    [Table("RII_ACTIVITY_TYPE")]
     public class ActivityType : BaseEntity
     {
         public string Name { get; set; } = String.Empty;
@@ -13,4 +10,3 @@ namespace crm_api.Models
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
     }
 }
-

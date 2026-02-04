@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
-    [Table("RII_PRICING_RULE_HEADER")]
     public class PricingRuleHeader : BaseEntity
     {
         public PricingRuleType RuleType { get; set; }
@@ -17,7 +14,6 @@ namespace crm_api.Models
 
         // KAPSAM
         public long? CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
         public Customer? Customer { get; set; }
 
         public string? ErpCustomerCode { get; set; } = String.Empty;  // e.g., "CUST001"
@@ -34,4 +30,3 @@ namespace crm_api.Models
         public ICollection<PricingRuleSalesman> Salesmen { get; set; } = new List<PricingRuleSalesman>();
     }
 }
-

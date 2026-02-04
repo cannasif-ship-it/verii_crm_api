@@ -1,21 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace crm_api.Models
 {
-    [Table("RII_STOCK_RELATION")]
     public class StockRelation : BaseEntity
     {
 
     // Stock ile ilişkilendirme
     public long StockId { get; set; }
-    [ForeignKey("StockId")]
     public Stock Stock { get; set; } = null!;
 
    // Bağlı ürün (ana ürüne bağlı olarak kullanılır)
     public long RelatedStockId { get; set; }
-    [ForeignKey("RelatedStockId")]
     public Stock RelatedStock { get; set; } = null!;
 
     // Bağlı ürün sayısı (örneğin 10 küçük tornavida)
