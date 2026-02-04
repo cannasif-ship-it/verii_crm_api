@@ -36,13 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CityGetDto>>> CreateCity([FromBody] CityCreateDto cityCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<CityGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("CityController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("CityController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _cityService.CreateCityAsync(cityCreateDto);
             return StatusCode(result.StatusCode, result);
@@ -51,13 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<CityGetDto>>> UpdateCity(long id, [FromBody] CityUpdateDto cityUpdateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<CityGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("CityController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("CityController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _cityService.UpdateCityAsync(id, cityUpdateDto);
             return StatusCode(result.StatusCode, result);

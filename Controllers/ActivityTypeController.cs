@@ -36,13 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ActivityTypeCreateDto createActivityTypeDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<ActivityTypeGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityTypeController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("ActivityTypeController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _activityTypeService.CreateActivityTypeAsync(createActivityTypeDto);
             return StatusCode(result.StatusCode, result);
@@ -51,13 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] ActivityTypeUpdateDto updateActivityTypeDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<ActivityTypeGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityTypeController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("ActivityTypeController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _activityTypeService.UpdateActivityTypeAsync(id, updateActivityTypeDto);
             return StatusCode(result.StatusCode, result);

@@ -22,13 +22,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] StockRelationCreateDto relationDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("ValidationError"),
-                    "ValidationFailed",
-                    400));
-            }
 
             var result = await _stockRelationService.CreateAsync(relationDto);
             return StatusCode(result.StatusCode, result);

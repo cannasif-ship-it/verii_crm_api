@@ -43,13 +43,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] StockDetailCreateDto stockDetailCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("ValidationError"), 
-                    "ValidationFailed", 
-                    400));
-            }
 
             var result = await _stockDetailService.CreateStockDetailAsync(stockDetailCreateDto);
             return StatusCode(result.StatusCode, result);
@@ -58,13 +51,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] StockDetailUpdateDto stockDetailUpdateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("ValidationError"), 
-                    "ValidationFailed", 
-                    400));
-            }
 
             var result = await _stockDetailService.UpdateStockDetailAsync(id, stockDetailUpdateDto);
             return StatusCode(result.StatusCode, result);

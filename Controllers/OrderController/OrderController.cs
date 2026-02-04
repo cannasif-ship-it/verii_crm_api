@@ -61,13 +61,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<OrderDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderService.CreateOrderAsync(createOrderDto);
             return StatusCode(result.StatusCode, result);
@@ -111,13 +104,6 @@ namespace crm_api.Controllers
         [HttpPost("start-approval-flow")]
         public async Task<IActionResult> StartApprovalFlow([FromBody] StartApprovalFlowDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderService.StartApprovalFlowAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -142,13 +128,6 @@ namespace crm_api.Controllers
         [HttpPost("approve")]
         public async Task<IActionResult> Approve([FromBody] ApproveActionDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<bool>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderService.ApproveAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -162,13 +141,6 @@ namespace crm_api.Controllers
         [HttpPost("reject")]
         public async Task<IActionResult> Reject([FromBody] RejectActionDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<bool>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderService.RejectAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -183,13 +155,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(long id, [FromBody] UpdateOrderDto updateOrderDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<OrderDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderService.UpdateOrderAsync(id, updateOrderDto);
             return StatusCode(result.StatusCode, result);

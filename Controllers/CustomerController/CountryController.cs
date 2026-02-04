@@ -43,13 +43,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<CountryGetDto>>> UpdateCountry(long id, [FromBody] CountryUpdateDto countryUpdateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<CountryGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("CountryController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("CountryController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _countryService.UpdateCountryAsync(id, countryUpdateDto);
             return StatusCode(result.StatusCode, result);

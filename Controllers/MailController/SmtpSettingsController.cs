@@ -38,20 +38,6 @@ namespace crm_api.Controllers
         [HttpPut]
         public async Task<ActionResult<ApiResponse<SmtpSettingsDto>>> Update([FromBody] UpdateSmtpSettingsDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                var bad = ApiResponse<SmtpSettingsDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("SmtpSettingsController.ValidationFailed"),
-                    _localizationService.GetLocalizedString("SmtpSettingsController.ValidationFailed"),
-                    StatusCodes.Status400BadRequest);
-
-                bad.Errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return StatusCode(bad.StatusCode, bad);
-            }
 
             var currentUserResponse = await _userService.GetCurrentUserIdAsync();
             if (!currentUserResponse.Success)

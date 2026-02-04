@@ -45,13 +45,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrderLine([FromBody] CreateOrderLineDto createOrderLineDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<OrderLineDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderLineController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderLineController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderLineService.CreateOrderLineAsync(createOrderLineDto);
             return StatusCode(result.StatusCode, result);
@@ -83,13 +76,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrderLine(long id, [FromBody] UpdateOrderLineDto updateOrderLineDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<OrderLineDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("OrderLineController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("OrderLineController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _orderLineService.UpdateOrderLineAsync(id, updateOrderLineDto);
             return StatusCode(result.StatusCode, result);

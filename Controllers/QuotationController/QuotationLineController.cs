@@ -45,13 +45,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuotationLine([FromBody] CreateQuotationLineDto createQuotationLineDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<QuotationLineDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationLineController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationLineController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationLineService.CreateQuotationLineAsync(createQuotationLineDto);
             return StatusCode(result.StatusCode, result);
@@ -83,13 +76,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateQuotationLine(long id, [FromBody] UpdateQuotationLineDto updateQuotationLineDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<QuotationLineDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationLineController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationLineController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationLineService.UpdateQuotationLineAsync(id, updateQuotationLineDto);
             return StatusCode(result.StatusCode, result);

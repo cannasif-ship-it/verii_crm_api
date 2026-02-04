@@ -36,13 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateUserSessionDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserSessionDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserSessionController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserSessionController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
             var result = await _service.CreateSessionAsync(dto);
             return StatusCode(result.StatusCode, result);
         }

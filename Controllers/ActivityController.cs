@@ -36,10 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateActivityDto createActivityDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ValidationError"), "ValidationFailed", 400));
-            }
 
             var result = await _activityService.CreateActivityAsync(createActivityDto);
             return StatusCode(result.StatusCode, result);
@@ -48,10 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] UpdateActivityDto updateActivityDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400,ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ValidationError"), ModelState?.ToString() ?? string.Empty));
-            }
 
             var result = await _activityService.UpdateActivityAsync(id, updateActivityDto);            
             return StatusCode(result.StatusCode, result);

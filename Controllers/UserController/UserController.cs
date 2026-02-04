@@ -43,13 +43,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] UpdateUserDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
             var result = await _service.UpdateUserAsync(id, dto);
             return StatusCode(result.StatusCode, result);
         }

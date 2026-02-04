@@ -57,13 +57,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserDiscountLimitDto createDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserDiscountLimitDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserDiscountLimitController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserDiscountLimitController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             // Check if combination already exists
             var existsResult = await _userDiscountLimitService.ExistsBySalespersonAndGroupAsync(createDto.SalespersonId, createDto.ErpProductGroupCode);
@@ -84,13 +77,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateUserDiscountLimitDto updateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserDiscountLimitDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserDiscountLimitController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserDiscountLimitController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _userDiscountLimitService.UpdateAsync(id, updateDto);
             return StatusCode(result.StatusCode, result);

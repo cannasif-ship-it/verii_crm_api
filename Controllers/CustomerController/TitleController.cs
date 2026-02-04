@@ -47,13 +47,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateTitleDto createTitleDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<TitleDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("TitleController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("TitleController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _titleService.CreateTitleAsync(createTitleDto);
             return StatusCode(result.StatusCode, result);
@@ -62,13 +55,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] UpdateTitleDto updateTitleDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<TitleDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("TitleController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("TitleController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _titleService.UpdateTitleAsync(id, updateTitleDto);            
             return StatusCode(result.StatusCode, result);

@@ -40,13 +40,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePowerBIReportDefinitionDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("PowerBIReportDefinitionController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("PowerBIReportDefinitionController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _service.CreateAsync(dto);
             return StatusCode(result.StatusCode, result);
@@ -55,13 +48,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdatePowerBIReportDefinitionDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("PowerBIReportDefinitionController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("PowerBIReportDefinitionController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _service.UpdateAsync(id, dto);
             return StatusCode(result.StatusCode, result);

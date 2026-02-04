@@ -23,13 +23,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] List<StockImageCreateDto> imageDtos)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("ValidationError"),
-                    "ValidationFailed",
-                    400));
-            }
 
             var result = await _stockImageService.AddImagesAsync(imageDtos);
             return StatusCode(result.StatusCode, result);

@@ -36,10 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<UserAuthorityDto>>> Create([FromBody] CreateUserAuthorityDto createDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserAuthorityDto>.ErrorResult(_localizationService.GetLocalizedString("InvalidModelState"), null, 400));
-            }
 
             var result = await _userAuthorityService.CreateAsync(createDto);
             return StatusCode(result.StatusCode, result);
@@ -48,10 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id:long}")]
         public async Task<ActionResult<ApiResponse<UserAuthorityDto>>> Update(long id, [FromBody] UpdateUserAuthorityDto updateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserAuthorityDto>.ErrorResult(_localizationService.GetLocalizedString("InvalidModelState"), null, 400));
-            }
 
             var result = await _userAuthorityService.UpdateAsync(id, updateDto);
             return StatusCode(result.StatusCode, result);

@@ -36,10 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ProductPricingGroupByDto>>> CreateProductPricingGroupBy(CreateProductPricingGroupByDto createDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ValidationError"), "ValidationFailed", 400));
-            }
 
             var result = await _productPricingGroupByService.CreateProductPricingGroupByAsync(createDto);
             if (result.Success)
@@ -52,10 +48,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ProductPricingGroupByDto>>> UpdateProductPricingGroupBy(int id, UpdateProductPricingGroupByDto updateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ValidationError"), "ValidationFailed", 400));
-            }
 
             var result = await _productPricingGroupByService.UpdateProductPricingGroupByAsync(id, updateDto);
             return StatusCode(result.StatusCode, result);

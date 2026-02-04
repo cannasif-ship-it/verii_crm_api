@@ -36,13 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] PaymentTypeCreateDto createPaymentTypeDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<PaymentTypeGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("PaymentTypeController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("PaymentTypeController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _paymentTypeService.CreatePaymentTypeAsync(createPaymentTypeDto);
             return StatusCode(result.StatusCode, result);
@@ -51,13 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] PaymentTypeUpdateDto updatePaymentTypeDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<PaymentTypeGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("PaymentTypeController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("PaymentTypeController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _paymentTypeService.UpdatePaymentTypeAsync(id, updatePaymentTypeDto);            
             return StatusCode(result.StatusCode, result);

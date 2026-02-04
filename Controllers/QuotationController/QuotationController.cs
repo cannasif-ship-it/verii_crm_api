@@ -61,13 +61,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuotation([FromBody] CreateQuotationDto createQuotationDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<QuotationDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationService.CreateQuotationAsync(createQuotationDto);
             return StatusCode(result.StatusCode, result);
@@ -123,13 +116,6 @@ namespace crm_api.Controllers
         [HttpPost("start-approval-flow")]
         public async Task<IActionResult> StartApprovalFlow([FromBody] StartApprovalFlowDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationService.StartApprovalFlowAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -154,13 +140,6 @@ namespace crm_api.Controllers
         [HttpPost("approve")]
         public async Task<IActionResult> Approve([FromBody] ApproveActionDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<bool>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationService.ApproveAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -174,13 +153,6 @@ namespace crm_api.Controllers
         [HttpPost("reject")]
         public async Task<IActionResult> Reject([FromBody] RejectActionDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<bool>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationService.RejectAsync(request);
             return StatusCode(result.StatusCode, result);
@@ -195,13 +167,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateQuotation(long id, [FromBody] UpdateQuotationDto updateQuotationDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<QuotationDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("QuotationController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _quotationService.UpdateQuotationAsync(id, updateQuotationDto);
             return StatusCode(result.StatusCode, result);

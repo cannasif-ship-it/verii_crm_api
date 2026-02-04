@@ -43,13 +43,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserDetailDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserDetailDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserDetailController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserDetailController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _service.CreateAsync(dto);
             return StatusCode(result.StatusCode, result);
@@ -58,13 +51,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateUserDetailDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<UserDetailDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("UserDetailController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("UserDetailController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _service.UpdateAsync(id, dto);
             return StatusCode(result.StatusCode, result);

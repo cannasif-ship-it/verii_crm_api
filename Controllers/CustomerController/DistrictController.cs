@@ -36,13 +36,6 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] DistrictCreateDto districtCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<DistrictGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("DistrictController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("DistrictController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _districtService.CreateDistrictAsync(districtCreateDto);
             return StatusCode(result.StatusCode, result);
@@ -51,13 +44,6 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] DistrictUpdateDto districtUpdateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(400, ApiResponse<DistrictGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("DistrictController.InvalidModelState"),
-                    _localizationService.GetLocalizedString("DistrictController.InvalidModelStateExceptionMessage", ModelState?.ToString() ?? string.Empty),
-                    400));
-            }
 
             var result = await _districtService.UpdateDistrictAsync(id, districtUpdateDto);
             return StatusCode(result.StatusCode, result);
