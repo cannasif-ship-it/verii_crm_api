@@ -19,6 +19,7 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportTemplateService> _logger;
+        private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
         private readonly IReportPdfGeneratorService _pdfGenerator;
 
@@ -93,14 +94,14 @@ namespace crm_api.Services
 
                 return ApiResponse<PagedResponse<ReportTemplateDto>>.SuccessResult(
                     pagedResponse,
-                    "Report templates retrieved successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplatesRetrieved"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving report templates");
+                _logger.LogError(ex, _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplates"));
                 return ApiResponse<PagedResponse<ReportTemplateDto>>.ErrorResult(
-                    "Error retrieving report templates",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplates"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
@@ -116,7 +117,7 @@ namespace crm_api.Services
                 if (template == null)
                 {
                     return ApiResponse<ReportTemplateDto>.ErrorResult(
-                        "Report template not found",
+                        _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFound"),
                         null,
                         404);
                 }
@@ -137,14 +138,14 @@ namespace crm_api.Services
 
                 return ApiResponse<ReportTemplateDto>.SuccessResult(
                     templateDto,
-                    "Report template retrieved successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving report template with ID {Id}", id);
                 return ApiResponse<ReportTemplateDto>.ErrorResult(
-                    "Error retrieving report template",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplate"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
@@ -205,14 +206,14 @@ namespace crm_api.Services
 
                 return ApiResponse<ReportTemplateDto>.SuccessResult(
                     templateDto,
-                    "Report template created successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateCreated"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating report template");
+                _logger.LogError(ex, _localizationService.GetLocalizedString("ReportTemplateService.ErrorCreatingReportTemplate"));
                 return ApiResponse<ReportTemplateDto>.ErrorResult(
-                    "Error creating report template",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorCreatingReportTemplate"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
@@ -228,7 +229,7 @@ namespace crm_api.Services
                 if (template == null)
                 {
                     return ApiResponse<ReportTemplateDto>.ErrorResult(
-                        "Report template not found",
+                        _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFound"),
                         null,
                         404);
                 }
@@ -296,14 +297,14 @@ namespace crm_api.Services
 
                 return ApiResponse<ReportTemplateDto>.SuccessResult(
                     templateDto,
-                    "Report template updated successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateUpdated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating report template with ID {Id}", id);
                 return ApiResponse<ReportTemplateDto>.ErrorResult(
-                    "Error updating report template",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorUpdatingReportTemplate"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
@@ -319,7 +320,7 @@ namespace crm_api.Services
                 if (template == null)
                 {
                     return ApiResponse<bool>.ErrorResult(
-                        "Report template not found",
+                        _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFound"),
                         null,
                         404);
                 }
@@ -332,14 +333,14 @@ namespace crm_api.Services
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
-                    "Report template deleted successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateDeleted"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting report template with ID {Id}", id);
                 return ApiResponse<bool>.ErrorResult(
-                    "Error deleting report template",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorDeletingReportTemplate"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
@@ -355,7 +356,7 @@ namespace crm_api.Services
                 if (template == null)
                 {
                     return ApiResponse<byte[]>.ErrorResult(
-                        "Report template not found or inactive",
+                        _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFoundOrInactive"),
                         null,
                         404);
                 }
@@ -365,7 +366,7 @@ namespace crm_api.Services
                 if (templateData == null)
                 {
                     return ApiResponse<byte[]>.ErrorResult(
-                        "Invalid template data",
+                        _localizationService.GetLocalizedString("ReportTemplateService.InvalidTemplateData"),
                         null,
                         400);
                 }
@@ -375,14 +376,14 @@ namespace crm_api.Services
 
                 return ApiResponse<byte[]>.SuccessResult(
                     pdfBytes,
-                    "PDF generated successfully");
+                    _localizationService.GetLocalizedString("ReportTemplateService.PdfGenerated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating PDF for template {TemplateId} and entity {EntityId}", templateId, entityId);
                 return ApiResponse<byte[]>.ErrorResult(
-                    "Error generating PDF",
-                    ex.Message,
+                    _localizationService.GetLocalizedString("ReportTemplateService.ErrorGeneratingPdf"),
+                    _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }

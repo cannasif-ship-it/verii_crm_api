@@ -15,10 +15,12 @@ namespace crm_api.Controllers
     public class ReportTemplateController : ControllerBase
     {
         private readonly IReportTemplateService _reportTemplateService;
+        private readonly ILocalizationService _localizationService;
 
-        public ReportTemplateController(IReportTemplateService reportTemplateService)
+        public ReportTemplateController(IReportTemplateService reportTemplateService, ILocalizationService localizationService)
         {
             _reportTemplateService = reportTemplateService;
+            _localizationService = localizationService;
         }
 
         /// <summary>
@@ -147,7 +149,7 @@ namespace crm_api.Controllers
 
             return Ok(ApiResponse<ReportTemplateFieldsDto>.SuccessResult(
                 fields,
-                "Available fields retrieved successfully"));
+                _localizationService.GetLocalizedString("ReportTemplateController.AvailableFieldsRetrieved")));
         }
     }
 }

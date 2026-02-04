@@ -17,6 +17,7 @@ namespace crm_api.Services.ReportBuilderService
         private readonly IMapper _mapper;
         private readonly IReportingConnectionService _connectionService;
         private readonly IReportingCatalogService _catalogService;
+        private readonly ILocalizationService _localizationService;
         private readonly ILogger<ReportService> _logger;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -31,6 +32,7 @@ namespace crm_api.Services.ReportBuilderService
             IMapper mapper,
             IReportingConnectionService connectionService,
             IReportingCatalogService catalogService,
+            ILocalizationService localizationService,
             ILogger<ReportService> logger)
         {
             _context = context;
@@ -38,6 +40,7 @@ namespace crm_api.Services.ReportBuilderService
             _mapper = mapper;
             _connectionService = connectionService;
             _catalogService = catalogService;
+            _localizationService = localizationService;
             _logger = logger;
         }
 
@@ -49,14 +52,14 @@ namespace crm_api.Services.ReportBuilderService
                     .AsNoTracking()
                     .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
                 if (entity == null)
-                    return ApiResponse<ReportDetailDto>.ErrorResult("Report not found", null, 404);
+                    return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
                 var dto = _mapper.Map<ReportDetailDto>(entity);
-                return ApiResponse<ReportDetailDto>.SuccessResult(dto, "OK");
+                return ApiResponse<ReportDetailDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ReportService.ReportRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetById report {Id}", id);
-                return ApiResponse<ReportDetailDto>.ErrorResult("Error retrieving report", ex.Message, 500);
+                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ErrorRetrievingReport"), _localizationService.GetLocalizedString("ReportService.ErrorRetrievingReport"), 500);
             }
         }
 
@@ -78,12 +81,12 @@ namespace crm_api.Services.ReportBuilderService
                     .ToListAsync();
                 var items = _mapper.Map<List<ReportListItemDto>>(list);
                 var paged = new PagedResponse<ReportListItemDto> { Items = items, TotalCount = total, PageNumber = pageNumber, PageSize = pageSize };
-                return ApiResponse<PagedResponse<ReportListItemDto>>.SuccessResult(paged, "OK");
+                return ApiResponse<PagedResponse<ReportListItemDto>>.SuccessResult(paged, _localizationService.GetLocalizedString("ReportService.ReportListRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "List reports");
-                return ApiResponse<PagedResponse<ReportListItemDto>>.ErrorResult("Error listing reports", ex.Message, 500);
+                return ApiResponse<PagedResponse<ReportListItemDto>>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ErrorListingReports"), _localizationService.GetLocalizedString("ReportService.ErrorListingReports"), 500);
             }
         }
 
@@ -104,12 +107,12 @@ namespace crm_api.Services.ReportBuilderService
                 await _unitOfWork.SaveChangesAsync();
                 var created = await _context.ReportDefinitions.AsNoTracking().FirstOrDefaultAsync(r => r.Id == entity.Id);
                 var detail = _mapper.Map<ReportDetailDto>(created!);
-                return ApiResponse<ReportDetailDto>.SuccessResult(detail, "Created");
+                return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportCreated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Create report");
-                return ApiResponse<ReportDetailDto>.ErrorResult("Error creating report", ex.Message, 500);
+                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ErrorCreatingReport"), _localizationService.GetLocalizedString("ReportService.ErrorCreatingReport"), 500);
             }
         }
 
@@ -122,7 +125,7 @@ namespace crm_api.Services.ReportBuilderService
             var repo = _unitOfWork.Repository<ReportDefinition>();
             var entity = await repo.GetByIdForUpdateAsync(id);
             if (entity == null)
-                return ApiResponse<ReportDetailDto>.ErrorResult("Report not found", null, 404);
+                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
 
             try
             {
@@ -138,12 +141,12 @@ namespace crm_api.Services.ReportBuilderService
                 await _unitOfWork.SaveChangesAsync();
                 var updated = await _context.ReportDefinitions.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
                 var detail = _mapper.Map<ReportDetailDto>(updated!);
-                return ApiResponse<ReportDetailDto>.SuccessResult(detail, "Updated");
+                return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportUpdated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Update report {Id}", id);
-                return ApiResponse<ReportDetailDto>.ErrorResult("Error updating report", ex.Message, 500);
+                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ErrorUpdatingReport"), _localizationService.GetLocalizedString("ReportService.ErrorUpdatingReport"), 500);
             }
         }
 
@@ -152,55 +155,55 @@ namespace crm_api.Services.ReportBuilderService
             var repo = _unitOfWork.Repository<ReportDefinition>();
             var ok = await repo.SoftDeleteAsync(id);
             if (!ok)
-                return ApiResponse<bool>.ErrorResult("Report not found", null, 404);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
             await _unitOfWork.SaveChangesAsync();
-            return ApiResponse<bool>.SuccessResult(true, "Deleted");
+            return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("ReportService.ReportDeleted"));
         }
 
         private async Task<ApiResponse<object>> ValidateForSaveAsync(string connectionKey, string dataSourceType, string dataSourceName, string configJson)
         {
             var connResp = _connectionService.ResolveConnectionString(connectionKey);
             if (!connResp.Success)
-                return ApiResponse<object>.ErrorResult(connResp.Message ?? "Invalid connection.", null, connResp.StatusCode);
+                return ApiResponse<object>.ErrorResult(connResp.Message ?? _localizationService.GetLocalizedString("ReportService.InvalidConnection"), null, connResp.StatusCode);
 
             var catalogResp = await _catalogService.CheckAndGetSchemaAsync(connectionKey, dataSourceType, dataSourceName);
             if (!catalogResp.Success)
-                return ApiResponse<object>.ErrorResult(catalogResp.Message ?? "Catalog error.", catalogResp.ExceptionMessage, catalogResp.StatusCode);
+                return ApiResponse<object>.ErrorResult(catalogResp.Message ?? _localizationService.GetLocalizedString("ReportService.CatalogError"), catalogResp.ExceptionMessage, catalogResp.StatusCode);
             if (catalogResp.Data == null || catalogResp.Data.Count == 0)
-                return ApiResponse<object>.ErrorResult("Datasource does not exist or has no columns.", null, 400);
+                return ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ReportService.DatasourceNotFoundOrEmpty"), null, 400);
 
             try
             {
                 var config = JsonSerializer.Deserialize<ReportConfig>(configJson, JsonOptions);
                 if (config == null)
-                    return ApiResponse<object>.ErrorResult("Invalid ConfigJson.", null, 400);
+                    return ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ReportService.InvalidConfigJson"), null, 400);
                 var err = ValidateReportConfig(config);
                 if (!string.IsNullOrEmpty(err))
                     return ApiResponse<object>.ErrorResult(err, null, 400);
             }
             catch (JsonException ex)
             {
-                return ApiResponse<object>.ErrorResult("Invalid ConfigJson format.", ex.Message, 400);
+                return ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ReportService.InvalidConfigJsonFormat"), _localizationService.GetLocalizedString("ReportService.InvalidConfigJsonFormat"), 400);
             }
 
-            return ApiResponse<object>.SuccessResult(null!, "OK");
+            return ApiResponse<object>.SuccessResult(null!, _localizationService.GetLocalizedString("ReportService.ReportRetrieved"));
         }
 
         private static readonly HashSet<string> ChartTypes = new(StringComparer.OrdinalIgnoreCase) { "table", "bar", "line", "pie" };
         private static readonly HashSet<string> Aggregations = new(StringComparer.OrdinalIgnoreCase) { "none", "sum", "count", "avg", "min", "max" };
 
-        private static string? ValidateReportConfig(ReportConfig config)
+        private string? ValidateReportConfig(ReportConfig config)
         {
             if (!ChartTypes.Contains(config.ChartType ?? ""))
-                return "chartType must be one of: table, bar, line, pie.";
+                return _localizationService.GetLocalizedString("ReportService.ReportConfigInvalidChartType");
             if (config.Values == null || config.Values.Count == 0)
-                return "At least one value field is required.";
+                return _localizationService.GetLocalizedString("ReportService.ReportConfigValueRequired");
             foreach (var v in config.Values)
             {
                 if (string.IsNullOrWhiteSpace(v.Field))
-                    return "Each value must have a field.";
+                    return _localizationService.GetLocalizedString("ReportService.ReportConfigValueFieldRequired");
                 if (!Aggregations.Contains(v.Aggregation ?? "none"))
-                    return "Invalid aggregation; use: none, sum, count, avg, min, max.";
+                    return _localizationService.GetLocalizedString("ReportService.ReportConfigInvalidAggregation");
             }
             return null;
         }

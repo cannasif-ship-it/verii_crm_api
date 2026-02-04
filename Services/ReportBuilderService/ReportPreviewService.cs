@@ -19,6 +19,7 @@ namespace crm_api.Services.ReportBuilderService
 
         private readonly IReportingConnectionService _connectionService;
         private readonly IReportingCatalogService _catalogService;
+        private readonly ILocalizationService _localizationService;
         private readonly ILogger<ReportPreviewService> _logger;
 
         private static readonly Regex IdentifierRegex = new(@"^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
@@ -28,10 +29,12 @@ namespace crm_api.Services.ReportBuilderService
         public ReportPreviewService(
             IReportingConnectionService connectionService,
             IReportingCatalogService catalogService,
+            ILocalizationService localizationService,
             ILogger<ReportPreviewService> logger)
         {
             _connectionService = connectionService;
             _catalogService = catalogService;
+            _localizationService = localizationService;
             _logger = logger;
         }
 
@@ -39,13 +42,13 @@ namespace crm_api.Services.ReportBuilderService
         {
             var connResp = _connectionService.ResolveConnectionString(request.ConnectionKey);
             if (!connResp.Success || string.IsNullOrEmpty(connResp.Data))
-                return ApiResponse<PreviewResponseDto>.ErrorResult(connResp.Message ?? "Invalid connection.", null, connResp.StatusCode);
+                return ApiResponse<PreviewResponseDto>.ErrorResult(connResp.Message ?? _localizationService.GetLocalizedString("ReportPreviewService.InvalidConnection"), null, connResp.StatusCode);
 
             var schemaResp = await _catalogService.CheckAndGetSchemaAsync(request.ConnectionKey, request.DataSourceType, request.DataSourceName);
             if (!schemaResp.Success || schemaResp.Data == null)
-                return ApiResponse<PreviewResponseDto>.ErrorResult(schemaResp.Message ?? "Schema not found", schemaResp.ExceptionMessage, schemaResp.StatusCode);
+                return ApiResponse<PreviewResponseDto>.ErrorResult(schemaResp.Message ?? _localizationService.GetLocalizedString("ReportPreviewService.SchemaNotFound"), schemaResp.ExceptionMessage, schemaResp.StatusCode);
             if (schemaResp.Data.Count == 0)
-                return ApiResponse<PreviewResponseDto>.ErrorResult("Datasource not found or has no columns.", null, 400);
+                return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.DatasourceNotFoundOrEmpty"), null, 400);
 
             var schemaDict = schemaResp.Data.ToDictionary(s => s.Name, StringComparer.OrdinalIgnoreCase);
 
@@ -56,7 +59,7 @@ namespace crm_api.Services.ReportBuilderService
             }
             catch (JsonException ex)
             {
-                return ApiResponse<PreviewResponseDto>.ErrorResult("Invalid ConfigJson.", ex.Message, 400);
+                return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), _localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), 400);
             }
 
             var err = ValidateConfigAgainstSchema(config, schemaDict);
@@ -114,7 +117,7 @@ namespace crm_api.Services.ReportBuilderService
                         selectCols.Add($"{AggSql(agg)}([{Escape(v.Field!.Trim())}]) AS [{Escape(v.Field.Trim())}]");
                     }
                 if (selectCols.Count == 0)
-                    return ApiResponse<PreviewResponseDto>.ErrorResult("Chart requires axis or legend and at least one value.", null, 400);
+                    return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.ChartRequiresAxisLegendAndValue"), null, 400);
                 selectClause = string.Join(", ", selectCols);
                 if (groupCols.Count > 0)
                     groupByClause = " GROUP BY " + string.Join(", ", groupCols);
@@ -214,12 +217,12 @@ namespace crm_api.Services.ReportBuilderService
                     }
                 }
                 return ApiResponse<PreviewResponseDto>.SuccessResult(
-                    new PreviewResponseDto { Columns = columns, Rows = rows }, "OK");
+                    new PreviewResponseDto { Columns = columns, Rows = rows }, _localizationService.GetLocalizedString("ReportPreviewService.PreviewOk"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Preview execution");
-                return ApiResponse<PreviewResponseDto>.ErrorResult("Preview execution failed.", ex.Message, 500);
+                return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.PreviewFailed"), _localizationService.GetLocalizedString("ReportPreviewService.PreviewFailed"), 500);
             }
         }
 
@@ -237,7 +240,7 @@ namespace crm_api.Services.ReportBuilderService
             return name.Replace("]", "]]");
         }
 
-        private static string? ValidateConfigAgainstSchema(ReportConfig config, Dictionary<string, FieldSchemaDto> schemaDict)
+        private string? ValidateConfigAgainstSchema(ReportConfig config, Dictionary<string, FieldSchemaDto> schemaDict)
         {
             var allFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (config.Axis?.Field != null) allFields.Add(config.Axis.Field.Trim());
@@ -251,7 +254,7 @@ namespace crm_api.Services.ReportBuilderService
             if (config.Sorting?.ValueField != null) allFields.Add(config.Sorting.ValueField.Trim());
             foreach (var f in allFields)
                 if (!schemaDict.ContainsKey(f))
-                    return $"Field '{f}' is not in datasource schema.";
+                    return _localizationService.GetLocalizedString("ReportPreviewService.FieldNotInSchema", f);
             return null;
         }
 

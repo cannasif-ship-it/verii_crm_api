@@ -143,12 +143,12 @@ namespace crm_api.Services
                     TotalCount = totalCount
                 };
 
-                return ApiResponse<PagedResponse<NotificationDto>>.SuccessResult(pagedResponse, "Notifications retrieved successfully");
+                return ApiResponse<PagedResponse<NotificationDto>>.SuccessResult(pagedResponse, _localizationService.GetLocalizedString("NotificationService.NotificationsRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving notifications for user");
-                return ApiResponse<PagedResponse<NotificationDto>>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<PagedResponse<NotificationDto>>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
 
@@ -159,12 +159,12 @@ namespace crm_api.Services
                 var count = await _unitOfWork.Notifications
                     .CountAsync(x => x.UserId == userId && !x.IsRead && !x.IsDeleted);
 
-                return ApiResponse<int>.SuccessResult(count, "Unread count retrieved");
+                return ApiResponse<int>.SuccessResult(count, _localizationService.GetLocalizedString("NotificationService.UnreadCountRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting unread count for user {UserId}", userId);
-                return ApiResponse<int>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<int>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
 
@@ -177,7 +177,7 @@ namespace crm_api.Services
 
                 if (notification == null)
                 {
-                    return ApiResponse<bool>.ErrorResult("Notification not found", "Notification not found", 404);
+                    return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.NotificationNotFound"), _localizationService.GetLocalizedString("NotificationService.NotificationNotFound"), 404);
                 }
 
                 notification.IsRead = true;
@@ -187,12 +187,12 @@ namespace crm_api.Services
                 await _unitOfWork.Notifications.UpdateAsync(notification);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<bool>.SuccessResult(true, "Notification marked as read");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.NotificationMarkedAsRead"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking notification {NotificationId} as read for user {UserId}", notificationId, userId);
-                return ApiResponse<bool>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
 
@@ -216,12 +216,12 @@ namespace crm_api.Services
                     await _unitOfWork.SaveChangesAsync();
                 }
 
-                return ApiResponse<bool>.SuccessResult(true, "All notifications marked as read");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.AllNotificationsMarkedAsRead"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking all notifications as read for user {UserId}", userId);
-                return ApiResponse<bool>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
 
@@ -298,12 +298,12 @@ namespace crm_api.Services
                     // Don't fail the whole operation if SignalR fails
                 }
 
-                return ApiResponse<bool>.SuccessResult(true, "Notification created");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.NotificationCreated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating notification for user {UserId}", createDto.UserId);
-                return ApiResponse<bool>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
 
@@ -316,7 +316,7 @@ namespace crm_api.Services
 
                 if (notification == null)
                 {
-                    return ApiResponse<bool>.ErrorResult("Notification not found", "Notification not found", 404);
+                    return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.NotificationNotFound"), _localizationService.GetLocalizedString("NotificationService.NotificationNotFound"), 404);
                 }
 
                 notification.IsDeleted = true;
@@ -326,12 +326,12 @@ namespace crm_api.Services
                 await _unitOfWork.Notifications.UpdateAsync(notification);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<bool>.SuccessResult(true, "Notification deleted");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.NotificationDeleted"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting notification {NotificationId} for user {UserId}", notificationId, userId);
-                return ApiResponse<bool>.ErrorResult("Internal Server Error", ex.Message, 500);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("NotificationService.InternalServerError"), _localizationService.GetLocalizedString("NotificationService.InternalServerError"), 500);
             }
         }
     }

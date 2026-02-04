@@ -128,9 +128,6 @@
   
   
   
-  <data name="General.OperationSuccessful" xml:space="preserve">
-    <value>Operation successful.</value>
-  </data>
   <data name="General.ValidationError" xml:space="preserve">
     <value>Validation error occurred.</value>
   </data>
@@ -2700,4 +2697,181 @@
   <data name="Notification.DemandApproval.Message" xml:space="preserve"><value>Demand {0} is pending approval.</value></data>
   <data name="Notification.DemandApproved.Title" xml:space="preserve"><value>Demand Approved</value></data>
   <data name="Notification.DemandApproved.Message" xml:space="preserve"><value>Demand {0} has been approved.</value></data>
+  <data name="DashboardController.DashboardRetrieved" xml:space="preserve">
+    <value>Dashboard data retrieved successfully.</value>
+  </data>
+  <data name="DashboardController.CurrencyRatesNotImplemented" xml:space="preserve">
+    <value>Currency rates endpoint is not implemented.</value>
+  </data>
+  <data name="NotificationService.NotificationsRetrieved" xml:space="preserve">
+    <value>Notifications retrieved successfully.</value>
+  </data>
+  <data name="NotificationService.InternalServerError" xml:space="preserve">
+    <value>Internal server error.</value>
+  </data>
+  <data name="NotificationService.UnreadCountRetrieved" xml:space="preserve">
+    <value>Unread count retrieved.</value>
+  </data>
+  <data name="NotificationService.NotificationNotFound" xml:space="preserve">
+    <value>Notification not found.</value>
+  </data>
+  <data name="NotificationService.NotificationMarkedAsRead" xml:space="preserve">
+    <value>Notification marked as read.</value>
+  </data>
+  <data name="NotificationService.AllNotificationsMarkedAsRead" xml:space="preserve">
+    <value>All notifications marked as read.</value>
+  </data>
+  <data name="ReportingConnectionService.ConnectionsRetrieved" xml:space="preserve">
+    <value>Connections retrieved successfully.</value>
+  </data>
+  <data name="ReportingConnectionService.ConnectionKeyRequired" xml:space="preserve">
+    <value>Connection key is required.</value>
+  </data>
+  <data name="ReportingConnectionService.InvalidConnectionKey" xml:space="preserve">
+    <value>Invalid connection key. Use CRM or ERP.</value>
+  </data>
+  <data name="ReportingConnectionService.ConnectionStringNotFound" xml:space="preserve">
+    <value>Connection string '{0}' not found.</value>
+  </data>
+  <data name="ReportingConnectionService.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ReportService.ReportNotFound" xml:space="preserve">
+    <value>Report not found.</value>
+  </data>
+  <data name="ReportService.ReportRetrieved" xml:space="preserve">
+    <value>Report retrieved successfully.</value>
+  </data>
+  <data name="ReportService.ErrorRetrievingReport" xml:space="preserve">
+    <value>Error retrieving report.</value>
+  </data>
+  <data name="ReportService.ReportListRetrieved" xml:space="preserve">
+    <value>Report list retrieved successfully.</value>
+  </data>
+  <data name="ReportService.ErrorListingReports" xml:space="preserve">
+    <value>Error listing reports.</value>
+  </data>
+  <data name="ReportService.ReportCreated" xml:space="preserve">
+    <value>Report created successfully.</value>
+  </data>
+  <data name="ReportService.ErrorCreatingReport" xml:space="preserve">
+    <value>Error creating report.</value>
+  </data>
+  <data name="ReportService.ReportUpdated" xml:space="preserve">
+    <value>Report updated successfully.</value>
+  </data>
+  <data name="ReportService.ErrorUpdatingReport" xml:space="preserve">
+    <value>Error updating report.</value>
+  </data>
+  <data name="ReportService.ReportDeleted" xml:space="preserve">
+    <value>Report deleted successfully.</value>
+  </data>
+  <data name="ReportService.InvalidConnection" xml:space="preserve">
+    <value>Invalid connection.</value>
+  </data>
+  <data name="ReportService.CatalogError" xml:space="preserve">
+    <value>Catalog error.</value>
+  </data>
+  <data name="ReportService.DatasourceNotFoundOrEmpty" xml:space="preserve">
+    <value>Datasource does not exist or has no columns.</value>
+  </data>
+  <data name="ReportService.InvalidConfigJson" xml:space="preserve">
+    <value>Invalid ConfigJson.</value>
+  </data>
+  <data name="ReportService.InvalidConfigJsonFormat" xml:space="preserve">
+    <value>Invalid ConfigJson format.</value>
+  </data>
+  <data name="ReportService.ReportConfigInvalidChartType" xml:space="preserve">
+    <value>chartType must be one of: table, bar, line, pie.</value>
+  </data>
+  <data name="ReportService.ReportConfigValueRequired" xml:space="preserve">
+    <value>At least one value field is required.</value>
+  </data>
+  <data name="ReportService.ReportConfigValueFieldRequired" xml:space="preserve">
+    <value>Each value must have a field.</value>
+  </data>
+  <data name="ReportService.ReportConfigInvalidAggregation" xml:space="preserve">
+    <value>Invalid aggregation; use: none, sum, count, avg, min, max.</value>
+  </data>
+  <data name="ReportPreviewService.InvalidConnection" xml:space="preserve">
+    <value>Invalid connection.</value>
+  </data>
+  <data name="ReportPreviewService.SchemaNotFound" xml:space="preserve">
+    <value>Schema not found.</value>
+  </data>
+  <data name="ReportPreviewService.DatasourceNotFoundOrEmpty" xml:space="preserve">
+    <value>Datasource not found or has no columns.</value>
+  </data>
+  <data name="ReportPreviewService.InvalidConfigJson" xml:space="preserve">
+    <value>Invalid ConfigJson.</value>
+  </data>
+  <data name="ReportPreviewService.ChartRequiresAxisLegendAndValue" xml:space="preserve">
+    <value>Chart requires axis or legend and at least one value.</value>
+  </data>
+  <data name="ReportPreviewService.PreviewOk" xml:space="preserve">
+    <value>Preview completed successfully.</value>
+  </data>
+  <data name="ReportPreviewService.PreviewFailed" xml:space="preserve">
+    <value>Preview execution failed.</value>
+  </data>
+  <data name="ReportPreviewService.FieldNotInSchema" xml:space="preserve">
+    <value>Field '{0}' is not in datasource schema.</value>
+  </data>
+  <data name="NotificationService.NotificationCreated" xml:space="preserve">
+    <value>Notification created.</value>
+  </data>
+  <data name="NotificationService.NotificationDeleted" xml:space="preserve">
+    <value>Notification deleted.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplatesRetrieved" xml:space="preserve">
+    <value>Report templates retrieved successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorRetrievingReportTemplates" xml:space="preserve">
+    <value>Error retrieving report templates.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateNotFound" xml:space="preserve">
+    <value>Report template not found.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateRetrieved" xml:space="preserve">
+    <value>Report template retrieved successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorRetrievingReportTemplate" xml:space="preserve">
+    <value>Error retrieving report template.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateCreated" xml:space="preserve">
+    <value>Report template created successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorCreatingReportTemplate" xml:space="preserve">
+    <value>Error creating report template.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateUpdated" xml:space="preserve">
+    <value>Report template updated successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorUpdatingReportTemplate" xml:space="preserve">
+    <value>Error updating report template.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateDeleted" xml:space="preserve">
+    <value>Report template deleted successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorDeletingReportTemplate" xml:space="preserve">
+    <value>Error deleting report template.</value>
+  </data>
+  <data name="ReportTemplateService.ReportTemplateNotFoundOrInactive" xml:space="preserve">
+    <value>Report template not found or inactive.</value>
+  </data>
+  <data name="ReportTemplateService.InvalidTemplateData" xml:space="preserve">
+    <value>Invalid template data.</value>
+  </data>
+  <data name="ReportTemplateService.PdfGenerated" xml:space="preserve">
+    <value>PDF generated successfully.</value>
+  </data>
+  <data name="ReportTemplateService.ErrorGeneratingPdf" xml:space="preserve">
+    <value>Error generating PDF.</value>
+  </data>
+  <data name="ReportTemplateService.InternalServerError" xml:space="preserve">
+    <value>Internal server error.</value>
+  </data>
+  <data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve">
+    <value>Available fields retrieved successfully.</value>
+  </data>
 </root>
