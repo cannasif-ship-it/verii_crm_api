@@ -28,12 +28,11 @@ namespace crm_api.Helpers
             {
                 // Store in HttpContext.Items for later use
                 context.Items["BranchCode"] = branchCode;
-                _logger.LogDebug("BranchCode extracted from header: {BranchCode}", branchCode);
+                _logger.LogDebug("BranchCode header present in request.");
             }
             else
             {
-                _logger.LogWarning("BranchCode header not found in request. Headers: {Headers}", 
-                    string.Join(", ", context.Request.Headers.Keys));
+                _logger.LogWarning("BranchCode header not found in request.");
             }
 
             // Continue to next middleware
