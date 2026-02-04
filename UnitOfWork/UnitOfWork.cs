@@ -63,7 +63,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<ApprovalUserRole>? _approvalUserRoles;
         private IGenericRepository<crm_api.Models.Notification.Notification>? _notifications;
         private IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>? _reportDefinitions;
-
+        private IGenericRepository<SmtpSetting>? _smtpSettings;
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -117,6 +117,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<ApprovalUserRole> ApprovalUserRoles{get{_approvalUserRoles ??= new GenericRepository<ApprovalUserRole>(_context, _httpContextAccessor);return _approvalUserRoles;}}
         public IGenericRepository<crm_api.Models.Notification.Notification> Notifications{get{_notifications ??= new GenericRepository<crm_api.Models.Notification.Notification>(_context, _httpContextAccessor);return _notifications;}}
         public IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions{get{_reportDefinitions ??= new GenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>(_context, _httpContextAccessor);return _reportDefinitions;}}
+        public IGenericRepository<SmtpSetting> SmtpSettings{get{_smtpSettings ??= new GenericRepository<SmtpSetting>(_context, _httpContextAccessor);return _smtpSettings;}}
 
         /// <summary>
         /// Get repository for any entity type
@@ -125,7 +126,7 @@ namespace crm_api.UnitOfWork
         /// <returns>Generic repository for the entity</returns>
         public IGenericRepository<T> Repository<T>() where T : BaseEntity
         {
-            return (IGenericRepository<T>)_repositories.GetOrAdd(typeof(T), 
+            return (IGenericRepository<T>)_repositories.GetOrAdd(typeof(T),
                 _ => new GenericRepository<T>(_context, _httpContextAccessor));
         }
 

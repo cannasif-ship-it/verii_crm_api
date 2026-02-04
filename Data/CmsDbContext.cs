@@ -59,6 +59,7 @@ namespace crm_api.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
+        public DbSet<SmtpSetting> SmtpSettings { get; set; }
 
 
 

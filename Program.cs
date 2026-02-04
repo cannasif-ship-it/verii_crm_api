@@ -18,11 +18,16 @@ using Microsoft.Extensions.FileProviders;
 using Hangfire;
 using Hangfire.SqlServer;
 using Infrastructure.BackgroundJobs.Interfaces;
+using Microsoft.Extensions.Caching.Memory;              // ✅ SMTP için (IMemoryCache)
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// ✅ SMTP için: MemoryCache + DataProtection
+builder.Services.AddMemoryCache();
+builder.Services.AddDataProtection();
 
 // SignalR Configuration
 builder.Services.AddSignalR(options =>
@@ -155,6 +160,9 @@ builder.Services.AddScoped<IApprovalUserRoleService, ApprovalUserRoleService>();
 // Register Mail Services
 builder.Services.AddScoped<IMailService, MailService>();
 
+// ✅ SMTP Settings Service kaydı
+builder.Services.AddScoped<ISmtpSettingsService, SmtpSettingsService>();
+
 // Register Background Jobs
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IStockSyncJob, Infrastructure.BackgroundJobs.StockSyncJob>();
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IMailJob, Infrastructure.BackgroundJobs.MailJob>();
@@ -197,7 +205,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.DefaultRequestCulture = new RequestCulture("tr-TR");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
-    
+
     // Add custom request culture provider for x-language header
     options.RequestCultureProviders.Insert(0, new CustomHeaderRequestCultureProvider());
 });
@@ -205,7 +213,6 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // CORS Configuration
 builder.Services.AddCors(options =>
 {
-
     options.AddPolicy("DevCors", policy =>
     {
         policy.WithOrigins(
@@ -240,24 +247,23 @@ builder.Services.AddAuthentication(options =>
             builder.Configuration["JwtSettings:SecretKey"] ?? "YourSuperSecretKeyThatIsAtLeast32CharactersLong!")),
         ClockSkew = TimeSpan.Zero
     };
-    
+
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            
-            // SignalR Hub için token yakala (AuthHub ve NotificationHub)
+
             if (!string.IsNullOrEmpty(accessToken) && (
-                path.StartsWithSegments("/api/authHub") || 
+                path.StartsWithSegments("/api/authHub") ||
                 path.StartsWithSegments("/authHub") ||
-                path.StartsWithSegments("/api/notificationHub") || 
+                path.StartsWithSegments("/api/notificationHub") ||
                 path.StartsWithSegments("/notificationHub")))
             {
                 context.Token = accessToken;
             }
-            
+
             return Task.CompletedTask;
         },
         OnTokenValidated = async context =>
@@ -265,17 +271,16 @@ builder.Services.AddAuthentication(options =>
             var db = context.HttpContext.RequestServices.GetRequiredService<CmsDbContext>();
             var claims = context.Principal?.Claims;
             var userId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            
+
             if (userId == null)
             {
                 context.Fail("Token geçersiz: eksik kullanıcı ID");
                 return;
             }
-            
-            // Token'ı hem Authorization header'dan hem de query parameter'dan al (SignalR için)
+
             var authHeader = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             var accessToken = context.HttpContext.Request.Query["access_token"].FirstOrDefault();
-            
+
             string? rawToken = null;
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
@@ -283,10 +288,9 @@ builder.Services.AddAuthentication(options =>
             }
             else if (!string.IsNullOrEmpty(accessToken))
             {
-                // SignalR için query parameter'dan token al
                 rawToken = accessToken;
             }
-            
+
             string? tokenHash = null;
             if (!string.IsNullOrEmpty(rawToken))
             {
@@ -300,16 +304,15 @@ builder.Services.AddAuthentication(options =>
                 tokenHash = builderStr.ToString();
             }
 
-            // Session kontrolü: Token hash ile eşleşen aktif session ara
             try
             {
                 var session = await db.UserSessions
                     .AsNoTracking()
-                    .Where(s => s.UserId.ToString() == userId 
-                        && s.RevokedAt == null 
+                    .Where(s => s.UserId.ToString() == userId
+                        && s.RevokedAt == null
                         && (tokenHash != null && s.Token == tokenHash))
                     .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
-                
+
                 if (session == null)
                 {
                     context.Fail("Token geçersiz veya oturum kapandı");
@@ -317,9 +320,6 @@ builder.Services.AddAuthentication(options =>
             }
             catch (Exception ex)
             {
-                // Database connection timeout veya diğer hatalar durumunda
-                // Loglama yapılabilir ama authentication'ı başarısız yapma
-                // Çünkü bu durumda tüm istekler başarısız olur
                 context.Fail($"Session kontrolü sırasında hata: {ex.Message}");
             }
         }
@@ -329,9 +329,9 @@ builder.Services.AddAuthentication(options =>
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "CRM Web API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "CRM Web API",
         Version = "v1",
         Description = "A comprehensive CRM Web API with JWT Authentication",
         Contact = new OpenApiContact
@@ -340,7 +340,7 @@ builder.Services.AddSwaggerGen(c =>
             Email = "support@crmapi.com"
         }
     });
-    
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -350,8 +350,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT"
     });
-    
-    // Add Language Header to Swagger
+
     c.AddSecurityDefinition("Language", new OpenApiSecurityScheme
     {
         Description = "Language header for localization. Use 'tr' for Turkish or 'en' for English. Example: \"x-language: tr\"",
@@ -360,7 +359,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "ApiKey"
     });
-    
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -389,26 +388,20 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
-    
-    // Ignore circular references
+
     c.CustomSchemaIds(type => type.FullName);
-    
-    // Map IFormFile to binary schema for Swagger
+
     c.MapType<IFormFile>(() => new OpenApiSchema
     {
         Type = "string",
         Format = "binary"
     });
-    
-    // Handle file uploads (IFormFile) with filters
-    // ParameterFilter must be registered before OperationFilter
+
     c.ParameterFilter<FileUploadParameterFilter>();
     c.OperationFilter<FileUploadOperationFilter>();
-    
-    // Configure Swagger to handle form data properly
+
     c.CustomOperationIds(apiDesc => apiDesc.ActionDescriptor.RouteValues["action"]);
-    
-    // Include XML comments if available
+
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -425,7 +418,6 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
     try
     {
-        // Apply pending migrations
         context.Database.Migrate();
         Console.WriteLine("Database migrated successfully.");
     }
@@ -455,7 +447,6 @@ app.UseRouting();
 app.UseStaticFiles();
 
 // Static files for uploads folder (project root/uploads)
-// This serves files from project root/uploads folder at /uploads URL path
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
 if (Directory.Exists(uploadsPath))
 {
@@ -469,14 +460,13 @@ if (Directory.Exists(uploadsPath))
 // Add Request Localization Middleware
 app.UseRequestLocalization();
 
-// Add BranchCode Middleware - Must be before Authentication to capture header early
+// Add BranchCode Middleware
 app.UseMiddleware<BranchCodeMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Endpoint mapping
-// SignalR hubs must be mapped before MapControllers() for proper routing
 app.MapHub<AuthHub>("/authHub");
 app.MapHub<crm_api.Hubs.NotificationHub>("/notificationHub");
 app.MapControllers();
@@ -493,7 +483,6 @@ RecurringJob.AddOrUpdate<IStockSyncJob>(
     job => job.ExecuteAsync(),
     Cron.MinuteInterval(30));
 
-// Trigger the job immediately on application startup
 BackgroundJob.Enqueue<IStockSyncJob>(job => job.ExecuteAsync());
 
 app.Run();
