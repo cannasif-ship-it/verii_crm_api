@@ -1,4 +1,7 @@
 using Hangfire.Dashboard;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System.Security.Claims;
 
 namespace crm_api.Helpers
 {
@@ -6,9 +9,19 @@ namespace crm_api.Helpers
     {
         public bool Authorize(DashboardContext context)
         {
-            // Allow all authenticated users to access Hangfire dashboard
-            // You can add custom authorization logic here if needed
-            return true;
+            var httpContext = context.GetHttpContext();
+            if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            {
+                return false;
+            }
+
+            var user = httpContext.User;
+            if (user.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            return user.Claims.Any(c => (c.Type == ClaimTypes.Role || c.Type == "role") && c.Value == "Admin");
         }
     }
 }
