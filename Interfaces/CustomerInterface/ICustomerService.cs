@@ -9,5 +9,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<CustomerGetDto>> CreateCustomerAsync(CustomerCreateDto customerCreateDto);
         Task<ApiResponse<CustomerGetDto>> UpdateCustomerAsync(long id, CustomerUpdateDto customerUpdateDto);
         Task<ApiResponse<object>> DeleteCustomerAsync(long id);
+        Task SyncCustomersFromErpAsync();
     }
 }

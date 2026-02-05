@@ -10,15 +10,18 @@ namespace Infrastructure.BackgroundJobs
     public class StockSyncJob : IStockSyncJob
     {
         private readonly IStockService _stockService;
+        private readonly ICustomerService _customerService;
         private readonly ILocalizationService _localizationService;
         private readonly ILogger<StockSyncJob> _logger;
 
         public StockSyncJob(
             IStockService stockService,
+            ICustomerService customerService,
             ILocalizationService localizationService,
             ILogger<StockSyncJob> logger)
         {
             _stockService = stockService;
+            _customerService = customerService;
             _localizationService = localizationService;
             _logger = logger;
         }
@@ -30,7 +33,11 @@ namespace Infrastructure.BackgroundJobs
                 _logger.LogInformation(_localizationService.GetLocalizedString("StockSyncJob.Started"));
                 
                 await _stockService.SyncStocksFromErpAsync();
-                
+
+                _logger.LogInformation(_localizationService.GetLocalizedString("CustomerSyncJob.Started"));
+                await _customerService.SyncCustomersFromErpAsync();
+                _logger.LogInformation(_localizationService.GetLocalizedString("CustomerSyncJob.Completed"));
+
                 _logger.LogInformation(_localizationService.GetLocalizedString("StockSyncJob.Completed"));
             }
             catch (Exception ex)

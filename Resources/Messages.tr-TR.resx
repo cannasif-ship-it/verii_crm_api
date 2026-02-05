@@ -1648,6 +1648,12 @@
   <data name="PowerBIReportRoleMappingService.DeleteExceptionMessage" xml:space="preserve">
     <value>Rol eşleştirmesi silinirken bir hata oluştu: {0}</value>
   </data>
+  <data name="CustomerSyncJob.Started" xml:space="preserve">
+    <value>Cari senkronizasyonu başladı.</value>
+  </data>
+  <data name="CustomerSyncJob.Completed" xml:space="preserve">
+    <value>Cari senkronizasyonu tamamlandı.</value>
+  </data>
   <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
     <value>Yapılandırma getirildi.</value>
   </data>

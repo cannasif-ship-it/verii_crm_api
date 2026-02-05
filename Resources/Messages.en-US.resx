@@ -1612,6 +1612,12 @@
   <data name="PowerBIReportRoleMappingService.DeleteExceptionMessage" xml:space="preserve">
     <value>An error occurred while deleting role mapping: {0}</value>
   </data>
+  <data name="CustomerSyncJob.Started" xml:space="preserve">
+    <value>Customer sync job started.</value>
+  </data>
+  <data name="CustomerSyncJob.Completed" xml:space="preserve">
+    <value>Customer sync job completed.</value>
+  </data>
   <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
     <value>Configuration retrieved.</value>
   </data>

@@ -15,12 +15,14 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
+        private readonly IErpService _erpService;
 
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IErpService erpService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
+            _erpService = erpService;
         }
 
         public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
@@ -233,6 +235,106 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("CustomerService.InternalServerError"),
                     _localizationService.GetLocalizedString("CustomerService.DeleteCustomerExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task SyncCustomersFromErpAsync()
+        {
+            var erpResponse = await _erpService.GetCarisAsync(null);
+
+            if (erpResponse?.Data == null || erpResponse.Data.Count == 0)
+                return;
+
+            var existingCustomers = await _unitOfWork.Customers
+                .Query(tracking: true, ignoreQueryFilters: true)
+                .ToListAsync();
+
+            var customerByCode = existingCustomers
+                .Where(x => !string.IsNullOrWhiteSpace(x.CustomerCode))
+                .ToDictionary(x => x.CustomerCode!, StringComparer.OrdinalIgnoreCase);
+
+            var newCustomers = new List<Customer>();
+            var hasAnyChange = false;
+
+            foreach (var erpCustomer in erpResponse.Data)
+            {
+                var code = erpCustomer.CariKod?.Trim();
+                if (string.IsNullOrWhiteSpace(code))
+                    continue;
+
+                if (!customerByCode.TryGetValue(code, out var customer))
+                {
+                    var name = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : erpCustomer.CariIsim!.Trim();
+                    newCustomers.Add(new Customer
+                    {
+                        CustomerCode = code,
+                        CustomerName = name,
+                        TaxOffice = erpCustomer.VergiDairesi,
+                        TaxNumber = erpCustomer.VergiNumarasi,
+                        TcknNumber = erpCustomer.TcknNumber,
+                        Email = erpCustomer.Email,
+                        Website = erpCustomer.Web,
+                        Phone1 = erpCustomer.CariTel,
+                        Address = erpCustomer.CariAdres,
+                        BranchCode = erpCustomer.SubeKodu,
+                        BusinessUnitCode = erpCustomer.IsletmeKodu,
+                        IsERPIntegrated = true,
+                        ERPIntegrationNumber = code,
+                        LastSyncDate = DateTime.UtcNow
+                    });
+                    hasAnyChange = true;
+                    continue;
+                }
+
+                var updated = false;
+                var newName = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : erpCustomer.CariIsim!.Trim();
+
+                if (customer.CustomerName != newName) { customer.CustomerName = newName; updated = true; }
+                if (customer.TaxOffice != erpCustomer.VergiDairesi) { customer.TaxOffice = erpCustomer.VergiDairesi; updated = true; }
+                if (customer.TaxNumber != erpCustomer.VergiNumarasi) { customer.TaxNumber = erpCustomer.VergiNumarasi; updated = true; }
+                if (customer.TcknNumber != erpCustomer.TcknNumber) { customer.TcknNumber = erpCustomer.TcknNumber; updated = true; }
+                if (customer.Email != erpCustomer.Email) { customer.Email = erpCustomer.Email; updated = true; }
+                if (customer.Website != erpCustomer.Web) { customer.Website = erpCustomer.Web; updated = true; }
+                if (customer.Phone1 != erpCustomer.CariTel) { customer.Phone1 = erpCustomer.CariTel; updated = true; }
+                if (customer.Address != erpCustomer.CariAdres) { customer.Address = erpCustomer.CariAdres; updated = true; }
+                if (customer.BranchCode != erpCustomer.SubeKodu) { customer.BranchCode = erpCustomer.SubeKodu; updated = true; }
+                if (customer.BusinessUnitCode != erpCustomer.IsletmeKodu) { customer.BusinessUnitCode = erpCustomer.IsletmeKodu; updated = true; }
+
+                if (customer.IsDeleted)
+                {
+                    customer.IsDeleted = false;
+                    customer.DeletedDate = null;
+                    customer.DeletedBy = null;
+                    updated = true;
+                }
+
+                if (customer.IsERPIntegrated != true) { customer.IsERPIntegrated = true; updated = true; }
+                if (customer.ERPIntegrationNumber != code) { customer.ERPIntegrationNumber = code; updated = true; }
+
+                if (updated)
+                {
+                    customer.LastSyncDate = DateTime.UtcNow;
+                    hasAnyChange = true;
+                }
+            }
+
+            if (!hasAnyChange)
+                return;
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+
+                if (newCustomers.Count > 0)
+                    await _unitOfWork.Customers.AddAllAsync(newCustomers);
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
             }
         }
     }
