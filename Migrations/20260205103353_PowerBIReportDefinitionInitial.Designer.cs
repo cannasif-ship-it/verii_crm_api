@@ -12,8 +12,8 @@ using crm_api.Data;
 namespace crm_api.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    [Migration("20260204135018_AddPowerBiTables")]
-    partial class AddPowerBiTables
+    [Migration("20260205103353_PowerBIReportDefinitionInitial")]
+    partial class PowerBIReportDefinitionInitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -901,12 +901,12 @@ namespace crm_api.Migrations
 
                     b.Property<string>("CustomerCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<long?>("CustomerTypeId")
                         .HasColumnType("bigint");
@@ -1441,8 +1441,7 @@ namespace crm_api.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount1")
                         .HasColumnType("decimal(18,6)");
@@ -2093,8 +2092,7 @@ namespace crm_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount1")
                         .HasColumnType("decimal(18,6)");
@@ -2200,16 +2198,12 @@ namespace crm_api.Migrations
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("CreatedByUserId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedDate")
@@ -2229,9 +2223,6 @@ namespace crm_api.Migrations
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -2243,15 +2234,15 @@ namespace crm_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CreatedBy");
 
-                    b.HasIndex("DeletedByUserId");
+                    b.HasIndex("DeletedBy");
 
-                    b.HasIndex("UpdatedByUserId");
+                    b.HasIndex("UpdatedBy");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RII_PASSWORD_RESET_REQUEST");
+                    b.ToTable("RII_PASSWORD_RESET_REQUEST", (string)null);
                 });
 
             modelBuilder.Entity("crm_api.Models.PaymentType", b =>
@@ -2442,8 +2433,11 @@ namespace crm_api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("ContentType")
-                        .HasColumnType("int");
+                    b.Property<string>("AllowedRoleIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AllowedUserIds")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
@@ -2453,8 +2447,8 @@ namespace crm_api.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("DefaultSettingsJson")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("DatasetId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<long?>("DeletedBy")
                         .HasColumnType("bigint");
@@ -2483,10 +2477,11 @@ namespace crm_api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("ReportId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("ReportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RlsRoles")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
@@ -2494,10 +2489,8 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("WorkspaceId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -3340,8 +3333,7 @@ namespace crm_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount1")
                         .HasColumnType("decimal(18,6)");
@@ -3771,7 +3763,7 @@ namespace crm_api.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedDate = new DateTime(2026, 2, 4, 13, 50, 14, 243, DateTimeKind.Utc).AddTicks(4392),
+                            CreatedDate = new DateTime(2026, 2, 5, 10, 33, 52, 412, DateTimeKind.Utc).AddTicks(290),
                             EnableSsl = true,
                             FromEmail = "",
                             FromName = "V3RII CRM SYSTEM",
@@ -4590,24 +4582,19 @@ namespace crm_api.Migrations
             modelBuilder.Entity("depoWebAPI.Models.RII_FN_2SHIPPING", b =>
                 {
                     b.Property<string>("CARI_ADRES")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CARI_IL")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CARI_ILCE")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CARI_ISIM")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CARI_KOD")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.ToTable("__EFMigrationsHistory_FN_2SHIPPING", null, t =>
                         {
@@ -4640,79 +4627,62 @@ namespace crm_api.Migrations
             modelBuilder.Entity("depoWebAPI.Models.RII_FN_STOK", b =>
                 {
                     b.Property<string>("GRUP_ISIM")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GRUP_KODU")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("INGISIM")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<short>("ISLETME_KODU")
                         .HasColumnType("smallint");
 
                     b.Property<string>("KOD1_ADI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD2_ADI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD3_ADI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD4_ADI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD5_ADI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD_1")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD_2")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD_3")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD_4")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KOD_5")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OLCU_BR1")
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("STOK_ADI")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("STOK_KODU")
                         .IsRequired()
-                        .HasMaxLength(35)
-                        .HasColumnType("nvarchar(35)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<short>("SUBE_KODU")
                         .HasColumnType("smallint");
 
                     b.Property<string>("URETICI_KODU")
-                        .HasMaxLength(35)
-                        .HasColumnType("nvarchar(35)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.ToTable("__EFMigrationsHistory_FN_STOK", null, t =>
                         {
@@ -4725,12 +4695,10 @@ namespace crm_api.Migrations
             modelBuilder.Entity("depoWebAPI.Models.RII_STGROUP", b =>
                 {
                     b.Property<string>("GRUP_ISIM")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GRUP_KOD")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<short>("ISLETME_KODU")
                         .HasColumnType("smallint");
@@ -5668,20 +5636,23 @@ namespace crm_api.Migrations
                 {
                     b.HasOne("crm_api.Models.User", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId");
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("crm_api.Models.User", "DeletedByUser")
                         .WithMany()
-                        .HasForeignKey("DeletedByUserId");
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("crm_api.Models.User", "UpdatedByUser")
                         .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("crm_api.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("CreatedByUser");

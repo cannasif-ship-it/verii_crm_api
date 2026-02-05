@@ -1,10 +1,11 @@
 namespace crm_api.Models.PowerBi
 {
-    public class PowerBIGroup : BaseEntity
+    public class UserPowerBIGroup : BaseEntity
     {
-        public string Name { get; set; } = default!;
-        public string? Description { get; set; }
+        public long UserId { get; set; }
+        public User? User { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public long GroupId { get; set; }
+        public PowerBIGroup? Group { get; set; }
     }
 }

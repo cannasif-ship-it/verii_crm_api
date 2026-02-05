@@ -20,23 +20,29 @@ namespace crm_api.Data.Configurations.PowerBi
                 .IsRequired(false);
 
             builder.Property(e => e.WorkspaceId)
-                .HasMaxLength(100)
                 .IsRequired();
 
             builder.Property(e => e.ReportId)
-                .HasMaxLength(100)
                 .IsRequired();
+
+            builder.Property(e => e.DatasetId)
+                .IsRequired(false);
 
             builder.Property(e => e.EmbedUrl)
                 .HasMaxLength(500)
                 .IsRequired(false);
 
-            builder.Property(e => e.DefaultSettingsJson)
+            builder.Property(e => e.RlsRoles)
                 .HasColumnType("nvarchar(max)")
                 .IsRequired(false);
 
-            builder.Property(e => e.ContentType)
-                .IsRequired();
+            builder.Property(e => e.AllowedUserIds)
+                .HasColumnType("nvarchar(max)")
+                .IsRequired(false);
+
+            builder.Property(e => e.AllowedRoleIds)
+                .HasColumnType("nvarchar(max)")
+                .IsRequired(false);
 
             builder.Property(e => e.IsActive)
                 .IsRequired()

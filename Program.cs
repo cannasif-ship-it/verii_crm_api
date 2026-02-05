@@ -198,6 +198,12 @@ builder.Services.AddScoped<IReportingCatalogService, crm_api.Services.ReportBuil
 builder.Services.AddScoped<IReportService, crm_api.Services.ReportBuilderService.ReportService>();
 builder.Services.AddScoped<IReportPreviewService, crm_api.Services.ReportBuilderService.ReportPreviewService>();
 
+// PowerBi CRUD Services
+builder.Services.AddScoped<IPowerBIGroupService, PowerBIGroupService>();
+builder.Services.AddScoped<IPowerBIReportDefinitionService, PowerBIReportDefinitionService>();
+builder.Services.AddScoped<IPowerBIGroupReportDefinitionService, PowerBIGroupReportDefinitionService>();
+builder.Services.AddScoped<IUserPowerBIGroupService, UserPowerBIGroupService>();
+
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
 
