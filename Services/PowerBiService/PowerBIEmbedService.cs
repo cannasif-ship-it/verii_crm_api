@@ -160,11 +160,11 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var accessDenied = ValidateAccessControl(definition);
-                if (accessDenied != null)
-                    return accessDenied;
+                var rlsResult = await ResolveRlsRolesAsync(definition);
+                if (rlsResult.Denied != null)
+                    return rlsResult.Denied;
 
-                if (!string.IsNullOrWhiteSpace(definition.RlsRoles) && !definition.DatasetId.HasValue)
+                if (rlsResult.HasRls && !definition.DatasetId.HasValue)
                 {
                     return ApiResponse<EmbedConfigDto>.ErrorResult(
                         _localizationService.GetLocalizedString("PowerBIEmbedService.DatasetRequired"),
@@ -234,7 +234,7 @@ namespace crm_api.Services
                         StatusCodes.Status502BadGateway);
                 }
 
-                var embedResult = await GetEmbedTokenAsync(definition, workspaceId, accessToken, config);
+                var embedResult = await GetEmbedTokenAsync(definition, workspaceId, accessToken, config, rlsResult.Roles);
                 if (embedResult == null)
                 {
                     return ApiResponse<EmbedConfigDto>.ErrorResult(
@@ -293,14 +293,14 @@ namespace crm_api.Services
             return null;
         }
 
-        private async Task<PowerBIEmbedTokenResponse?> GetEmbedTokenAsync(PowerBIReportDefinition definition, Guid workspaceId, string accessToken, EmbedServiceConfig config)
+        private async Task<PowerBIEmbedTokenResponse?> GetEmbedTokenAsync(PowerBIReportDefinition definition, Guid workspaceId, string accessToken, EmbedServiceConfig config, List<string> rlsRoles)
         {
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var url = $"{config.ApiBaseUrl.TrimEnd('/')}/v1.0/myorg/groups/{workspaceId}/reports/{definition.ReportId}/GenerateToken";
 
-            object requestBody = BuildGenerateTokenRequest(definition);
+            object requestBody = BuildGenerateTokenRequest(definition, rlsRoles);
             var body = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(body, Encoding.UTF8, "application/json");
 
@@ -312,7 +312,7 @@ namespace crm_api.Services
             return JsonSerializer.Deserialize<PowerBIEmbedTokenResponse>(json);
         }
 
-        private ApiResponse<EmbedConfigDto>? ValidateAccessControl(PowerBIReportDefinition definition)
+        private async Task<(ApiResponse<EmbedConfigDto>? Denied, List<string> Roles, bool HasRls)> ResolveRlsRolesAsync(PowerBIReportDefinition definition)
         {
             var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? _httpContextAccessor.HttpContext?.User?.FindFirst("UserId")?.Value;
@@ -325,11 +325,54 @@ namespace crm_api.Services
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
                 if (string.IsNullOrEmpty(userId) || !allowedIds.Contains(userId))
                 {
-                    return ApiResponse<EmbedConfigDto>.ErrorResult(
+                    return (ApiResponse<EmbedConfigDto>.ErrorResult(
                         _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
                         _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
-                        StatusCodes.Status403Forbidden);
+                        StatusCodes.Status403Forbidden), new List<string>(), false);
                 }
+            }
+
+            var mappings = await _unitOfWork.PowerBIReportRoleMappings
+                .Query()
+                .AsNoTracking()
+                .Where(x => x.PowerBIReportDefinitionId == definition.Id)
+                .ToListAsync();
+
+            if (mappings.Count > 0)
+            {
+                var userRoleIds = GetUserRoleIds();
+                if (userRoleIds.Count == 0)
+                {
+                    return (ApiResponse<EmbedConfigDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        StatusCodes.Status403Forbidden), new List<string>(), false);
+                }
+
+                var matched = mappings.Where(m => userRoleIds.Contains(m.RoleId)).ToList();
+                if (matched.Count == 0)
+                {
+                    return (ApiResponse<EmbedConfigDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        StatusCodes.Status403Forbidden), new List<string>(), false);
+                }
+
+                var roles = matched
+                    .SelectMany(m => (m.RlsRoles ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    .Where(r => !string.IsNullOrWhiteSpace(r))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (roles.Count == 0)
+                {
+                    return (ApiResponse<EmbedConfigDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
+                        StatusCodes.Status403Forbidden), new List<string>(), false);
+                }
+
+                return (null, roles, true);
             }
 
             if (!string.IsNullOrWhiteSpace(definition.AllowedRoleIds))
@@ -351,25 +394,42 @@ namespace crm_api.Services
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
                 if (roleValues.Count == 0 || !roleValues.Any(allowedRoleIds.Contains))
                 {
-                    return ApiResponse<EmbedConfigDto>.ErrorResult(
+                    return (ApiResponse<EmbedConfigDto>.ErrorResult(
                         _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
                         _localizationService.GetLocalizedString("PowerBIEmbedService.AccessDenied"),
-                        StatusCodes.Status403Forbidden);
+                        StatusCodes.Status403Forbidden), new List<string>(), false);
                 }
             }
 
-            return null;
+            var fallbackRoles = (definition.RlsRoles ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return (null, fallbackRoles, fallbackRoles.Count > 0);
         }
 
-        private object BuildGenerateTokenRequest(PowerBIReportDefinition definition)
+        private List<long> GetUserRoleIds()
         {
-            var hasRls = !string.IsNullOrWhiteSpace(definition.RlsRoles);
+            var user = _httpContextAccessor.HttpContext?.User;
+            var roleIdClaims = user?.FindAll("RoleId").Select(c => c.Value) ?? Enumerable.Empty<string>();
+            var roleIdValues = roleIdClaims
+                .Select(v => long.TryParse(v, out var id) ? id : 0)
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
+            return roleIdValues;
+        }
+
+        private object BuildGenerateTokenRequest(PowerBIReportDefinition definition, List<string> rlsRoles)
+        {
+            var hasRls = rlsRoles.Count > 0;
             if (!hasRls)
                 return new { accessLevel = "View" };
 
-            var roles = definition.RlsRoles!
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Distinct()
+            var roles = rlsRoles
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             var username = GetCurrentUserIdentity();

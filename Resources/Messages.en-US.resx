@@ -1549,6 +1549,69 @@
   <data name="PowerBIEmbedService.ExceptionMessage" xml:space="preserve">
     <value>An error occurred: {0}</value>
   </data>
+  <data name="PowerBIReportSyncService.ConfigurationMissing" xml:space="preserve">
+    <value>Power BI configuration is missing.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ClientSecretMissing" xml:space="preserve">
+    <value>Azure AD client secret is missing.</value>
+  </data>
+  <data name="PowerBIReportSyncService.WorkspaceRequired" xml:space="preserve">
+    <value>Workspace is required for sync.</value>
+  </data>
+  <data name="PowerBIReportSyncService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Failed to acquire Azure AD access token.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncFailed" xml:space="preserve">
+    <value>Failed to sync Power BI reports.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncCompleted" xml:space="preserve">
+    <value>Power BI report sync completed.</value>
+  </data>
+  <data name="PowerBIReportSyncService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemsRetrieved" xml:space="preserve">
+    <value>Role mappings retrieved successfully.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemRetrieved" xml:space="preserve">
+    <value>Role mapping retrieved successfully.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemCreated" xml:space="preserve">
+    <value>Role mapping created successfully.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemUpdated" xml:space="preserve">
+    <value>Role mapping updated successfully.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemDeleted" xml:space="preserve">
+    <value>Role mapping deleted successfully.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemNotFound" xml:space="preserve">
+    <value>Role mapping not found.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.Duplicate" xml:space="preserve">
+    <value>This role mapping already exists.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetAllExceptionMessage" xml:space="preserve">
+    <value>An error occurred while retrieving role mappings: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred while retrieving role mapping: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.CreateExceptionMessage" xml:space="preserve">
+    <value>An error occurred while creating role mapping: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred while updating role mapping: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.DeleteExceptionMessage" xml:space="preserve">
+    <value>An error occurred while deleting role mapping: {0}</value>
+  </data>
   <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
     <value>Configuration retrieved.</value>
   </data>

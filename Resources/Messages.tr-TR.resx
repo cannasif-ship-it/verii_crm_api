@@ -1585,6 +1585,69 @@
   <data name="PowerBIEmbedService.ExceptionMessage" xml:space="preserve">
     <value>Bir hata oluştu: {0}</value>
   </data>
+  <data name="PowerBIReportSyncService.ConfigurationMissing" xml:space="preserve">
+    <value>Power BI yapılandırması eksik.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ClientSecretMissing" xml:space="preserve">
+    <value>Azure AD client secret eksik.</value>
+  </data>
+  <data name="PowerBIReportSyncService.WorkspaceRequired" xml:space="preserve">
+    <value>Senkronizasyon için workspace zorunludur.</value>
+  </data>
+  <data name="PowerBIReportSyncService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Azure AD erişim token'ı alınamadı.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncFailed" xml:space="preserve">
+    <value>Power BI rapor senkronizasyonu başarısız.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncCompleted" xml:space="preserve">
+    <value>Power BI rapor senkronizasyonu tamamlandı.</value>
+  </data>
+  <data name="PowerBIReportSyncService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemsRetrieved" xml:space="preserve">
+    <value>Rol eşleştirmeleri başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemRetrieved" xml:space="preserve">
+    <value>Rol eşleştirmesi başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemCreated" xml:space="preserve">
+    <value>Rol eşleştirmesi başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemUpdated" xml:space="preserve">
+    <value>Rol eşleştirmesi başarıyla güncellendi.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemDeleted" xml:space="preserve">
+    <value>Rol eşleştirmesi başarıyla silindi.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemNotFound" xml:space="preserve">
+    <value>Rol eşleştirmesi bulunamadı.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.Duplicate" xml:space="preserve">
+    <value>Bu rol eşleştirmesi zaten mevcut.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Rol eşleştirmeleri getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Rol eşleştirmesi getirilirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.CreateExceptionMessage" xml:space="preserve">
+    <value>Rol eşleştirmesi oluşturulurken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Rol eşleştirmesi güncellenirken bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Rol eşleştirmesi silinirken bir hata oluştu: {0}</value>
+  </data>
   <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
     <value>Yapılandırma getirildi.</value>
   </data>

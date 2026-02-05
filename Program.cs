@@ -205,6 +205,8 @@ builder.Services.AddScoped<IPowerBIGroupReportDefinitionService, PowerBIGroupRep
 builder.Services.AddScoped<IUserPowerBIGroupService, UserPowerBIGroupService>();
 builder.Services.AddScoped<IPowerBIConfigurationService, PowerBIConfigurationService>();
 builder.Services.AddScoped<IPowerBIEmbedService, PowerBIEmbedService>();
+builder.Services.AddScoped<IPowerBIReportSyncService, PowerBIReportSyncService>();
+builder.Services.AddScoped<IPowerBIReportRoleMappingService, PowerBIReportRoleMappingService>();
 
 // PowerBi / Azure AD options (embed token)
 builder.Services.Configure<crm_api.Infrastructure.AzureAdSettings>(
