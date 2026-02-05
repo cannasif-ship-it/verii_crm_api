@@ -1555,7 +1555,60 @@
   <data name="StockService.DeleteStockExceptionMessage" xml:space="preserve">
     <value>Stok silinirken bir hata oluştu: {0}</value>
   </data>
-  
+  <data name="PowerBIEmbedService.ReportNotFound" xml:space="preserve">
+    <value>Power BI rapor tanımı bulunamadı.</value>
+  </data>
+  <data name="PowerBIEmbedService.ReportInactive" xml:space="preserve">
+    <value>Power BI raporu aktif değil.</value>
+  </data>
+  <data name="PowerBIEmbedService.AccessDenied" xml:space="preserve">
+    <value>Bu rapora erişim yetkiniz yok.</value>
+  </data>
+  <data name="PowerBIEmbedService.WorkspaceRequired" xml:space="preserve">
+    <value>Bu rapor için workspace gereklidir.</value>
+  </data>
+  <data name="PowerBIEmbedService.DatasetRequired" xml:space="preserve">
+    <value>RLS roller tanımlıyken dataset zorunludur.</value>
+  </data>
+  <data name="PowerBIEmbedService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Azure AD erişim token'ı alınamadı.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedTokenFailed" xml:space="preserve">
+    <value>Power BI embed token oluşturulamadı.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedConfigRetrieved" xml:space="preserve">
+    <value>Embed yapılandırması başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIEmbedService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PowerBIEmbedService.ExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
+    <value>Yapılandırma getirildi.</value>
+  </data>
+  <data name="PowerBIConfigurationService.NotFound" xml:space="preserve">
+    <value>Power BI yapılandırması bulunamadı.</value>
+  </data>
+  <data name="PowerBIConfigurationService.AlreadyExists" xml:space="preserve">
+    <value>Zaten bir Power BI yapılandırması mevcut.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Created" xml:space="preserve">
+    <value>Power BI yapılandırması oluşturuldu.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Updated" xml:space="preserve">
+    <value>Power BI yapılandırması güncellendi.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Deleted" xml:space="preserve">
+    <value>Power BI yapılandırması silindi.</value>
+  </data>
+  <data name="PowerBIConfigurationService.InternalServerError" xml:space="preserve">
+    <value>Sunucu hatası oluştu.</value>
+  </data>
+  <data name="PowerBIConfigurationService.ExceptionMessage" xml:space="preserve">
+    <value>Bir hata oluştu: {0}</value>
+  </data>
   
   
   <data name="ApprovalActionService.ApprovalActionsRetrieved" xml:space="preserve">

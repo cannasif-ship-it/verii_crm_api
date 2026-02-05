@@ -203,6 +203,14 @@ builder.Services.AddScoped<IPowerBIGroupService, PowerBIGroupService>();
 builder.Services.AddScoped<IPowerBIReportDefinitionService, PowerBIReportDefinitionService>();
 builder.Services.AddScoped<IPowerBIGroupReportDefinitionService, PowerBIGroupReportDefinitionService>();
 builder.Services.AddScoped<IUserPowerBIGroupService, UserPowerBIGroupService>();
+builder.Services.AddScoped<IPowerBIConfigurationService, PowerBIConfigurationService>();
+builder.Services.AddScoped<IPowerBIEmbedService, PowerBIEmbedService>();
+
+// PowerBi / Azure AD options (embed token)
+builder.Services.Configure<crm_api.Infrastructure.AzureAdSettings>(
+    builder.Configuration.GetSection(crm_api.Infrastructure.AzureAdSettings.SectionName));
+builder.Services.Configure<crm_api.Infrastructure.PowerBISettings>(
+    builder.Configuration.GetSection(crm_api.Infrastructure.PowerBISettings.SectionName));
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();

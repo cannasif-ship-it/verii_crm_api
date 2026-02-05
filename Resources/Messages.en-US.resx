@@ -1519,7 +1519,60 @@
   <data name="StockService.DeleteStockExceptionMessage" xml:space="preserve">
     <value>An error occurred while deleting stock: {0}</value>
   </data>
-  
+  <data name="PowerBIEmbedService.ReportNotFound" xml:space="preserve">
+    <value>Power BI report definition not found.</value>
+  </data>
+  <data name="PowerBIEmbedService.ReportInactive" xml:space="preserve">
+    <value>Power BI report is inactive.</value>
+  </data>
+  <data name="PowerBIEmbedService.AccessDenied" xml:space="preserve">
+    <value>Access denied to this report.</value>
+  </data>
+  <data name="PowerBIEmbedService.WorkspaceRequired" xml:space="preserve">
+    <value>Workspace is required for this report.</value>
+  </data>
+  <data name="PowerBIEmbedService.DatasetRequired" xml:space="preserve">
+    <value>Dataset is required when RLS roles are configured.</value>
+  </data>
+  <data name="PowerBIEmbedService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Failed to acquire Azure AD access token.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedTokenFailed" xml:space="preserve">
+    <value>Failed to generate Power BI embed token.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedConfigRetrieved" xml:space="preserve">
+    <value>Embed config retrieved successfully.</value>
+  </data>
+  <data name="PowerBIEmbedService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIEmbedService.ExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
+  <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
+    <value>Configuration retrieved.</value>
+  </data>
+  <data name="PowerBIConfigurationService.NotFound" xml:space="preserve">
+    <value>Power BI configuration not found.</value>
+  </data>
+  <data name="PowerBIConfigurationService.AlreadyExists" xml:space="preserve">
+    <value>A Power BI configuration already exists.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Created" xml:space="preserve">
+    <value>Power BI configuration created.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Updated" xml:space="preserve">
+    <value>Power BI configuration updated.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Deleted" xml:space="preserve">
+    <value>Power BI configuration deleted.</value>
+  </data>
+  <data name="PowerBIConfigurationService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIConfigurationService.ExceptionMessage" xml:space="preserve">
+    <value>An error occurred: {0}</value>
+  </data>
   
   
   <data name="ApprovalActionService.ApprovalActionsRetrieved" xml:space="preserve">

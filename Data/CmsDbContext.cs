@@ -68,6 +68,7 @@ namespace crm_api.Data
         public DbSet<PowerBIGroup> PowerBIGroups { get; set; }
         public DbSet<UserPowerBIGroup> UserPowerBIGroups { get; set; }
         public DbSet<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; set; }
+        public DbSet<PowerBIConfiguration> PowerBIConfigurations { get; set; }
 
 
 

@@ -31,7 +31,8 @@ namespace crm_api.Services
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim("firstName", user.FirstName ?? ""),
                     new Claim("lastName", user.LastName ?? ""),
-                    new Claim(ClaimTypes.Role, user.RoleNavigation?.Title ?? "User")
+                    new Claim(ClaimTypes.Role, user.RoleNavigation?.Title ?? "User"),
+                    new Claim("RoleId", user.RoleId.ToString())
                 };
 
                 // Read settings from "JwtSettings" to align with Program.cs and appsettings.json

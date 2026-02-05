@@ -59,6 +59,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<PowerBIGroup> PowerBIGroups { get; }
         IGenericRepository<UserPowerBIGroup> UserPowerBIGroups { get; }
         IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; }
+        IGenericRepository<PowerBIConfiguration> PowerBIConfigurations { get; }
 
         /// <summary>
         /// Save all changes to the database within a transaction

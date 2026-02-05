@@ -3,7 +3,9 @@
     "http": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AzureAd__ClientSecret": "YOUR_SECRET",
+        "PowerBi__MockMode": "true"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5000"
@@ -11,7 +13,9 @@
     "https": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AzureAd__ClientSecret": "YOUR_SECRET",
+        "PowerBi__MockMode": "true"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7182;http://localhost:5218"
@@ -20,7 +24,9 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AzureAd__ClientSecret": "YOUR_SECRET",
+        "PowerBi__MockMode": "true"
       }
     }
   },

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using crm_api.DTOs;
 using crm_api.Helpers;
@@ -15,15 +16,18 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PowerBIReportDefinitionService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ApiResponse<PagedResponse<PowerBIReportDefinitionGetDto>>> GetAllAsync(PagedRequest request)
@@ -33,6 +37,13 @@ namespace crm_api.Services
                 request ??= new PagedRequest();
                 request.Filters ??= new List<Filter>();
 
+                var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? _httpContextAccessor.HttpContext?.User?.FindFirst("UserId")?.Value;
+                var roleId = _httpContextAccessor.HttpContext?.User?.FindFirst("RoleId")?.Value;
+                var role = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value
+                    ?? _httpContextAccessor.HttpContext?.User?.FindFirst("role")?.Value;
+                var roleIdOrName = roleId ?? role ?? string.Empty;
+
                 var query = _unitOfWork.PowerBIReportDefinitions
                     .Query()
                     .AsNoTracking()
@@ -40,6 +51,18 @@ namespace crm_api.Services
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
                     .ApplyFilters(request.Filters);
+
+                query = query.Where(r =>
+                    (string.IsNullOrWhiteSpace(r.AllowedUserIds) || (userId != null && (
+                        r.AllowedUserIds == userId
+                        || r.AllowedUserIds.StartsWith(userId + ",")
+                        || r.AllowedUserIds.EndsWith("," + userId)
+                        || r.AllowedUserIds.Contains("," + userId + ","))))
+                    && (string.IsNullOrWhiteSpace(r.AllowedRoleIds) || (roleIdOrName != "" && (
+                        r.AllowedRoleIds == roleIdOrName
+                        || r.AllowedRoleIds.StartsWith(roleIdOrName + ",")
+                        || r.AllowedRoleIds.EndsWith("," + roleIdOrName)
+                        || r.AllowedRoleIds.Contains("," + roleIdOrName + ",")))));
 
                 var sortBy = request.SortBy ?? nameof(PowerBIReportDefinition.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);

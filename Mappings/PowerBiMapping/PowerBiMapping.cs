@@ -90,6 +90,13 @@ namespace crm_api.Mappings.PowerBiMapping
 
             CreateMap<CreateUserPowerBIGroupDto, UserPowerBIGroup>();
             CreateMap<UpdateUserPowerBIGroupDto, UserPowerBIGroup>();
+
+            // -------------------------
+            // PowerBI Configuration (single record)
+            // -------------------------
+            CreateMap<PowerBIConfiguration, PowerBIConfigurationGetDto>();
+            CreateMap<CreatePowerBIConfigurationDto, PowerBIConfiguration>();
+            CreateMap<UpdatePowerBIConfigurationDto, PowerBIConfiguration>();
         }
     }
 }
