@@ -444,23 +444,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Database migration and initialization (dev only, unless explicitly enabled)
-if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Database:AutoMigrate"))
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
-        try
-        {
-            context.Database.Migrate();
-            Console.WriteLine("Database migrated successfully.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error migrating database: {ex.Message}");
-        }
-    }
-}
+// Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
 // Configure the HTTP request pipeline.
 app.UseCors("DevCors");
