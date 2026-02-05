@@ -77,6 +77,17 @@ namespace crm_api.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
+                    {
+                        property.SetColumnType("decimal(18,6)");
+                    }
+                }
+            }
+
             // Kur function yapılandırması - Key yok
             modelBuilder.Entity<RII_FN_KUR>(entity =>
             {
