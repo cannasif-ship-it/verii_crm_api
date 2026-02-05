@@ -70,6 +70,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<UserPowerBIGroup>? _userPowerBIGroups;
         private IGenericRepository<PowerBIGroupReportDefinition>? _powerBIGroupReportDefinitions;
         private IGenericRepository<PowerBIConfiguration>? _powerBIConfigurations;
+        private IGenericRepository<PowerBIReportRoleMapping>? _powerBIReportRoleMappings;
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -129,6 +130,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<UserPowerBIGroup> UserPowerBIGroups{get{_userPowerBIGroups ??= new GenericRepository<UserPowerBIGroup>(_context, _httpContextAccessor);return _userPowerBIGroups;}}
         public IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions{get{_powerBIGroupReportDefinitions ??= new GenericRepository<PowerBIGroupReportDefinition>(_context, _httpContextAccessor);return _powerBIGroupReportDefinitions;}}
         public IGenericRepository<PowerBIConfiguration> PowerBIConfigurations{get{_powerBIConfigurations ??= new GenericRepository<PowerBIConfiguration>(_context, _httpContextAccessor);return _powerBIConfigurations;}}
+        public IGenericRepository<PowerBIReportRoleMapping> PowerBIReportRoleMappings{get{_powerBIReportRoleMappings ??= new GenericRepository<PowerBIReportRoleMapping>(_context, _httpContextAccessor);return _powerBIReportRoleMappings;}}
 
         /// <summary>
         /// Get repository for any entity type

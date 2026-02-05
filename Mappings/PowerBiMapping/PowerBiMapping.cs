@@ -97,6 +97,24 @@ namespace crm_api.Mappings.PowerBiMapping
             CreateMap<PowerBIConfiguration, PowerBIConfigurationGetDto>();
             CreateMap<CreatePowerBIConfigurationDto, PowerBIConfiguration>();
             CreateMap<UpdatePowerBIConfigurationDto, PowerBIConfiguration>();
+
+            // -------------------------
+            // PowerBI Report Role Mapping
+            // -------------------------
+            CreateMap<PowerBIReportRoleMapping, PowerBIReportRoleMappingGetDto>()
+                .ForMember(d => d.ReportName, opt => opt.MapFrom(s => s.ReportDefinition != null ? s.ReportDefinition.Name : null))
+                .ForMember(d => d.RoleName, opt => opt.MapFrom(s => s.Role != null ? s.Role.Title : null))
+                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(s =>
+                    s.CreatedByUser != null
+                        ? (s.CreatedByUser.FirstName + " " + s.CreatedByUser.LastName)
+                        : null))
+                .ForMember(d => d.UpdatedBy, opt => opt.MapFrom(s =>
+                    s.UpdatedByUser != null
+                        ? (s.UpdatedByUser.FirstName + " " + s.UpdatedByUser.LastName)
+                        : null));
+
+            CreateMap<CreatePowerBIReportRoleMappingDto, PowerBIReportRoleMapping>();
+            CreateMap<UpdatePowerBIReportRoleMappingDto, PowerBIReportRoleMapping>();
         }
     }
 }
