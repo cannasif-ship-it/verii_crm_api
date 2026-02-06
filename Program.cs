@@ -139,6 +139,7 @@ builder.Services.AddScoped<IProductPricingGroupByService, ProductPricingGroupByS
 
 // Register User Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISalesmen360Service, Salesmen360Service>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 builder.Services.AddScoped<IUserDiscountLimitService, UserDiscountLimitService>();
 builder.Services.AddScoped<IUserDetailService, UserDetailService>();
