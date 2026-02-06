@@ -5,5 +5,6 @@ namespace crm_api.DTOs.CustomerDto
         public List<Customer360MonthlyTrendItemDto> MonthlyTrend { get; set; } = new();
         public Customer360DistributionDto Distribution { get; set; } = new();
         public Customer360AmountComparisonDto AmountComparison { get; set; } = new();
+        public List<Customer360AmountComparisonDto> AmountComparisonByCurrency { get; set; } = new();
     }
 }
