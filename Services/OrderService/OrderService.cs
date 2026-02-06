@@ -1159,8 +1159,30 @@ namespace crm_api.Services
                 if (nextStep == null)
                 {
                     // 🎉 AKIŞ BİTTİ
+                    var now = DateTime.UtcNow;
+
+                    order.Status = ApprovalStatus.Approved;
+                    order.UpdatedDate = now;
+                    order.UpdatedBy = userId;
+                    await _unitOfWork.Orders.UpdateAsync(order);
+
+                    if (!string.IsNullOrWhiteSpace(order.OfferNo))
+                    {
+                        var siblingOrders = await _unitOfWork.Orders.Query()
+                            .Where(o => !o.IsDeleted && o.Id != order.Id && o.OfferNo == order.OfferNo)
+                            .ToListAsync();
+
+                        foreach (var siblingOrder in siblingOrders)
+                        {
+                            siblingOrder.Status = ApprovalStatus.Closed;
+                            siblingOrder.UpdatedDate = now;
+                            siblingOrder.UpdatedBy = userId;
+                            await _unitOfWork.Orders.UpdateAsync(siblingOrder);
+                        }
+                    }
+
                     approvalRequest.Status = ApprovalStatus.Approved;
-                    approvalRequest.UpdatedDate = DateTime.UtcNow;
+                    approvalRequest.UpdatedDate = now;
                     approvalRequest.UpdatedBy = userId;
                     await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
                     await _unitOfWork.SaveChangesAsync();
@@ -1173,7 +1195,7 @@ namespace crm_api.Services
                     foreach (var line in orderLines)
                     {
                         line.ApprovalStatus = ApprovalStatus.Approved;
-                        line.UpdatedDate = DateTime.UtcNow;
+                        line.UpdatedDate = now;
                         line.UpdatedBy = userId;
                         await _unitOfWork.OrderLines.UpdateAsync(line);
                     }

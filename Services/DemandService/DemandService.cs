@@ -1164,6 +1164,28 @@ namespace crm_api.Services
                 {
 
                     // 🎉 AKIŞ BİTTİ
+                    var now = DateTime.UtcNow;
+
+                    demand.Status = ApprovalStatus.Approved;
+                    demand.UpdatedDate = now;
+                    demand.UpdatedBy = userId;
+                    await _unitOfWork.Demands.UpdateAsync(demand);
+
+                    if (!string.IsNullOrWhiteSpace(demand.OfferNo))
+                    {
+                        var siblingDemands = await _unitOfWork.Demands.Query()
+                            .Where(d => !d.IsDeleted && d.Id != demand.Id && d.OfferNo == demand.OfferNo)
+                            .ToListAsync();
+
+                        foreach (var siblingDemand in siblingDemands)
+                        {
+                            siblingDemand.Status = ApprovalStatus.Closed;
+                            siblingDemand.UpdatedDate = now;
+                            siblingDemand.UpdatedBy = userId;
+                            await _unitOfWork.Demands.UpdateAsync(siblingDemand);
+                        }
+                    }
+
                     // if there is no flow then Convert to quotation end return success
                     var quotationId = await ConvertToQuotationAsync(demand.Id);
                     if (!quotationId.Success)
@@ -1173,7 +1195,7 @@ namespace crm_api.Services
                     }
 
                     approvalRequest.Status = ApprovalStatus.Approved;
-                    approvalRequest.UpdatedDate = DateTime.UtcNow;
+                    approvalRequest.UpdatedDate = now;
                     approvalRequest.UpdatedBy = userId;
                     await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
                     await _unitOfWork.SaveChangesAsync();
@@ -1186,7 +1208,7 @@ namespace crm_api.Services
                     foreach (var line in demandLines)
                     {
                         line.ApprovalStatus = ApprovalStatus.Approved;
-                        line.UpdatedDate = DateTime.UtcNow;
+                        line.UpdatedDate = now;
                         line.UpdatedBy = userId;
                         await _unitOfWork.DemandLines.UpdateAsync(line);
                     }

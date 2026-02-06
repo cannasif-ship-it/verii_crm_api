@@ -1357,6 +1357,27 @@ namespace crm_api.Services
                 if (nextStep == null)
                 {
                     // 🎉 AKIŞ BİTTİ
+                    var now = DateTime.UtcNow;
+
+                    quotation.Status = ApprovalStatus.Approved;
+                    quotation.UpdatedDate = now;
+                    quotation.UpdatedBy = userId;
+                    await _unitOfWork.Quotations.UpdateAsync(quotation);
+
+                    if (!string.IsNullOrWhiteSpace(quotation.OfferNo))
+                    {
+                        var siblingQuotations = await _unitOfWork.Quotations.Query()
+                            .Where(q => !q.IsDeleted && q.Id != quotation.Id && q.OfferNo == quotation.OfferNo)
+                            .ToListAsync();
+
+                        foreach (var siblingQuotation in siblingQuotations)
+                        {
+                            siblingQuotation.Status = ApprovalStatus.Closed;
+                            siblingQuotation.UpdatedDate = now;
+                            siblingQuotation.UpdatedBy = userId;
+                            await _unitOfWork.Quotations.UpdateAsync(siblingQuotation);
+                        }
+                    }
 
                     var quotationId = await ConvertToOrderAsync(quotation.Id);
                     if (!quotationId.Success)
@@ -1367,7 +1388,7 @@ namespace crm_api.Services
 
 
                     approvalRequest.Status = ApprovalStatus.Approved;
-                    approvalRequest.UpdatedDate = DateTime.UtcNow;
+                    approvalRequest.UpdatedDate = now;
                     approvalRequest.UpdatedBy = userId;
                     await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
                     await _unitOfWork.SaveChangesAsync();
@@ -1380,7 +1401,7 @@ namespace crm_api.Services
                     foreach (var line in quotationLines)
                     {
                         line.ApprovalStatus = ApprovalStatus.Approved;
-                        line.UpdatedDate = DateTime.UtcNow;
+                        line.UpdatedDate = now;
                         line.UpdatedBy = userId;
                         await _unitOfWork.QuotationLines.UpdateAsync(line);
                     }
