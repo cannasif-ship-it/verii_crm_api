@@ -11,14 +11,16 @@ namespace crm_api.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILocalizationService _localizationService;
+        private readonly IErpService _erpService;
 
-        public Customer360Service(IUnitOfWork unitOfWork, ILocalizationService localizationService)
+        public Customer360Service(IUnitOfWork unitOfWork, ILocalizationService localizationService, IErpService erpService)
         {
             _unitOfWork = unitOfWork;
             _localizationService = localizationService;
+            _erpService = erpService;
         }
 
-        public async Task<ApiResponse<Customer360OverviewDto>> GetOverviewAsync(long customerId)
+        public async Task<ApiResponse<Customer360OverviewDto>> GetOverviewAsync(long customerId, string? currency = null)
         {
             try
             {
@@ -96,7 +98,7 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<Customer360AnalyticsSummaryDto>> GetAnalyticsSummaryAsync(long customerId)
+        public async Task<ApiResponse<Customer360AnalyticsSummaryDto>> GetAnalyticsSummaryAsync(long customerId, string? currency = null)
         {
             try
             {
@@ -112,34 +114,54 @@ namespace crm_api.Services
                 }
 
                 var sinceDate = DateTime.UtcNow.AddMonths(-12);
+                var currencyNameMap = await GetCurrencyNameMapAsync();
+                var normalizedCurrency = string.IsNullOrWhiteSpace(currency) ? null : NormalizeCurrency(currency);
+                var currencyFilterValues = normalizedCurrency == null
+                    ? null
+                    : BuildCurrencyFilterValues(normalizedCurrency, currencyNameMap);
 
-                var last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                    .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
-                        (o.OfferDate ?? o.CreatedDate) >= sinceDate)
-                    .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
+                decimal last12MonthsOrderAmount = 0m;
+                decimal openQuotationAmount = 0m;
+                decimal openOrderAmount = 0m;
 
-                var openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                    .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
-                        q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected)
-                    .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
+                if (currencyFilterValues != null)
+                {
+                    last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                            (o.OfferDate ?? o.CreatedDate) >= sinceDate &&
+                            currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
 
-                var openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                    .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
-                        o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected)
-                    .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
+                    openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
+                        .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                            q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
+                            currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
+
+                    openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                            o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
+                            currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
+                }
 
                 var activityCount = await _unitOfWork.Activities.Query(tracking: false)
                     .CountAsync(a => a.PotentialCustomerId == customerId && !a.IsDeleted);
 
                 var lastActivityDate = await GetLastActivityDateAsync(customerId);
 
+                var totalsByCurrency = await GetTotalsByCurrencyAsync(customerId);
+                totalsByCurrency = MergeCurrencyAmountRows(totalsByCurrency, currencyNameMap);
+
                 var summary = new Customer360AnalyticsSummaryDto
                 {
+                    Currency = normalizedCurrency == null ? null : ResolveCurrencyName(normalizedCurrency, currencyNameMap),
                     Last12MonthsOrderAmount = last12MonthsOrderAmount,
                     OpenQuotationAmount = openQuotationAmount,
                     OpenOrderAmount = openOrderAmount,
                     ActivityCount = activityCount,
-                    LastActivityDate = lastActivityDate
+                    LastActivityDate = lastActivityDate,
+                    TotalsByCurrency = totalsByCurrency
                 };
 
                 return ApiResponse<Customer360AnalyticsSummaryDto>.SuccessResult(
@@ -155,7 +177,7 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<Customer360AnalyticsChartsDto>> GetAnalyticsChartsAsync(long customerId, int months = 12)
+        public async Task<ApiResponse<Customer360AnalyticsChartsDto>> GetAnalyticsChartsAsync(long customerId, int months = 12, string? currency = null)
         {
             try
             {
@@ -171,6 +193,11 @@ namespace crm_api.Services
                 }
 
                 var safeMonths = months <= 0 ? 12 : Math.Min(months, 36);
+                var currencyNameMap = await GetCurrencyNameMapAsync();
+                var normalizedCurrency = string.IsNullOrWhiteSpace(currency) ? null : NormalizeCurrency(currency);
+                var currencyFilterValues = normalizedCurrency == null
+                    ? null
+                    : BuildCurrencyFilterValues(normalizedCurrency, currencyNameMap);
                 var currentMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
                 var startMonth = currentMonth.AddMonths(-(safeMonths - 1));
                 var endExclusive = currentMonth.AddMonths(1);
@@ -230,28 +257,49 @@ namespace crm_api.Services
 
                 var last12MonthsStart = currentMonth.AddMonths(-11);
 
-                var amountComparison = new Customer360AmountComparisonDto
+                decimal last12MonthsOrderAmount = 0m;
+                decimal openQuotationAmount = 0m;
+                decimal openOrderAmount = 0m;
+
+                if (currencyFilterValues != null)
                 {
-                    Last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
+                    last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
                         .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
                             (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
-                            (o.OfferDate ?? o.CreatedDate) < endExclusive)
-                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m,
-                    OpenQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
+                            (o.OfferDate ?? o.CreatedDate) < endExclusive &&
+                            currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
+
+                    openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
                         .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
-                            q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected)
-                        .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m,
-                    OpenOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
+                            q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
+                            currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
+
+                    openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
                         .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
-                            o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected)
-                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m
+                            o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
+                            currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
+                        .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
+                }
+
+                var amountComparison = new Customer360AmountComparisonDto
+                {
+                    Currency = normalizedCurrency == null ? null : ResolveCurrencyName(normalizedCurrency, currencyNameMap),
+                    Last12MonthsOrderAmount = last12MonthsOrderAmount,
+                    OpenQuotationAmount = openQuotationAmount,
+                    OpenOrderAmount = openOrderAmount
                 };
+
+                var amountComparisonByCurrency = await GetAmountComparisonByCurrencyAsync(customerId, last12MonthsStart, endExclusive);
+                amountComparisonByCurrency = MergeAmountComparisonRows(amountComparisonByCurrency, currencyNameMap);
 
                 var charts = new Customer360AnalyticsChartsDto
                 {
                     MonthlyTrend = monthlyTrend,
                     Distribution = distribution,
-                    AmountComparison = amountComparison
+                    AmountComparison = amountComparison,
+                    AmountComparisonByCurrency = amountComparisonByCurrency
                 };
 
                 return ApiResponse<Customer360AnalyticsChartsDto>.SuccessResult(
@@ -288,6 +336,225 @@ namespace crm_api.Services
                 IsERPIntegrated = c.IsERPIntegrated,
                 LastSyncDate = c.LastSyncDate
             };
+        }
+
+        private static string NormalizeCurrency(string? currency)
+        {
+            return string.IsNullOrWhiteSpace(currency) ? "UNKNOWN" : currency.Trim().ToUpperInvariant();
+        }
+
+        private async Task<Dictionary<string, string>> GetCurrencyNameMapAsync()
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var rates = await _erpService.GetExchangeRateAsync(DateTime.Now, 1);
+
+            if (!rates.Success || rates.Data == null)
+            {
+                return result;
+            }
+
+            foreach (var item in rates.Data)
+            {
+                if (item.DovizTipi <= 0 || string.IsNullOrWhiteSpace(item.DovizIsmi))
+                {
+                    continue;
+                }
+
+                var idKey = item.DovizTipi.ToString();
+                var nameValue = NormalizeCurrency(item.DovizIsmi);
+
+                if (!result.ContainsKey(idKey))
+                {
+                    result[idKey] = nameValue;
+                }
+
+                if (!result.ContainsKey(nameValue))
+                {
+                    result[nameValue] = nameValue;
+                }
+            }
+
+            return result;
+        }
+
+        private static List<string> BuildCurrencyFilterValues(string normalizedCurrency, Dictionary<string, string> currencyNameMap)
+        {
+            var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { normalizedCurrency };
+
+            if (currencyNameMap.TryGetValue(normalizedCurrency, out var mappedName))
+            {
+                values.Add(mappedName);
+            }
+
+            foreach (var item in currencyNameMap.Where(x => string.Equals(x.Value, normalizedCurrency, StringComparison.OrdinalIgnoreCase)))
+            {
+                values.Add(item.Key);
+            }
+
+            return values.Select(NormalizeCurrency).Distinct().ToList();
+        }
+
+        private static string ResolveCurrencyName(string? currency, Dictionary<string, string> currencyNameMap)
+        {
+            var normalized = NormalizeCurrency(currency);
+            return currencyNameMap.TryGetValue(normalized, out var mappedName) ? mappedName : normalized;
+        }
+
+        private async Task<List<Customer360CurrencyAmountDto>> GetTotalsByCurrencyAsync(long customerId)
+        {
+            var demandTotals = await _unitOfWork.Demands.Query(tracking: false)
+                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                .GroupBy(d => d.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var quotationTotals = await _unitOfWork.Quotations.Query(tracking: false)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                .GroupBy(q => q.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var orderTotals = await _unitOfWork.Orders.Query(tracking: false)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                .GroupBy(o => o.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var result = new Dictionary<string, Customer360CurrencyAmountDto>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in demandTotals)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360CurrencyAmountDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.DemandAmount = item.Amount;
+            }
+
+            foreach (var item in quotationTotals)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360CurrencyAmountDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.QuotationAmount = item.Amount;
+            }
+
+            foreach (var item in orderTotals)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360CurrencyAmountDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.OrderAmount = item.Amount;
+            }
+
+            return result.Values.OrderBy(x => x.Currency).ToList();
+        }
+
+        private async Task<List<Customer360AmountComparisonDto>> GetAmountComparisonByCurrencyAsync(
+            long customerId,
+            DateTime last12MonthsStart,
+            DateTime endExclusive)
+        {
+            var quotationOpenByCurrency = await _unitOfWork.Quotations.Query(tracking: false)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                    q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected)
+                .GroupBy(q => q.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var orderOpenByCurrency = await _unitOfWork.Orders.Query(tracking: false)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                    o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected)
+                .GroupBy(o => o.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var orderLast12ByCurrency = await _unitOfWork.Orders.Query(tracking: false)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                    (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
+                    (o.OfferDate ?? o.CreatedDate) < endExclusive)
+                .GroupBy(o => o.Currency)
+                .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
+                .ToListAsync();
+
+            var result = new Dictionary<string, Customer360AmountComparisonDto>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in orderLast12ByCurrency)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360AmountComparisonDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.Last12MonthsOrderAmount = item.Amount;
+            }
+
+            foreach (var item in quotationOpenByCurrency)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360AmountComparisonDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.OpenQuotationAmount = item.Amount;
+            }
+
+            foreach (var item in orderOpenByCurrency)
+            {
+                var key = NormalizeCurrency(item.Currency);
+                if (!result.TryGetValue(key, out var dto))
+                {
+                    dto = new Customer360AmountComparisonDto { Currency = key };
+                    result[key] = dto;
+                }
+                dto.OpenOrderAmount = item.Amount;
+            }
+
+            return result.Values.OrderBy(x => x.Currency).ToList();
+        }
+
+        private static List<Customer360CurrencyAmountDto> MergeCurrencyAmountRows(
+            List<Customer360CurrencyAmountDto> rows,
+            Dictionary<string, string> currencyNameMap)
+        {
+            return rows
+                .GroupBy(x => ResolveCurrencyName(x.Currency, currencyNameMap), StringComparer.OrdinalIgnoreCase)
+                .Select(g => new Customer360CurrencyAmountDto
+                {
+                    Currency = g.Key,
+                    DemandAmount = g.Sum(x => x.DemandAmount),
+                    QuotationAmount = g.Sum(x => x.QuotationAmount),
+                    OrderAmount = g.Sum(x => x.OrderAmount)
+                })
+                .OrderBy(x => x.Currency)
+                .ToList();
+        }
+
+        private static List<Customer360AmountComparisonDto> MergeAmountComparisonRows(
+            List<Customer360AmountComparisonDto> rows,
+            Dictionary<string, string> currencyNameMap)
+        {
+            return rows
+                .GroupBy(x => ResolveCurrencyName(x.Currency, currencyNameMap), StringComparer.OrdinalIgnoreCase)
+                .Select(g => new Customer360AmountComparisonDto
+                {
+                    Currency = g.Key,
+                    Last12MonthsOrderAmount = g.Sum(x => x.Last12MonthsOrderAmount),
+                    OpenQuotationAmount = g.Sum(x => x.OpenQuotationAmount),
+                    OpenOrderAmount = g.Sum(x => x.OpenOrderAmount)
+                })
+                .OrderBy(x => x.Currency)
+                .ToList();
         }
 
         private async Task<List<Customer360SimpleItemDto>> GetContactsAsync(long customerId)
