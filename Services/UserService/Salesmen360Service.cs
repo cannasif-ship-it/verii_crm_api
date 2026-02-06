@@ -35,13 +35,13 @@ namespace crm_api.Services
                 }
 
                 var totalDemands = await _unitOfWork.Demands.Query(tracking: false)
-                    .CountAsync(d => d.RepresentativeId == userId && !d.IsDeleted);
+                    .CountAsync(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed));
 
                 var totalQuotations = await _unitOfWork.Quotations.Query(tracking: false)
-                    .CountAsync(q => q.RepresentativeId == userId && !q.IsDeleted);
+                    .CountAsync(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed));
 
                 var totalOrders = await _unitOfWork.Orders.Query(tracking: false)
-                    .CountAsync(o => o.RepresentativeId == userId && !o.IsDeleted);
+                    .CountAsync(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed));
 
                 var totalActivities = await _unitOfWork.Activities.Query(tracking: false)
                     .CountAsync(a => a.AssignedUserId == userId && !a.IsDeleted);
@@ -58,17 +58,17 @@ namespace crm_api.Services
                 if (currencyFilterValues != null)
                 {
                     totalDemandAmount = await _unitOfWork.Demands.Query(tracking: false)
-                        .Where(d => d.RepresentativeId == userId && !d.IsDeleted &&
+                        .Where(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed) &&
                             currencyFilterValues.Contains((d.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(d => (decimal?)d.GrandTotal) ?? 0m;
 
                     totalQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted &&
+                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                             currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
 
                     totalOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
                 }
@@ -135,19 +135,19 @@ namespace crm_api.Services
                 if (currencyFilterValues != null)
                 {
                     last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             (o.OfferDate ?? o.CreatedDate) >= sinceDate &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
 
                     openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted &&
+                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                             q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
 
                     openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
@@ -210,19 +210,19 @@ namespace crm_api.Services
                     .ToList();
 
                 var demandDates = await _unitOfWork.Demands.Query(tracking: false)
-                    .Where(d => d.RepresentativeId == userId && !d.IsDeleted)
+                    .Where(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                     .Select(d => d.OfferDate ?? d.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
 
                 var quotationDates = await _unitOfWork.Quotations.Query(tracking: false)
-                    .Where(q => q.RepresentativeId == userId && !q.IsDeleted)
+                    .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                     .Select(q => q.OfferDate ?? q.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
 
                 var orderDates = await _unitOfWork.Orders.Query(tracking: false)
-                    .Where(o => o.RepresentativeId == userId && !o.IsDeleted)
+                    .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                     .Select(o => o.OfferDate ?? o.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
@@ -252,11 +252,11 @@ namespace crm_api.Services
                 var distribution = new Salesmen360DistributionDto
                 {
                     DemandCount = await _unitOfWork.Demands.Query(tracking: false)
-                        .CountAsync(d => d.RepresentativeId == userId && !d.IsDeleted),
+                        .CountAsync(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed)),
                     QuotationCount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .CountAsync(q => q.RepresentativeId == userId && !q.IsDeleted),
+                        .CountAsync(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed)),
                     OrderCount = await _unitOfWork.Orders.Query(tracking: false)
-                        .CountAsync(o => o.RepresentativeId == userId && !o.IsDeleted)
+                        .CountAsync(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 };
 
                 var last12MonthsStart = currentMonth.AddMonths(-11);
@@ -268,20 +268,20 @@ namespace crm_api.Services
                 if (currencyFilterValues != null)
                 {
                     last12OrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
                             (o.OfferDate ?? o.CreatedDate) < endExclusive &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
 
                     openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted &&
+                        .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                             q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
 
                     openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                        .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
@@ -425,19 +425,19 @@ namespace crm_api.Services
         private async Task<List<Salesmen360CurrencyAmountDto>> GetTotalsByCurrencyAsync(long userId)
         {
             var demandTotals = await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.RepresentativeId == userId && !d.IsDeleted)
+                .Where(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .GroupBy(d => d.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var quotationTotals = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.RepresentativeId == userId && !q.IsDeleted)
+                .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .GroupBy(q => q.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderTotals = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.RepresentativeId == userId && !o.IsDeleted)
+                .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .GroupBy(o => o.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
@@ -486,21 +486,21 @@ namespace crm_api.Services
             DateTime endExclusive)
         {
             var quotationOpenByCurrency = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.RepresentativeId == userId && !q.IsDeleted &&
+                .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                     q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected)
                 .GroupBy(q => q.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderOpenByCurrency = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                     o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected)
                 .GroupBy(o => o.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderLast12ByCurrency = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.RepresentativeId == userId && !o.IsDeleted &&
+                .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                     (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
                     (o.OfferDate ?? o.CreatedDate) < endExclusive)
                 .GroupBy(o => o.Currency)
@@ -548,19 +548,19 @@ namespace crm_api.Services
         private async Task<DateTime?> GetLastActivityDateAsync(long userId)
         {
             var demandDate = await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.RepresentativeId == userId && !d.IsDeleted)
+                .Where(d => d.RepresentativeId == userId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .Select(d => (DateTime?)(d.OfferDate ?? d.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();
 
             var quotationDate = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.RepresentativeId == userId && !q.IsDeleted)
+                .Where(q => q.RepresentativeId == userId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .Select(q => (DateTime?)(q.OfferDate ?? q.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();
 
             var orderDate = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.RepresentativeId == userId && !o.IsDeleted)
+                .Where(o => o.RepresentativeId == userId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .Select(o => (DateTime?)(o.OfferDate ?? o.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();

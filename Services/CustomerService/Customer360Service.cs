@@ -45,17 +45,17 @@ namespace crm_api.Services
                 var recentActivities = await GetRecentActivitiesAsync(customerId);
 
                 var totalDemands = await _unitOfWork.Demands.Query(tracking: false)
-                    .CountAsync(d => d.PotentialCustomerId == customerId && !d.IsDeleted);
+                    .CountAsync(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed));
                 var totalQuotations = await _unitOfWork.Quotations.Query(tracking: false)
-                    .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted);
+                    .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed));
                 var totalOrders = await _unitOfWork.Orders.Query(tracking: false)
-                    .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted);
+                    .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed));
 
                 var openQuotations = await _unitOfWork.Quotations.Query(tracking: false)
-                    .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                    .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                         q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected);
                 var openOrders = await _unitOfWork.Orders.Query(tracking: false)
-                    .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                    .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                         o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected);
 
                 var lastActivityDate = await GetLastActivityDateAsync(customerId);
@@ -127,19 +127,19 @@ namespace crm_api.Services
                 if (currencyFilterValues != null)
                 {
                     last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             (o.OfferDate ?? o.CreatedDate) >= sinceDate &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
 
                     openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                        .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                             q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
 
                     openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
@@ -206,19 +206,19 @@ namespace crm_api.Services
                     .ToList();
 
                 var demandDates = await _unitOfWork.Demands.Query(tracking: false)
-                    .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                    .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                     .Select(d => d.OfferDate ?? d.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
 
                 var quotationDates = await _unitOfWork.Quotations.Query(tracking: false)
-                    .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                    .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                     .Select(q => q.OfferDate ?? q.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
 
                 var orderDates = await _unitOfWork.Orders.Query(tracking: false)
-                    .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                    .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                     .Select(o => o.OfferDate ?? o.CreatedDate)
                     .Where(d => d >= startMonth && d < endExclusive)
                     .ToListAsync();
@@ -248,11 +248,11 @@ namespace crm_api.Services
                 var distribution = new Customer360DistributionDto
                 {
                     DemandCount = await _unitOfWork.Demands.Query(tracking: false)
-                        .CountAsync(d => d.PotentialCustomerId == customerId && !d.IsDeleted),
+                        .CountAsync(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed)),
                     QuotationCount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted),
+                        .CountAsync(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed)),
                     OrderCount = await _unitOfWork.Orders.Query(tracking: false)
-                        .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                        .CountAsync(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 };
 
                 var last12MonthsStart = currentMonth.AddMonths(-11);
@@ -264,20 +264,20 @@ namespace crm_api.Services
                 if (currencyFilterValues != null)
                 {
                     last12MonthsOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
                             (o.OfferDate ?? o.CreatedDate) < endExclusive &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
 
                     openQuotationAmount = await _unitOfWork.Quotations.Query(tracking: false)
-                        .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                        .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                             q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((q.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(q => (decimal?)q.GrandTotal) ?? 0m;
 
                     openOrderAmount = await _unitOfWork.Orders.Query(tracking: false)
-                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                        .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                             o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected &&
                             currencyFilterValues.Contains((o.Currency ?? "UNKNOWN").ToUpper()))
                         .SumAsync(o => (decimal?)o.GrandTotal) ?? 0m;
@@ -403,19 +403,19 @@ namespace crm_api.Services
         private async Task<List<Customer360CurrencyAmountDto>> GetTotalsByCurrencyAsync(long customerId)
         {
             var demandTotals = await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .GroupBy(d => d.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var quotationTotals = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .GroupBy(q => q.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderTotals = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .GroupBy(o => o.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
@@ -464,21 +464,21 @@ namespace crm_api.Services
             DateTime endExclusive)
         {
             var quotationOpenByCurrency = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted &&
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed) &&
                     q.Status != ApprovalStatus.Approved && q.Status != ApprovalStatus.Rejected)
                 .GroupBy(q => q.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderOpenByCurrency = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                     o.Status != ApprovalStatus.Approved && o.Status != ApprovalStatus.Rejected)
                 .GroupBy(o => o.Currency)
                 .Select(g => new { Currency = g.Key, Amount = g.Sum(x => x.GrandTotal) })
                 .ToListAsync();
 
             var orderLast12ByCurrency = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted &&
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed) &&
                     (o.OfferDate ?? o.CreatedDate) >= last12MonthsStart &&
                     (o.OfferDate ?? o.CreatedDate) < endExclusive)
                 .GroupBy(o => o.Currency)
@@ -596,7 +596,7 @@ namespace crm_api.Services
         private async Task<List<Customer360SimpleItemDto>> GetRecentDemandsAsync(long customerId)
         {
             return await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .OrderByDescending(d => d.OfferDate ?? d.CreatedDate)
                 .Take(10)
                 .Select(d => new Customer360SimpleItemDto
@@ -614,7 +614,7 @@ namespace crm_api.Services
         private async Task<List<Customer360SimpleItemDto>> GetRecentQuotationsAsync(long customerId)
         {
             return await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .OrderByDescending(q => q.OfferDate ?? q.CreatedDate)
                 .Take(10)
                 .Select(q => new Customer360SimpleItemDto
@@ -632,7 +632,7 @@ namespace crm_api.Services
         private async Task<List<Customer360SimpleItemDto>> GetRecentOrdersAsync(long customerId)
         {
             return await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .OrderByDescending(o => o.OfferDate ?? o.CreatedDate)
                 .Take(10)
                 .Select(o => new Customer360SimpleItemDto
@@ -668,19 +668,19 @@ namespace crm_api.Services
         private async Task<DateTime?> GetLastActivityDateAsync(long customerId)
         {
             var demandDate = await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .Select(d => (DateTime?)(d.OfferDate ?? d.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();
 
             var quotationDate = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .Select(q => (DateTime?)(q.OfferDate ?? q.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();
 
             var orderDate = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .Select(o => (DateTime?)(o.OfferDate ?? o.CreatedDate))
                 .DefaultIfEmpty()
                 .MaxAsync();
@@ -698,7 +698,7 @@ namespace crm_api.Services
         private async Task<List<Customer360TimelineItemDto>> BuildTimelineAsync(long customerId)
         {
             var demands = await _unitOfWork.Demands.Query(tracking: false)
-                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted)
+                .Where(d => d.PotentialCustomerId == customerId && !d.IsDeleted && (d.Status == null || d.Status != ApprovalStatus.Closed))
                 .Select(d => new Customer360TimelineItemDto
                 {
                     Type = "Demand",
@@ -711,7 +711,7 @@ namespace crm_api.Services
                 .ToListAsync();
 
             var quotations = await _unitOfWork.Quotations.Query(tracking: false)
-                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted)
+                .Where(q => q.PotentialCustomerId == customerId && !q.IsDeleted && (q.Status == null || q.Status != ApprovalStatus.Closed))
                 .Select(q => new Customer360TimelineItemDto
                 {
                     Type = "Quotation",
@@ -724,7 +724,7 @@ namespace crm_api.Services
                 .ToListAsync();
 
             var orders = await _unitOfWork.Orders.Query(tracking: false)
-                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted)
+                .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
                 .Select(o => new Customer360TimelineItemDto
                 {
                     Type = "Order",
