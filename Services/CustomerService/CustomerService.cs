@@ -271,15 +271,12 @@ namespace crm_api.Services
             var createdCount = 0;
             var updatedCount = 0;
             var reactivatedCount = 0;
-            var deletedCount = 0;
-            var erpCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var erpCustomer in erpResponse.Data)
             {
                 var code = erpCustomer.CariKod?.Trim();
                 if (string.IsNullOrWhiteSpace(code))
                     continue;
-                erpCodes.Add(code);
 
                 if (!customerByCode.TryGetValue(code, out var customer))
                 {
@@ -343,19 +340,7 @@ namespace crm_api.Services
                 }
             }
 
-            foreach (var existing in existingCustomers.Where(x =>
-                         !x.IsDeleted &&
-                         (x.IsERPIntegrated || !string.IsNullOrWhiteSpace(x.ERPIntegrationNumber) || !string.IsNullOrWhiteSpace(x.CustomerCode)) &&
-                         !string.IsNullOrWhiteSpace(x.CustomerCode) &&
-                         !erpCodes.Contains(x.CustomerCode!)))
-            {
-                var deleted = await _unitOfWork.Customers.SoftDeleteAsync(existing.Id);
-                if (deleted)
-                {
-                    deletedCount++;
-                    hasAnyChange = true;
-                }
-            }
+            // ERP'de olmayan müşteriler silinmez; CRM'de manuel eklenen potansiyel müşteriler korunur.
 
             if (!hasAnyChange)
             {
@@ -374,11 +359,10 @@ namespace crm_api.Services
                 await _unitOfWork.CommitTransactionAsync();
 
                 _logger.LogInformation(
-                    "Customer sync completed: created={Created}, updated={Updated}, reactivated={Reactivated}, deleted={Deleted}.",
+                    "Customer sync completed: created={Created}, updated={Updated}, reactivated={Reactivated}.",
                     createdCount,
                     updatedCount,
-                    reactivatedCount,
-                    deletedCount);
+                    reactivatedCount);
             }
             catch
             {
@@ -386,5 +370,6 @@ namespace crm_api.Services
                 throw;
             }
         }
+   
     }
 }
