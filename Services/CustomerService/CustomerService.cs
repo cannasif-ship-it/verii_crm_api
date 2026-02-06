@@ -5,6 +5,7 @@ using crm_api.Models;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -16,13 +17,20 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly IErpService _erpService;
+        private readonly ILogger<CustomerService> _logger;
 
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IErpService erpService)
+        public CustomerService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ILocalizationService localizationService,
+            IErpService erpService,
+            ILogger<CustomerService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _erpService = erpService;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
@@ -243,7 +251,12 @@ namespace crm_api.Services
             var erpResponse = await _erpService.GetCarisAsync(null);
 
             if (erpResponse?.Data == null || erpResponse.Data.Count == 0)
+            {
+                _logger.LogInformation("Customer sync skipped: no ERP records returned.");
                 return;
+            }
+
+            _logger.LogInformation("Customer sync fetched {Count} ERP records.", erpResponse.Data.Count);
 
             var existingCustomers = await _unitOfWork.Customers
                 .Query(tracking: true, ignoreQueryFilters: true)
@@ -255,12 +268,18 @@ namespace crm_api.Services
 
             var newCustomers = new List<Customer>();
             var hasAnyChange = false;
+            var createdCount = 0;
+            var updatedCount = 0;
+            var reactivatedCount = 0;
+            var deletedCount = 0;
+            var erpCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var erpCustomer in erpResponse.Data)
             {
                 var code = erpCustomer.CariKod?.Trim();
                 if (string.IsNullOrWhiteSpace(code))
                     continue;
+                erpCodes.Add(code);
 
                 if (!customerByCode.TryGetValue(code, out var customer))
                 {
@@ -282,11 +301,13 @@ namespace crm_api.Services
                         ERPIntegrationNumber = code,
                         LastSyncDate = DateTime.UtcNow
                     });
+                    createdCount++;
                     hasAnyChange = true;
                     continue;
                 }
 
                 var updated = false;
+                var reactivated = false;
                 var newName = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : erpCustomer.CariIsim!.Trim();
 
                 if (customer.CustomerName != newName) { customer.CustomerName = newName; updated = true; }
@@ -306,6 +327,8 @@ namespace crm_api.Services
                     customer.DeletedDate = null;
                     customer.DeletedBy = null;
                     updated = true;
+                    reactivated = true;
+                    reactivatedCount++;
                 }
 
                 if (customer.IsERPIntegrated != true) { customer.IsERPIntegrated = true; updated = true; }
@@ -315,11 +338,30 @@ namespace crm_api.Services
                 {
                     customer.LastSyncDate = DateTime.UtcNow;
                     hasAnyChange = true;
+                    if (!reactivated)
+                        updatedCount++;
+                }
+            }
+
+            foreach (var existing in existingCustomers.Where(x =>
+                         !x.IsDeleted &&
+                         (x.IsERPIntegrated || !string.IsNullOrWhiteSpace(x.ERPIntegrationNumber) || !string.IsNullOrWhiteSpace(x.CustomerCode)) &&
+                         !string.IsNullOrWhiteSpace(x.CustomerCode) &&
+                         !erpCodes.Contains(x.CustomerCode!)))
+            {
+                var deleted = await _unitOfWork.Customers.SoftDeleteAsync(existing.Id);
+                if (deleted)
+                {
+                    deletedCount++;
+                    hasAnyChange = true;
                 }
             }
 
             if (!hasAnyChange)
+            {
+                _logger.LogInformation("Customer sync completed: no changes detected.");
                 return;
+            }
 
             try
             {
@@ -330,6 +372,13 @@ namespace crm_api.Services
 
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
+
+                _logger.LogInformation(
+                    "Customer sync completed: created={Created}, updated={Updated}, reactivated={Reactivated}, deleted={Deleted}.",
+                    createdCount,
+                    updatedCount,
+                    reactivatedCount,
+                    deletedCount);
             }
             catch
             {
