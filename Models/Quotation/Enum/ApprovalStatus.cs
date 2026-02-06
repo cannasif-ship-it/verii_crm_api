@@ -5,6 +5,7 @@ namespace crm_api.Models
         HavenotStarted = 0,
         Waiting = 1,
         Approved = 2,
-        Rejected = 3
+        Rejected = 3,
+        Closed = 4
     }
 }
