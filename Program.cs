@@ -450,8 +450,6 @@ var app = builder.Build();
 // Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
 // Configure the HTTP request pipeline.
-app.UseCors("DevCors");
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -464,6 +462,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseCors("DevCors");
 
 // Static files for uploaded images - wwwroot folder (default)
 app.UseStaticFiles();
@@ -504,7 +503,5 @@ RecurringJob.AddOrUpdate<IStockSyncJob>(
     "erp-stock-sync-job",
     job => job.ExecuteAsync(),
     Cron.MinuteInterval(30));
-
-BackgroundJob.Enqueue<IStockSyncJob>(job => job.ExecuteAsync());
 
 app.Run();
