@@ -116,6 +116,7 @@ builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IDistrictService, DistrictService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
+builder.Services.AddScoped<ICustomer360Service, Customer360Service>();
 
 // Register Quotation Services
 builder.Services.AddScoped<IQuotationService, QuotationService>();

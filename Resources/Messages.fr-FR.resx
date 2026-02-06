@@ -448,6 +448,18 @@
   <data name="CustomerService.UpdateCustomerExceptionMessage" xml:space="preserve">
     <value>Une erreur est survenue lors de la mise à jour de the Client: {0}</value>
   </data>
+  <data name="Customer360Service.OverviewRetrieved" xml:space="preserve">
+    <value>Vue d'ensemble du client récupérée avec succès.</value>
+  </data>
+  <data name="Customer360Service.CustomerNotFound" xml:space="preserve">
+    <value>Client non trouvé.</value>
+  </data>
+  <data name="Customer360Service.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur s'est produite.</value>
+  </data>
+  <data name="Customer360Service.ExceptionMessage" xml:space="preserve">
+    <value>{0}</value>
+  </data>
   
   
   
