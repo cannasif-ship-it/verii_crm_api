@@ -43,6 +43,7 @@ Thumbs.db
 .env.*
 appsettings.Development.json
 appsettings.Production.json
+DataProtectionKeys/
 
 # ================================
 # Publish output
