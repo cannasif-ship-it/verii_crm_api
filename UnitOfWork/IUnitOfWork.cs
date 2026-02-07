@@ -1,6 +1,7 @@
 using crm_api.Models;
 using crm_api.Repositories;
 using crm_api.Models.PowerBi;
+using crm_api.Models.UserPermissions;
 
 namespace crm_api.UnitOfWork
 {
@@ -61,6 +62,10 @@ namespace crm_api.UnitOfWork
         IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; }
         IGenericRepository<PowerBIConfiguration> PowerBIConfigurations { get; }
         IGenericRepository<PowerBIReportRoleMapping> PowerBIReportRoleMappings { get; }
+        IGenericRepository<PermissionDefinition> PermissionDefinitions { get; }
+        IGenericRepository<PermissionGroup> PermissionGroups { get; }
+        IGenericRepository<PermissionGroupPermission> PermissionGroupPermissions { get; }
+        IGenericRepository<UserPermissionGroup> UserPermissionGroups { get; }
 
         /// <summary>
         /// Save all changes to the database within a transaction

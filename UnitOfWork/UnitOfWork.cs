@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using crm_api.Models.PowerBi;
+using crm_api.Models.UserPermissions;
 
 namespace crm_api.UnitOfWork
 {
@@ -71,6 +72,10 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<PowerBIGroupReportDefinition>? _powerBIGroupReportDefinitions;
         private IGenericRepository<PowerBIConfiguration>? _powerBIConfigurations;
         private IGenericRepository<PowerBIReportRoleMapping>? _powerBIReportRoleMappings;
+        private IGenericRepository<PermissionDefinition>? _permissionDefinitions;
+        private IGenericRepository<PermissionGroup>? _permissionGroups;
+        private IGenericRepository<PermissionGroupPermission>? _permissionGroupPermissions;
+        private IGenericRepository<UserPermissionGroup>? _userPermissionGroups;
         public UnitOfWork(CmsDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -131,6 +136,10 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions{get{_powerBIGroupReportDefinitions ??= new GenericRepository<PowerBIGroupReportDefinition>(_context, _httpContextAccessor);return _powerBIGroupReportDefinitions;}}
         public IGenericRepository<PowerBIConfiguration> PowerBIConfigurations{get{_powerBIConfigurations ??= new GenericRepository<PowerBIConfiguration>(_context, _httpContextAccessor);return _powerBIConfigurations;}}
         public IGenericRepository<PowerBIReportRoleMapping> PowerBIReportRoleMappings{get{_powerBIReportRoleMappings ??= new GenericRepository<PowerBIReportRoleMapping>(_context, _httpContextAccessor);return _powerBIReportRoleMappings;}}
+        public IGenericRepository<PermissionDefinition> PermissionDefinitions{get{_permissionDefinitions ??= new GenericRepository<PermissionDefinition>(_context, _httpContextAccessor);return _permissionDefinitions;}}
+        public IGenericRepository<PermissionGroup> PermissionGroups{get{_permissionGroups ??= new GenericRepository<PermissionGroup>(_context, _httpContextAccessor);return _permissionGroups;}}
+        public IGenericRepository<PermissionGroupPermission> PermissionGroupPermissions{get{_permissionGroupPermissions ??= new GenericRepository<PermissionGroupPermission>(_context, _httpContextAccessor);return _permissionGroupPermissions;}}
+        public IGenericRepository<UserPermissionGroup> UserPermissionGroups{get{_userPermissionGroups ??= new GenericRepository<UserPermissionGroup>(_context, _httpContextAccessor);return _userPermissionGroups;}}
 
         /// <summary>
         /// Get repository for any entity type
