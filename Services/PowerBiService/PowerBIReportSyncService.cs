@@ -273,8 +273,8 @@ namespace crm_api.Services
 
                 return new EmbedServiceConfig
                 {
-                    TenantId = entity.TenantId,
-                    ClientId = entity.ClientId,
+                    TenantId = entity.TenantId ?? string.Empty,
+                    ClientId = entity.ClientId ?? string.Empty,
                     ClientSecret = clientSecret,
                     Scope = string.IsNullOrWhiteSpace(entity.Scope) ? "https://analysis.windows.net/powerbi/api/.default" : entity.Scope.Trim(),
                     ApiBaseUrl = string.IsNullOrWhiteSpace(entity.ApiBaseUrl) ? "https://api.powerbi.com" : entity.ApiBaseUrl.Trim(),
@@ -284,9 +284,9 @@ namespace crm_api.Services
 
             return new EmbedServiceConfig
             {
-                TenantId = _azureAd.TenantId,
-                ClientId = _azureAd.ClientId,
-                ClientSecret = _azureAd.ClientSecret,
+                TenantId = _azureAd.TenantId ?? string.Empty,
+                ClientId = _azureAd.ClientId ?? string.Empty,
+                ClientSecret = _azureAd.ClientSecret ?? string.Empty,
                 Scope = _powerBi.Scope ?? "https://analysis.windows.net/powerbi/api/.default",
                 ApiBaseUrl = _powerBi.ApiBaseUrl?.TrimEnd('/') ?? "https://api.powerbi.com",
                 DefaultWorkspaceId = fallbackWorkspaceId
