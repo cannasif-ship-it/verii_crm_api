@@ -5,6 +5,7 @@ using crm_api.Models.ReportBuilder;
 using crm_api.Data.Configurations;
 using depoWebAPI.Models;
 using crm_api.Models.PowerBi;
+using crm_api.Models.UserPermissions;
 
 
 namespace crm_api.Data
@@ -70,6 +71,10 @@ namespace crm_api.Data
         public DbSet<PowerBIGroupReportDefinition> PowerBIGroupReportDefinitions { get; set; }
         public DbSet<PowerBIConfiguration> PowerBIConfigurations { get; set; }
         public DbSet<PowerBIReportRoleMapping> PowerBIReportRoleMappings { get; set; }
+        public DbSet<PermissionDefinition> PermissionDefinitions { get; set; }
+        public DbSet<PermissionGroup> PermissionGroups { get; set; }
+        public DbSet<PermissionGroupPermission> PermissionGroupPermissions { get; set; }
+        public DbSet<UserPermissionGroup> UserPermissionGroups { get; set; }
 
 
 
