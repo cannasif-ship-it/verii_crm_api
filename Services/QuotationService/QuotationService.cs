@@ -140,13 +140,13 @@ namespace crm_api.Services
                         avaibleUsersResponse.Message,
                         StatusCodes.Status401Unauthorized);
                 }
-                var avaibleUsers = avaibleUsersResponse.Data;
+                var avaibleUsers = avaibleUsersResponse.Data ?? new List<ApprovalScopeUserDto>();
                 var avaibleUsersIds = avaibleUsers.Select(x => x.UserId).ToList();
 
 
                 var query = _unitOfWork.Quotations.Query()
                     .AsNoTracking()
-                    .Where(q => !q.IsDeleted && (q.CreatedBy == userId || avaibleUsersIds.Contains(q.RepresentativeId.Value)))
+                    .Where(q => !q.IsDeleted && (q.CreatedBy == userId || (q.RepresentativeId.HasValue && avaibleUsersIds.Contains(q.RepresentativeId.Value))))
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
