@@ -90,6 +90,14 @@ builder.Services.AddHangfire(configuration => configuration
         DisableGlobalLocks = true
     }));
 
+GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
+{
+    Attempts = 3,
+    DelaysInSeconds = new[] { 60, 300, 900 },
+    LogEvents = true,
+    OnAttemptsExceeded = AttemptsExceededAction.Fail
+});
+
 builder.Services.AddHangfireServer();
 
 // Creates the first admin user only when the DB is empty and BootstrapAdmin is configured.
@@ -475,6 +483,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+GlobalJobFilters.Filters.Add(
+    new HangfireJobStateFilter(
+        app.Services.GetRequiredService<ILogger<HangfireJobStateFilter>>()));
 
 // Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
