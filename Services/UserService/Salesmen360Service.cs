@@ -12,12 +12,21 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILocalizationService _localizationService;
         private readonly IErpService _erpService;
+        private readonly IRevenueQualityService _revenueQualityService;
+        private readonly INextBestActionService _nextBestActionService;
 
-        public Salesmen360Service(IUnitOfWork unitOfWork, ILocalizationService localizationService, IErpService erpService)
+        public Salesmen360Service(
+            IUnitOfWork unitOfWork,
+            ILocalizationService localizationService,
+            IErpService erpService,
+            IRevenueQualityService revenueQualityService,
+            INextBestActionService nextBestActionService)
         {
             _unitOfWork = unitOfWork;
             _localizationService = localizationService;
             _erpService = erpService;
+            _revenueQualityService = revenueQualityService;
+            _nextBestActionService = nextBestActionService;
         }
 
         public async Task<ApiResponse<Salesmen360OverviewDto>> GetOverviewAsync(long userId, string? currency = null)
@@ -92,8 +101,10 @@ namespace crm_api.Services
                         TotalQuotationAmount = totalQuotationAmount,
                         TotalOrderAmount = totalOrderAmount,
                         TotalsByCurrency = totalsByCurrency
-                    }
+                    },
+                    RevenueQuality = await _revenueQualityService.CalculateSalesmanRevenueQualityAsync(userId),
                 };
+                response.RecommendedActions = await _nextBestActionService.GetSalesmanActionsAsync(userId, response.RevenueQuality);
 
                 return ApiResponse<Salesmen360OverviewDto>.SuccessResult(
                     response,
@@ -313,6 +324,180 @@ namespace crm_api.Services
             catch (Exception ex)
             {
                 return ApiResponse<Salesmen360AnalyticsChartsDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.InternalServerError"),
+                    ex.Message,
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<CohortRetentionDto>>> GetCohortRetentionAsync(long userId, int months = 12)
+        {
+            try
+            {
+                var user = await GetUserAsync(userId);
+                if (user == null)
+                {
+                    return ApiResponse<List<CohortRetentionDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("UserService.UserNotFound"),
+                        _localizationService.GetLocalizedString("UserService.UserNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var safeMonths = months <= 0 ? 12 : Math.Min(months, 24);
+
+                var orderEntries = await _unitOfWork.Orders.Query(tracking: false)
+                    .Where(o => o.RepresentativeId == userId &&
+                                o.PotentialCustomerId.HasValue &&
+                                !o.IsDeleted &&
+                                (o.Status == null || o.Status != ApprovalStatus.Closed))
+                    .Select(o => new
+                    {
+                        CustomerId = o.PotentialCustomerId!.Value,
+                        OrderMonth = new DateTime((o.OfferDate ?? o.CreatedDate).Year, (o.OfferDate ?? o.CreatedDate).Month, 1)
+                    })
+                    .ToListAsync();
+
+                if (orderEntries.Count == 0)
+                {
+                    return ApiResponse<List<CohortRetentionDto>>.SuccessResult(new List<CohortRetentionDto>(), _localizationService.GetLocalizedString("General.OperationSuccessful"));
+                }
+
+                var firstOrderByCustomer = orderEntries
+                    .GroupBy(x => x.CustomerId)
+                    .ToDictionary(g => g.Key, g => g.Min(x => x.OrderMonth));
+
+                var monthsByCustomer = orderEntries
+                    .GroupBy(x => x.CustomerId)
+                    .ToDictionary(g => g.Key, g => g.Select(x => x.OrderMonth.ToString("yyyy-MM")).Distinct(StringComparer.OrdinalIgnoreCase).ToHashSet(StringComparer.OrdinalIgnoreCase));
+
+                var customersByCohort = firstOrderByCustomer
+                    .GroupBy(x => x.Value.ToString("yyyy-MM"))
+                    .ToDictionary(g => g.Key, g => g.Select(x => x.Key).ToList());
+
+                var cohorts = new List<CohortRetentionDto>();
+
+                foreach (var cohortItem in customersByCohort.OrderBy(x => x.Key))
+                {
+                    var cohortCustomerIds = cohortItem.Value;
+                    var cohortSize = cohortCustomerIds.Count;
+
+                    var cohort = new CohortRetentionDto
+                    {
+                        CohortKey = cohortItem.Key,
+                        CohortSize = cohortSize
+                    };
+
+                    var cohortStart = DateTime.Parse($"{cohortItem.Key}-01");
+                    for (var period = 0; period < safeMonths; period++)
+                    {
+                        var monthKey = cohortStart.AddMonths(period).ToString("yyyy-MM");
+                        var retainedCount = cohortCustomerIds.Count(customerId => monthsByCustomer[customerId].Contains(monthKey));
+                        var retentionRate = cohortSize == 0 ? 0m : Math.Round((decimal)retainedCount / cohortSize * 100m, 2);
+
+                        cohort.Points.Add(new CohortRetentionPointDto
+                        {
+                            PeriodIndex = period,
+                            PeriodMonth = monthKey,
+                            RetainedCount = retainedCount,
+                            RetentionRate = retentionRate
+                        });
+                    }
+
+                    cohorts.Add(cohort);
+                }
+
+                return ApiResponse<List<CohortRetentionDto>>.SuccessResult(cohorts, _localizationService.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<CohortRetentionDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.InternalServerError"),
+                    ex.Message,
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<ActivityDto>> ExecuteRecommendedActionAsync(long userId, ExecuteRecommendedActionDto request)
+        {
+            try
+            {
+                var user = await GetUserAsync(userId);
+                if (user == null)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("UserService.UserNotFound"),
+                        _localizationService.GetLocalizedString("UserService.UserNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var actionCode = (request.ActionCode ?? string.Empty).Trim().ToUpperInvariant();
+                if (string.IsNullOrWhiteSpace(actionCode))
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var dueInDays = request.DueInDays.GetValueOrDefault(1);
+                if (dueInDays < 0) dueInDays = 0;
+                if (dueInDays > 30) dueInDays = 30;
+
+                var subject = string.IsNullOrWhiteSpace(request.Title)
+                    ? $"[{actionCode}] Salesman follow-up: {user.FullName}"
+                    : request.Title.Trim();
+
+                var description = request.Reason ?? $"Auto-created from Salesmen 360 recommended action: {actionCode}.";
+                var priority = string.IsNullOrWhiteSpace(request.Priority) ? "High" : request.Priority.Trim();
+
+                var activity = new Activity
+                {
+                    Subject = subject,
+                    Description = description,
+                    Status = "Scheduled",
+                    IsCompleted = false,
+                    Priority = priority,
+                    AssignedUserId = request.AssignedUserId ?? userId,
+                    ActivityDate = DateTime.UtcNow.AddDays(dueInDays)
+                };
+
+                await _unitOfWork.Activities.AddAsync(activity);
+                await _unitOfWork.SaveChangesAsync();
+
+                var entity = await _unitOfWork.Activities.Query(tracking: false)
+                    .Include(a => a.CreatedByUser)
+                    .Include(a => a.UpdatedByUser)
+                    .Include(a => a.DeletedByUser)
+                    .FirstOrDefaultAsync(a => a.Id == activity.Id) ?? activity;
+
+                var dto = new ActivityDto
+                {
+                    Id = entity.Id,
+                    CreatedDate = entity.CreatedDate,
+                    UpdatedDate = entity.UpdatedDate,
+                    DeletedDate = entity.DeletedDate,
+                    IsDeleted = entity.IsDeleted,
+                    CreatedByFullUser = entity.CreatedByUser?.FullName,
+                    UpdatedByFullUser = entity.UpdatedByUser?.FullName,
+                    DeletedByFullUser = entity.DeletedByUser?.FullName,
+                    Subject = entity.Subject,
+                    Description = entity.Description,
+                    ActivityTypeId = entity.ActivityTypeId,
+                    PotentialCustomerId = entity.PotentialCustomerId,
+                    ErpCustomerCode = entity.ErpCustomerCode,
+                    Status = entity.Status,
+                    IsCompleted = entity.IsCompleted,
+                    Priority = entity.Priority,
+                    ContactId = entity.ContactId,
+                    AssignedUserId = entity.AssignedUserId,
+                    ActivityDate = entity.ActivityDate
+                };
+
+                return ApiResponse<ActivityDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ActivityService.ActivityCreated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<ActivityDto>.ErrorResult(
                     _localizationService.GetLocalizedString("General.InternalServerError"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);

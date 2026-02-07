@@ -19,5 +19,7 @@ namespace crm_api.DTOs
         public string FullName { get; set; } = string.Empty;
         public string? Email { get; set; }
         public Salesmen360KpiDto Kpis { get; set; } = new();
+        public RevenueQualityDto RevenueQuality { get; set; } = new();
+        public List<RecommendedActionDto> RecommendedActions { get; set; } = new();
     }
 }

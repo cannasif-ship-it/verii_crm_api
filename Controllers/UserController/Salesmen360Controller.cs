@@ -1,4 +1,5 @@
 using crm_api.Interfaces;
+using crm_api.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,6 +38,20 @@ namespace crm_api.Controllers
         {
             var effectiveCurrency = ResolveCurrency(currency);
             var result = await _salesmen360Service.GetAnalyticsChartsAsync(userId, months, effectiveCurrency);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("{userId}/analytics/cohort")]
+        public async Task<IActionResult> GetCohortRetention(long userId, [FromQuery] int months = 12)
+        {
+            var result = await _salesmen360Service.GetCohortRetentionAsync(userId, months);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("{userId}/recommended-actions/execute")]
+        public async Task<IActionResult> ExecuteRecommendedAction(long userId, [FromBody] ExecuteRecommendedActionDto request)
+        {
+            var result = await _salesmen360Service.ExecuteRecommendedActionAsync(userId, request);
             return StatusCode(result.StatusCode, result);
         }
 
