@@ -298,6 +298,14 @@ namespace crm_api.Services
                 }
                 else
                 {
+                    if (string.IsNullOrWhiteSpace(oldDocumentSerial))
+                    {
+                        return ApiResponse<string>.ErrorResult(
+                            _localizationService.GetLocalizedString("DocumentSerialTypeService.InternalServerError"),
+                            _localizationService.GetLocalizedString("DocumentSerialTypeService.InternalServerError"),
+                            StatusCodes.Status400BadRequest);
+                    }
+
                     string beforeDash = oldDocumentSerial.Split('-')[0];
                     var QuotationDocumentSerialTypes = await _unitOfWork.Quotations.Query().Where(x => x.OfferNo == beforeDash).ToListAsync();
                     int maxSerialNumber = QuotationDocumentSerialTypes
