@@ -6,6 +6,7 @@ using System.Text;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.DataProtection;
 using crm_api.Data;
 using crm_api.Interfaces;
 using crm_api.Mappings;
@@ -15,6 +16,7 @@ using crm_api.UnitOfWork;
 using crm_api.Hubs;
 using crm_api.Helpers;
 using System.Security.Claims;
+using System.IO;
 using Microsoft.Extensions.FileProviders;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -45,7 +47,14 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options 
 
 // ✅ SMTP için: MemoryCache + DataProtection
 builder.Services.AddMemoryCache();
-builder.Services.AddDataProtection();
+var dataProtectionKeyPath =
+    builder.Configuration["DataProtection:KeyPath"] ??
+    Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys");
+Directory.CreateDirectory(dataProtectionKeyPath);
+builder.Services
+    .AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyPath))
+    .SetApplicationName("V3RII_CRM");
 
 // SignalR Configuration
 builder.Services.AddSignalR(options =>
@@ -139,7 +148,13 @@ builder.Services.AddScoped<IProductPricingGroupByService, ProductPricingGroupByS
 
 // Register User Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPermissionAccessService, PermissionAccessService>();
+builder.Services.AddScoped<IPermissionDefinitionService, PermissionDefinitionService>();
+builder.Services.AddScoped<IPermissionGroupService, PermissionGroupService>();
+builder.Services.AddScoped<IUserPermissionGroupService, UserPermissionGroupService>();
 builder.Services.AddScoped<ISalesmen360Service, Salesmen360Service>();
+builder.Services.AddScoped<IRevenueQualityService, RevenueQualityService>();
+builder.Services.AddScoped<INextBestActionService, NextBestActionService>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 builder.Services.AddScoped<IUserDiscountLimitService, UserDiscountLimitService>();
 builder.Services.AddScoped<IUserDetailService, UserDetailService>();
