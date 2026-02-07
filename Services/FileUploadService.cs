@@ -105,13 +105,15 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteProfilePictureAsync(string fileUrl)
+        public Task<ApiResponse<bool>> DeleteProfilePictureAsync(string fileUrl)
         {
             try
             {
                 if (string.IsNullOrEmpty(fileUrl))
                 {
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.NoFileToDelete"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.NoFileToDelete")));
                 }
 
                 // Extract file path from URL
@@ -142,10 +144,10 @@ namespace crm_api.Services
                 if (pathSegments.Length < 4 || pathSegments[0] != "uploads" || pathSegments[1] != "user-profiles")
                 {
                     var expectedFormat = "/uploads/user-profiles/{userId}/{fileName}";
-                    return ApiResponse<bool>.ErrorResult(
+                    return Task.FromResult(ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("FileUploadService.InvalidFileUrl", expectedFormat, fileUrl),
                         null,
-                        400);
+                        400));
                 }
 
                 var userId = pathSegments[2];
@@ -163,20 +165,24 @@ namespace crm_api.Services
                 {
                     // Delete file synchronously (File.Delete is already synchronous and fast)
                     File.Delete(filePath);
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully")));
                 }
                 else
                 {
                     // File doesn't exist, but that's okay - it might have been already deleted
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully")));
                 }
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.ErrorResult(
+                return Task.FromResult(ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("FileUploadService.FileDeletionError"),
                     _localizationService.GetLocalizedString("FileUploadService.FileDeletionExceptionMessage", ex.Message),
-                    500);
+                    500));
             }
         }
 
@@ -268,13 +274,15 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteStockImageAsync(string fileUrl)
+        public Task<ApiResponse<bool>> DeleteStockImageAsync(string fileUrl)
         {
             try
             {
                 if (string.IsNullOrEmpty(fileUrl))
                 {
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.NoFileToDelete"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.NoFileToDelete")));
                 }
 
                 // Extract file path from URL
@@ -304,10 +312,10 @@ namespace crm_api.Services
                 if (pathSegments.Length < 4 || pathSegments[0] != "uploads" || pathSegments[1] != StockImagesFolder)
                 {
                     var expectedFormat = $"/uploads/{StockImagesFolder}/{{stockId}}/{{fileName}}";
-                    return ApiResponse<bool>.ErrorResult(
+                    return Task.FromResult(ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("FileUploadService.InvalidFileUrl", expectedFormat, fileUrl),
                         null,
-                        400);
+                        400));
                 }
 
                 var stockId = pathSegments[2];
@@ -324,19 +332,23 @@ namespace crm_api.Services
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully")));
                 }
                 else
                 {
-                    return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully"));
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully")));
                 }
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.ErrorResult(
+                return Task.FromResult(ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("FileUploadService.FileDeletionError"),
                     _localizationService.GetLocalizedString("FileUploadService.FileDeletionExceptionMessage", ex.Message),
-                    500);
+                    500));
             }
         }
 

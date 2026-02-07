@@ -30,26 +30,29 @@ namespace crm_api.Services
             _configuration = configuration;
         }
 
-        public async Task<ApiResponse<long>> GetCurrentUserIdAsync()
+        public Task<ApiResponse<long>> GetCurrentUserIdAsync()
         {
             try
             {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
-            {
-                return ApiResponse<long>.ErrorResult(
-                    _loc.GetLocalizedString("UserService.InvalidUserId"),
-                    _loc.GetLocalizedString("UserService.InvalidUserId"),
-                    StatusCodes.Status400BadRequest);
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
+                {
+                    return Task.FromResult(ApiResponse<long>.ErrorResult(
+                        _loc.GetLocalizedString("UserService.InvalidUserId"),
+                        _loc.GetLocalizedString("UserService.InvalidUserId"),
+                        StatusCodes.Status400BadRequest));
                 }
-                return ApiResponse<long>.SuccessResult(userId, _loc.GetLocalizedString("UserService.UserIdRetrieved"));
+
+                return Task.FromResult(ApiResponse<long>.SuccessResult(
+                    userId,
+                    _loc.GetLocalizedString("UserService.UserIdRetrieved")));
             }
             catch (Exception ex)
             {
-                return ApiResponse<long>.ErrorResult(
+                return Task.FromResult(ApiResponse<long>.ErrorResult(
                     _loc.GetLocalizedString("UserService.InternalServerError"),
                     _loc.GetLocalizedString("UserService.GetCurrentUserIdExceptionMessage", ex.Message),
-                    StatusCodes.Status500InternalServerError);
+                    StatusCodes.Status500InternalServerError));
             }
         }
 
