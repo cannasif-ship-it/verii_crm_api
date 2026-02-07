@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using crm_api.Hubs;
 using crm_api.Interfaces;
 using crm_api.DTOs;
+using Microsoft.Extensions.Hosting;
 
 namespace crm_api.Controllers
 {
@@ -17,19 +18,25 @@ namespace crm_api.Controllers
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IPermissionAccessService _permissionAccessService;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _configuration;
 
         public AuthController(
             IHubContext<AuthHub> hubContext,
             ILocalizationService localizationService,
             IAuthService authService,
             IUserService userService,
-            IPermissionAccessService permissionAccessService)
+            IPermissionAccessService permissionAccessService,
+            IWebHostEnvironment environment,
+            IConfiguration configuration)
         {
             _hubContext = hubContext;
             _localizationService = localizationService;
             _authService = authService;
             _userService = userService;
             _permissionAccessService = permissionAccessService;
+            _environment = environment;
+            _configuration = configuration;
         }
 
         [AllowAnonymous]
@@ -61,11 +68,22 @@ namespace crm_api.Controllers
         [HttpPost("admin-login")]
         public async Task<ActionResult<ApiResponse<string>>> AdminLogin()
         {
-            var loginDto = new LoginRequest
+            if (!_environment.IsDevelopment())
             {
-                Email = "admin@v3rii.com",
-                Password = "Veriipass123!"
-            };
+                return NotFound();
+            }
+
+            var email = _configuration["AdminSettings:Email"];
+            var password = _configuration["AdminSettings:Password"];
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.InternalServerError"),
+                    "AdminSettings is missing.",
+                    500));
+            }
+
+            var loginDto = new LoginRequest { Email = email, Password = password };
 
             var loginDtoInternal = new LoginDto
             {

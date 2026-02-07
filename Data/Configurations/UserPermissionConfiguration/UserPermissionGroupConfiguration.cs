@@ -30,16 +30,6 @@ namespace crm_api.Data.Configurations.UserPermissionConfiguration
 
             builder.HasQueryFilter(x => !x.IsDeleted);
 
-            builder.HasData(
-                new UserPermissionGroup
-                {
-                    Id = 1,
-                    UserId = 1,
-                    PermissionGroupId = 1,
-                    CreatedDate = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                    IsDeleted = false
-                }
-            );
         }
     }
 }

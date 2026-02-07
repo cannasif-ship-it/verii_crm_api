@@ -22,8 +22,12 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Caching.Memory;              // ✅ SMTP için (IMemoryCache)
+using crm_api.Infrastructure.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Local-only secrets (ignored by git)
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -87,6 +91,9 @@ builder.Services.AddHangfire(configuration => configuration
     }));
 
 builder.Services.AddHangfireServer();
+
+// Creates the first admin user only when the DB is empty and BootstrapAdmin is configured.
+builder.Services.AddHostedService<AdminBootstrapHostedService>();
 
 // ERP Database Configuration - Using SQL Server
 builder.Services.AddDbContext<ErpCmsDbContext>(options =>
@@ -284,8 +291,15 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
+
+    var jwtSecret = builder.Configuration["JwtSettings:SecretKey"];
+    if (string.IsNullOrWhiteSpace(jwtSecret))
+    {
+        throw new InvalidOperationException("JwtSettings:SecretKey is required.");
+    }
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -294,8 +308,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "CmsWebApi",
         ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "CmsWebApiUsers",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            builder.Configuration["JwtSettings:SecretKey"] ?? "YourSuperSecretKeyThatIsAtLeast32CharactersLong!")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
         ClockSkew = TimeSpan.Zero
     };
 

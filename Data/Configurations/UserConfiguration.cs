@@ -76,27 +76,6 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(u => u.IsDeleted)
                 .HasDatabaseName("IX_Users_IsDeleted");
 
-            // Deterministic admin seed for first system access
-            // Note: CreatedDate will use DB default (GETUTCDATE()) to reflect current UTC time at insert.
-            builder.HasData(new User
-            {
-                Id = 1,
-                Username = "admin@v3rii.com",
-                Email = "v3rii@v3rii.com",
-                // Deterministic bcrypt hash using fixed salt so migrations remain stable
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(
-                    "Veriipass123!",
-                    "$2a$11$abcdefghijklmnopqrstuv"
-                ),
-                FirstName = "Admin",
-                LastName = "User",
-                RoleId = 3, // Admin role
-                IsEmailConfirmed = true,
-                IsActive = true,
-                CreatedDate = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
-            });
-
             // Global Query Filter for soft delete
             builder.HasQueryFilter(e => !e.IsDeleted);
         }
