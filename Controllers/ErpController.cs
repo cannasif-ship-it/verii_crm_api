@@ -8,6 +8,7 @@ namespace crm_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ErpController : ControllerBase
     {
         private readonly IErpService _IErpService;

@@ -10,6 +10,7 @@ namespace crm_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class SmtpSettingsController : ControllerBase
     {
         private readonly ISmtpSettingsService _smtpSettingsService;
