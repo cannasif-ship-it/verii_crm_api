@@ -7,6 +7,7 @@ using crm_api.UnitOfWork;
 using depoWebAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Globalization;
 
 namespace crm_api.Services
@@ -30,14 +31,19 @@ namespace crm_api.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ApiResponse<short>> GetBranchCodeFromContext()
+        public Task<ApiResponse<short>> GetBranchCodeFromContext()
         {
             var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"]?.ToString();
 
             if (!short.TryParse(branchCodeStr, out var branchCode))
-                return ApiResponse<short>.ErrorResult(_localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalError"), _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"), StatusCodes.Status500InternalServerError);
+                return Task.FromResult(ApiResponse<short>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalError"),
+                    _localizationService.GetLocalizedString("ErpService.BranchCodeRetrievalErrorMessage"),
+                    StatusCodes.Status500InternalServerError));
 
-            return ApiResponse<short>.SuccessResult(branchCode, _localizationService.GetLocalizedString("ErpService.BranchCodeRetrieved"));
+            return Task.FromResult(ApiResponse<short>.SuccessResult(
+                branchCode,
+                _localizationService.GetLocalizedString("ErpService.BranchCodeRetrieved")));
         }
 
 
@@ -52,7 +58,10 @@ namespace crm_api.Services
                 var subeKodu = string.IsNullOrWhiteSpace(subeFromContext) ? null : subeFromContext;
 
                 var result = await _erpContext.RII_FN_CARI
-                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_CARI({0}, {1})", string.IsNullOrWhiteSpace(cariKodu) ? null : cariKodu, subeKodu)
+                    .FromSqlRaw(
+                        "SELECT * FROM dbo.RII_FN_CARI({0}, {1})",
+                        string.IsNullOrWhiteSpace(cariKodu) ? DBNull.Value : cariKodu,
+                        string.IsNullOrWhiteSpace(subeKodu) ? DBNull.Value : subeKodu)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -86,7 +95,10 @@ namespace crm_api.Services
                     : string.Join(",", subeFromContext.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)));
 
                 var result = await _erpContext.RII_FN_CARI
-                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_CARI({0}, {1})", cariParam, subeCsv)
+                    .FromSqlRaw(
+                        "SELECT * FROM dbo.RII_FN_CARI({0}, {1})",
+                        string.IsNullOrWhiteSpace(cariParam) ? DBNull.Value : cariParam,
+                        string.IsNullOrWhiteSpace(subeCsv) ? DBNull.Value : subeCsv)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -111,7 +123,10 @@ namespace crm_api.Services
                 var subeKodu = string.IsNullOrWhiteSpace(subeFromContext) ? null : subeFromContext;
 
                 var result = await _cmsContext.Set<RII_FN_STOK>()
-                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_STOK({0}, {1})", string.IsNullOrWhiteSpace(stokKodu) ? null : stokKodu, subeKodu)
+                    .FromSqlRaw(
+                        "SELECT * FROM dbo.RII_FN_STOK({0}, {1})",
+                        string.IsNullOrWhiteSpace(stokKodu) ? DBNull.Value : stokKodu,
+                        string.IsNullOrWhiteSpace(subeKodu) ? DBNull.Value : subeKodu)
                     .AsNoTracking()
                     .ToListAsync();
                 var mappedResult = _mapper.Map<List<StokFunctionDto>>(result);
@@ -133,7 +148,9 @@ namespace crm_api.Services
             try
             {
                 var rows = await _erpContext.Branches
-                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_BRANCHES({0})", branchNo)
+                    .FromSqlRaw(
+                        "SELECT * FROM dbo.RII_FN_BRANCHES({0})",
+                        branchNo.HasValue ? branchNo.Value : DBNull.Value)
                     .AsNoTracking()
                     .ToListAsync();
                 var mappedList = _mapper.Map<List<BranchDto>>(rows);
@@ -196,7 +213,10 @@ namespace crm_api.Services
                 var subeFromContext = _httpContextAccessor.HttpContext?.Items["BranchCode"] as string;
                 var subeKodu = string.IsNullOrWhiteSpace(subeFromContext) ? null : subeFromContext;
                 var result = await _cmsContext.Set<RII_STGROUP>()
-                .FromSqlRaw("SELECT * FROM dbo.RII_FN_STGRUP({0}, {1})", grupKodu, subeKodu )
+                .FromSqlRaw(
+                    "SELECT * FROM dbo.RII_FN_STGRUP({0}, {1})",
+                    string.IsNullOrWhiteSpace(grupKodu) ? DBNull.Value : grupKodu,
+                    string.IsNullOrWhiteSpace(subeKodu) ? DBNull.Value : subeKodu)
                 .AsNoTracking()
                 .ToListAsync();
                 var mappedResult = _mapper.Map<List<StokGroupDto>>(result);
