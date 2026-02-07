@@ -1915,6 +1915,7 @@ namespace crm_api.Services
                 ApprovalStatus.Waiting => "Beklemede",
                 ApprovalStatus.Approved => "Onaylandı",
                 ApprovalStatus.Rejected => "Reddedildi",
+                ApprovalStatus.Closed => "Kapandı",
                 _ => "Belirsiz"
             };
         }
