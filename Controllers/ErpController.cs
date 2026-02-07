@@ -33,6 +33,7 @@ namespace crm_api.Controllers
         }
 
         [HttpGet("getBranches")]
+        [AllowAnonymous]
         public async Task<ActionResult<ApiResponse<List<BranchDto>>>> GetBranches([FromQuery] int? branchNo = null)
         {
             var result = await _IErpService.GetBranchesAsync(branchNo);

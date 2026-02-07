@@ -19,6 +19,12 @@ namespace crm_api.Helpers
 
         public async Task InvokeAsync(HttpContext context)
         {
+            if (HttpMethods.IsOptions(context.Request.Method))
+            {
+                await _next(context);
+                return;
+            }
+
             // Try to get BranchCode from header
             // Support both "X-Branch-Code" and "Branch-Code" header names
             var branchCode = context.Request.Headers["X-Branch-Code"].FirstOrDefault() 
@@ -32,7 +38,8 @@ namespace crm_api.Helpers
             }
             else
             {
-                _logger.LogWarning("BranchCode header not found in request.");
+                // Not all requests require a branch context (e.g. login, health checks, pre-branch selection).
+                _logger.LogDebug("BranchCode header not found in request.");
             }
 
             // Continue to next middleware

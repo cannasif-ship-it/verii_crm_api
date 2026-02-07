@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.SignalR;
 using crm_api.Hubs;
 using crm_api.Interfaces;
 using crm_api.DTOs;
-using Microsoft.Extensions.Hosting;
 
 namespace crm_api.Controllers
 {
@@ -18,25 +17,19 @@ namespace crm_api.Controllers
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IPermissionAccessService _permissionAccessService;
-        private readonly IWebHostEnvironment _environment;
-        private readonly IConfiguration _configuration;
 
         public AuthController(
             IHubContext<AuthHub> hubContext,
             ILocalizationService localizationService,
             IAuthService authService,
             IUserService userService,
-            IPermissionAccessService permissionAccessService,
-            IWebHostEnvironment environment,
-            IConfiguration configuration)
+            IPermissionAccessService permissionAccessService)
         {
             _hubContext = hubContext;
             _localizationService = localizationService;
             _authService = authService;
             _userService = userService;
             _permissionAccessService = permissionAccessService;
-            _environment = environment;
-            _configuration = configuration;
         }
 
         [AllowAnonymous]
@@ -59,51 +52,6 @@ namespace crm_api.Controllers
             }
 
             return StatusCode(loginResult.StatusCode, ApiResponse<LoginWithSessionResponseDto>.ErrorResult(
-                loginResult.Message,
-                loginResult.ExceptionMessage,
-                loginResult.StatusCode));
-        }
-
-        [AllowAnonymous]
-        [HttpPost("admin-login")]
-        public async Task<ActionResult<ApiResponse<string>>> AdminLogin()
-        {
-            if (!_environment.IsDevelopment())
-            {
-                return NotFound();
-            }
-
-            var email = _configuration["AdminSettings:Email"];
-            var password = _configuration["AdminSettings:Password"];
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                return StatusCode(500, ApiResponse<string>.ErrorResult(
-                    _localizationService.GetLocalizedString("General.InternalServerError"),
-                    "AdminSettings is missing.",
-                    500));
-            }
-
-            var loginDto = new LoginRequest { Email = email, Password = password };
-
-            var loginDtoInternal = new LoginDto
-            {
-                Username = loginDto.Email,
-                Password = loginDto.Password
-            };
-
-            var loginResult = await _authService.LoginWithSessionAsync(loginDtoInternal);
-
-            // SignalR ile eski kullanıcıyı çıkış yaptır (eğer varsa)
-            if (loginResult.Success && loginResult.Data != null)
-            {
-                await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
-
-                return StatusCode(loginResult.StatusCode, ApiResponse<string>.SuccessResult(
-                    loginResult.Data.Token,
-                    loginResult.Message));
-            }
-
-            return StatusCode(loginResult.StatusCode, ApiResponse<string>.ErrorResult(
                 loginResult.Message,
                 loginResult.ExceptionMessage,
                 loginResult.StatusCode));

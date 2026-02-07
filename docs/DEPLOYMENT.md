@@ -38,10 +38,4 @@ After the first successful login, remove these variables.
 
 ## Dev-only Admin Login
 
-`POST /api/auth/admin-login` works only in `Development` and reads credentials from:
-
-- `AdminSettings__Email`
-- `AdminSettings__Password`
-
-In `Production`, this endpoint returns `404`.
-
+Removed. Use `POST /api/auth/login` or Bootstrap Admin for first install.

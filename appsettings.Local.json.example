@@ -6,14 +6,9 @@
   "JwtSettings": {
     "SecretKey": "YOUR_SECRET_KEY_AT_LEAST_32_CHARS"
   },
-  "AdminSettings": {
-    "Email": "admin@example.com",
-    "Password": "DEV_ONLY_PASSWORD"
-  },
   "BootstrapAdmin": {
     "Email": "admin@example.com",
     "Password": "BOOTSTRAP_PASSWORD",
     "RoleId": 3
   }
 }
-
