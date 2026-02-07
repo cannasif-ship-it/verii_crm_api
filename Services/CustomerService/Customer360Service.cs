@@ -12,12 +12,21 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILocalizationService _localizationService;
         private readonly IErpService _erpService;
+        private readonly IRevenueQualityService _revenueQualityService;
+        private readonly INextBestActionService _nextBestActionService;
 
-        public Customer360Service(IUnitOfWork unitOfWork, ILocalizationService localizationService, IErpService erpService)
+        public Customer360Service(
+            IUnitOfWork unitOfWork,
+            ILocalizationService localizationService,
+            IErpService erpService,
+            IRevenueQualityService revenueQualityService,
+            INextBestActionService nextBestActionService)
         {
             _unitOfWork = unitOfWork;
             _localizationService = localizationService;
             _erpService = erpService;
+            _revenueQualityService = revenueQualityService;
+            _nextBestActionService = nextBestActionService;
         }
 
         public async Task<ApiResponse<Customer360OverviewDto>> GetOverviewAsync(long customerId, string? currency = null)
@@ -71,6 +80,8 @@ namespace crm_api.Services
                 };
 
                 var timeline = await BuildTimelineAsync(customerId);
+                var revenueQuality = await _revenueQualityService.CalculateCustomerRevenueQualityAsync(customerId);
+                var recommendedActions = await _nextBestActionService.GetCustomerActionsAsync(customerId, revenueQuality);
 
                 var overview = new Customer360OverviewDto
                 {
@@ -82,7 +93,9 @@ namespace crm_api.Services
                     RecentQuotations = recentQuotations,
                     RecentOrders = recentOrders,
                     RecentActivities = recentActivities,
-                    Timeline = timeline
+                    Timeline = timeline,
+                    RevenueQuality = revenueQuality,
+                    RecommendedActions = recommendedActions
                 };
 
                 return ApiResponse<Customer360OverviewDto>.SuccessResult(
@@ -309,6 +322,162 @@ namespace crm_api.Services
             catch (Exception ex)
             {
                 return ApiResponse<Customer360AnalyticsChartsDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
+                    _localizationService.GetLocalizedString("Customer360Service.ExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<CohortRetentionDto>>> GetCohortRetentionAsync(long customerId, int months = 12)
+        {
+            try
+            {
+                var customerExists = await _unitOfWork.Customers.Query(tracking: false)
+                    .AnyAsync(c => c.Id == customerId && !c.IsDeleted);
+
+                if (!customerExists)
+                {
+                    return ApiResponse<List<CohortRetentionDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var safeMonths = months <= 0 ? 12 : Math.Min(months, 24);
+                var orderDates = await _unitOfWork.Orders.Query(tracking: false)
+                    .Where(o => o.PotentialCustomerId == customerId && !o.IsDeleted && (o.Status == null || o.Status != ApprovalStatus.Closed))
+                    .Select(o => o.OfferDate ?? o.CreatedDate)
+                    .OrderBy(x => x)
+                    .ToListAsync();
+
+                if (orderDates.Count == 0)
+                {
+                    return ApiResponse<List<CohortRetentionDto>>.SuccessResult(new List<CohortRetentionDto>(), _localizationService.GetLocalizedString("General.OperationSuccessful"));
+                }
+
+                var cohortStart = new DateTime(orderDates.Min().Year, orderDates.Min().Month, 1);
+                var activeMonthSet = orderDates
+                    .Select(x => new DateTime(x.Year, x.Month, 1).ToString("yyyy-MM"))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var cohort = new CohortRetentionDto
+                {
+                    CohortKey = cohortStart.ToString("yyyy-MM"),
+                    CohortSize = 1
+                };
+
+                for (var period = 0; period < safeMonths; period++)
+                {
+                    var month = cohortStart.AddMonths(period).ToString("yyyy-MM");
+                    var retained = activeMonthSet.Contains(month) ? 1 : 0;
+
+                    cohort.Points.Add(new CohortRetentionPointDto
+                    {
+                        PeriodIndex = period,
+                        PeriodMonth = month,
+                        RetainedCount = retained,
+                        RetentionRate = retained == 1 ? 100m : 0m
+                    });
+                }
+
+                return ApiResponse<List<CohortRetentionDto>>.SuccessResult(
+                    new List<CohortRetentionDto> { cohort },
+                    _localizationService.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<CohortRetentionDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
+                    _localizationService.GetLocalizedString("Customer360Service.ExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<ActivityDto>> ExecuteRecommendedActionAsync(long customerId, ExecuteRecommendedActionDto request)
+        {
+            try
+            {
+                var customer = await _unitOfWork.Customers.Query(tracking: false)
+                    .FirstOrDefaultAsync(c => c.Id == customerId && !c.IsDeleted);
+
+                if (customer == null)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var actionCode = (request.ActionCode ?? string.Empty).Trim().ToUpperInvariant();
+                if (string.IsNullOrWhiteSpace(actionCode))
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var dueInDays = request.DueInDays.GetValueOrDefault(1);
+                if (dueInDays < 0) dueInDays = 0;
+                if (dueInDays > 30) dueInDays = 30;
+
+                var subject = string.IsNullOrWhiteSpace(request.Title)
+                    ? $"[{actionCode}] {customer.CustomerName}"
+                    : request.Title.Trim();
+
+                var description = request.Reason ?? $"Auto-created from Customer 360 recommended action: {actionCode}.";
+                var priority = string.IsNullOrWhiteSpace(request.Priority) ? "High" : request.Priority.Trim();
+
+                var activity = new Activity
+                {
+                    Subject = subject,
+                    Description = description,
+                    PotentialCustomerId = customerId,
+                    ErpCustomerCode = customer.CustomerCode,
+                    Status = "Scheduled",
+                    IsCompleted = false,
+                    Priority = priority,
+                    AssignedUserId = request.AssignedUserId,
+                    ActivityDate = DateTime.UtcNow.AddDays(dueInDays)
+                };
+
+                await _unitOfWork.Activities.AddAsync(activity);
+                await _unitOfWork.SaveChangesAsync();
+
+                var entity = await _unitOfWork.Activities.Query(tracking: false)
+                    .Include(a => a.CreatedByUser)
+                    .Include(a => a.UpdatedByUser)
+                    .Include(a => a.DeletedByUser)
+                    .FirstOrDefaultAsync(a => a.Id == activity.Id) ?? activity;
+
+                var dto = new ActivityDto
+                {
+                    Id = entity.Id,
+                    CreatedDate = entity.CreatedDate,
+                    UpdatedDate = entity.UpdatedDate,
+                    DeletedDate = entity.DeletedDate,
+                    IsDeleted = entity.IsDeleted,
+                    CreatedByFullUser = entity.CreatedByUser?.FullName,
+                    UpdatedByFullUser = entity.UpdatedByUser?.FullName,
+                    DeletedByFullUser = entity.DeletedByUser?.FullName,
+                    Subject = entity.Subject,
+                    Description = entity.Description,
+                    ActivityTypeId = entity.ActivityTypeId,
+                    PotentialCustomerId = entity.PotentialCustomerId,
+                    ErpCustomerCode = entity.ErpCustomerCode,
+                    Status = entity.Status,
+                    IsCompleted = entity.IsCompleted,
+                    Priority = entity.Priority,
+                    ContactId = entity.ContactId,
+                    AssignedUserId = entity.AssignedUserId,
+                    ActivityDate = entity.ActivityDate
+                };
+
+                return ApiResponse<ActivityDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ActivityService.ActivityCreated"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<ActivityDto>.ErrorResult(
                     _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
                     _localizationService.GetLocalizedString("Customer360Service.ExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);

@@ -8,5 +8,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<Customer360OverviewDto>> GetOverviewAsync(long customerId, string? currency = null);
         Task<ApiResponse<Customer360AnalyticsSummaryDto>> GetAnalyticsSummaryAsync(long customerId, string? currency = null);
         Task<ApiResponse<Customer360AnalyticsChartsDto>> GetAnalyticsChartsAsync(long customerId, int months = 12, string? currency = null);
+        Task<ApiResponse<List<CohortRetentionDto>>> GetCohortRetentionAsync(long customerId, int months = 12);
+        Task<ApiResponse<ActivityDto>> ExecuteRecommendedActionAsync(long customerId, ExecuteRecommendedActionDto request);
     }
 }
