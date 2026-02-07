@@ -181,7 +181,7 @@ namespace crm_api.Services.ReportBuilderService
                 if (!string.IsNullOrEmpty(err))
                     return ApiResponse<object>.ErrorResult(err, null, 400);
             }
-            catch (JsonException ex)
+            catch (JsonException)
             {
                 return ApiResponse<object>.ErrorResult(_localizationService.GetLocalizedString("ReportService.InvalidConfigJsonFormat"), _localizationService.GetLocalizedString("ReportService.InvalidConfigJsonFormat"), 400);
             }

@@ -161,7 +161,7 @@ namespace crm_api.Services
         public async Task<SmtpSettingsRuntimeDto> GetRuntimeAsync()
         {
             // DB kontrol yok: cache varsa direkt dön
-            if (_cache.TryGetValue(CacheKey, out SmtpSettingsRuntimeDto cached) && cached != null)
+            if (_cache.TryGetValue(CacheKey, out SmtpSettingsRuntimeDto? cached) && cached != null)
                 return cached;
 
             // cache yoksa DB’den al

@@ -27,12 +27,14 @@ namespace crm_api.Services
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<ReportTemplateService> logger,
+            ILocalizationService localizationService,
             CmsDbContext context,
             IReportPdfGeneratorService pdfGenerator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _localizationService = localizationService;
             _context = context;
             _pdfGenerator = pdfGenerator;
         }

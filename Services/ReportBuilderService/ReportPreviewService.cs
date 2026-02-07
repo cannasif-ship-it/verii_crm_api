@@ -57,7 +57,7 @@ namespace crm_api.Services.ReportBuilderService
             {
                 config = JsonSerializer.Deserialize<ReportConfig>(request.ConfigJson, JsonOptions) ?? new ReportConfig();
             }
-            catch (JsonException ex)
+            catch (JsonException)
             {
                 return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), _localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), 400);
             }
