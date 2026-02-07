@@ -18,21 +18,6 @@ namespace crm_api.Persistence.Configurations
 
             builder.Property(x => x.Port).IsRequired();
             builder.Property(x => x.Timeout).IsRequired();
-
-            // Tek kayıt mantığına yardımcı: Id = 1 seed (opsiyonel ama pratik)
-            builder.HasData(new SmtpSetting
-            {
-                Id = 1,
-                Host = "smtp.gmail.com",
-                Port = 587,
-                EnableSsl = true,
-                Username = "",
-                PasswordEncrypted = "",
-                FromEmail = "",
-                FromName = "V3RII CRM SYSTEM",
-                Timeout = 30
-                // EntityBase alanların seed’de gerekiyorsa eklenir (CreatedAt vs.)
-            });
         }
     }
 }
