@@ -67,7 +67,7 @@ namespace crm_api.Controllers
             }
 
             var result = await _userDiscountLimitService.CreateAsync(createDto);
-            if (result.Success)
+            if (result.Success && result.Data != null)
             {
                 return CreatedAtAction(nameof(GetById), new { id = result.Data.Id }, result);
             }

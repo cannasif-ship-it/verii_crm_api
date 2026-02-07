@@ -38,7 +38,7 @@ namespace crm_api.Controllers
         {
 
             var result = await _productPricingGroupByService.CreateProductPricingGroupByAsync(createDto);
-            if (result.Success)
+            if (result.Success && result.Data != null)
             {
                 return CreatedAtAction(nameof(GetProductPricingGroupBy), new { id = result.Data.Id }, result);
             }
