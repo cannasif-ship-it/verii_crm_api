@@ -143,6 +143,18 @@
   <data name="General.AccountInactive" xml:space="preserve">
     <value>Your account is not active.</value>
   </data>
+  <data name="MailController.SmtpSettingsMissing" xml:space="preserve">
+    <value>SMTP settings were not found. Please configure them in Mail Settings.</value>
+  </data>
+  <data name="MailController.SmtpSettingsIncomplete" xml:space="preserve">
+    <value>SMTP settings are incomplete. Please fill Host, Username, Password and From Email.</value>
+  </data>
+  <data name="MailController.TestMailSendFailed" xml:space="preserve">
+    <value>Test email could not be sent. Please check your SMTP settings.</value>
+  </data>
+  <data name="MailController.SmtpSettingsCannotDecryptPassword" xml:space="preserve">
+    <value>SMTP password could not be decrypted (the server key may have changed). Please re-save the password in Mail Settings.</value>
+  </data>
   
   
   <data name="CityService.CitiesRetrieved" xml:space="preserve">

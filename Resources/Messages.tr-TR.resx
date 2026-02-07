@@ -179,6 +179,18 @@
   <data name="General.AccountInactive" xml:space="preserve">
     <value>Hesabınız aktif değil.</value>
   </data>
+  <data name="MailController.SmtpSettingsMissing" xml:space="preserve">
+    <value>SMTP ayarları bulunamadı. Lütfen Mail Ayarları ekranından yapılandırın.</value>
+  </data>
+  <data name="MailController.SmtpSettingsIncomplete" xml:space="preserve">
+    <value>SMTP ayarları eksik. Host, Kullanıcı Adı, Şifre ve Gönderen E-posta alanlarını doldurun.</value>
+  </data>
+  <data name="MailController.TestMailSendFailed" xml:space="preserve">
+    <value>Test maili gönderilemedi. SMTP ayarlarınızı kontrol edin.</value>
+  </data>
+  <data name="MailController.SmtpSettingsCannotDecryptPassword" xml:space="preserve">
+    <value>SMTP şifresi çözümlenemedi (sunucu anahtarı değişmiş olabilir). Lütfen Mail Ayarları ekranından şifreyi tekrar kaydedin.</value>
+  </data>
   
   
   <data name="CityService.CitiesRetrieved" xml:space="preserve">
