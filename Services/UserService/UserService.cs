@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
+using crm_api.Models.UserPermissions;
 
 namespace crm_api.Services
 {
@@ -73,6 +74,7 @@ namespace crm_api.Services
                 var query = _uow.Users.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
+                    .Include(u => u.RoleNavigation)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
@@ -123,6 +125,7 @@ namespace crm_api.Services
                 // Reload with navigation properties for mapping
                 var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
+                    .Include(u => u.RoleNavigation)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
@@ -144,19 +147,88 @@ namespace crm_api.Services
         {
             try
             {
-                dto.RoleId = 3;
-                dto.Password = "123456";
+                if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Email))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var existsByEmail = await _uow.Users.Query()
+                    .AsNoTracking()
+                    .AnyAsync(x => !x.IsDeleted && x.Email == dto.Email);
+
+                if (existsByEmail)
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var existsByUsername = await _uow.Users.Query()
+                    .AsNoTracking()
+                    .AnyAsync(x => !x.IsDeleted && x.Username == dto.Username);
+
+                if (existsByUsername)
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (dto.RoleId <= 0)
+                {
+                    dto.RoleId = 1;
+                }
+
+                var roleExists = await _uow.UserAuthorities.Query()
+                    .AsNoTracking()
+                    .AnyAsync(x => x.Id == dto.RoleId && !x.IsDeleted);
+
+                if (!roleExists)
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (dto.PermissionGroupIds != null)
+                {
+                    var validateGroups = await ValidatePermissionGroupIdsAsync(dto.PermissionGroupIds);
+                    if (!validateGroups.Success)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(validateGroups.Message, validateGroups.ExceptionMessage, validateGroups.StatusCode);
+                    }
+                }
+
+                var plainPassword = string.IsNullOrWhiteSpace(dto.Password)
+                    ? GenerateTemporaryPassword()
+                    : dto.Password;
+
                 var entity = _mapper.Map<User>(dto);
                 entity.IsEmailConfirmed = true;
-                entity.IsActive = true;
-                entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-                entity.CreatedDate = DateTime.UtcNow;
+                entity.IsActive = dto.IsActive ?? true;
+                entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
                 await _uow.Users.AddAsync(entity);
                 await _uow.SaveChangesAsync();
+
+                if (dto.PermissionGroupIds != null)
+                {
+                    var syncResult = await SyncUserPermissionGroupsAsync(entity.Id, dto.PermissionGroupIds);
+                    if (!syncResult.Success)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(syncResult.Message, syncResult.ExceptionMessage, syncResult.StatusCode);
+                    }
+                }
 
                 // Reload with navigation properties for mapping
                 var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
+                    .Include(u => u.RoleNavigation)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
@@ -166,9 +238,37 @@ namespace crm_api.Services
                 
                     var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
                     BackgroundJob.Enqueue<IMailJob>(job =>
-                        job.SendUserCreatedEmailAsync(dto.Email, dto.Username, dto.Password, dto.FirstName, dto.LastName, baseUrl));
+                        job.SendUserCreatedEmailAsync(dto.Email, dto.Username, plainPassword, dto.FirstName, dto.LastName, baseUrl));
 
                 return ApiResponse<UserDto>.SuccessResult(outDto, _loc.GetLocalizedString("UserService.UserCreated"));
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+
+                if (innerMessage.Contains("IX_Users_Email", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("IX_Users_Username", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (innerMessage.Contains("RII_USER_AUTHORITY", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("FOREIGN KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<UserDto>.ErrorResult(
+                    _loc.GetLocalizedString("UserService.InternalServerError"),
+                    _loc.GetLocalizedString("UserService.CreateUserExceptionMessage", innerMessage),
+                    StatusCodes.Status500InternalServerError);
             }
             catch (Exception ex)
             {
@@ -188,15 +288,72 @@ namespace crm_api.Services
                     _loc.GetLocalizedString("UserService.UserNotFound"),
                     null,
                     StatusCodes.Status404NotFound);
-                dto.RoleId = entity.RoleId;
+
+                if (dto.Email != null && string.IsNullOrWhiteSpace(dto.Email))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.Email) &&
+                    !dto.Email.Equals(entity.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    var emailExists = await _uow.Users.Query()
+                        .AsNoTracking()
+                        .AnyAsync(x => !x.IsDeleted && x.Id != id && x.Email == dto.Email);
+
+                    if (emailExists)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(
+                            _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                            _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                            StatusCodes.Status400BadRequest);
+                    }
+                }
+
+                if (dto.RoleId.HasValue && dto.RoleId.Value > 0 && dto.RoleId.Value != entity.RoleId)
+                {
+                    var roleExists = await _uow.UserAuthorities.Query()
+                        .AsNoTracking()
+                        .AnyAsync(x => x.Id == dto.RoleId.Value && !x.IsDeleted);
+
+                    if (!roleExists)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(
+                            _loc.GetLocalizedString("General.ValidationError"),
+                            _loc.GetLocalizedString("General.ValidationError"),
+                            StatusCodes.Status400BadRequest);
+                    }
+                }
+
+                if (dto.PermissionGroupIds != null)
+                {
+                    var validateGroups = await ValidatePermissionGroupIdsAsync(dto.PermissionGroupIds);
+                    if (!validateGroups.Success)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(validateGroups.Message, validateGroups.ExceptionMessage, validateGroups.StatusCode);
+                    }
+                }
+
                 _mapper.Map(dto, entity);
-                entity.UpdatedDate = DateTime.UtcNow;
                 await _uow.Users.UpdateAsync(entity);
                 await _uow.SaveChangesAsync();
+
+                if (dto.PermissionGroupIds != null)
+                {
+                    var syncResult = await SyncUserPermissionGroupsAsync(entity.Id, dto.PermissionGroupIds);
+                    if (!syncResult.Success)
+                    {
+                        return ApiResponse<UserDto>.ErrorResult(syncResult.Message, syncResult.ExceptionMessage, syncResult.StatusCode);
+                    }
+                }
 
                 // Reload with navigation properties for mapping
                 var userWithNav = await _uow.Users.Query()
                     .AsNoTracking()
+                    .Include(u => u.RoleNavigation)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
@@ -204,6 +361,34 @@ namespace crm_api.Services
 
                 var outDto = _mapper.Map<UserDto>(userWithNav ?? entity);
                 return ApiResponse<UserDto>.SuccessResult(outDto, _loc.GetLocalizedString("UserService.UserUpdated"));
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+
+                if (innerMessage.Contains("IX_Users_Email", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("IX_Users_Username", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        _loc.GetLocalizedString("UserService.UserAlreadyExists"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (innerMessage.Contains("RII_USER_AUTHORITY", StringComparison.OrdinalIgnoreCase) ||
+                    innerMessage.Contains("FOREIGN KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<UserDto>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<UserDto>.ErrorResult(
+                    _loc.GetLocalizedString("UserService.InternalServerError"),
+                    _loc.GetLocalizedString("UserService.UpdateUserExceptionMessage", innerMessage),
+                    StatusCodes.Status500InternalServerError);
             }
             catch (Exception ex)
             {
@@ -265,6 +450,103 @@ namespace crm_api.Services
                 return ApiResponse<UserDto>.ErrorResult(
                     _loc.GetLocalizedString("UserService.InternalServerError"),
                     _loc.GetLocalizedString("UserService.GetUserProfileExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        private string GenerateTemporaryPassword()
+        {
+            var seed = Guid.NewGuid().ToString("N")[..10];
+            return $"V3r!{seed}";
+        }
+
+        private async Task<ApiResponse<bool>> ValidatePermissionGroupIdsAsync(IEnumerable<long> permissionGroupIds)
+        {
+            try
+            {
+                var distinctGroupIds = permissionGroupIds.Distinct().ToList();
+                if (distinctGroupIds.Count == 0)
+                {
+                    return ApiResponse<bool>.SuccessResult(true, _loc.GetLocalizedString("General.OperationSuccessful"));
+                }
+
+                var validCount = await _uow.PermissionGroups.Query()
+                    .AsNoTracking()
+                    .CountAsync(x => !x.IsDeleted && distinctGroupIds.Contains(x.Id));
+
+                if (validCount != distinctGroupIds.Count)
+                {
+                    return ApiResponse<bool>.ErrorResult(
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        _loc.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                return ApiResponse<bool>.SuccessResult(true, _loc.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.ErrorResult(
+                    _loc.GetLocalizedString("General.InternalServerError"),
+                    ex.Message,
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        private async Task<ApiResponse<bool>> SyncUserPermissionGroupsAsync(long userId, IEnumerable<long> permissionGroupIds)
+        {
+            try
+            {
+                var distinctGroupIds = permissionGroupIds.Distinct().ToList();
+
+                var validate = await ValidatePermissionGroupIdsAsync(distinctGroupIds);
+                if (!validate.Success)
+                {
+                    return validate;
+                }
+
+                var allLinks = await _uow.UserPermissionGroups
+                    .Query(tracking: true, ignoreQueryFilters: true)
+                    .Where(x => x.UserId == userId)
+                    .ToListAsync();
+
+                // Soft-delete links not desired anymore
+                foreach (var link in allLinks.Where(x => !x.IsDeleted && !distinctGroupIds.Contains(x.PermissionGroupId)))
+                {
+                    await _uow.UserPermissionGroups.SoftDeleteAsync(link.Id);
+                }
+
+                // Ensure each desired groupId is active; revive if previously soft-deleted
+                foreach (var groupId in distinctGroupIds)
+                {
+                    var existing = allLinks.FirstOrDefault(x => x.PermissionGroupId == groupId);
+                    if (existing == null)
+                    {
+                        await _uow.UserPermissionGroups.AddAsync(new UserPermissionGroup
+                        {
+                            UserId = userId,
+                            PermissionGroupId = groupId
+                        });
+                        continue;
+                    }
+
+                    if (existing.IsDeleted)
+                    {
+                        existing.IsDeleted = false;
+                        existing.DeletedDate = null;
+                        existing.DeletedBy = null;
+                        await _uow.UserPermissionGroups.UpdateAsync(existing);
+                    }
+                }
+
+                await _uow.SaveChangesAsync();
+                return ApiResponse<bool>.SuccessResult(true, _loc.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.ErrorResult(
+                    _loc.GetLocalizedString("General.InternalServerError"),
+                    ex.Message,
                     StatusCodes.Status500InternalServerError);
             }
         }

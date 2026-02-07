@@ -11,6 +11,7 @@ namespace crm_api.DTOs
         public string? LastName { get; set; }
         public string? PhoneNumber { get; set; }
         public string Role { get; set; } = string.Empty;
+        public long RoleId { get; set; }
         public bool IsEmailConfirmed { get; set; }
         public bool IsActive { get; set; }
         public DateTime? LastLoginDate { get; set; }
@@ -86,6 +87,10 @@ namespace crm_api.DTOs
 
         [Required]
         public long RoleId { get; set; }
+
+        public bool? IsActive { get; set; }
+
+        public List<long>? PermissionGroupIds { get; set; }
     }
 
     public class LoginResponseDto
@@ -164,5 +169,7 @@ namespace crm_api.DTOs
         public long? RoleId { get; set; }
 
         public bool? IsActive { get; set; }
+
+        public List<long>? PermissionGroupIds { get; set; }
     }
 }

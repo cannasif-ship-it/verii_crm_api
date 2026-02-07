@@ -16,13 +16,20 @@ namespace crm_api.Controllers
         private readonly ILocalizationService _localizationService;
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
+        private readonly IPermissionAccessService _permissionAccessService;
 
-        public AuthController(IHubContext<AuthHub> hubContext, ILocalizationService localizationService, IAuthService authService, IUserService userService)
+        public AuthController(
+            IHubContext<AuthHub> hubContext,
+            ILocalizationService localizationService,
+            IAuthService authService,
+            IUserService userService,
+            IPermissionAccessService permissionAccessService)
         {
             _hubContext = hubContext;
             _localizationService = localizationService;
             _authService = authService;
             _userService = userService;
+            _permissionAccessService = permissionAccessService;
         }
 
         [AllowAnonymous]
@@ -98,6 +105,14 @@ namespace crm_api.Controllers
             }
 
             var result = await _userService.GetUserProfileAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [Authorize]
+        [HttpGet("me/permissions")]
+        public async Task<ActionResult<ApiResponse<MyPermissionsDto>>> GetMyPermissions()
+        {
+            var result = await _permissionAccessService.GetMyPermissionsAsync();
             return StatusCode(result.StatusCode, result);
         }
 
