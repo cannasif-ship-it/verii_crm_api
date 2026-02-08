@@ -90,6 +90,9 @@ builder.Services.AddHangfire(configuration => configuration
         DisableGlobalLocks = true
     }));
 
+builder.Services.Configure<HangfireMonitoringOptions>(
+    builder.Configuration.GetSection(HangfireMonitoringOptions.SectionName));
+
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
 {
     Attempts = 3,
@@ -98,7 +101,10 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
     OnAttemptsExceeded = AttemptsExceededAction.Fail
 });
 
-builder.Services.AddHangfireServer();
+builder.Services.AddHangfireServer(options =>
+{
+    options.Queues = new[] { "default", "dead-letter" };
+});
 
 // Creates the first admin user only when the DB is empty and BootstrapAdmin is configured.
 builder.Services.AddHostedService<AdminBootstrapHostedService>();
@@ -216,6 +222,7 @@ builder.Services.AddScoped<ISmtpSettingsService, SmtpSettingsService>();
 // Register Background Jobs
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IStockSyncJob, Infrastructure.BackgroundJobs.StockSyncJob>();
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IMailJob, Infrastructure.BackgroundJobs.MailJob>();
+builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IHangfireDeadLetterJob, Infrastructure.BackgroundJobs.HangfireDeadLetterJob>();
 
 // Register File Upload Services
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
@@ -486,7 +493,9 @@ var app = builder.Build();
 
 GlobalJobFilters.Filters.Add(
     new HangfireJobStateFilter(
-        app.Services.GetRequiredService<ILogger<HangfireJobStateFilter>>()));
+        app.Services.GetRequiredService<ILogger<HangfireJobStateFilter>>(),
+        app.Services.GetRequiredService<IBackgroundJobClient>(),
+        app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<HangfireMonitoringOptions>>()));
 
 // Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
