@@ -417,16 +417,25 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var dueInDays = request.DueInDays.GetValueOrDefault(1);
+                if (!NbaActionCatalog.TryGet(actionCode, out var template) ||
+                    !string.Equals(template.TargetEntityType, "Customer", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        $"Unsupported action code for Customer360: {actionCode}",
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var dueInDays = request.DueInDays.GetValueOrDefault(template.DefaultDueInDays);
                 if (dueInDays < 0) dueInDays = 0;
                 if (dueInDays > 30) dueInDays = 30;
 
                 var subject = string.IsNullOrWhiteSpace(request.Title)
-                    ? $"[{actionCode}] {customer.CustomerName}"
+                    ? $"[{actionCode}] {template.Title} - {customer.CustomerName}"
                     : request.Title.Trim();
 
                 var description = request.Reason ?? $"Auto-created from Customer 360 recommended action: {actionCode}.";
-                var priority = string.IsNullOrWhiteSpace(request.Priority) ? "High" : request.Priority.Trim();
+                var priority = string.IsNullOrWhiteSpace(request.Priority) ? template.DefaultPriority : request.Priority.Trim();
 
                 var activity = new Activity
                 {

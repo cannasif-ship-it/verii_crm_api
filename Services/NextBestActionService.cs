@@ -52,7 +52,7 @@ namespace crm_api.Services
             if (inactivityDays >= 14)
             {
                 actions.Add(CreateAction(
-                    "CUSTOMER_FOLLOW_UP",
+                    NbaActionCatalog.CustomerFollowUp,
                     "Customer follow-up call",
                     95,
                     $"No customer activity in the last {inactivityDays} days.",
@@ -65,7 +65,7 @@ namespace crm_api.Services
             if (openQuotationCount > 0 && inactivityDays >= 7)
             {
                 actions.Add(CreateAction(
-                    "QUOTATION_FOLLOW_UP",
+                    NbaActionCatalog.QuotationFollowUp,
                     "Follow up open quotations",
                     90,
                     $"{openQuotationCount} open quotation(s) without recent activity.",
@@ -78,7 +78,7 @@ namespace crm_api.Services
             if ((revenueQuality.ChurnRiskScore ?? 0m) >= 70m)
             {
                 actions.Add(CreateAction(
-                    "RETENTION_PLAN",
+                    NbaActionCatalog.RetentionPlan,
                     "Run retention plan",
                     88,
                     $"Churn risk score is {(revenueQuality.ChurnRiskScore ?? 0m):0.##}.",
@@ -91,7 +91,7 @@ namespace crm_api.Services
             if ((revenueQuality.UpsellPropensityScore ?? 0m) >= 70m)
             {
                 actions.Add(CreateAction(
-                    "UPSELL_OFFER",
+                    NbaActionCatalog.UpsellOffer,
                     "Prepare upsell offer",
                     75,
                     $"Upsell propensity score is {(revenueQuality.UpsellPropensityScore ?? 0m):0.##}.",
@@ -104,7 +104,7 @@ namespace crm_api.Services
             if ((revenueQuality.PaymentBehaviorScore ?? 100m) <= 40m)
             {
                 actions.Add(CreateAction(
-                    "PAYMENT_REVIEW",
+                    NbaActionCatalog.PaymentReview,
                     "Run payment risk review",
                     82,
                     $"Payment behavior score is {(revenueQuality.PaymentBehaviorScore ?? 0m):0.##}.",
@@ -117,7 +117,7 @@ namespace crm_api.Services
             if (daysSinceLastOrder >= 60 && openDemandCount > 0)
             {
                 actions.Add(CreateAction(
-                    "DEMAND_TO_QUOTATION",
+                    NbaActionCatalog.DemandToQuotation,
                     "Convert open demands to quotations",
                     78,
                     $"No order in {daysSinceLastOrder} days and {openDemandCount} open demand(s).",
@@ -165,7 +165,7 @@ namespace crm_api.Services
             if (openQuotationCount >= 15)
             {
                 actions.Add(CreateAction(
-                    "PIPELINE_CLEANUP",
+                    NbaActionCatalog.PipelineCleanup,
                     "Clean open pipeline",
                     90,
                     $"{openQuotationCount} open quotations require prioritization.",
@@ -178,7 +178,7 @@ namespace crm_api.Services
             if (activityCount7 < 5)
             {
                 actions.Add(CreateAction(
-                    "ACTIVITY_BOOST",
+                    NbaActionCatalog.ActivityBoost,
                     "Increase activity cadence",
                     80,
                     $"Only {activityCount7} activities in the last 7 days.",
@@ -191,7 +191,7 @@ namespace crm_api.Services
             if ((revenueQuality.ChurnRiskScore ?? 0m) >= 70m)
             {
                 actions.Add(CreateAction(
-                    "PORTFOLIO_RETENTION",
+                    NbaActionCatalog.PortfolioRetention,
                     "Review risky customer portfolio",
                     88,
                     $"Portfolio churn risk score is {(revenueQuality.ChurnRiskScore ?? 0m):0.##}.",
@@ -204,7 +204,7 @@ namespace crm_api.Services
             if ((revenueQuality.UpsellPropensityScore ?? 0m) >= 70m)
             {
                 actions.Add(CreateAction(
-                    "UPSELL_CAMPAIGN",
+                    NbaActionCatalog.UpsellCampaign,
                     "Run upsell campaign",
                     74,
                     $"Upsell propensity score is {(revenueQuality.UpsellPropensityScore ?? 0m):0.##}.",
@@ -218,7 +218,7 @@ namespace crm_api.Services
             if (quotationCount90 >= 5 && winRate90 < 0.2m)
             {
                 actions.Add(CreateAction(
-                    "WINRATE_IMPROVEMENT",
+                    NbaActionCatalog.WinrateImprovement,
                     "Review lost quotation reasons",
                     76,
                     $"90-day win rate is {(winRate90 * 100m):0.##}%.",
