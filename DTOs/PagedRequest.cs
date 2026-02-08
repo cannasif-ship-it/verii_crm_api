@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using crm_api.Infrastructure.ModelBinding;
+using Microsoft.AspNetCore.Mvc;
 
 namespace crm_api.DTOs
 {
@@ -9,6 +11,7 @@ namespace crm_api.DTOs
         public string Value { get; set; } = string.Empty;
     }
 
+    [ModelBinder(BinderType = typeof(PagedRequestModelBinder))]
     public class PagedRequest
     {
         public int PageNumber { get; set; } = 1;
