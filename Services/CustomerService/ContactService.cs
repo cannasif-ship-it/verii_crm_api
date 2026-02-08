@@ -7,6 +7,8 @@ using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
 
 namespace crm_api.Services
 {
@@ -114,6 +116,12 @@ namespace crm_api.Services
         {
             try
             {
+                var governanceError = await ValidateContactGovernanceAsync(createContactDto, null);
+                if (governanceError != null)
+                {
+                    return governanceError;
+                }
+
                 var contact = _mapper.Map<Contact>(createContactDto);
                 await _unitOfWork.Contacts.AddAsync(contact);
                 await _unitOfWork.SaveChangesAsync();
@@ -151,6 +159,12 @@ namespace crm_api.Services
         {
             try
             {
+                var governanceError = await ValidateContactGovernanceAsync(updateContactDto, id);
+                if (governanceError != null)
+                {
+                    return governanceError;
+                }
+
                 // Get tracked entity for update
                 var contact = await _unitOfWork.Contacts.GetByIdForUpdateAsync(id);
                 if (contact == null)
@@ -217,6 +231,100 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("ContactService.InternalServerError"),
                     _localizationService.GetLocalizedString("ContactService.DeleteContactExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        private async Task<ApiResponse<ContactDto>?> ValidateContactGovernanceAsync(CreateContactDto dto, long? excludedId)
+        {
+            if (string.IsNullOrWhiteSpace(dto.FullName))
+            {
+                return ApiResponse<ContactDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("ContactService.FullNameRequired"),
+                    _localizationService.GetLocalizedString("ContactService.FullNameRequired"),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            if (!IsValidEmail(dto.Email))
+            {
+                return ApiResponse<ContactDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("ContactService.InvalidEmail"),
+                    _localizationService.GetLocalizedString("ContactService.InvalidEmail"),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            var normalizedEmail = NormalizeText(dto.Email);
+            var normalizedPhone = NormalizeDigits(dto.Phone);
+            var normalizedMobile = NormalizeDigits(dto.Mobile);
+            var normalizedName = NormalizeText(dto.FullName);
+
+            var duplicateQuery = _unitOfWork.Contacts
+                .Query()
+                .Where(c => !c.IsDeleted && c.CustomerId == dto.CustomerId);
+
+            if (excludedId.HasValue)
+            {
+                duplicateQuery = duplicateQuery.Where(c => c.Id != excludedId.Value);
+            }
+
+            var hasDuplicate = await duplicateQuery.AnyAsync(c =>
+                (!string.IsNullOrWhiteSpace(normalizedEmail) && NormalizeText(c.Email) == normalizedEmail) ||
+                ((!string.IsNullOrWhiteSpace(normalizedMobile) || !string.IsNullOrWhiteSpace(normalizedPhone)) &&
+                 NormalizeText(c.FullName) == normalizedName &&
+                 (NormalizeDigits(c.Mobile) == normalizedMobile || NormalizeDigits(c.Phone) == normalizedPhone)));
+
+            if (hasDuplicate)
+            {
+                return ApiResponse<ContactDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("ContactService.DuplicateContact"),
+                    _localizationService.GetLocalizedString("ContactService.DuplicateContact"),
+                    StatusCodes.Status409Conflict);
+            }
+
+            return null;
+        }
+
+        private async Task<ApiResponse<ContactDto>?> ValidateContactGovernanceAsync(UpdateContactDto dto, long excludedId)
+        {
+            var createLike = new CreateContactDto
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Mobile = dto.Mobile,
+                Notes = dto.Notes,
+                CustomerId = dto.CustomerId,
+                TitleId = dto.TitleId
+            };
+
+            return await ValidateContactGovernanceAsync(createLike, excludedId);
+        }
+
+        private static string NormalizeText(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToUpperInvariant();
+        }
+
+        private static string NormalizeDigits(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            return new string(value.Where(char.IsDigit).ToArray());
+        }
+
+        private static bool IsValidEmail(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return true;
+
+            try
+            {
+                _ = new MailAddress(value.Trim());
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

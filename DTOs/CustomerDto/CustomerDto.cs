@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace crm_api.DTOs
 {
@@ -150,5 +151,26 @@ namespace crm_api.DTOs
 
         public DateTime? CompletedDate { get; set; }
         public bool IsCompleted { get; set; }
+    }
+
+    public class CustomerDuplicateCandidateDto
+    {
+        public long MasterCustomerId { get; set; }
+        public string MasterCustomerName { get; set; } = string.Empty;
+        public long DuplicateCustomerId { get; set; }
+        public string DuplicateCustomerName { get; set; } = string.Empty;
+        public string MatchType { get; set; } = string.Empty;
+        public decimal Score { get; set; }
+    }
+
+    public class CustomerMergeRequestDto
+    {
+        [Required]
+        public long MasterCustomerId { get; set; }
+
+        [Required]
+        public long DuplicateCustomerId { get; set; }
+
+        public bool PreferMasterValues { get; set; } = true;
     }
 }

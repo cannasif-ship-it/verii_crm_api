@@ -51,5 +51,19 @@ namespace crm_api.Controllers
             var result = await _customerService.DeleteCustomerAsync(id);
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpGet("dedupe/candidates")]
+        public async Task<IActionResult> GetDuplicateCandidates()
+        {
+            var result = await _customerService.GetDuplicateCandidatesAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("dedupe/merge")]
+        public async Task<IActionResult> MergeCustomers([FromBody] CustomerMergeRequestDto request)
+        {
+            var result = await _customerService.MergeCustomersAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }
