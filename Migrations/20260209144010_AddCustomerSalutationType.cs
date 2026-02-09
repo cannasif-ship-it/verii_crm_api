@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,40 +11,53 @@ namespace crm_api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "RII_SMTP_SETTING",
-                keyColumn: "Id",
-                keyValue: 1L);
+            migrationBuilder.Sql(@"
+                UPDATE RII_ACTIVITY SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_ACTIVITY SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_ACTIVITY SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_ACTIVITY_TYPE SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_ACTIVITY_TYPE SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_ACTIVITY_TYPE SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_REPORT_TEMPLATES SET CreatedByUserId = NULL WHERE CreatedByUserId = 1;
+                UPDATE RII_REPORT_TEMPLATES SET UpdatedByUserId = NULL WHERE UpdatedByUserId = 1;
+                UPDATE RII_REPORT_TEMPLATES SET DeletedByUserId = NULL WHERE DeletedByUserId = 1;
+                UPDATE RII_USER_PERMISSION_GROUPS SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_USER_PERMISSION_GROUPS SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_USER_PERMISSION_GROUPS SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_APPROVAL_ACTION SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_APPROVAL_ACTION SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_APPROVAL_ACTION SET DeletedBy = NULL WHERE DeletedBy = 1;
+                DELETE FROM RII_APPROVAL_ACTION WHERE ApprovedByUserId = 1;
+                UPDATE RII_APPROVAL_FLOW SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_APPROVAL_FLOW SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_APPROVAL_FLOW SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_APPROVAL_FLOW_STEP SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_APPROVAL_FLOW_STEP SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_APPROVAL_FLOW_STEP SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_APPROVAL_REQUEST SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_APPROVAL_REQUEST SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_APPROVAL_REQUEST SET DeletedBy = NULL WHERE DeletedBy = 1;
+                UPDATE RII_APPROVAL_ROLE SET CreatedBy = NULL WHERE CreatedBy = 1;
+                UPDATE RII_APPROVAL_ROLE SET UpdatedBy = NULL WHERE UpdatedBy = 1;
+                UPDATE RII_APPROVAL_ROLE SET DeletedBy = NULL WHERE DeletedBy = 1;
+            ");
 
-            migrationBuilder.DeleteData(
-                table: "RII_USER_PERMISSION_GROUPS",
-                keyColumn: "Id",
-                keyValue: 1L);
-
-            migrationBuilder.DeleteData(
-                table: "RII_USERS",
-                keyColumn: "Id",
-                keyValue: 1L);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDefault",
-                table: "RII_SHIPPING_ADDRESS",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Name",
-                table: "RII_SHIPPING_ADDRESS",
-                type: "nvarchar(150)",
-                maxLength: 150,
-                nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "DefaultShippingAddressId",
-                table: "RII_CUSTOMER",
-                type: "bigint",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                IF COL_LENGTH('RII_SHIPPING_ADDRESS', 'IsDefault') IS NULL
+                    ALTER TABLE [RII_SHIPPING_ADDRESS] ADD [IsDefault] bit NOT NULL DEFAULT CAST(0 AS bit);
+                IF COL_LENGTH('RII_SHIPPING_ADDRESS', 'Name') IS NULL
+                    ALTER TABLE [RII_SHIPPING_ADDRESS] ADD [Name] nvarchar(150) NULL;
+                IF COL_LENGTH('RII_CUSTOMER', 'DefaultShippingAddressId') IS NULL
+                    ALTER TABLE [RII_CUSTOMER] ADD [DefaultShippingAddressId] bigint NULL;
+                IF COL_LENGTH('RII_CONTACT', 'FirstName') IS NULL
+                    ALTER TABLE [RII_CONTACT] ADD [FirstName] nvarchar(100) NOT NULL DEFAULT N'';
+                IF COL_LENGTH('RII_CONTACT', 'LastName') IS NULL
+                    ALTER TABLE [RII_CONTACT] ADD [LastName] nvarchar(100) NOT NULL DEFAULT N'';
+                IF COL_LENGTH('RII_CONTACT', 'MiddleName') IS NULL
+                    ALTER TABLE [RII_CONTACT] ADD [MiddleName] nvarchar(100) NULL;
+                IF COL_LENGTH('RII_CONTACT', 'Salutation') IS NULL
+                    ALTER TABLE [RII_CONTACT] ADD [Salutation] int NOT NULL DEFAULT 0;
+            ");
 
             migrationBuilder.AlterColumn<long>(
                 name: "TitleId",
@@ -64,48 +77,25 @@ namespace crm_api.Migrations
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
 
-            migrationBuilder.AddColumn<string>(
-                name: "FirstName",
-                table: "RII_CONTACT",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM sys.indexes
+                    WHERE name = 'IX_Customer_DefaultShippingAddressId'
+                      AND object_id = OBJECT_ID('RII_CUSTOMER')
+                )
+                    CREATE INDEX [IX_Customer_DefaultShippingAddressId]
+                    ON [RII_CUSTOMER] ([DefaultShippingAddressId]);
 
-            migrationBuilder.AddColumn<string>(
-                name: "LastName",
-                table: "RII_CONTACT",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "MiddleName",
-                table: "RII_CONTACT",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Salutation",
-                table: "RII_CONTACT",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Customer_DefaultShippingAddressId",
-                table: "RII_CUSTOMER",
-                column: "DefaultShippingAddressId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_RII_CUSTOMER_RII_SHIPPING_ADDRESS_DefaultShippingAddressId",
-                table: "RII_CUSTOMER",
-                column: "DefaultShippingAddressId",
-                principalTable: "RII_SHIPPING_ADDRESS",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                IF NOT EXISTS (
+                    SELECT 1 FROM sys.foreign_keys
+                    WHERE name = 'FK_RII_CUSTOMER_RII_SHIPPING_ADDRESS_DefaultShippingAddressId'
+                )
+                    ALTER TABLE [RII_CUSTOMER]
+                    ADD CONSTRAINT [FK_RII_CUSTOMER_RII_SHIPPING_ADDRESS_DefaultShippingAddressId]
+                    FOREIGN KEY ([DefaultShippingAddressId])
+                    REFERENCES [RII_SHIPPING_ADDRESS] ([Id])
+                    ON DELETE SET NULL;
+            ");
         }
 
         /// <inheritdoc />
@@ -166,21 +156,6 @@ namespace crm_api.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(250)",
                 oldMaxLength: 250);
-
-            migrationBuilder.InsertData(
-                table: "RII_SMTP_SETTING",
-                columns: new[] { "Id", "CreatedBy", "CreatedByUserId", "CreatedDate", "DeletedBy", "DeletedByUserId", "DeletedDate", "EnableSsl", "FromEmail", "FromName", "Host", "IsDeleted", "PasswordEncrypted", "Port", "Timeout", "UpdatedBy", "UpdatedByUserId", "UpdatedDate", "Username" },
-                values: new object[] { 1L, null, null, new DateTime(2026, 2, 7, 12, 44, 32, 621, DateTimeKind.Utc).AddTicks(3640), null, null, null, true, "", "V3RII CRM SYSTEM", "smtp.gmail.com", false, "", 587, 30, null, null, null, "" });
-
-            migrationBuilder.InsertData(
-                table: "RII_USERS",
-                columns: new[] { "Id", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "Email", "FirstName", "IsActive", "IsDeleted", "IsEmailConfirmed", "LastLoginDate", "LastName", "PasswordHash", "PhoneNumber", "RefreshToken", "RefreshTokenExpiryTime", "RoleId", "UpdatedBy", "UpdatedDate", "Username" },
-                values: new object[] { 1L, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "v3rii@v3rii.com", "Admin", true, false, true, null, "User", "$2a$11$abcdefghijklmnopqrstuuNIZsBQfUYLG05oQWoW6wLHKeQreQYs6", null, null, null, 3L, null, null, "admin@v3rii.com" });
-
-            migrationBuilder.InsertData(
-                table: "RII_USER_PERMISSION_GROUPS",
-                columns: new[] { "Id", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "IsDeleted", "PermissionGroupId", "UpdatedBy", "UpdatedDate", "UserId" },
-                values: new object[] { 1L, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, false, 1L, null, null, 1L });
         }
     }
 }
