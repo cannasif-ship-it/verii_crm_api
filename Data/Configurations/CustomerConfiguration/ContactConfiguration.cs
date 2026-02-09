@@ -13,7 +13,22 @@ namespace crm_api.Data.Configurations
 
             // Contact specific properties
             builder.Property(e => e.FullName)
+                .HasMaxLength(250)
+                .IsRequired();
+
+            builder.Property(e => e.FirstName)
                 .HasMaxLength(100)
+                .IsRequired();
+
+            builder.Property(e => e.MiddleName)
+                .HasMaxLength(100)
+                .IsRequired(false);
+
+            builder.Property(e => e.LastName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            builder.Property(e => e.Salutation)
                 .IsRequired();
 
             builder.Property(e => e.Email)
@@ -37,15 +52,15 @@ namespace crm_api.Data.Configurations
                 .IsRequired();
 
             builder.Property(e => e.TitleId)
-                .IsRequired();
+                .IsRequired(false);
 
             // Relationship configuration
-            builder.HasOne(e => e.Customers)
-                .WithMany()
+            builder.HasOne(e => e.Customer)
+                .WithMany(c => c.Contacts)
                 .HasForeignKey(e => e.CustomerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Titles)
+            builder.HasOne(e => e.Title)
                 .WithMany(t => t.Contacts)
                 .HasForeignKey(e => e.TitleId)
                 .OnDelete(DeleteBehavior.Restrict);

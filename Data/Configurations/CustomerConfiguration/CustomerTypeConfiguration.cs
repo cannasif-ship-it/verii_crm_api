@@ -22,7 +22,7 @@ namespace crm_api.Data.Configurations
 
             // Navigation Properties
             builder.HasMany(e => e.Customers)
-                .WithOne(c => c.CustomerTypes)
+                .WithOne(c => c.CustomerType)
                 .HasForeignKey(c => c.CustomerTypeId)
                 .OnDelete(DeleteBehavior.SetNull);
 

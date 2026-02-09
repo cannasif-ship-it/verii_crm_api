@@ -1,5 +1,4 @@
-using System;
-using crm_api.Models;
+using System.Collections.Generic;
 
 namespace crm_api.Models
 {
@@ -8,8 +7,9 @@ namespace crm_api.Models
         // Basic Information
         public string? CustomerCode { get; set; } // CariKod
         public string CustomerName { get; set; } = string.Empty; // CariAd
+
         public long? CustomerTypeId { get; set; } // 'M' = Customer, 'T' = Supplier, 'P' = Potential
-        public CustomerType? CustomerTypes { get; set; } // CariTipId
+        public CustomerType? CustomerType { get; set; } // Navigation (tekil)
 
         // Tax Information
         public string? TaxOffice { get; set; } // VergiDaire
@@ -33,18 +33,27 @@ namespace crm_api.Models
         public string? Website { get; set; } // Web
         public string? Phone1 { get; set; } // Telefon1
         public string? Phone2 { get; set; } // Telefon2
-        public string? Address { get; set; } // Adres
+
+        // (Opsiyonel) Merkez/Özet adres gibi kullanacaksan kalsın.
+        // Sevk adresleri zaten ShippingAddress tablosunda.
+        public string? Address { get; set; } // Adres (opsiyonel / legacy)
 
         // Location Information
         public long? CountryId { get; set; } // UlkeId
         public long? CityId { get; set; } // SehirId
         public long? DistrictId { get; set; } // IlceId
 
-        // Navigation Properties
-        public Country? Countries { get; set; } // Ulke
-        public City? Cities { get; set; } // Sehir
-        public District? Districts { get; set; } // Ilce
+        // Navigation Properties (tekil)
+        public Country? Country { get; set; } // Ulke
+        public City? City { get; set; } // Sehir
+        public District? District { get; set; } // Ilce
 
+        // ✅ Relationships
+        public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
+        public virtual ICollection<ShippingAddress> ShippingAddresses { get; set; } = new List<ShippingAddress>();
 
+        // ✅ Default Shipping Address (çok işe yarar)
+        public long? DefaultShippingAddressId { get; set; }
+        public virtual ShippingAddress? DefaultShippingAddress { get; set; }
     }
 }

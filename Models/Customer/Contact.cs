@@ -1,27 +1,33 @@
 using System;
 
 namespace crm_api.Models
-{
+    {
     public class Contact : BaseEntity
     {
-        public string FullName { get; set; }  = string.Empty; // e.g. John Doe
+        // Mail hitabı
+        public SalutationType Salutation { get; set; } = SalutationType.None;
 
+        // İsim
+        public string FirstName { get; set; } = string.Empty;
+        public string? MiddleName { get; set; }
+        public string LastName { get; set; } = string.Empty;
+
+        // CRM içi gösterim
+        public string FullName { get; set; } = string.Empty;
+
+        // İletişim
         public string? Email { get; set; }
-
         public string? Phone { get; set; }
-
         public string? Mobile { get; set; }
+        public string? Notes { get; set; }
 
-        public string? Notes { get; set; }  // Additional remarks or relationship context
-
-        // Foreign Key
+        // Şirket
         public long CustomerId { get; set; }
-        // Navigation property
-        public virtual Customer Customers { get; set; } = null!;
+        public virtual Customer Customer { get; set; } = null!;
 
-        // Foreign Key
-        public long TitleId { get; set; }
-        // Navigation property
-        public virtual Title Titles { get; set; } = null!;
+        // 🎯 İş ünvanı / departman rolü
+        public long? TitleId { get; set; }
+        public virtual Title? Title { get; set; }
     }
+
 }

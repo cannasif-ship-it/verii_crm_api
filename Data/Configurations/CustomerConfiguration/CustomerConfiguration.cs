@@ -93,25 +93,30 @@ namespace crm_api.Data.Configurations
                 .IsRequired(false);
 
             // Foreign Key Relationships
-            builder.HasOne(e => e.Countries)
+            builder.HasOne(e => e.Country)
                 .WithMany()
                 .HasForeignKey(e => e.CountryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Cities)
+            builder.HasOne(e => e.City)
                 .WithMany()
                 .HasForeignKey(e => e.CityId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Districts)
+            builder.HasOne(e => e.District)
                 .WithMany()
                 .HasForeignKey(e => e.DistrictId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.CustomerTypes)
+            builder.HasOne(e => e.CustomerType)
                 .WithMany(ct => ct.Customers)
                 .HasForeignKey(e => e.CustomerTypeId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(e => e.DefaultShippingAddress)
+                .WithMany()
+                .HasForeignKey(e => e.DefaultShippingAddressId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             builder.HasIndex(e => e.CustomerCode)
@@ -142,6 +147,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.CustomerTypeId)
                 .HasDatabaseName("IX_Customer_CustomerTypeId");
+
+            builder.HasIndex(e => e.DefaultShippingAddressId)
+                .HasDatabaseName("IX_Customer_DefaultShippingAddressId");
 
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Customer_IsDeleted");

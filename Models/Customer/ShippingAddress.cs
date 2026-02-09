@@ -1,32 +1,34 @@
-using System;
 namespace crm_api.Models
 {
     public class ShippingAddress : BaseEntity
     {
+        // Adres etiketi (Merkez Depo / Fabrika / Şube-1 gibi)
+        public string? Name { get; set; }
 
         public string Address { get; set; } = string.Empty;
-
         public string? PostalCode { get; set; }
 
-        public string? ContactPerson { get; set; }  // Sevk adresinde yetkili kişi
-        
-        public string? Phone { get; set; } // Sevk adresinde yetkili kişinin telefon numarası
+        // Sevk adresinde yetkili kişi
+        public string? ContactPerson { get; set; }
+        public string? Phone { get; set; }
 
-        public string? Notes { get; set; }  // Özel notlar veya teslim talimatları
+        public string? Notes { get; set; }  // teslim talimatları vs.
+
+        // Default sevk adresi flag'i (opsiyonel ama çok kullanışlı)
+        public bool IsDefault { get; set; } = false;
 
         // Foreign Key
         public long CustomerId { get; set; }
-        public Customer Customer { get; set; } = null!; // Navigation
+        public virtual Customer Customer { get; set; } = null!;
 
-         // Location Information
+        // Location Information
         public long? CountryId { get; set; } // UlkeId
         public long? CityId { get; set; } // SehirId
         public long? DistrictId { get; set; } // IlceId
 
-        // Navigation Properties
-        public Country? Countries { get; set; } // Ulke
-        public City? Cities { get; set; } // Sehir
-        public District? Districts { get; set; } // Ilce
-
+        // Navigation Properties (tekil)
+        public Country? Country { get; set; } // Ulke
+        public City? City { get; set; } // Sehir
+        public District? District { get; set; } // Ilce
     }
 }

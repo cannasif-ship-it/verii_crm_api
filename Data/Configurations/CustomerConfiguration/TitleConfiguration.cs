@@ -22,7 +22,7 @@ namespace crm_api.Data.Configurations
 
             // Relationship configuration
             builder.HasMany(e => e.Contacts)
-                .WithOne(c => c.Titles)
+                .WithOne(c => c.Title)
                 .HasForeignKey(c => c.TitleId)
                 .OnDelete(DeleteBehavior.Restrict);
 

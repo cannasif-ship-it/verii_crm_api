@@ -12,6 +12,10 @@ namespace crm_api.Data.Configurations
             builder.ToTable("RII_SHIPPING_ADDRESS");
 
             // ShippingAddress specific properties
+            builder.Property(e => e.Name)
+                .HasMaxLength(150)
+                .IsRequired(false);
+
             builder.Property(e => e.Address)
                 .HasMaxLength(500)
                 .IsRequired();
@@ -32,6 +36,10 @@ namespace crm_api.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired(false);
 
+            builder.Property(e => e.IsDefault)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(e => e.CustomerId)
                 .IsRequired();
 
@@ -46,21 +54,21 @@ namespace crm_api.Data.Configurations
 
             // Foreign key relationships
             builder.HasOne(e => e.Customer)
-                .WithMany()
+                .WithMany(c => c.ShippingAddresses)
                 .HasForeignKey(e => e.CustomerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Countries)
+            builder.HasOne(e => e.Country)
                 .WithMany()
                 .HasForeignKey(e => e.CountryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Cities)
+            builder.HasOne(e => e.City)
                 .WithMany()
                 .HasForeignKey(e => e.CityId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(e => e.Districts)
+            builder.HasOne(e => e.District)
                 .WithMany()
                 .HasForeignKey(e => e.DistrictId)
                 .OnDelete(DeleteBehavior.NoAction);
