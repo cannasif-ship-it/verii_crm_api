@@ -524,7 +524,9 @@ app.UseExceptionHandler(errApp =>
             ctx.Response.Headers.Append("Access-Control-Allow-Origin", origin);
             ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
         }
-        await ctx.Response.WriteAsync("{\"error\":\"An error occurred.\"}");
+        var message = ex?.Message ?? "An error occurred.";
+        var json = System.Text.Json.JsonSerializer.Serialize(new { error = "An error occurred.", message });
+        await ctx.Response.WriteAsync(json);
     });
 });
 
