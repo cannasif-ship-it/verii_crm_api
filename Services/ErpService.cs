@@ -147,17 +147,34 @@ namespace crm_api.Services
         {
             try
             {
+                _logger.LogInformation(
+                    "ERP branch list requested. BranchNo: {BranchNo}, ConnectionStringPresent: {HasConnectionString}",
+                    branchNo,
+                    !string.IsNullOrWhiteSpace(_erpContext.Database.GetConnectionString()));
+
                 var rows = await _erpContext.Branches
                     .FromSqlRaw(
                         "SELECT * FROM dbo.RII_FN_BRANCHES({0})",
                         branchNo.HasValue ? branchNo.Value : DBNull.Value)
                     .AsNoTracking()
                     .ToListAsync();
+
+                _logger.LogInformation("ERP branch list retrieved successfully. Count: {Count}", rows.Count);
+
                 var mappedList = _mapper.Map<List<BranchDto>>(rows);
                 return ApiResponse<List<BranchDto>>.SuccessResult(mappedList, _localizationService.GetLocalizedString("ErpService.BranchesRetrievedSuccessfully"));
             }
             catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "ERP branch list retrieval failed. BranchNo: {BranchNo}, ConnectionState: {ConnectionState}, DataSource: {DataSource}, Database: {Database}, InnerException: {InnerException}",
+                    branchNo,
+                    _erpContext.Database.GetDbConnection().State.ToString(),
+                    _erpContext.Database.GetDbConnection().DataSource,
+                    _erpContext.Database.GetDbConnection().Database,
+                    ex.InnerException?.Message);
+
                 return ApiResponse<List<BranchDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("ErpService.InternalServerError"),
                     _localizationService.GetLocalizedString("ErpService.BranchesRetrievalError", ex.Message),
