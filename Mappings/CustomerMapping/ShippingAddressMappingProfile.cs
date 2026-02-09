@@ -8,12 +8,11 @@ namespace crm_api.Mappings
     {
         public ShippingAddressMappingProfile()
         {
-            // ShippingAddress mappings
             CreateMap<ShippingAddress, ShippingAddressGetDto>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.CustomerName : string.Empty))
-                .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Countries != null ? src.Countries.Name : null))
-                .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.Cities != null ? src.Cities.Name : null))
-                .ForMember(dest => dest.DistrictName, opt => opt.MapFrom(src => src.Districts != null ? src.Districts.Name : null))
+                .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Country != null ? src.Country.Name : null))
+                .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.City != null ? src.City.Name : null))
+                .ForMember(dest => dest.DistrictName, opt => opt.MapFrom(src => src.District != null ? src.District.Name : null))
                 .ForMember(dest => dest.CreatedByFullUser, opt => opt.MapFrom(src => src.CreatedByUser != null ? $"{src.CreatedByUser.FirstName} {src.CreatedByUser.LastName}".Trim() : null))
                 .ForMember(dest => dest.UpdatedByFullUser, opt => opt.MapFrom(src => src.UpdatedByUser != null ? $"{src.UpdatedByUser.FirstName} {src.UpdatedByUser.LastName}".Trim() : null))
                 .ForMember(dest => dest.DeletedByFullUser, opt => opt.MapFrom(src => src.DeletedByUser != null ? $"{src.DeletedByUser.FirstName} {src.DeletedByUser.LastName}".Trim() : null));
@@ -28,9 +27,9 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.Customer, opt => opt.Ignore())
-                .ForMember(dest => dest.Countries, opt => opt.Ignore())
-                .ForMember(dest => dest.Cities, opt => opt.Ignore())
-                .ForMember(dest => dest.Districts, opt => opt.Ignore());
+                .ForMember(dest => dest.Country, opt => opt.Ignore())
+                .ForMember(dest => dest.City, opt => opt.Ignore())
+                .ForMember(dest => dest.District, opt => opt.Ignore());
 
             CreateMap<UpdateShippingAddressDto, ShippingAddress>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -42,9 +41,9 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.Customer, opt => opt.Ignore())
-                .ForMember(dest => dest.Countries, opt => opt.Ignore())
-                .ForMember(dest => dest.Cities, opt => opt.Ignore())
-                .ForMember(dest => dest.Districts, opt => opt.Ignore());
+                .ForMember(dest => dest.Country, opt => opt.Ignore())
+                .ForMember(dest => dest.City, opt => opt.Ignore())
+                .ForMember(dest => dest.District, opt => opt.Ignore());
         }
     }
 }

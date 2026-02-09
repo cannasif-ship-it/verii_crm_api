@@ -5,6 +5,9 @@ namespace crm_api.DTOs
 {
     public class CreateShippingAddressDto
     {
+        [MaxLength(150)]
+        public string? Name { get; set; }
+
         [Required]
         [MaxLength(150)]
         public string Address { get; set; } = string.Empty;
@@ -29,10 +32,15 @@ namespace crm_api.DTOs
         public long? CityId { get; set; }
 
         public long? DistrictId { get; set; }
+
+        public bool IsDefault { get; set; } = false;
     }
 
     public class UpdateShippingAddressDto
     {
+        [MaxLength(150)]
+        public string? Name { get; set; }
+
         [Required]
         [MaxLength(150)]
         public string Address { get; set; } = string.Empty;
@@ -57,10 +65,13 @@ namespace crm_api.DTOs
         public long? CityId { get; set; }
 
         public long? DistrictId { get; set; }
+
+        public bool IsDefault { get; set; } = false;
     }
 
     public class ShippingAddressGetDto : BaseEntityDto
     {
+        public string? Name { get; set; }
         public string Address { get; set; } = string.Empty;
         public string? PostalCode { get; set; }
         public string? ContactPerson { get; set; }
@@ -74,6 +85,7 @@ namespace crm_api.DTOs
         public string? CityName { get; set; }
         public long? DistrictId { get; set; }
         public string? DistrictName { get; set; }
+        public bool IsDefault { get; set; }
         public bool IsActive { get; set; }
         
     }

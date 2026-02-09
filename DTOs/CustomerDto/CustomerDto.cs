@@ -30,6 +30,7 @@ namespace crm_api.DTOs
         public decimal? CreditLimit { get; set; }
         public short BranchCode { get; set; }
         public short BusinessUnitCode { get; set; }
+        public long? DefaultShippingAddressId { get; set; }
     }
 
     public class CustomerCreateDto
@@ -88,6 +89,8 @@ namespace crm_api.DTOs
         public short BranchCode { get; set; }
 
         public short BusinessUnitCode { get; set; }
+
+        public long? DefaultShippingAddressId { get; set; }
 
         public bool IsCompleted { get; set; } = false;
     }
@@ -148,6 +151,8 @@ namespace crm_api.DTOs
         public short BranchCode { get; set; }
 
         public short BusinessUnitCode { get; set; }
+
+        public long? DefaultShippingAddressId { get; set; }
 
         public DateTime? CompletedDate { get; set; }
         public bool IsCompleted { get; set; }
