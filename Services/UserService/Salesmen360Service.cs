@@ -458,16 +458,24 @@ namespace crm_api.Services
 
                 var description = request.Reason ?? $"Auto-created from Salesmen 360 recommended action: {actionCode}.";
                 var priority = string.IsNullOrWhiteSpace(request.Priority) ? template.DefaultPriority : request.Priority.Trim();
+                var activityTypeId = await GetDefaultActivityTypeIdAsync();
+                if (!activityTypeId.HasValue)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
 
                 var activity = new Activity
                 {
                     Subject = subject,
                     Description = description,
-                    Status = "Scheduled",
-                    IsCompleted = false,
-                    Priority = priority,
+                    ActivityTypeId = activityTypeId.Value,
+                    Status = ActivityStatus.Scheduled,
+                    Priority = ParseActivityPriority(priority),
                     AssignedUserId = request.AssignedUserId ?? userId,
-                    ActivityDate = DateTime.UtcNow.AddDays(dueInDays)
+                    StartDateTime = DateTime.UtcNow.AddDays(dueInDays)
                 };
 
                 await _unitOfWork.Activities.AddAsync(activity);
@@ -495,11 +503,13 @@ namespace crm_api.Services
                     PotentialCustomerId = entity.PotentialCustomerId,
                     ErpCustomerCode = entity.ErpCustomerCode,
                     Status = entity.Status,
-                    IsCompleted = entity.IsCompleted,
                     Priority = entity.Priority,
                     ContactId = entity.ContactId,
                     AssignedUserId = entity.AssignedUserId,
-                    ActivityDate = entity.ActivityDate
+                    StartDateTime = entity.StartDateTime,
+                    EndDateTime = entity.EndDateTime,
+                    IsAllDay = entity.IsAllDay,
+                    Reminders = new List<ActivityReminderDto>()
                 };
 
                 return ApiResponse<ActivityDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ActivityService.ActivityCreated"));
@@ -761,7 +771,7 @@ namespace crm_api.Services
 
             var activityDate = await _unitOfWork.Activities.Query(tracking: false)
                 .Where(a => a.AssignedUserId == userId && !a.IsDeleted)
-                .Select(a => (DateTime?)(a.ActivityDate ?? a.CreatedDate))
+                .Select(a => (DateTime?)a.StartDateTime)
                 .DefaultIfEmpty()
                 .MaxAsync();
 
@@ -771,6 +781,30 @@ namespace crm_api.Services
                 .ToList();
 
             return dates.Count > 0 ? dates.Max() : null;
+        }
+
+        private async Task<long?> GetDefaultActivityTypeIdAsync()
+        {
+            return await _unitOfWork.ActivityTypes.Query(tracking: false)
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.Id)
+                .Select(x => (long?)x.Id)
+                .FirstOrDefaultAsync();
+        }
+
+        private static ActivityPriority ParseActivityPriority(string? priority)
+        {
+            if (string.IsNullOrWhiteSpace(priority))
+            {
+                return ActivityPriority.Medium;
+            }
+
+            return priority.Trim().ToLowerInvariant() switch
+            {
+                "low" => ActivityPriority.Low,
+                "high" => ActivityPriority.High,
+                _ => ActivityPriority.Medium
+            };
         }
     }
 }

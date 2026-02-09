@@ -22,7 +22,7 @@ namespace crm_api.Services
 
             var lastActivityDate = await _unitOfWork.Activities.Query(tracking: false)
                 .Where(x => x.PotentialCustomerId == customerId && !x.IsDeleted)
-                .Select(x => (DateTime?)(x.ActivityDate ?? x.CreatedDate))
+                .Select(x => (DateTime?)x.StartDateTime)
                 .DefaultIfEmpty()
                 .MaxAsync();
 
@@ -160,7 +160,7 @@ namespace crm_api.Services
                                  (x.OfferDate ?? x.CreatedDate) >= since90);
 
             var activityCount7 = await _unitOfWork.Activities.Query(tracking: false)
-                .CountAsync(x => x.AssignedUserId == userId && !x.IsDeleted && (x.ActivityDate ?? x.CreatedDate) >= since7);
+                .CountAsync(x => x.AssignedUserId == userId && !x.IsDeleted && x.StartDateTime >= since7);
 
             if (openQuotationCount >= 15)
             {

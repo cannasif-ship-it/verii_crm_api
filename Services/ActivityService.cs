@@ -1,12 +1,10 @@
 using AutoMapper;
 using crm_api.DTOs;
+using crm_api.Helpers;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
-using crm_api.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 
 namespace crm_api.Services
 {
@@ -27,32 +25,26 @@ namespace crm_api.Services
         {
             try
             {
-                if (request == null)
-                {
-                    request = new PagedRequest();
-                }
-
-                if (request.Filters == null)
-                {
-                    request.Filters = new List<Filter>();
-                }
+                request ??= new PagedRequest();
+                request.Filters ??= new List<Filter>();
 
                 var query = _unitOfWork.Activities.Query()
                     .AsNoTracking()
                     .Where(a => !a.IsDeleted)
                     .Include(a => a.ActivityType)
+                    .Include(a => a.PotentialCustomer)
+                    .Include(a => a.Contact)
+                    .Include(a => a.AssignedUser)
+                    .Include(a => a.Reminders.Where(r => !r.IsDeleted))
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Activity.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
-
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
                 var totalCount = await query.CountAsync();
-
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .ToListAsync();
@@ -67,7 +59,9 @@ namespace crm_api.Services
                     PageSize = request.PageSize
                 };
 
-                return ApiResponse<PagedResponse<ActivityDto>>.SuccessResult(pagedResponse, _localizationService.GetLocalizedString("ActivityService.ActivitiesRetrieved"));
+                return ApiResponse<PagedResponse<ActivityDto>>.SuccessResult(
+                    pagedResponse,
+                    _localizationService.GetLocalizedString("ActivityService.ActivitiesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -82,26 +76,30 @@ namespace crm_api.Services
         {
             try
             {
-                var activity = await _unitOfWork.Activities.GetByIdAsync(id);
-                if (activity == null)
-                {
-                    return ApiResponse<ActivityDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
-                    _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
-                    StatusCodes.Status404NotFound);
-                }
-
-                // Reload with navigation properties for mapping
-                var activityWithNav = await _unitOfWork.Activities.Query()
+                var activity = await _unitOfWork.Activities.Query()
                     .AsNoTracking()
                     .Include(a => a.ActivityType)
+                    .Include(a => a.PotentialCustomer)
+                    .Include(a => a.Contact)
+                    .Include(a => a.AssignedUser)
+                    .Include(a => a.Reminders.Where(r => !r.IsDeleted))
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
                     .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
 
-                var activityDto = _mapper.Map<ActivityDto>(activityWithNav ?? activity);
-                return ApiResponse<ActivityDto>.SuccessResult(activityDto, _localizationService.GetLocalizedString("ActivityService.ActivityRetrieved"));
+                if (activity == null)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
+                        _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var activityDto = _mapper.Map<ActivityDto>(activity);
+                return ApiResponse<ActivityDto>.SuccessResult(
+                    activityDto,
+                    _localizationService.GetLocalizedString("ActivityService.ActivityRetrieved"));
             }
             catch (Exception ex)
             {
@@ -116,22 +114,34 @@ namespace crm_api.Services
         {
             try
             {
+                var validationError = await ValidateForeignKeysAsync(
+                    createActivityDto.ActivityTypeId,
+                    createActivityDto.AssignedUserId,
+                    createActivityDto.ContactId,
+                    createActivityDto.PotentialCustomerId);
+                if (validationError != null)
+                {
+                    return validationError;
+                }
+
+                if (createActivityDto.EndDateTime.HasValue && createActivityDto.EndDateTime < createActivityDto.StartDateTime)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+
                 var activity = _mapper.Map<Activity>(createActivityDto);
                 var createdActivity = await _unitOfWork.Activities.AddAsync(activity);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Reload with navigation properties for mapping
-                var activityWithNav = await _unitOfWork.Activities.Query()
-                    .AsNoTracking()
-                    .Include(a => a.ActivityType)
-                    .Include(a => a.CreatedByUser)
-                    .Include(a => a.UpdatedByUser)
-                    .Include(a => a.DeletedByUser)
-                    .FirstOrDefaultAsync(a => a.Id == createdActivity.Id && !a.IsDeleted);
+                var createdWithNav = await LoadActivityWithRelationsAsync(createdActivity.Id, asNoTracking: true);
+                var dto = _mapper.Map<ActivityDto>(createdWithNav ?? createdActivity);
 
-                var activityDto = _mapper.Map<ActivityDto>(activityWithNav ?? createdActivity);
-
-                return ApiResponse<ActivityDto>.SuccessResult(activityDto, _localizationService.GetLocalizedString("ActivityService.ActivityCreated"));
+                return ApiResponse<ActivityDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("ActivityService.ActivityCreated"));
             }
             catch (Exception ex)
             {
@@ -146,31 +156,61 @@ namespace crm_api.Services
         {
             try
             {
-                var activity = await _unitOfWork.Activities.GetByIdAsync(id);
+                var activity = await _unitOfWork.Activities.Query()
+                    .Include(a => a.Reminders)
+                    .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+
                 if (activity == null)
                 {
                     return ApiResponse<ActivityDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
-                    _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
-                    StatusCodes.Status404NotFound);
+                        _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
+                        _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var validationError = await ValidateForeignKeysAsync(
+                    updateActivityDto.ActivityTypeId,
+                    updateActivityDto.AssignedUserId,
+                    updateActivityDto.ContactId,
+                    updateActivityDto.PotentialCustomerId);
+                if (validationError != null)
+                {
+                    return validationError;
+                }
+
+                if (updateActivityDto.EndDateTime.HasValue && updateActivityDto.EndDateTime < updateActivityDto.StartDateTime)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
                 }
 
                 _mapper.Map(updateActivityDto, activity);
-                var updatedActivity = await _unitOfWork.Activities.UpdateAsync(activity);
+                activity.UpdatedDate = DateTime.UtcNow;
+
+                foreach (var existingReminder in activity.Reminders.Where(r => !r.IsDeleted))
+                {
+                    existingReminder.IsDeleted = true;
+                    existingReminder.DeletedDate = DateTime.UtcNow;
+                }
+
+                foreach (var reminderDto in updateActivityDto.Reminders)
+                {
+                    var newReminder = _mapper.Map<ActivityReminder>(reminderDto);
+                    newReminder.ActivityId = activity.Id;
+                    activity.Reminders.Add(newReminder);
+                }
+
+                await _unitOfWork.Activities.UpdateAsync(activity);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Reload with navigation properties for mapping
-                var activityWithNav = await _unitOfWork.Activities.Query()
-                    .AsNoTracking()
-                    .Include(a => a.ActivityType)
-                    .Include(a => a.CreatedByUser)
-                    .Include(a => a.UpdatedByUser)
-                    .Include(a => a.DeletedByUser)
-                    .FirstOrDefaultAsync(a => a.Id == updatedActivity.Id && !a.IsDeleted);
+                var updatedWithNav = await LoadActivityWithRelationsAsync(activity.Id, asNoTracking: true);
+                var dto = _mapper.Map<ActivityDto>(updatedWithNav ?? activity);
 
-                var activityDto = _mapper.Map<ActivityDto>(activityWithNav ?? updatedActivity);
-
-                return ApiResponse<ActivityDto>.SuccessResult(activityDto, _localizationService.GetLocalizedString("ActivityService.ActivityUpdated"));
+                return ApiResponse<ActivityDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("ActivityService.ActivityUpdated"));
             }
             catch (Exception ex)
             {
@@ -185,7 +225,10 @@ namespace crm_api.Services
         {
             try
             {
-                var activity = await _unitOfWork.Activities.GetByIdAsync(id);
+                var activity = await _unitOfWork.Activities.Query()
+                    .Include(a => a.Reminders)
+                    .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+
                 if (activity == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -195,16 +238,101 @@ namespace crm_api.Services
                 }
 
                 await _unitOfWork.Activities.SoftDeleteAsync(id);
+
+                foreach (var reminder in activity.Reminders.Where(r => !r.IsDeleted))
+                {
+                    reminder.IsDeleted = true;
+                    reminder.DeletedDate = DateTime.UtcNow;
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<object>.SuccessResult(activity, _localizationService.GetLocalizedString("ActivityService.ActivityDeleted"));
+                return ApiResponse<object>.SuccessResult(
+                    activity,
+                    _localizationService.GetLocalizedString("ActivityService.ActivityDeleted"));
             }
             catch (Exception ex)
             {
                 return ApiResponse<object>.ErrorResult(
                     _localizationService.GetLocalizedString("ActivityService.InternalServerError"),
-                    _localizationService.GetLocalizedString("ActivityService.DeleteActivityExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+                    _localizationService.GetLocalizedString("ActivityService.DeleteActivityExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private async Task<Activity?> LoadActivityWithRelationsAsync(long id, bool asNoTracking)
+        {
+            var query = _unitOfWork.Activities.Query();
+            if (asNoTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            return await query
+                .Include(a => a.ActivityType)
+                .Include(a => a.PotentialCustomer)
+                .Include(a => a.Contact)
+                .Include(a => a.AssignedUser)
+                .Include(a => a.Reminders.Where(r => !r.IsDeleted))
+                .Include(a => a.CreatedByUser)
+                .Include(a => a.UpdatedByUser)
+                .Include(a => a.DeletedByUser)
+                .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+        }
+
+        private async Task<ApiResponse<ActivityDto>?> ValidateForeignKeysAsync(
+            long activityTypeId,
+            long assignedUserId,
+            long? contactId,
+            long? potentialCustomerId)
+        {
+            var activityTypeExists = await _unitOfWork.ActivityTypes.Query(tracking: false)
+                .AnyAsync(x => x.Id == activityTypeId && !x.IsDeleted);
+            if (!activityTypeExists)
+            {
+                return ApiResponse<ActivityDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            var assignedUserExists = await _unitOfWork.Users.Query(tracking: false)
+                .AnyAsync(x => x.Id == assignedUserId && !x.IsDeleted);
+            if (!assignedUserExists)
+            {
+                return ApiResponse<ActivityDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            if (contactId.HasValue)
+            {
+                var contactExists = await _unitOfWork.Contacts.Query(tracking: false)
+                    .AnyAsync(x => x.Id == contactId.Value && !x.IsDeleted);
+                if (!contactExists)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+            }
+
+            if (potentialCustomerId.HasValue)
+            {
+                var customerExists = await _unitOfWork.Customers.Query(tracking: false)
+                    .AnyAsync(x => x.Id == potentialCustomerId.Value && !x.IsDeleted);
+                if (!customerExists)
+                {
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        StatusCodes.Status400BadRequest);
+                }
+            }
+
+            return null;
         }
     }
 }

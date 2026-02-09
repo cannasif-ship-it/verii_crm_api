@@ -45,7 +45,7 @@ namespace crm_api.Services
 
             var lastActivityDate = await _unitOfWork.Activities.Query(tracking: false)
                 .Where(x => x.PotentialCustomerId == customerId && !x.IsDeleted)
-                .Select(x => (DateTime?)(x.ActivityDate ?? x.CreatedDate))
+                .Select(x => (DateTime?)x.StartDateTime)
                 .DefaultIfEmpty()
                 .MaxAsync();
 
@@ -117,7 +117,7 @@ namespace crm_api.Services
 
             var activities = await _unitOfWork.Activities.Query(tracking: false)
                 .Where(x => x.AssignedUserId == userId && !x.IsDeleted)
-                .Select(x => x.ActivityDate ?? x.CreatedDate)
+                .Select(x => x.StartDateTime)
                 .ToListAsync();
 
             var firstTouchDate = orders.Select(x => (DateTime?)x.Date)

@@ -8,47 +8,43 @@ namespace crm_api.Data.Configurations
     {
         protected override void ConfigureEntity(EntityTypeBuilder<Activity> builder)
         {
-            // Table name
             builder.ToTable("RII_ACTIVITY");
 
-            // Activity specific properties
             builder.Property(e => e.Subject)
-                .HasMaxLength(100)
+                .HasMaxLength(200)
                 .IsRequired();
 
             builder.Property(e => e.Description)
-                .HasMaxLength(500)
+                .HasMaxLength(1000)
                 .IsRequired(false);
 
-            // ActivityType relationship
             builder.Property(e => e.ActivityTypeId)
-                .IsRequired(false);
+                .IsRequired();
 
             builder.HasOne(e => e.ActivityType)
                 .WithMany(at => at.Activities)
                 .HasForeignKey(e => e.ActivityTypeId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(e => e.ErpCustomerCode)
                 .HasMaxLength(50)
                 .IsRequired(false);
 
             builder.Property(e => e.Status)
-                .HasMaxLength(50)
-                .IsRequired();
-
-            builder.Property(e => e.IsCompleted)
                 .IsRequired()
-                .HasDefaultValue(false);
+                .HasConversion<int>()
+                .HasDefaultValue(ActivityStatus.Scheduled);
 
             builder.Property(e => e.Priority)
-                .HasMaxLength(50)
-                .IsRequired(false);
+                .IsRequired()
+                .HasConversion<int>()
+                .HasDefaultValue(ActivityPriority.Medium);
 
-            builder.Property(e => e.ActivityDate)
-                .IsRequired(false);
+            builder.Property(e => e.StartDateTime).IsRequired();
+            builder.Property(e => e.EndDateTime).IsRequired(false);
+            builder.Property(e => e.IsAllDay).IsRequired().HasDefaultValue(false);
+            builder.Property(e => e.AssignedUserId).IsRequired();
 
-            // Relationship configurations
             builder.HasOne(e => e.PotentialCustomer)
                 .WithMany()
                 .HasForeignKey(e => e.PotentialCustomerId)
@@ -64,7 +60,11 @@ namespace crm_api.Data.Configurations
                 .HasForeignKey(e => e.AssignedUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Indexes
+            builder.HasMany(e => e.Reminders)
+                .WithOne(r => r.Activity)
+                .HasForeignKey(r => r.ActivityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasIndex(e => e.Subject)
                 .HasDatabaseName("IX_Activity_Subject");
 
@@ -73,9 +73,6 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.Status)
                 .HasDatabaseName("IX_Activity_Status");
-
-            builder.HasIndex(e => e.IsCompleted)
-                .HasDatabaseName("IX_Activity_IsCompleted");
 
             builder.HasIndex(e => e.PotentialCustomerId)
                 .HasDatabaseName("IX_Activity_PotentialCustomerId");
@@ -86,13 +83,12 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(e => e.AssignedUserId)
                 .HasDatabaseName("IX_Activity_AssignedUserId");
 
-            builder.HasIndex(e => e.ActivityDate)
-                .HasDatabaseName("IX_Activity_ActivityDate");
+            builder.HasIndex(e => e.StartDateTime)
+                .HasDatabaseName("IX_Activity_StartDateTime");
 
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Activity_IsDeleted");
 
-            // Global Query Filter for soft delete
             builder.HasQueryFilter(e => !e.IsDeleted);
         }
     }
