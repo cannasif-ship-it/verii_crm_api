@@ -290,7 +290,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",
-                "https://crm.v3rii.com"
+                "https://crm.v3rii.com",
+                "http://crm.v3rii.com"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -500,6 +501,10 @@ GlobalJobFilters.Filters.Add(
 // Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
 // Configure the HTTP request pipeline.
+// CORS first so all responses (including errors) include CORS headers
+app.UseCors("DevCors");
+app.UseRouting();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -510,9 +515,6 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
-
-app.UseRouting();
-app.UseCors("DevCors");
 
 // Static files for uploaded images - wwwroot folder (default)
 app.UseStaticFiles();
