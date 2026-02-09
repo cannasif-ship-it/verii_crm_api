@@ -503,6 +503,25 @@ GlobalJobFilters.Filters.Add(
 // Configure the HTTP request pipeline.
 // CORS first so all responses (including errors) include CORS headers
 app.UseCors("DevCors");
+
+// Ensure 500 from unhandled exceptions still get CORS headers (browser would otherwise hide the response)
+var allowedCorsOrigins = new[] { "https://crm.v3rii.com", "http://localhost:5173" };
+app.UseExceptionHandler(errApp =>
+{
+    errApp.Run(async ctx =>
+    {
+        ctx.Response.StatusCode = 500;
+        ctx.Response.ContentType = "application/json";
+        var origin = ctx.Request.Headers["Origin"].ToString();
+        if (!string.IsNullOrEmpty(origin) && allowedCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+        {
+            ctx.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+            ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+        }
+        await ctx.Response.WriteAsync("{\"error\":\"An error occurred.\"}");
+    });
+});
+
 app.UseRouting();
 
 if (app.Environment.IsDevelopment())

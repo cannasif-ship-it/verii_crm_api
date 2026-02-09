@@ -145,6 +145,16 @@ namespace crm_api.Services
         // Branch işlemleri
         public async Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null)
         {
+            var connectionString = _erpContext.Database.GetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                _logger.LogWarning("GetBranchesAsync called but ErpConnection is not configured.");
+                return ApiResponse<List<BranchDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                    "ErpConnection is not configured.",
+                    StatusCodes.Status503ServiceUnavailable);
+            }
+
             try
             {
                 _logger.LogInformation(
