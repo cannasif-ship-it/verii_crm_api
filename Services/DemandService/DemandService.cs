@@ -836,6 +836,7 @@ namespace crm_api.Services
                     }
                     else
                     {
+                        await _unitOfWork.RollbackTransactionAsync();
                         return ApiResponse<bool>.ErrorResult(quotationId.Message, quotationId.Message, StatusCodes.Status404NotFound);
                     }
                 }
