@@ -7,6 +7,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics;
 using crm_api.Data;
 using crm_api.Interfaces;
 using crm_api.Mappings;
@@ -510,6 +511,11 @@ app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
     {
+        var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var logger = ctx.RequestServices.GetService<ILogger<Program>>();
+        if (ex != null)
+            logger?.LogError(ex, "Unhandled exception: {Path}", ctx.Request.Path);
+
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
         var origin = ctx.Request.Headers["Origin"].ToString();

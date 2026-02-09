@@ -145,18 +145,18 @@ namespace crm_api.Services
         // Branch işlemleri
         public async Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null)
         {
-            var connectionString = _erpContext.Database.GetConnectionString();
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                _logger.LogWarning("GetBranchesAsync called but ErpConnection is not configured.");
-                return ApiResponse<List<BranchDto>>.ErrorResult(
-                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
-                    "ErpConnection is not configured.",
-                    StatusCodes.Status503ServiceUnavailable);
-            }
-
             try
             {
+                var connectionString = _erpContext.Database.GetConnectionString();
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    _logger.LogWarning("GetBranchesAsync called but ErpConnection is not configured.");
+                    return ApiResponse<List<BranchDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                        "ErpConnection is not configured.",
+                        StatusCodes.Status503ServiceUnavailable);
+                }
+
                 _logger.LogInformation(
                     "ERP branch list requested. BranchNo: {BranchNo}, ConnectionStringPresent: {HasConnectionString}",
                     branchNo,
@@ -176,14 +176,14 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "ERP branch list retrieval failed. BranchNo: {BranchNo}, ConnectionState: {ConnectionState}, DataSource: {DataSource}, Database: {Database}, InnerException: {InnerException}",
-                    branchNo,
-                    _erpContext.Database.GetDbConnection().State.ToString(),
-                    _erpContext.Database.GetDbConnection().DataSource,
-                    _erpContext.Database.GetDbConnection().Database,
-                    ex.InnerException?.Message);
+                try
+                {
+                    var conn = _erpContext.Database.GetDbConnection();
+                    _logger.LogError(ex,
+                        "ERP branch list retrieval failed. BranchNo: {BranchNo}, ConnectionState: {ConnectionState}, DataSource: {DataSource}, Database: {Database}, InnerException: {InnerException}",
+                        branchNo, conn?.State.ToString(), conn?.DataSource, conn?.Database, ex.InnerException?.Message);
+                }
+                catch { _logger.LogError(ex, "ERP branch list retrieval failed. BranchNo: {BranchNo}", branchNo); }
 
                 return ApiResponse<List<BranchDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("ErpService.InternalServerError"),
