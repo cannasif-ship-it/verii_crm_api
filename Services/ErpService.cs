@@ -152,7 +152,7 @@ namespace crm_api.Services
                     branchNo,
                     !string.IsNullOrWhiteSpace(_erpContext.Database.GetConnectionString()));
 
-                var rows = await _erpContext.Branches
+                var rows = await _erpContext.Set<RII_FN_BRANCHES>()
                     .FromSqlRaw(
                         "SELECT * FROM dbo.RII_FN_BRANCHES({0})",
                         branchNo.HasValue ? branchNo.Value : DBNull.Value)
