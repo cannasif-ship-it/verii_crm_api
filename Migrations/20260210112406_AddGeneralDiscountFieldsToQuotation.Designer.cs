@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using crm_api.Data;
 
@@ -11,9 +12,11 @@ using crm_api.Data;
 namespace crm_api.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    partial class CmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260210112406_AddGeneralDiscountFieldsToQuotation")]
+    partial class AddGeneralDiscountFieldsToQuotation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1277,12 +1280,6 @@ namespace crm_api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal?>("GeneralDiscountAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("GeneralDiscountRate")
-                        .HasColumnType("decimal(18,6)");
-
                     b.Property<decimal>("GrandTotal")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(18,6)")
@@ -1930,12 +1927,6 @@ namespace crm_api.Migrations
                     b.Property<string>("ErpCustomerCode")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("GeneralDiscountAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("GeneralDiscountRate")
-                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("GrandTotal")
                         .ValueGeneratedOnAdd()
