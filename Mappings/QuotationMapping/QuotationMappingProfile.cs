@@ -14,6 +14,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddressText, opt => opt.MapFrom(src => src.ShippingAddress != null ? src.ShippingAddress.Address : null))
                 .ForMember(dest => dest.RepresentativeName, opt => opt.MapFrom(src => src.Representative != null ? src.Representative.FirstName + " " + src.Representative.LastName : null))
                 .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
+                .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
+                .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
 
             CreateMap<Quotation, QuotationGetDto>()
@@ -21,6 +23,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddressText, opt => opt.MapFrom(src => src.ShippingAddress != null ? src.ShippingAddress.Address : null))
                 .ForMember(dest => dest.RepresentativeName, opt => opt.MapFrom(src => src.Representative != null ? src.Representative.FirstName + " " + src.Representative.LastName : null))
                 .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
+                .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
+                .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
 
             CreateMap<CreateQuotationDto, Quotation>()
@@ -36,6 +40,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
                 .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
+                .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
+                .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
                 .ForMember(dest => dest.Demand, opt => opt.Ignore());
 
@@ -52,6 +58,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.ShippingAddress, opt => opt.Ignore())
                 .ForMember(dest => dest.Representative, opt => opt.Ignore())
                 .ForMember(dest => dest.PaymentType, opt => opt.Ignore())
+                .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
+                .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
                 .ForMember(dest => dest.Demand, opt => opt.Ignore());
         }

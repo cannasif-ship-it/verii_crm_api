@@ -224,6 +224,8 @@ namespace crm_api.Services
             try
             {
                 var quotation = _mapper.Map<Quotation>(createQuotationDto);
+                quotation.GeneralDiscountRate = createQuotationDto.GeneralDiscountRate;
+                quotation.GeneralDiscountAmount = createQuotationDto.GeneralDiscountAmount;
                 quotation.CreatedDate = DateTime.UtcNow;
 
                 await _unitOfWork.Quotations.AddAsync(quotation);
@@ -271,6 +273,8 @@ namespace crm_api.Services
 
                 // 3. Güncelleme işlemi
                 _mapper.Map(updateQuotationDto, quotation);
+                quotation.GeneralDiscountRate = updateQuotationDto.GeneralDiscountRate;
+                quotation.GeneralDiscountAmount = updateQuotationDto.GeneralDiscountAmount;
                 quotation.UpdatedDate = DateTime.UtcNow;
                 quotation.UpdatedBy = userId;
 
@@ -424,6 +428,8 @@ namespace crm_api.Services
 
                 // 1. Header map
                 var quotation = _mapper.Map<Quotation>(bulkDto.Quotation);
+                quotation.GeneralDiscountRate = bulkDto.Quotation.GeneralDiscountRate;
+                quotation.GeneralDiscountAmount = bulkDto.Quotation.GeneralDiscountAmount;
 
                 decimal total = 0m;
                 decimal grandTotal = 0m;
@@ -731,6 +737,8 @@ namespace crm_api.Services
                 newQuotation.RevisionNo = documentSerialTypeWithRevision.Data;
                 newQuotation.OfferDate = quotation.OfferDate;
                 newQuotation.Currency = quotation.Currency;
+                newQuotation.GeneralDiscountRate = quotation.GeneralDiscountRate;
+                newQuotation.GeneralDiscountAmount = quotation.GeneralDiscountAmount;
                 newQuotation.Total = quotation.Total;
                 newQuotation.GrandTotal = quotation.GrandTotal;
                 newQuotation.CreatedBy = quotation.CreatedBy;
@@ -1898,6 +1906,8 @@ namespace crm_api.Services
                     RevisionNo = documentSerialResult.Data,
                     Currency = quotation.Currency,
                     HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount,
+                    GeneralDiscountRate = quotation.GeneralDiscountRate,
+                    GeneralDiscountAmount = quotation.GeneralDiscountAmount,
                     Total = quotation.Total,
                     GrandTotal = quotation.GrandTotal,
                     QuotationId = quotation.Id,
