@@ -3011,6 +3011,9 @@
   <data name="ReportTemplateService.InternalServerError" xml:space="preserve">
     <value>Dahili sunucu hatası oluştu.</value>
   </data>
+  <data name="ReportTemplateService.UnauthorizedGenerate" xml:space="preserve">
+    <value>PDF oluşturmak için giriş yapmalısınız.</value>
+  </data>
   <data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve">
     <value>Kullanılabilir alanlar başarıyla getirildi.</value>
   </data>

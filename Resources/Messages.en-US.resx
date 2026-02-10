@@ -3017,6 +3017,9 @@
   <data name="ReportTemplateService.InternalServerError" xml:space="preserve">
     <value>Internal server error.</value>
   </data>
+  <data name="ReportTemplateService.UnauthorizedGenerate" xml:space="preserve">
+    <value>You must be signed in to generate a PDF.</value>
+  </data>
   <data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve">
     <value>Available fields retrieved successfully.</value>
   </data>

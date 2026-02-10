@@ -4,11 +4,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using crm_api.DTOs;
+using crm_api.Infrastructure;
 using crm_api.Interfaces;
 using crm_api.Models;
 
 namespace crm_api.Controllers
 {
+    /// <summary>
+    /// Legacy report template API. Prefer <see cref="PdfReportTemplateController"/> and /api/pdf-report-templates for new clients.
+    /// </summary>
+    [Obsolete("Use /api/pdf-report-templates (PdfReportTemplateController) instead. This endpoint remains for backward compatibility.")]
+    [DeprecatedApi(Replacement = "/api/pdf-report-templates")]
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -71,7 +77,8 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateReportTemplateDto dto)
         {
-            var userId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (!long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
+                return Unauthorized(ApiResponse<object>.ErrorResult("Unauthorized", "Invalid or missing user claim", 401));
 
             var result = await _reportTemplateService.CreateAsync(dto, userId);
 
@@ -89,7 +96,8 @@ namespace crm_api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateReportTemplateDto dto)
         {
-            var userId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (!long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
+                return Unauthorized(ApiResponse<object>.ErrorResult("Unauthorized", "Invalid or missing user claim", 401));
 
             var result = await _reportTemplateService.UpdateAsync(id, dto, userId);
 
@@ -123,7 +131,8 @@ namespace crm_api.Controllers
         [HttpPost("generate-pdf")]
         public async Task<IActionResult> GeneratePdf([FromBody] GeneratePdfRequest request)
         {
-            var result = await _reportTemplateService.GeneratePdfAsync(request.TemplateId, request.EntityId);
+            long? userId = long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var uid) && uid > 0 ? uid : null;
+            var result = await _reportTemplateService.GeneratePdfAsync(request.TemplateId, request.EntityId, userId);
 
             if (!result.Success)
             {

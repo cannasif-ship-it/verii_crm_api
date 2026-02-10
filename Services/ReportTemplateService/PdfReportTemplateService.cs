@@ -3,46 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using crm_api.Data;
 using crm_api.DTOs;
+using crm_api.Helpers;
 using crm_api.Interfaces;
 using crm_api.Models;
-using crm_api.UnitOfWork;
 
 namespace crm_api.Services
 {
-    public class ReportTemplateService : IReportTemplateService
+    /// <summary>
+    /// PDF report template service: CRUD and generate with validation, default invariant fix, and access control.
+    /// </summary>
+    public class PdfReportTemplateService : IPdfReportTemplateService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ReportTemplateService> _logger;
-        private readonly ILocalizationService _localizationService;
         private readonly CmsDbContext _context;
-        private readonly IReportPdfGeneratorService _pdfGenerator;
+        private readonly ILogger<PdfReportTemplateService> _logger;
+        private readonly ILocalizationService _localizationService;
+        private readonly IPdfReportDocumentGeneratorService _pdfGenerator;
+        private readonly IPdfReportTemplateValidator _validator;
 
-        public ReportTemplateService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            ILogger<ReportTemplateService> logger,
-            ILocalizationService localizationService,
+        public PdfReportTemplateService(
             CmsDbContext context,
-            IReportPdfGeneratorService pdfGenerator)
+            ILogger<PdfReportTemplateService> logger,
+            ILocalizationService localizationService,
+            IPdfReportDocumentGeneratorService pdfGenerator,
+            IPdfReportTemplateValidator validator)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _context = context;
             _logger = logger;
             _localizationService = localizationService;
-            _context = context;
             _pdfGenerator = pdfGenerator;
+            _validator = validator;
         }
 
-        public async Task<ApiResponse<PagedResponse<ReportTemplateDto>>> GetAllAsync(
-            PagedRequest request,
-            DocumentRuleType? ruleType = null,
-            bool? isActive = null)
+        public async Task<ApiResponse<PagedResponse<PdfReportTemplateDto>>> GetAllAsync(PdfReportTemplateListRequest request)
         {
             try
             {
@@ -50,65 +46,47 @@ namespace crm_api.Services
                     .Where(rt => !rt.IsDeleted)
                     .AsQueryable();
 
-                // Apply filters
-                if (ruleType.HasValue)
+                if (!string.IsNullOrWhiteSpace(request.Search))
                 {
-                    query = query.Where(rt => rt.RuleType == ruleType.Value);
+                    var search = request.Search.Trim();
+                    query = query.Where(rt => rt.Title.Contains(search));
                 }
+                if (request.RuleType.HasValue)
+                    query = query.Where(rt => rt.RuleType == request.RuleType.Value);
+                if (request.IsActive.HasValue)
+                    query = query.Where(rt => rt.IsActive == request.IsActive.Value);
 
-                if (isActive.HasValue)
-                {
-                    query = query.Where(rt => rt.IsActive == isActive.Value);
-                }
-
-                // Get total count
                 var totalCount = await query.CountAsync();
-
-                // Apply pagination
                 var templates = await query
                     .OrderByDescending(rt => rt.CreatedDate)
                     .Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .ToListAsync();
 
-                // Map to DTOs
-                var templateDtos = templates.Select(template => new ReportTemplateDto
+                var items = templates.Select(t => MapToPdfDto(t)).ToList();
+                var paged = new PagedResponse<PdfReportTemplateDto>
                 {
-                    Id = template.Id,
-                    RuleType = template.RuleType,
-                    Title = template.Title,
-                    TemplateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson),
-                    IsActive = template.IsActive,
-                    Default = template.Default,
-                    CreatedByUserId = template.CreatedByUserId,
-                    UpdatedByUserId = template.UpdatedByUserId,
-                    CreatedDate = template.CreatedDate,
-                    UpdatedDate = template.UpdatedDate
-                }).ToList();
-
-                var pagedResponse = new PagedResponse<ReportTemplateDto>
-                {
-                    Items = templateDtos,
+                    Items = items,
                     TotalCount = totalCount,
                     PageNumber = request.PageNumber,
                     PageSize = request.PageSize
                 };
 
-                return ApiResponse<PagedResponse<ReportTemplateDto>>.SuccessResult(
-                    pagedResponse,
+                return ApiResponse<PagedResponse<PdfReportTemplateDto>>.SuccessResult(
+                    paged,
                     _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplatesRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplates"));
-                return ApiResponse<PagedResponse<ReportTemplateDto>>.ErrorResult(
+                return ApiResponse<PagedResponse<PdfReportTemplateDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplates"),
                     _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
 
-        public async Task<ApiResponse<ReportTemplateDto>> GetByIdAsync(long id)
+        public async Task<ApiResponse<PdfReportTemplateDto>> GetByIdAsync(long id)
         {
             try
             {
@@ -118,52 +96,43 @@ namespace crm_api.Services
 
                 if (template == null)
                 {
-                    return ApiResponse<ReportTemplateDto>.ErrorResult(
+                    return ApiResponse<PdfReportTemplateDto>.ErrorResult(
                         _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFound"),
                         null,
                         404);
                 }
 
-                var templateDto = new ReportTemplateDto
-                {
-                    Id = template.Id,
-                    RuleType = template.RuleType,
-                    Title = template.Title,
-                    TemplateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson),
-                    IsActive = template.IsActive,
-                    Default = template.Default,
-                    CreatedByUserId = template.CreatedByUserId,
-                    UpdatedByUserId = template.UpdatedByUserId,
-                    CreatedDate = template.CreatedDate,
-                    UpdatedDate = template.UpdatedDate
-                };
-
-                return ApiResponse<ReportTemplateDto>.SuccessResult(
-                    templateDto,
+                return ApiResponse<PdfReportTemplateDto>.SuccessResult(
+                    MapToPdfDto(template),
                     _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateRetrieved"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving report template with ID {Id}", id);
-                return ApiResponse<ReportTemplateDto>.ErrorResult(
+                return ApiResponse<PdfReportTemplateDto>.ErrorResult(
                     _localizationService.GetLocalizedString("ReportTemplateService.ErrorRetrievingReportTemplate"),
                     _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
 
-        public async Task<ApiResponse<ReportTemplateDto>> CreateAsync(CreateReportTemplateDto dto, long userId)
+        public async Task<ApiResponse<PdfReportTemplateDto>> CreateAsync(CreatePdfReportTemplateDto dto, long userId)
         {
+            var validationErrors = _validator.ValidateTemplateData(dto.TemplateData, dto.RuleType);
+            if (validationErrors.Count > 0)
+            {
+                var response = ApiResponse<PdfReportTemplateDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    string.Join("; ", validationErrors),
+                    400);
+                response.Errors = validationErrors.ToList();
+                return response;
+            }
+
             try
             {
-                // Serialize template data to JSON
-                var templateJson = JsonSerializer.Serialize(dto.TemplateData, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = false
-                });
+                var templateJson = JsonSerializer.Serialize(dto.TemplateData, PdfReportTemplateJsonOptions.CamelCase);
 
-                // Her RuleType için tek default: yeni Default=true ise diğerlerini false yap; ilk şablon ise Default=true yap
                 var sameTypeCount = await _context.ReportTemplates.CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
                 var isFirstForType = sameTypeCount == 0;
                 var setAsDefault = dto.Default || isFirstForType;
@@ -194,7 +163,7 @@ namespace crm_api.Services
                 await _context.ReportTemplates.AddAsync(template);
                 await _context.SaveChangesAsync();
 
-                var templateDto = new ReportTemplateDto
+                var templateDto = new PdfReportTemplateDto
                 {
                     Id = template.Id,
                     RuleType = template.RuleType,
@@ -206,22 +175,33 @@ namespace crm_api.Services
                     CreatedDate = template.CreatedDate
                 };
 
-                return ApiResponse<ReportTemplateDto>.SuccessResult(
+                return ApiResponse<PdfReportTemplateDto>.SuccessResult(
                     templateDto,
                     _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateCreated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, _localizationService.GetLocalizedString("ReportTemplateService.ErrorCreatingReportTemplate"));
-                return ApiResponse<ReportTemplateDto>.ErrorResult(
+                return ApiResponse<PdfReportTemplateDto>.ErrorResult(
                     _localizationService.GetLocalizedString("ReportTemplateService.ErrorCreatingReportTemplate"),
                     _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
         }
 
-        public async Task<ApiResponse<ReportTemplateDto>> UpdateAsync(long id, UpdateReportTemplateDto dto, long userId)
+        public async Task<ApiResponse<PdfReportTemplateDto>> UpdateAsync(long id, UpdatePdfReportTemplateDto dto, long userId)
         {
+            var validationErrors = _validator.ValidateTemplateData(dto.TemplateData, dto.RuleType);
+            if (validationErrors.Count > 0)
+            {
+                var response = ApiResponse<PdfReportTemplateDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    string.Join("; ", validationErrors),
+                    400);
+                response.Errors = validationErrors.ToList();
+                return response;
+            }
+
             try
             {
                 var template = await _context.ReportTemplates
@@ -230,22 +210,16 @@ namespace crm_api.Services
 
                 if (template == null)
                 {
-                    return ApiResponse<ReportTemplateDto>.ErrorResult(
+                    return ApiResponse<PdfReportTemplateDto>.ErrorResult(
                         _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateNotFound"),
                         null,
                         404);
                 }
 
-                // Capture current default state BEFORE updating (default invariant bug fix)
+                // Capture current default state BEFORE updating template (default bug fix)
                 var currentWasDefault = template.Default;
 
-                // Serialize template data to JSON
-                var templateJson = JsonSerializer.Serialize(dto.TemplateData, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = false
-                });
-
+                var templateJson = JsonSerializer.Serialize(dto.TemplateData, PdfReportTemplateJsonOptions.CamelCase);
                 template.RuleType = dto.RuleType;
                 template.Title = dto.Title;
                 template.TemplateJson = templateJson;
@@ -267,6 +241,7 @@ namespace crm_api.Services
                 }
                 else if (currentWasDefault)
                 {
+                    // Current template was default and is being unset; assign another as default (smallest Id)
                     var newDefault = await _context.ReportTemplates
                         .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
                         .OrderBy(rt => rt.Id)
@@ -281,7 +256,7 @@ namespace crm_api.Services
                 _context.ReportTemplates.Update(template);
                 await _context.SaveChangesAsync();
 
-                var templateDto = new ReportTemplateDto
+                var templateDto = new PdfReportTemplateDto
                 {
                     Id = template.Id,
                     RuleType = template.RuleType,
@@ -295,14 +270,14 @@ namespace crm_api.Services
                     UpdatedDate = template.UpdatedDate
                 };
 
-                return ApiResponse<ReportTemplateDto>.SuccessResult(
+                return ApiResponse<PdfReportTemplateDto>.SuccessResult(
                     templateDto,
                     _localizationService.GetLocalizedString("ReportTemplateService.ReportTemplateUpdated"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating report template with ID {Id}", id);
-                return ApiResponse<ReportTemplateDto>.ErrorResult(
+                return ApiResponse<PdfReportTemplateDto>.ErrorResult(
                     _localizationService.GetLocalizedString("ReportTemplateService.ErrorUpdatingReportTemplate"),
                     _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
@@ -327,7 +302,6 @@ namespace crm_api.Services
 
                 template.IsDeleted = true;
                 template.DeletedDate = DateTime.UtcNow;
-
                 _context.ReportTemplates.Update(template);
                 await _context.SaveChangesAsync();
 
@@ -345,8 +319,17 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<byte[]>> GeneratePdfAsync(long templateId, long entityId, long? requestingUserId = null)
+        public async Task<ApiResponse<byte[]>> GeneratePdfAsync(long templateId, long entityId, long? requestingUserId)
         {
+            // Erişim kontrolü: en azından kimlik doğrulaması gerekli
+            if (!requestingUserId.HasValue || requestingUserId.Value <= 0)
+            {
+                return ApiResponse<byte[]>.ErrorResult(
+                    _localizationService.GetLocalizedString("ReportTemplateService.UnauthorizedGenerate"),
+                    null,
+                    401);
+            }
+
             try
             {
                 var template = await _context.ReportTemplates
@@ -361,8 +344,20 @@ namespace crm_api.Services
                         404);
                 }
 
-                // Deserialize template data
-                var templateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson);
+                ReportTemplateData? templateData;
+                try
+                {
+                    templateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson, PdfReportTemplateJsonOptions.CamelCase);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Invalid template JSON for template {TemplateId}", templateId);
+                    return ApiResponse<byte[]>.ErrorResult(
+                        _localizationService.GetLocalizedString("ReportTemplateService.InvalidTemplateData"),
+                        ex.Message,
+                        400);
+                }
+
                 if (templateData == null)
                 {
                     return ApiResponse<byte[]>.ErrorResult(
@@ -371,7 +366,17 @@ namespace crm_api.Services
                         400);
                 }
 
-                // Generate PDF using the PDF generator service
+                var genErrors = _validator.ValidateForGenerate(templateData);
+                if (genErrors.Count > 0)
+                {
+                    var response = ApiResponse<byte[]>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        string.Join("; ", genErrors),
+                        400);
+                    response.Errors = genErrors.ToList();
+                    return response;
+                }
+
                 var pdfBytes = await _pdfGenerator.GeneratePdfAsync(template.RuleType, entityId, templateData);
 
                 return ApiResponse<byte[]>.SuccessResult(
@@ -386,6 +391,33 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("ReportTemplateService.InternalServerError"),
                     500);
             }
+        }
+
+        private static PdfReportTemplateDto MapToPdfDto(ReportTemplate template)
+        {
+            var templateData = (ReportTemplateData?)null;
+            if (!string.IsNullOrEmpty(template.TemplateJson))
+            {
+                try
+                {
+                    templateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson, PdfReportTemplateJsonOptions.CamelCase);
+                }
+                catch { /* leave null on invalid json */ }
+            }
+
+            return new PdfReportTemplateDto
+            {
+                Id = template.Id,
+                RuleType = template.RuleType,
+                Title = template.Title,
+                TemplateData = templateData,
+                IsActive = template.IsActive,
+                Default = template.Default,
+                CreatedByUserId = template.CreatedByUserId,
+                UpdatedByUserId = template.UpdatedByUserId,
+                CreatedDate = template.CreatedDate,
+                UpdatedDate = template.UpdatedDate
+            };
         }
     }
 }

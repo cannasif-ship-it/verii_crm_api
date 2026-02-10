@@ -228,7 +228,13 @@ builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IHangfireDea
 // Register File Upload Services
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
-// Register Report Template Services
+// PDF Report Template (report-builder discipline)
+builder.Services.Configure<crm_api.Infrastructure.PdfBuilderOptions>(
+    builder.Configuration.GetSection(crm_api.Infrastructure.PdfBuilderOptions.SectionName));
+builder.Services.AddScoped<crm_api.Interfaces.IPdfReportTemplateValidator, crm_api.Services.PdfReportTemplateValidator>();
+builder.Services.AddScoped<crm_api.Interfaces.IPdfReportDocumentGeneratorService, crm_api.Services.PdfReportDocumentGeneratorService>();
+builder.Services.AddScoped<crm_api.Interfaces.IPdfReportTemplateService, crm_api.Services.PdfReportTemplateService>();
+// Legacy Report Template (backward compatibility; delegates to PDF generator)
 builder.Services.AddScoped<IReportTemplateService, ReportTemplateService>();
 builder.Services.AddScoped<IReportPdfGeneratorService, ReportPdfGeneratorService>();
 

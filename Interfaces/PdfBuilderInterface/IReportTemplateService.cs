@@ -12,6 +12,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<ReportTemplateDto>> CreateAsync(CreateReportTemplateDto dto, long userId);
         Task<ApiResponse<ReportTemplateDto>> UpdateAsync(long id, UpdateReportTemplateDto dto, long userId);
         Task<ApiResponse<bool>> DeleteAsync(long id);
-        Task<ApiResponse<byte[]>> GeneratePdfAsync(long templateId, long entityId);
+        Task<ApiResponse<byte[]>> GeneratePdfAsync(long templateId, long entityId, long? requestingUserId = null);
     }
 }
