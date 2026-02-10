@@ -26,6 +26,8 @@ namespace crm_api.DTOs
         public string? RevisionNo { get; set; }
         public long? RevisionId { get; set; }
         public string Currency { get; set; } = string.Empty;
+        public decimal? GeneralDiscountRate { get; set; }
+        public decimal? GeneralDiscountAmount { get; set; }
         public long? QuotationId { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
@@ -71,6 +73,10 @@ namespace crm_api.DTOs
         [MaxLength(50)]
         public string Currency { get; set; } = string.Empty;
 
+        public decimal? GeneralDiscountRate { get; set; }
+
+        public decimal? GeneralDiscountAmount { get; set; }
+
         public long? QuotationId { get; set; }
     }
 
@@ -114,6 +120,10 @@ namespace crm_api.DTOs
         [MaxLength(50)]
         public string Currency { get; set; } = string.Empty;
 
+        public decimal? GeneralDiscountRate { get; set; }
+
+        public decimal? GeneralDiscountAmount { get; set; }
+
         public long? QuotationId { get; set; }
     }
 
@@ -139,6 +149,8 @@ namespace crm_api.DTOs
         public string? RevisionNo { get; set; }
         public long? RevisionId { get; set; }
         public string Currency { get; set; } = string.Empty;
+        public decimal? GeneralDiscountRate { get; set; }
+        public decimal? GeneralDiscountAmount { get; set; }
         public long? QuotationId { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }

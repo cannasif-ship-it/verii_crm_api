@@ -46,6 +46,8 @@ namespace crm_api.Models
         public string Currency { get; set; } = String.Empty; // Döviz tipi
 
         public bool HasCustomerSpecificDiscount { get; set; } = false; // Müşteri özelindekiler için indirim var mı?
+        public decimal? GeneralDiscountRate { get; set; } // Genel iskonto oranı
+        public decimal? GeneralDiscountAmount { get; set; } // Genel iskonto tutarı
         public decimal Total { get; set; } = 0m; // KDV hariç toplam
         public decimal GrandTotal { get; set; } = 0m; // KDV dahil toplam
 

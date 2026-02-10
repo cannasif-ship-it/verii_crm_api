@@ -146,6 +146,8 @@ namespace crm_api.Services
             try
             {
                 var order = _mapper.Map<Order>(createOrderDto);
+                order.GeneralDiscountRate = createOrderDto.GeneralDiscountRate;
+                order.GeneralDiscountAmount = createOrderDto.GeneralDiscountAmount;
                 order.CreatedDate = DateTime.UtcNow;
 
                 await _unitOfWork.Orders.AddAsync(order);
@@ -193,6 +195,8 @@ namespace crm_api.Services
 
                 // 3. Güncelleme işlemi
                 _mapper.Map(updateOrderDto, order);
+                order.GeneralDiscountRate = updateOrderDto.GeneralDiscountRate;
+                order.GeneralDiscountAmount = updateOrderDto.GeneralDiscountAmount;
                 order.UpdatedDate = DateTime.UtcNow;
                 order.UpdatedBy = userId;
 
@@ -346,6 +350,8 @@ namespace crm_api.Services
 
                 // 1. Header map
                 var order = _mapper.Map<Order>(bulkDto.Order);
+                order.GeneralDiscountRate = bulkDto.Order.GeneralDiscountRate;
+                order.GeneralDiscountAmount = bulkDto.Order.GeneralDiscountAmount;
 
                 decimal total = 0m;
                 decimal grandTotal = 0m;
@@ -497,6 +503,8 @@ namespace crm_api.Services
                 newOrder.RevisionNo = documentSerialTypeWithRevision.Data;
                 newOrder.OfferDate = order.OfferDate;
                 newOrder.Currency = order.Currency;
+                newOrder.GeneralDiscountRate = order.GeneralDiscountRate;
+                newOrder.GeneralDiscountAmount = order.GeneralDiscountAmount;
                 newOrder.Total = order.Total;
                 newOrder.GrandTotal = order.GrandTotal;
                 newOrder.CreatedBy = userId;
