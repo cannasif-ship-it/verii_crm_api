@@ -146,6 +146,8 @@ namespace crm_api.Services
             try
             {
                 var demand = _mapper.Map<Demand>(createDemandDto);
+                demand.GeneralDiscountRate = createDemandDto.GeneralDiscountRate;
+                demand.GeneralDiscountAmount = createDemandDto.GeneralDiscountAmount;
                 demand.CreatedDate = DateTime.UtcNow;
 
                 await _unitOfWork.Demands.AddAsync(demand);
@@ -192,6 +194,8 @@ namespace crm_api.Services
 
                 // 3. Güncelleme işlemi
                 _mapper.Map(updateDemandDto, demand);
+                demand.GeneralDiscountRate = updateDemandDto.GeneralDiscountRate;
+                demand.GeneralDiscountAmount = updateDemandDto.GeneralDiscountAmount;
                 demand.UpdatedDate = DateTime.UtcNow;
                 demand.UpdatedBy = userId;
 
@@ -345,6 +349,8 @@ namespace crm_api.Services
 
                 // 1. Header map
                 var demand = _mapper.Map<Demand>(bulkDto.Demand);
+                demand.GeneralDiscountRate = bulkDto.Demand.GeneralDiscountRate;
+                demand.GeneralDiscountAmount = bulkDto.Demand.GeneralDiscountAmount;
 
                 decimal total = 0m;
                 decimal grandTotal = 0m;
@@ -536,6 +542,8 @@ namespace crm_api.Services
                 newDemand.RevisionNo = documentSerialTypeWithRevision.Data;
                 newDemand.OfferDate = demand.OfferDate;
                 newDemand.Currency = demand.Currency;
+                newDemand.GeneralDiscountRate = demand.GeneralDiscountRate;
+                newDemand.GeneralDiscountAmount = demand.GeneralDiscountAmount;
                 newDemand.Total = demand.Total;
                 newDemand.GrandTotal = demand.GrandTotal;
                 newDemand.CreatedBy = userId;

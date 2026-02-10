@@ -129,6 +129,16 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            // General Discount Rate
+            builder.Property(e => e.GeneralDiscountRate)
+                .HasColumnType("decimal(18,6)")
+                .IsRequired(false);
+
+            // General Discount Amount
+            builder.Property(e => e.GeneralDiscountAmount)
+                .HasColumnType("decimal(18,6)")
+                .IsRequired(false);
+
             // Total (KDV hariç)
             builder.Property(e => e.Total)
                 .HasColumnType("decimal(18,6)")
