@@ -42,6 +42,8 @@ namespace crm_api.Services
                 var query = _unitOfWork.Contacts
                     .Query()
                     .Where(c => !c.IsDeleted)
+                    .Include(c => c.Customer)
+                    .Include(c => c.Title)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
@@ -95,6 +97,8 @@ namespace crm_api.Services
                 // Reload with navigation properties for mapping
                 var contactWithNav = await _unitOfWork.Contacts
                     .Query()
+                    .Include(c => c.Customer)
+                    .Include(c => c.Title)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
@@ -129,6 +133,8 @@ namespace crm_api.Services
                 // Reload with navigation properties for mapping
                 var contactWithNav = await _unitOfWork.Contacts
                     .Query()
+                    .Include(c => c.Customer)
+                    .Include(c => c.Title)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
@@ -182,6 +188,8 @@ namespace crm_api.Services
                 // Reload with navigation properties for mapping (read-only)
                 var contactWithNav = await _unitOfWork.Contacts
                     .Query()
+                    .Include(c => c.Customer)
+                    .Include(c => c.Title)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
