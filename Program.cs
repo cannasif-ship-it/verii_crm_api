@@ -153,16 +153,19 @@ builder.Services.AddScoped<ICustomer360Service, Customer360Service>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddScoped<IQuotationLineService, QuotationLineService>();
 builder.Services.AddScoped<IQuotationExchangeRateService, QuotationExchangeRateService>();
+builder.Services.AddScoped<IQuotationNotesService, QuotationNotesService>();
 
 // Register Demand Services
 builder.Services.AddScoped<IDemandService, DemandService>();
 builder.Services.AddScoped<IDemandLineService, DemandLineService>();
 builder.Services.AddScoped<IDemandExchangeRateService, DemandExchangeRateService>();
+builder.Services.AddScoped<IDemandNotesService, DemandNotesService>();
 
 // Register Order Services
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderLineService, OrderLineService>();
 builder.Services.AddScoped<IOrderExchangeRateService, OrderExchangeRateService>();
+builder.Services.AddScoped<IOrderNotesService, OrderNotesService>();
 
 // Register Product Services
 builder.Services.AddScoped<IProductPricingService, ProductPricingService>();
