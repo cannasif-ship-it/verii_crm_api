@@ -30,5 +30,6 @@ namespace crm_api.Models
         public string? ErpCustomerCode { get; set; }
 
         public ICollection<ActivityReminder> Reminders { get; set; } = new List<ActivityReminder>();
+        public ICollection<ActivityImage> Images { get; set; } = new List<ActivityImage>();
     }
 }

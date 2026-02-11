@@ -65,6 +65,11 @@ namespace crm_api.Data.Configurations
                 .HasForeignKey(r => r.ActivityId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(e => e.Images)
+                .WithOne(i => i.Activity)
+                .HasForeignKey(i => i.ActivityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasIndex(e => e.Subject)
                 .HasDatabaseName("IX_Activity_Subject");
 
