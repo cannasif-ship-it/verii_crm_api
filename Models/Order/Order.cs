@@ -56,6 +56,7 @@ namespace crm_api.Models
         
         //navigation
         public ICollection<OrderLine> Lines { get; set; } = new List<OrderLine>();
+        public OrderNotes? OrderNotes { get; set; }
 
     }
 }

@@ -56,6 +56,7 @@ namespace crm_api.Models
         
         //navigation
         public ICollection<QuotationLine> Lines { get; set; } = new List<QuotationLine>();
+        public QuotationNotes? QuotationNotes { get; set; }
 
     }
 }

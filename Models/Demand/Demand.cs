@@ -53,6 +53,7 @@ namespace crm_api.Models
         
         //navigation
         public ICollection<DemandLine> Lines { get; set; } = new List<DemandLine>();
+        public DemandNotes? DemandNotes { get; set; }
 
     }
 }
