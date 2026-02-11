@@ -28,6 +28,9 @@ namespace crm_api.DTOs
         public string Currency { get; set; } = string.Empty;
         public decimal? GeneralDiscountRate { get; set; }
         public decimal? GeneralDiscountAmount { get; set; }
+        public long? SalesTypeDefinitionId { get; set; }
+        public string? SalesTypeDefinitionName { get; set; }
+        public string? ErpProjectCode { get; set; }
         public long? QuotationId { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
@@ -77,6 +80,11 @@ namespace crm_api.DTOs
 
         public decimal? GeneralDiscountAmount { get; set; }
 
+        [MaxLength(50)]
+        public string? ErpProjectCode { get; set; }
+
+        public long? SalesTypeDefinitionId { get; set; }
+
         public long? QuotationId { get; set; }
     }
 
@@ -124,6 +132,11 @@ namespace crm_api.DTOs
 
         public decimal? GeneralDiscountAmount { get; set; }
 
+        [MaxLength(50)]
+        public string? ErpProjectCode { get; set; }
+
+        public long? SalesTypeDefinitionId { get; set; }
+
         public long? QuotationId { get; set; }
     }
 
@@ -151,6 +164,9 @@ namespace crm_api.DTOs
         public string Currency { get; set; } = string.Empty;
         public decimal? GeneralDiscountRate { get; set; }
         public decimal? GeneralDiscountAmount { get; set; }
+        public long? SalesTypeDefinitionId { get; set; }
+        public string? SalesTypeDefinitionName { get; set; }
+        public string? ErpProjectCode { get; set; }
         public long? QuotationId { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }

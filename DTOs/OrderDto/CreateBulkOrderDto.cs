@@ -31,6 +31,8 @@ namespace crm_api.DTOs
         public decimal LineGrandTotal { get; set; }
         [MaxLength(250)]
         public string? Description { get; set; }
+        [MaxLength(50)]
+        public string? ErpProjectCode { get; set; }
     }
 
     public class CreateBulkOrderResultDto

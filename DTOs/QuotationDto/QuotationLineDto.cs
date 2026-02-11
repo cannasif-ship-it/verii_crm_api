@@ -28,6 +28,7 @@ namespace crm_api.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
+        public string? ErpProjectCode { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
@@ -65,6 +66,8 @@ namespace crm_api.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
+        [MaxLength(50)]
+        public string? ErpProjectCode { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
@@ -100,6 +103,8 @@ namespace crm_api.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
+        [MaxLength(50)]
+        public string? ErpProjectCode { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
@@ -127,6 +132,7 @@ namespace crm_api.DTOs
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
         public bool IsMainRelatedProduct { get; set; }
+        public string? ErpProjectCode { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;
     }
 
