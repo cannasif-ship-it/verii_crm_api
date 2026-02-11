@@ -17,6 +17,7 @@ namespace crm_api.Data
         public DbSet<RII_FN_CARI> RII_FN_CARI { get; set; }
         public DbSet<RII_VW_STOK> RII_VW_STOK { get; set; }
         public DbSet<RII_FN_BRANCHES> Branches { get; set; }
+        public DbSet<RII_FN_PROJECTCODE> RII_FN_PROJECTCODE { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -55,9 +56,14 @@ namespace crm_api.Data
                 entity.Property(e => e.UNVAN).HasMaxLength(150);
             });
 
-
-
-
+            // RII_FN_PROJECTCODE function yapılandırması - Key yok
+            modelBuilder.Entity<RII_FN_PROJECTCODE>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToFunction("RII_FN_PROJECTCODE");
+                entity.Property(e => e.PROJE_KODU).HasMaxLength(15);
+                entity.Property(e => e.PROJE_ACIKLAMA).HasMaxLength(50);
+            });
         }
     }
 }
