@@ -186,6 +186,7 @@ builder.Services.AddScoped<IUserDetailService, UserDetailService>();
 
 // Register Activity Services
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<IActivityImageService, ActivityImageService>();
 builder.Services.AddScoped<IActivityTypeService, ActivityTypeService>();
 
 // Register Payment Services
@@ -512,8 +513,6 @@ GlobalJobFilters.Filters.Add(
 // Migrations are intentionally run out-of-band (e.g., dotnet ef database update)
 
 // Configure the HTTP request pipeline.
-// CORS first so all responses (including errors) include CORS headers
-app.UseCors("DevCors");
 
 // Ensure 500 from unhandled exceptions still get CORS headers (browser would otherwise hide the response)
 var allowedCorsOrigins = new[] { "https://crm.v3rii.com", "http://localhost:5173" };
@@ -573,6 +572,7 @@ app.UseRequestLocalization();
 // Add BranchCode Middleware
 app.UseMiddleware<BranchCodeMiddleware>();
 
+app.UseCors("DevCors");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -588,9 +588,17 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 });
 
 // Register Recurring Jobs
-RecurringJob.AddOrUpdate<IStockSyncJob>(
-    "erp-stock-sync-job",
-    job => job.ExecuteAsync(),
-    Cron.MinuteInterval(30));
+if (!app.Environment.IsDevelopment())
+{
+    RecurringJob.AddOrUpdate<IStockSyncJob>(
+        "erp-stock-sync-job",
+        job => job.ExecuteAsync(),
+        Cron.MinuteInterval(30));
+}
+else
+{
+    RecurringJob.RemoveIfExists("erp-stock-sync-job");
+    app.Logger.LogInformation("Skipping recurring ERP sync jobs in Development environment.");
+}
 
 app.Run();

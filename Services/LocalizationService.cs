@@ -1,9 +1,7 @@
-using Microsoft.Extensions.Localization;
 using crm_api.Interfaces;
 using System.Globalization;
-using System.Resources;
 using System.Reflection;
-using crm_api.UnitOfWork;
+using System.Resources;
 
 namespace crm_api.Services
 {
@@ -12,42 +10,45 @@ namespace crm_api.Services
         private readonly ILogger<LocalizationService> _logger;
         private readonly ResourceManager _resourceManager;
 
+        // If resources are missing, disable lookups to avoid repeated exceptions/noise.
+        private static bool _resourceLookupDisabled;
+
         public LocalizationService(ILogger<LocalizationService> logger)
         {
             _logger = logger;
-            
-            // Get the current assembly
+
             var assembly = Assembly.GetExecutingAssembly();
-            
-            // Create ResourceManager for Messages resources
             _resourceManager = new ResourceManager("crm_api.Resources.Messages", assembly);
-            
-            _logger.LogInformation($"LocalizationService initialized with ResourceManager for crm_api.Resources.Messages");
         }
 
         public string GetLocalizedString(string key)
         {
-            var currentCulture = CultureInfo.CurrentCulture;
-            var currentUICulture = CultureInfo.CurrentUICulture;
-            
-            _logger.LogInformation($"LocalizationService - Key: {key}, CurrentCulture: {currentCulture.Name}, CurrentUICulture: {currentUICulture.Name}");
-            
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return string.Empty;
+            }
+
+            if (_resourceLookupDisabled)
+            {
+                return key;
+            }
+
             try
             {
-                var localizedString = _resourceManager.GetString(key, currentUICulture);
-                
-                if (string.IsNullOrEmpty(localizedString))
-                {
-                    _logger.LogWarning($"LocalizationService - Resource not found for key: {key}, culture: {currentUICulture.Name}");
-                    return key;
-                }
-                
-                _logger.LogInformation($"LocalizationService - Found localized string: {localizedString}");
-                return localizedString;
+                var culture = NormalizeCulture(CultureInfo.CurrentUICulture);
+                var localizedString = _resourceManager.GetString(key, culture);
+
+                return string.IsNullOrWhiteSpace(localizedString) ? key : localizedString;
+            }
+            catch (MissingManifestResourceException ex)
+            {
+                _resourceLookupDisabled = true;
+                _logger.LogWarning(ex, "Localization resources not found. Falling back to keys.");
+                return key;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"LocalizationService - Error getting localized string for key: {key}");
+                _logger.LogWarning(ex, "Localization lookup failed for key: {Key}", key);
                 return key;
             }
         }
@@ -55,15 +56,43 @@ namespace crm_api.Services
         public string GetLocalizedString(string key, params object[] arguments)
         {
             var localizedString = GetLocalizedString(key);
-            
+
             try
             {
                 return string.Format(localizedString, arguments);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, $"LocalizationService - Error formatting localized string for key: {key}");
                 return localizedString;
+            }
+        }
+
+        private static CultureInfo NormalizeCulture(CultureInfo culture)
+        {
+            var name = culture?.Name?.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return new CultureInfo("tr-TR");
+            }
+
+            var normalized = name.ToLowerInvariant() switch
+            {
+                "tr" or "tr-tr" => "tr-TR",
+                "en" or "en-us" or "en-tr" => "en-US",
+                "de" or "de-de" => "de-DE",
+                "fr" or "fr-fr" => "fr-FR",
+                "es" or "es-es" => "es-ES",
+                "it" or "it-it" => "it-IT",
+                _ => name
+            };
+
+            try
+            {
+                return new CultureInfo(normalized);
+            }
+            catch
+            {
+                return new CultureInfo("tr-TR");
             }
         }
     }

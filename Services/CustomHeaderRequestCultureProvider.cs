@@ -1,32 +1,52 @@
 using Microsoft.AspNetCore.Localization;
+using System;
+using System.Linq;
 
 namespace crm_api.Services
 {
     /// <summary>
-    /// Custom culture provider that reads language from "x-language" header
-    /// Supports: tr, en, de, fr, es, it
+    /// Custom culture provider that reads language from "x-language" header.
+    /// It normalizes short and mixed forms (e.g., tr, tr-tr, en, en-TR) into supported cultures.
     /// </summary>
     public class CustomHeaderRequestCultureProvider : RequestCultureProvider
     {
         public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
         {
-            if (httpContext.Request.Headers.TryGetValue("x-language", out var headerValue))
+            if (!httpContext.Request.Headers.TryGetValue("x-language", out var headerValue))
             {
-                var language = headerValue.ToString().ToLowerInvariant().Trim();
-                
-                return Task.FromResult<ProviderCultureResult?>(language switch
-                {
-                    "tr" or "tr-tr" => new ProviderCultureResult("tr-TR"),
-                    "en" or "en-us" => new ProviderCultureResult("en-US"),
-                    "de" or "de-de" => new ProviderCultureResult("de-DE"),
-                    "fr" or "fr-fr" => new ProviderCultureResult("fr-FR"),
-                    "es" or "es-es" => new ProviderCultureResult("es-ES"),
-                    "it" or "it-it" => new ProviderCultureResult("it-IT"),
-                    _ => null // Return null to fall back to default culture
-                });
+                return Task.FromResult<ProviderCultureResult?>(null);
             }
 
-            return Task.FromResult<ProviderCultureResult?>(null);
+            var raw = headerValue.ToString().Trim();
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return Task.FromResult<ProviderCultureResult?>(null);
+            }
+
+            var normalized = NormalizeLanguage(raw);
+            if (normalized == null)
+            {
+                return Task.FromResult<ProviderCultureResult?>(null);
+            }
+
+            return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult(normalized, normalized));
+        }
+
+        private static string? NormalizeLanguage(string raw)
+        {
+            var lower = raw.ToLowerInvariant();
+            var primary = lower.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+
+            return (lower, primary) switch
+            {
+                ("tr", _) or ("tr-tr", _) or (_, "tr") => "tr-TR",
+                ("en", _) or ("en-us", _) or (_, "en") => "en-US",
+                ("de", _) or ("de-de", _) or (_, "de") => "de-DE",
+                ("fr", _) or ("fr-fr", _) or (_, "fr") => "fr-FR",
+                ("es", _) or ("es-es", _) or (_, "es") => "es-ES",
+                ("it", _) or ("it-it", _) or (_, "it") => "it-IT",
+                _ => null
+            };
         }
     }
 }
