@@ -74,6 +74,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Quotation.Id);
@@ -151,6 +152,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Quotation.Id);
@@ -205,6 +207,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
 
                 var quotationDto = _mapper.Map<QuotationGetDto>(quotationWithNav ?? quotation);
@@ -525,6 +528,7 @@ namespace crm_api.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .FirstOrDefaultAsync(q => q.Id == quotation.Id);
 
                 var dto = _mapper.Map<QuotationGetDto>(quotationWithNav);
@@ -766,6 +770,8 @@ namespace crm_api.Services
                 newQuotation.PaymentTypeId = quotation.PaymentTypeId;
                 newQuotation.HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount;
                 newQuotation.DemandId = quotation.DemandId;
+                newQuotation.SalesTypeDefinitionId = quotation.SalesTypeDefinitionId;
+                newQuotation.ErpProjectCode = quotation.ErpProjectCode;
                 newQuotation.Status = (int)ApprovalStatus.HavenotStarted;
 
                 await _unitOfWork.Quotations.AddAsync(newQuotation);

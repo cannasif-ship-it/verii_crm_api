@@ -277,6 +277,7 @@ namespace crm_api.Services
                         RelatedStockId = x.QuotationLine.RelatedStockId,
                         RelatedProductKey = x.QuotationLine.RelatedProductKey,
                         IsMainRelatedProduct = x.QuotationLine.IsMainRelatedProduct,
+                        ErpProjectCode = x.QuotationLine.ErpProjectCode,
                         ApprovalStatus = x.QuotationLine.ApprovalStatus
                     })
                     .ToListAsync();

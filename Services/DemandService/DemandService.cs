@@ -73,6 +73,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
@@ -127,6 +128,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
 
                 var demandDto = _mapper.Map<DemandGetDto>(demandWithNav ?? demand);
@@ -446,6 +448,7 @@ namespace crm_api.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .FirstOrDefaultAsync(q => q.Id == demand.Id);
 
                 var dto = _mapper.Map<DemandGetDto>(demandWithNav);
@@ -570,6 +573,8 @@ namespace crm_api.Services
                 newDemand.Description = demand.Description;
                 newDemand.PaymentTypeId = demand.PaymentTypeId;
                 newDemand.HasCustomerSpecificDiscount = demand.HasCustomerSpecificDiscount;
+                newDemand.SalesTypeDefinitionId = demand.SalesTypeDefinitionId;
+                newDemand.ErpProjectCode = demand.ErpProjectCode;
                 newDemand.Status = (int)ApprovalStatus.HavenotStarted;
 
                 await _unitOfWork.Demands.AddAsync(newDemand);
@@ -598,6 +603,7 @@ namespace crm_api.Services
                     newLine.RelatedStockId = line.RelatedStockId;
                     newLine.RelatedProductKey = line.RelatedProductKey;
                     newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
+                    newLine.ErpProjectCode = line.ErpProjectCode;
                     newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
                     newDemandLines.Add(newLine);
                 }
@@ -1696,6 +1702,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
                     .ApplyFilters(request.Filters);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
