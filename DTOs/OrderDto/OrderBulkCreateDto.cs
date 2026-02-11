@@ -13,5 +13,7 @@ namespace crm_api.DTOs
         public List<CreateOrderLineDto> Lines { get; set; } = new List<CreateOrderLineDto>();
 
         public List<OrderExchangeRateCreateDto>? ExchangeRates { get; set; }
+
+        public CreateOrderNotesDto? OrderNotes { get; set; }
     }
 }

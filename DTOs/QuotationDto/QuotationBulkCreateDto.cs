@@ -13,5 +13,7 @@ namespace crm_api.DTOs
         public List<CreateQuotationLineDto> Lines { get; set; } = new List<CreateQuotationLineDto>();
 
         public List<QuotationExchangeRateCreateDto>? ExchangeRates { get; set; }
+
+        public CreateQuotationNotesDto? QuotationNotes { get; set; }
     }
 }
