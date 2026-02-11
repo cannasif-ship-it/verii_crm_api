@@ -35,6 +35,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<Activity>? _activities;
         private IGenericRepository<ActivityType>? _activityTypes;
         private IGenericRepository<PaymentType>? _paymentTypes;
+        private IGenericRepository<SalesTypeDefinition>? _salesTypeDefinitions;
         private IGenericRepository<ProductPricing>? _productPricings;
         private IGenericRepository<ProductPricingGroupBy>? _productPricingGroupBys;
         private IGenericRepository<UserDiscountLimit>? _userDiscountLimits;
@@ -101,6 +102,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<Activity> Activities{get{_activities ??= new GenericRepository<Activity>(_context, _httpContextAccessor);return _activities;}}
         public IGenericRepository<ActivityType> ActivityTypes{get{_activityTypes ??= new GenericRepository<ActivityType>(_context, _httpContextAccessor);return _activityTypes;}}
         public IGenericRepository<PaymentType> PaymentTypes{get{_paymentTypes ??= new GenericRepository<PaymentType>(_context, _httpContextAccessor);return _paymentTypes;}}
+        public IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions{get{_salesTypeDefinitions ??= new GenericRepository<SalesTypeDefinition>(_context, _httpContextAccessor);return _salesTypeDefinitions;}}
 
         public IGenericRepository<ProductPricing> ProductPricings{get{_productPricings ??= new GenericRepository<ProductPricing>(_context, _httpContextAccessor);return _productPricings;}}
         public IGenericRepository<ProductPricingGroupBy> ProductPricingGroupBys{get{_productPricingGroupBys ??= new GenericRepository<ProductPricingGroupBy>(_context, _httpContextAccessor);return _productPricingGroupBys;}}

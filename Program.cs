@@ -190,6 +190,7 @@ builder.Services.AddScoped<IActivityTypeService, ActivityTypeService>();
 
 // Register Payment Services
 builder.Services.AddScoped<IPaymentTypeService, PaymentTypeService>();
+builder.Services.AddScoped<ISalesTypeService, SalesTypeService>();
 
 // Register Title Services
 builder.Services.AddScoped<ITitleService, TitleService>();

@@ -28,6 +28,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<ProductPricingGroupBy> ProductPricingGroupBys { get; }
         IGenericRepository<UserDiscountLimit> UserDiscountLimits { get; }
         IGenericRepository<PaymentType> PaymentTypes { get; }
+        IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions { get; }
         IGenericRepository<ShippingAddress> ShippingAddresses { get; }
         IGenericRepository<Quotation> Quotations { get; }
         IGenericRepository<QuotationLine> QuotationLines { get; }
