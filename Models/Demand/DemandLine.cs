@@ -46,5 +46,6 @@ namespace crm_api.Models
 
         public bool IsMainRelatedProduct { get; set; } = false;
 
+        public string? ErpProjectCode { get; set; }  // max 50, nullable
     }
 }

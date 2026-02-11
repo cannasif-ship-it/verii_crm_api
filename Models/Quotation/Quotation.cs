@@ -53,7 +53,12 @@ namespace crm_api.Models
 
         public long? DemandId { get; set; }
         public Demand? Demand { get; set; }
-        
+
+        public long? SalesTypeDefinitionId { get; set; }
+        public SalesTypeDefinition? SalesTypeDefinition { get; set; }
+
+        public string? ErpProjectCode { get; set; }  // max 50, nullable
+
         //navigation
         public ICollection<QuotationLine> Lines { get; set; } = new List<QuotationLine>();
         public QuotationNotes? QuotationNotes { get; set; }

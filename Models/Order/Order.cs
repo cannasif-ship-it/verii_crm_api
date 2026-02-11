@@ -51,6 +51,11 @@ namespace crm_api.Models
         public decimal Total { get; set; } = 0m; // KDV hariç toplam
         public decimal GrandTotal { get; set; } = 0m; // KDV dahil toplam
 
+        public long? SalesTypeDefinitionId { get; set; }
+        public SalesTypeDefinition? SalesTypeDefinition { get; set; }
+
+        public string? ErpProjectCode { get; set; }  // max 50, nullable
+
         public long? QuotationId { get; set; }
         public Quotation? Quotation { get; set; }
         

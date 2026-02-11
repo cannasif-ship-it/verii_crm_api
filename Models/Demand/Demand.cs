@@ -50,7 +50,12 @@ namespace crm_api.Models
         public decimal? GeneralDiscountAmount { get; set; } // Genel iskonto tutarı
         public decimal Total { get; set; } = 0m; // KDV hariç toplam
         public decimal GrandTotal { get; set; } = 0m; // KDV dahil toplam
-        
+
+        public long? SalesTypeDefinitionId { get; set; }
+        public SalesTypeDefinition? SalesTypeDefinition { get; set; }
+
+        public string? ErpProjectCode { get; set; }  // max 50, nullable
+
         //navigation
         public ICollection<DemandLine> Lines { get; set; } = new List<DemandLine>();
         public DemandNotes? DemandNotes { get; set; }
