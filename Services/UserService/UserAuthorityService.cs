@@ -5,7 +5,6 @@ using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
-using crm_api.Data;
 using System;
 using System.Collections.Generic;
 
@@ -16,14 +15,12 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
 
-        public UserAuthorityService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, CmsDbContext context)
+        public UserAuthorityService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
-            _context = context;
         }
 
         public async Task<ApiResponse<PagedResponse<UserAuthorityDto>>> GetAllAsync(PagedRequest request)
@@ -40,7 +37,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var query = _context.UserAuthorities
+                var query = _unitOfWork.UserAuthorities.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
                     .Include(u => u.CreatedByUser)
@@ -94,7 +91,7 @@ namespace crm_api.Services
                 }
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserAuthorities
+                var entityWithNav = await _unitOfWork.UserAuthorities.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -122,7 +119,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserAuthorities
+                var entityWithNav = await _unitOfWork.UserAuthorities.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
@@ -159,7 +156,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
-                var entityWithNav = await _context.UserAuthorities
+                var entityWithNav = await _unitOfWork.UserAuthorities.Query()
                     .AsNoTracking()
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)

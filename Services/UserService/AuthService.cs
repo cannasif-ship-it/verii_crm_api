@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
-using crm_api.Data;
 using crm_api.DTOs;
 using crm_api.Models;
 using crm_api.Interfaces;
@@ -18,7 +17,6 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtService _jwtService;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
         private readonly IHubContext<AuthHub> _hubContext;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
@@ -26,7 +24,6 @@ namespace crm_api.Services
             IUnitOfWork unitOfWork,
             IJwtService jwtService,
             ILocalizationService localizationService,
-            CmsDbContext context,
             IHubContext<AuthHub> hubContext,
             IConfiguration configuration,
             IUserService userService)
@@ -34,7 +31,6 @@ namespace crm_api.Services
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
             _localizationService = localizationService;
-            _context = context;
             _hubContext = hubContext;
             _configuration = configuration;
             _userService = userService;
@@ -154,11 +150,11 @@ namespace crm_api.Services
                 }
                 var token = tokenResponse.Data!;
 
-                var activeSession = _context.Set<UserSession>().FirstOrDefault(s => s.UserId == user.Id && s.RevokedAt == null);
+                var activeSession = await _unitOfWork.UserSessions.Query().FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null);
                 if (activeSession != null)
                 {
                     activeSession.RevokedAt = DateTime.UtcNow;
-                    _context.SaveChanges();
+                    await _unitOfWork.SaveChangesAsync();
                     await AuthHub.ForceLogoutUser(_hubContext, user.Id.ToString());
                 }
 
@@ -171,8 +167,8 @@ namespace crm_api.Services
                     IsDeleted = false,
                     CreatedDate = DateTime.UtcNow
                 };
-                _context.Set<UserSession>().Add(session);
-                _context.SaveChanges();
+                await _unitOfWork.UserSessions.AddAsync(session);
+                await _unitOfWork.SaveChangesAsync();
                 
                 return ApiResponse<string>.SuccessResult(token, _localizationService.GetLocalizedString("Success.User.LoginSuccessful"));
             }
@@ -232,7 +228,7 @@ namespace crm_api.Services
                     return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(_localizationService.GetLocalizedString("AuthUserNotFound"), null, 404);
                 }
 
-                var session = await _context.Set<UserSession>().FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null);
+                var session = await _unitOfWork.UserSessions.Query().FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null);
                 if (session == null)
                 {
                     return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(_localizationService.GetLocalizedString("AuthSessionNotFound"), null, 404);
@@ -307,8 +303,8 @@ namespace crm_api.Services
                         CreatedDate = DateTime.UtcNow,
                         IsDeleted = false
                     };
-                    _context.Set<PasswordResetRequest>().Add(reset);
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.Repository<PasswordResetRequest>().AddAsync(reset);
+                    await _unitOfWork.SaveChangesAsync();
                     
                     var fullName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
                     if (string.IsNullOrWhiteSpace(fullName))
@@ -345,7 +341,7 @@ namespace crm_api.Services
                 var tokenHash = ComputeSha256Hash(request.Token);
                 var now = DateTime.UtcNow;
 
-                var reset = await _context.Set<PasswordResetRequest>()
+                var reset = await _unitOfWork.Repository<PasswordResetRequest>().Query()
                     .Include(r => r.User)
                     .FirstOrDefaultAsync(r => r.TokenHash == tokenHash && r.UsedAt == null && r.ExpiresAt > now && !r.IsDeleted);
 
@@ -360,7 +356,7 @@ namespace crm_api.Services
                 reset.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
                 reset.User.UpdatedDate = now;
 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 await InvalidateUserSessionsAsync(reset.User.Id);
 
@@ -423,7 +419,7 @@ namespace crm_api.Services
 
         private async Task InvalidateUserSessionsAsync(long userId)
         {
-            var sessions = await _context.Set<UserSession>()
+            var sessions = await _unitOfWork.UserSessions.Query()
                 .Where(s => s.UserId == userId && s.RevokedAt == null)
                 .ToListAsync();
 
@@ -435,7 +431,7 @@ namespace crm_api.Services
                     s.RevokedAt = now;
                     s.UpdatedDate = now;
                 }
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 await AuthHub.ForceLogoutUser(_hubContext, userId.ToString());
             }
         }
