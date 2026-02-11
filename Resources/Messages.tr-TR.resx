@@ -863,6 +863,9 @@
   <data name="ErpService.GetAllStokGroupExceptionMessage" xml:space="preserve">
     <value>Erpler getirilirken bir hata oluştu: {0}</value>
   </data>
+  <data name="ErpService.GetProjectCodesExceptionMessage" xml:space="preserve">
+    <value>Proje kodları getirilirken bir hata oluştu: {0}</value>
+  </data>
   <data name="ErpService.InternalServerError" xml:space="preserve">
     <value>Sunucu hatası oluştu.</value>
   </data>

@@ -815,6 +815,9 @@
   <data name="ErpService.GetAllStokGroupExceptionMessage" xml:space="preserve">
     <value>Si è verificato un errore durante il recupero di Erps: {0}</value>
   </data>
+  <data name="ErpService.GetProjectCodesExceptionMessage" xml:space="preserve">
+    <value>Si è verificato un errore durante il recupero dei codici progetto: {0}</value>
+  </data>
   <data name="ErpService.InternalServerError" xml:space="preserve">
     <value>Si è verificato un errore interno del server.</value>
   </data>

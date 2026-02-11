@@ -815,6 +815,9 @@
   <data name="ErpService.GetAllStokGroupExceptionMessage" xml:space="preserve">
     <value>حدث خطأ أثناء استرجاع Erps: {0}</value>
   </data>
+  <data name="ErpService.GetProjectCodesExceptionMessage" xml:space="preserve">
+    <value>حدث خطأ أثناء استرجاع رموز المشروع: {0}</value>
+  </data>
   <data name="ErpService.InternalServerError" xml:space="preserve">
     <value>حدث خطأ داخلي في الخادم.</value>
   </data>
