@@ -411,7 +411,15 @@ namespace crm_api.Services
 
                 await _unitOfWork.OrderLines.AddAllAsync(lines);
 
-                // 5. Exchange rates
+                // 5. Order notes
+                if (bulkDto.OrderNotes != null)
+                {
+                    var orderNotes = _mapper.Map<OrderNotes>(bulkDto.OrderNotes);
+                    orderNotes.OrderId = order.Id;
+                    await _unitOfWork.OrderNotes.AddAsync(orderNotes);
+                }
+
+                // 6. Exchange rates
                 if (bulkDto.ExchangeRates?.Any() == true)
                 {
                     var rates = bulkDto.ExchangeRates
@@ -485,6 +493,9 @@ namespace crm_api.Services
 
                 var orderExchangeRates = await _unitOfWork.OrderExchangeRates.Query()
                     .Where(x => !x.IsDeleted && x.OrderId == orderId).ToListAsync();
+
+                var orderNotes = await _unitOfWork.OrderNotes.Query()
+                    .FirstOrDefaultAsync(x => !x.IsDeleted && x.OrderId == orderId);
 
                 var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(order.DocumentSerialTypeId, false, order.RevisionNo);
                 if (!documentSerialTypeWithRevision.Success)
@@ -569,6 +580,32 @@ namespace crm_api.Services
                     newOrderExchangeRates.Add(newExchangeRate);
                 }
                 await _unitOfWork.OrderExchangeRates.AddAllAsync(newOrderExchangeRates);
+
+                if (orderNotes != null)
+                {
+                    var newOrderNotes = new OrderNotes
+                    {
+                        OrderId = newOrder.Id,
+                        Note1 = orderNotes.Note1,
+                        Note2 = orderNotes.Note2,
+                        Note3 = orderNotes.Note3,
+                        Note4 = orderNotes.Note4,
+                        Note5 = orderNotes.Note5,
+                        Note6 = orderNotes.Note6,
+                        Note7 = orderNotes.Note7,
+                        Note8 = orderNotes.Note8,
+                        Note9 = orderNotes.Note9,
+                        Note10 = orderNotes.Note10,
+                        Note11 = orderNotes.Note11,
+                        Note12 = orderNotes.Note12,
+                        Note13 = orderNotes.Note13,
+                        Note14 = orderNotes.Note14,
+                        Note15 = orderNotes.Note15
+                    };
+
+                    await _unitOfWork.OrderNotes.AddAsync(newOrderNotes);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 await _unitOfWork.CommitTransactionAsync();

@@ -489,7 +489,15 @@ namespace crm_api.Services
 
                 await _unitOfWork.QuotationLines.AddAllAsync(lines);
 
-                // 5. Exchange rates
+                                // 5. Quotation notes
+                if (bulkDto.QuotationNotes != null)
+                {
+                    var quotationNotes = _mapper.Map<QuotationNotes>(bulkDto.QuotationNotes);
+                    quotationNotes.QuotationId = quotation.Id;
+                    await _unitOfWork.QuotationNotes.AddAsync(quotationNotes);
+                }
+
+                // 6. Exchange rates
                 if (bulkDto.ExchangeRates?.Any() == true)
                 {
                     var rates = bulkDto.ExchangeRates
@@ -503,7 +511,7 @@ namespace crm_api.Services
                     await _unitOfWork.QuotationExchangeRates.AddAllAsync(rates);
                 }
 
-                // 6. Commit
+                                // 7. Commit
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
@@ -720,6 +728,9 @@ namespace crm_api.Services
                 var QuotationExchangeRates = await _unitOfWork.QuotationExchangeRates.Query()
                 .Where(x => !x.IsDeleted && x.QuotationId == quotationId).ToListAsync();
 
+                var quotationNotes = await _unitOfWork.QuotationNotes.Query()
+                .FirstOrDefaultAsync(x => !x.IsDeleted && x.QuotationId == quotationId);
+
                 var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(quotation.DocumentSerialTypeId, false, quotation.RevisionNo);
                 if (!documentSerialTypeWithRevision.Success)
                 {
@@ -801,6 +812,32 @@ namespace crm_api.Services
                     newQuotationExchangeRates.Add(newExchangeRate);
                 }
                 await _unitOfWork.QuotationExchangeRates.AddAllAsync(newQuotationExchangeRates);
+
+                if (quotationNotes != null)
+                {
+                    var newQuotationNotes = new QuotationNotes
+                    {
+                        QuotationId = newQuotation.Id,
+                        Note1 = quotationNotes.Note1,
+                        Note2 = quotationNotes.Note2,
+                        Note3 = quotationNotes.Note3,
+                        Note4 = quotationNotes.Note4,
+                        Note5 = quotationNotes.Note5,
+                        Note6 = quotationNotes.Note6,
+                        Note7 = quotationNotes.Note7,
+                        Note8 = quotationNotes.Note8,
+                        Note9 = quotationNotes.Note9,
+                        Note10 = quotationNotes.Note10,
+                        Note11 = quotationNotes.Note11,
+                        Note12 = quotationNotes.Note12,
+                        Note13 = quotationNotes.Note13,
+                        Note14 = quotationNotes.Note14,
+                        Note15 = quotationNotes.Note15
+                    };
+
+                    await _unitOfWork.QuotationNotes.AddAsync(newQuotationNotes);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
                 var dtos = _mapper.Map<QuotationGetDto>(newQuotation);

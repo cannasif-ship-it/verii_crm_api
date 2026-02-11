@@ -33,12 +33,15 @@ namespace crm_api.UnitOfWork
         IGenericRepository<QuotationLine> QuotationLines { get; }
         IGenericRepository<UserSession> UserSessions { get; }
         IGenericRepository<QuotationExchangeRate> QuotationExchangeRates { get; }
+        IGenericRepository<QuotationNotes> QuotationNotes { get; }
         IGenericRepository<Demand> Demands { get; }
         IGenericRepository<DemandLine> DemandLines { get; }
         IGenericRepository<DemandExchangeRate> DemandExchangeRates { get; }
+        IGenericRepository<DemandNotes> DemandNotes { get; }
         IGenericRepository<Order> Orders { get; }
         IGenericRepository<OrderLine> OrderLines { get; }
         IGenericRepository<OrderExchangeRate> OrderExchangeRates { get; }
+        IGenericRepository<OrderNotes> OrderNotes { get; }
         IGenericRepository<UserDetail> UserDetails { get; }
         IGenericRepository<PricingRuleHeader> PricingRuleHeaders { get; }
         IGenericRepository<PricingRuleLine> PricingRuleLines { get; }

@@ -410,7 +410,15 @@ namespace crm_api.Services
 
                 await _unitOfWork.DemandLines.AddAllAsync(lines);
 
-                // 5. Exchange rates
+                // 5. Demand notes
+                if (bulkDto.DemandNotes != null)
+                {
+                    var demandNotes = _mapper.Map<DemandNotes>(bulkDto.DemandNotes);
+                    demandNotes.DemandId = demand.Id;
+                    await _unitOfWork.DemandNotes.AddAsync(demandNotes);
+                }
+
+                // 6. Exchange rates
                 if (bulkDto.ExchangeRates?.Any() == true)
                 {
                     var rates = bulkDto.ExchangeRates
@@ -525,6 +533,9 @@ namespace crm_api.Services
                 var DemandExchangeRates = await _unitOfWork.DemandExchangeRates.Query()
                 .Where(x => !x.IsDeleted && x.DemandId == demandId).ToListAsync();
 
+                var demandNotes = await _unitOfWork.DemandNotes.Query()
+                .FirstOrDefaultAsync(x => !x.IsDeleted && x.DemandId == demandId);
+
                 var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(demand.DocumentSerialTypeId, false, demand.RevisionNo);
                 if (!documentSerialTypeWithRevision.Success)
                 {
@@ -607,6 +618,32 @@ namespace crm_api.Services
                     newDemandExchangeRates.Add(newExchangeRate);
                 }
                 await _unitOfWork.DemandExchangeRates.AddAllAsync(newDemandExchangeRates);
+
+                if (demandNotes != null)
+                {
+                    var newDemandNotes = new DemandNotes
+                    {
+                        DemandId = newDemand.Id,
+                        Note1 = demandNotes.Note1,
+                        Note2 = demandNotes.Note2,
+                        Note3 = demandNotes.Note3,
+                        Note4 = demandNotes.Note4,
+                        Note5 = demandNotes.Note5,
+                        Note6 = demandNotes.Note6,
+                        Note7 = demandNotes.Note7,
+                        Note8 = demandNotes.Note8,
+                        Note9 = demandNotes.Note9,
+                        Note10 = demandNotes.Note10,
+                        Note11 = demandNotes.Note11,
+                        Note12 = demandNotes.Note12,
+                        Note13 = demandNotes.Note13,
+                        Note14 = demandNotes.Note14,
+                        Note15 = demandNotes.Note15
+                    };
+
+                    await _unitOfWork.DemandNotes.AddAsync(newDemandNotes);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 await _unitOfWork.CommitTransactionAsync();
