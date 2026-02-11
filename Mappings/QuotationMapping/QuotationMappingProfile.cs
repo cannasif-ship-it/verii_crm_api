@@ -16,7 +16,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
                 .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
                 .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
-                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
+                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null))
+                .ForMember(dest => dest.SalesTypeDefinitionName, opt => opt.MapFrom(src => src.SalesTypeDefinition != null ? src.SalesTypeDefinition.Name : null));
 
             CreateMap<Quotation, QuotationGetDto>()
                 .ForMember(dest => dest.PotentialCustomerName, opt => opt.MapFrom(src => src.PotentialCustomer != null ? src.PotentialCustomer.CustomerName : null))
@@ -25,7 +26,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType != null ? src.PaymentType.Name : null))
                 .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
                 .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
-                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null));
+                .ForMember(dest => dest.DocumentSerialTypeName, opt => opt.MapFrom(src => src.DocumentSerialType != null ? src.DocumentSerialType.SerialPrefix : null))
+                .ForMember(dest => dest.SalesTypeDefinitionName, opt => opt.MapFrom(src => src.SalesTypeDefinition != null ? src.SalesTypeDefinition.Name : null));
 
             CreateMap<CreateQuotationDto, Quotation>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -43,7 +45,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
                 .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
-                .ForMember(dest => dest.Demand, opt => opt.Ignore());
+                .ForMember(dest => dest.Demand, opt => opt.Ignore())
+                .ForMember(dest => dest.SalesTypeDefinition, opt => opt.Ignore());
 
             CreateMap<UpdateQuotationDto, Quotation>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -61,7 +64,8 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.GeneralDiscountRate, opt => opt.MapFrom(src => src.GeneralDiscountRate))
                 .ForMember(dest => dest.GeneralDiscountAmount, opt => opt.MapFrom(src => src.GeneralDiscountAmount))
                 .ForMember(dest => dest.DocumentSerialType, opt => opt.Ignore())
-                .ForMember(dest => dest.Demand, opt => opt.Ignore());
+                .ForMember(dest => dest.Demand, opt => opt.Ignore())
+                .ForMember(dest => dest.SalesTypeDefinition, opt => opt.Ignore());
         }
     }
 }
