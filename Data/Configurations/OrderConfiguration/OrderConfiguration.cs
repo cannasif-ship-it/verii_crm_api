@@ -160,6 +160,11 @@ namespace crm_api.Data.Configurations
                 .HasForeignKey(e => e.QuotationId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            builder.HasOne(e => e.OrderNotes)
+                .WithOne(n => n.Order)
+                .HasForeignKey<OrderNotes>(n => n.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Navigation - Lines
             builder.HasMany(e => e.Lines)
                 .WithOne(l => l.Order)

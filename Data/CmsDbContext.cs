@@ -35,12 +35,15 @@ namespace crm_api.Data
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<QuotationLine> QuotationLines { get; set; }
         public DbSet<QuotationExchangeRate> QuotationExchangeRates { get; set; }
+        public DbSet<QuotationNotes> QuotationNotes { get; set; }
         public DbSet<Demand> Demands { get; set; }
         public DbSet<DemandLine> DemandLines { get; set; }
         public DbSet<DemandExchangeRate> DemandExchangeRates { get; set; }
+        public DbSet<DemandNotes> DemandNotes { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderLine> OrderLines { get; set; }
         public DbSet<OrderExchangeRate> OrderExchangeRates { get; set; }
+        public DbSet<OrderNotes> OrderNotes { get; set; }
         public DbSet<UserAuthority> UserAuthorities { get; set; }
         public DbSet<UserSession> UserSessions { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
