@@ -33,6 +33,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<UserAuthority>? _userAuthorities;
         private IGenericRepository<Contact>? _contacts;
         private IGenericRepository<Activity>? _activities;
+        private IGenericRepository<ActivityImage>? _activityImages;
         private IGenericRepository<ActivityType>? _activityTypes;
         private IGenericRepository<PaymentType>? _paymentTypes;
         private IGenericRepository<SalesTypeDefinition>? _salesTypeDefinitions;
@@ -100,6 +101,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<UserAuthority> UserAuthorities{get{_userAuthorities ??= new GenericRepository<UserAuthority>(_context, _httpContextAccessor);return _userAuthorities;}}
         public IGenericRepository<Contact> Contacts{get{_contacts ??= new GenericRepository<Contact>(_context, _httpContextAccessor);return _contacts;}}
         public IGenericRepository<Activity> Activities{get{_activities ??= new GenericRepository<Activity>(_context, _httpContextAccessor);return _activities;}}
+        public IGenericRepository<ActivityImage> ActivityImages{get{_activityImages ??= new GenericRepository<ActivityImage>(_context, _httpContextAccessor);return _activityImages;}}
         public IGenericRepository<ActivityType> ActivityTypes{get{_activityTypes ??= new GenericRepository<ActivityType>(_context, _httpContextAccessor);return _activityTypes;}}
         public IGenericRepository<PaymentType> PaymentTypes{get{_paymentTypes ??= new GenericRepository<PaymentType>(_context, _httpContextAccessor);return _paymentTypes;}}
         public IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions{get{_salesTypeDefinitions ??= new GenericRepository<SalesTypeDefinition>(_context, _httpContextAccessor);return _salesTypeDefinitions;}}

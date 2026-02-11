@@ -23,6 +23,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<UserAuthority> UserAuthorities { get; }
         IGenericRepository<Contact> Contacts { get; }
         IGenericRepository<Activity> Activities { get; }
+        IGenericRepository<ActivityImage> ActivityImages { get; }
         IGenericRepository<ActivityType> ActivityTypes { get; }
         IGenericRepository<ProductPricing> ProductPricings { get; }
         IGenericRepository<ProductPricingGroupBy> ProductPricingGroupBys { get; }
