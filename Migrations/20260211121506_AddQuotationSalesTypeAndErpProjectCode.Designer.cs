@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using crm_api.Data;
 
@@ -11,9 +12,11 @@ using crm_api.Data;
 namespace crm_api.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    partial class CmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211121506_AddQuotationSalesTypeAndErpProjectCode")]
+    partial class AddQuotationSalesTypeAndErpProjectCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1337,10 +1340,6 @@ namespace crm_api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("ErpProjectCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<decimal?>("GeneralDiscountAmount")
                         .HasColumnType("decimal(18,6)");
 
@@ -1409,9 +1408,6 @@ namespace crm_api.Migrations
                     b.Property<string>("RevisionNo")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<long?>("SalesTypeDefinitionId")
-                        .HasColumnType("bigint");
 
                     b.Property<long?>("ShippingAddressId")
                         .HasColumnType("bigint");
@@ -1485,9 +1481,6 @@ namespace crm_api.Migrations
 
                     b.HasIndex("RepresentativeId")
                         .HasDatabaseName("IX_Demand_RepresentativeId");
-
-                    b.HasIndex("SalesTypeDefinitionId")
-                        .HasDatabaseName("IX_Demand_SalesTypeDefinitionId");
 
                     b.HasIndex("ShippingAddressId")
                         .HasDatabaseName("IX_Demand_ShippingAddressId");
@@ -1630,10 +1623,6 @@ namespace crm_api.Migrations
 
                     b.Property<decimal>("DiscountRate3")
                         .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("ErpProjectCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -2117,10 +2106,6 @@ namespace crm_api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("ErpProjectCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<decimal?>("GeneralDiscountAmount")
                         .HasColumnType("decimal(18,6)");
 
@@ -2192,9 +2177,6 @@ namespace crm_api.Migrations
                     b.Property<string>("RevisionNo")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<long?>("SalesTypeDefinitionId")
-                        .HasColumnType("bigint");
 
                     b.Property<long?>("ShippingAddressId")
                         .HasColumnType("bigint");
@@ -2271,9 +2253,6 @@ namespace crm_api.Migrations
 
                     b.HasIndex("RepresentativeId")
                         .HasDatabaseName("IX_Order_RepresentativeId");
-
-                    b.HasIndex("SalesTypeDefinitionId")
-                        .HasDatabaseName("IX_Order_SalesTypeDefinitionId");
 
                     b.HasIndex("ShippingAddressId")
                         .HasDatabaseName("IX_Order_ShippingAddressId");
@@ -2413,10 +2392,6 @@ namespace crm_api.Migrations
 
                     b.Property<decimal>("DiscountRate3")
                         .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("ErpProjectCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -6353,11 +6328,6 @@ namespace crm_api.Migrations
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.SalesTypeDefinition", "SalesTypeDefinition")
-                        .WithMany()
-                        .HasForeignKey("SalesTypeDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
@@ -6385,8 +6355,6 @@ namespace crm_api.Migrations
                     b.Navigation("PotentialCustomer");
 
                     b.Navigation("Representative");
-
-                    b.Navigation("SalesTypeDefinition");
 
                     b.Navigation("ShippingAddress");
 
@@ -6658,11 +6626,6 @@ namespace crm_api.Migrations
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.SalesTypeDefinition", "SalesTypeDefinition")
-                        .WithMany()
-                        .HasForeignKey("SalesTypeDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
@@ -6692,8 +6655,6 @@ namespace crm_api.Migrations
                     b.Navigation("Quotation");
 
                     b.Navigation("Representative");
-
-                    b.Navigation("SalesTypeDefinition");
 
                     b.Navigation("ShippingAddress");
 
