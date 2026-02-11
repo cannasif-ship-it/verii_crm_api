@@ -47,6 +47,11 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.SubeKodu, opt => opt.MapFrom(src => src.SUBE_KODU))
                 .ForMember(dest => dest.Unvan, opt => opt.MapFrom(src => src.UNVAN));
 
+            // RII_FN_PROJECTCODE (Proje kodu) mappings
+            CreateMap<RII_FN_PROJECTCODE, ProjeDto>()
+                .ForMember(dest => dest.ProjeKod, opt => opt.MapFrom(src => src.PROJE_KODU))
+                .ForMember(dest => dest.ProjeAciklama, opt => opt.MapFrom(src => src.PROJE_ACIKLAMA));
+
             // Kur mappings
             CreateMap<RII_FN_KUR, KurDto>()
                 .ForMember(dest => dest.DovizTipi, opt => opt.MapFrom(src => src.DOVIZ_TIPI))

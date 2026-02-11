@@ -514,8 +514,41 @@ GlobalJobFilters.Filters.Add(
 
 // Configure the HTTP request pipeline.
 
+// ── Early CORS middleware ──────────────────────────────────────────────
+// Handles preflight (OPTIONS) requests *before* any other middleware can
+// short-circuit. For non-preflight requests it adds the CORS headers so
+// that even 500 / exception-handler responses carry them.
+var allowedCorsOrigins = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "http://localhost:5173",
+    "https://crm.v3rii.com",
+    "http://crm.v3rii.com"
+};
+
+app.Use(async (ctx, next) =>
+{
+    var origin = ctx.Request.Headers["Origin"].ToString();
+    if (!string.IsNullOrEmpty(origin) && allowedCorsOrigins.Contains(origin))
+    {
+        ctx.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+        ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+
+        // Preflight
+        if (HttpMethods.IsOptions(ctx.Request.Method))
+        {
+            ctx.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+            ctx.Response.Headers.Append("Access-Control-Allow-Headers",
+                "Content-Type, Authorization, X-Branch-Code, Branch-Code, X-Language, x-language, x-branch-code");
+            ctx.Response.Headers.Append("Access-Control-Max-Age", "86400");
+            ctx.Response.StatusCode = 204;
+            return; // short-circuit – don't call next
+        }
+    }
+
+    await next();
+});
+
 // Ensure 500 from unhandled exceptions still get CORS headers (browser would otherwise hide the response)
-var allowedCorsOrigins = new[] { "https://crm.v3rii.com", "http://localhost:5173" };
 app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
@@ -528,10 +561,15 @@ app.UseExceptionHandler(errApp =>
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
         var origin = ctx.Request.Headers["Origin"].ToString();
-        if (!string.IsNullOrEmpty(origin) && allowedCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(origin) && allowedCorsOrigins.Contains(origin))
         {
-            ctx.Response.Headers.Append("Access-Control-Allow-Origin", origin);
-            ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+            // Headers may already be set by the early middleware, but Append is
+            // safe – duplicates are ignored when the value already exists.
+            if (!ctx.Response.Headers.ContainsKey("Access-Control-Allow-Origin"))
+            {
+                ctx.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+                ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+            }
         }
         var message = ex?.Message ?? "An error occurred.";
         var json = System.Text.Json.JsonSerializer.Serialize(new { error = "An error occurred.", message });
@@ -540,6 +578,8 @@ app.UseExceptionHandler(errApp =>
 });
 
 app.UseRouting();
+
+app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {
@@ -572,7 +612,6 @@ app.UseRequestLocalization();
 // Add BranchCode Middleware
 app.UseMiddleware<BranchCodeMiddleware>();
 
-app.UseCors("DevCors");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -259,6 +259,26 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<ProjeDto>>> GetProjectCodesAsync()
+        {
+            try
+            {
+                var result = await _erpContext.Set<RII_FN_PROJECTCODE>()
+                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_PROJECTCODE()")
+                    .AsNoTracking()
+                    .ToListAsync();
+                var mappedResult = _mapper.Map<List<ProjeDto>>(result);
+                return ApiResponse<List<ProjeDto>>.SuccessResult(mappedResult, _localizationService.GetLocalizedString("ErpService.ProjeRecordsRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<ProjeDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                    _localizationService.GetLocalizedString("ErpService.GetProjectCodesExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         // Health Check
         public async Task<ApiResponse<object>> HealthCheckAsync()
         {

@@ -64,6 +64,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("getProjectCodes")]
+        public async Task<ActionResult<ApiResponse<List<ProjeDto>>>> GetProjectCodes()
+        {
+            var result = await _IErpService.GetProjectCodesAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("health-check")]
         [AllowAnonymous]
         public IActionResult HealthCheckPublic()
