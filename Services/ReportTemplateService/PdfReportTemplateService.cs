@@ -5,11 +5,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using crm_api.Data;
 using crm_api.DTOs;
 using crm_api.Helpers;
 using crm_api.Interfaces;
 using crm_api.Models;
+using crm_api.UnitOfWork;
 
 namespace crm_api.Services
 {
@@ -18,20 +18,20 @@ namespace crm_api.Services
     /// </summary>
     public class PdfReportTemplateService : IPdfReportTemplateService
     {
-        private readonly CmsDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PdfReportTemplateService> _logger;
         private readonly ILocalizationService _localizationService;
         private readonly IPdfReportDocumentGeneratorService _pdfGenerator;
         private readonly IPdfReportTemplateValidator _validator;
 
         public PdfReportTemplateService(
-            CmsDbContext context,
+            IUnitOfWork unitOfWork,
             ILogger<PdfReportTemplateService> logger,
             ILocalizationService localizationService,
             IPdfReportDocumentGeneratorService pdfGenerator,
             IPdfReportTemplateValidator validator)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _localizationService = localizationService;
             _pdfGenerator = pdfGenerator;
@@ -42,7 +42,7 @@ namespace crm_api.Services
         {
             try
             {
-                var query = _context.ReportTemplates
+                var query = _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => !rt.IsDeleted)
                     .AsQueryable();
 
@@ -90,7 +90,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -133,19 +133,19 @@ namespace crm_api.Services
             {
                 var templateJson = JsonSerializer.Serialize(dto.TemplateData, PdfReportTemplateJsonOptions.CamelCase);
 
-                var sameTypeCount = await _context.ReportTemplates.CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
+                var sameTypeCount = await _unitOfWork.Repository<ReportTemplate>().Query().CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
                 var isFirstForType = sameTypeCount == 0;
                 var setAsDefault = dto.Default || isFirstForType;
 
                 if (setAsDefault && !isFirstForType)
                 {
-                    var others = await _context.ReportTemplates
+                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted)
                         .ToListAsync();
                     foreach (var o in others)
                     {
                         o.Default = false;
-                        _context.ReportTemplates.Update(o);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o);
                     }
                 }
 
@@ -160,8 +160,8 @@ namespace crm_api.Services
                     CreatedDate = DateTime.UtcNow
                 };
 
-                await _context.ReportTemplates.AddAsync(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().AddAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 var templateDto = new PdfReportTemplateDto
                 {
@@ -204,7 +204,7 @@ namespace crm_api.Services
 
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -230,31 +230,31 @@ namespace crm_api.Services
 
                 if (dto.Default)
                 {
-                    var others = await _context.ReportTemplates
+                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
                         .ToListAsync();
                     foreach (var o in others)
                     {
                         o.Default = false;
-                        _context.ReportTemplates.Update(o);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o);
                     }
                 }
                 else if (currentWasDefault)
                 {
                     // Current template was default and is being unset; assign another as default (smallest Id)
-                    var newDefault = await _context.ReportTemplates
+                    var newDefault = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
                         .OrderBy(rt => rt.Id)
                         .FirstOrDefaultAsync();
                     if (newDefault != null)
                     {
                         newDefault.Default = true;
-                        _context.ReportTemplates.Update(newDefault);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(newDefault);
                     }
                 }
 
-                _context.ReportTemplates.Update(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 var templateDto = new PdfReportTemplateDto
                 {
@@ -288,7 +288,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -302,8 +302,8 @@ namespace crm_api.Services
 
                 template.IsDeleted = true;
                 template.DeletedDate = DateTime.UtcNow;
-                _context.ReportTemplates.Update(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -332,7 +332,7 @@ namespace crm_api.Services
 
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == templateId && !rt.IsDeleted && rt.IsActive)
                     .FirstOrDefaultAsync();
 

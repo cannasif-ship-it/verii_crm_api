@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using crm_api.Data;
 using crm_api.DTOs;
 using crm_api.Interfaces;
 using crm_api.Models;
@@ -20,7 +19,6 @@ namespace crm_api.Services
         private readonly IMapper _mapper;
         private readonly ILogger<ReportTemplateService> _logger;
         private readonly ILocalizationService _localizationService;
-        private readonly CmsDbContext _context;
         private readonly IReportPdfGeneratorService _pdfGenerator;
 
         public ReportTemplateService(
@@ -28,14 +26,12 @@ namespace crm_api.Services
             IMapper mapper,
             ILogger<ReportTemplateService> logger,
             ILocalizationService localizationService,
-            CmsDbContext context,
             IReportPdfGeneratorService pdfGenerator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _localizationService = localizationService;
-            _context = context;
             _pdfGenerator = pdfGenerator;
         }
 
@@ -46,7 +42,7 @@ namespace crm_api.Services
         {
             try
             {
-                var query = _context.ReportTemplates
+                var query = _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => !rt.IsDeleted)
                     .AsQueryable();
 
@@ -112,7 +108,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -164,19 +160,19 @@ namespace crm_api.Services
                 });
 
                 // Her RuleType için tek default: yeni Default=true ise diğerlerini false yap; ilk şablon ise Default=true yap
-                var sameTypeCount = await _context.ReportTemplates.CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
+                var sameTypeCount = await _unitOfWork.Repository<ReportTemplate>().Query().CountAsync(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted);
                 var isFirstForType = sameTypeCount == 0;
                 var setAsDefault = dto.Default || isFirstForType;
 
                 if (setAsDefault && !isFirstForType)
                 {
-                    var others = await _context.ReportTemplates
+                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted)
                         .ToListAsync();
                     foreach (var o in others)
                     {
                         o.Default = false;
-                        _context.ReportTemplates.Update(o);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o);
                     }
                 }
 
@@ -191,8 +187,8 @@ namespace crm_api.Services
                     CreatedDate = DateTime.UtcNow
                 };
 
-                await _context.ReportTemplates.AddAsync(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().AddAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 var templateDto = new ReportTemplateDto
                 {
@@ -224,7 +220,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -256,30 +252,30 @@ namespace crm_api.Services
 
                 if (dto.Default)
                 {
-                    var others = await _context.ReportTemplates
+                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
                         .ToListAsync();
                     foreach (var o in others)
                     {
                         o.Default = false;
-                        _context.ReportTemplates.Update(o);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o);
                     }
                 }
                 else if (currentWasDefault)
                 {
-                    var newDefault = await _context.ReportTemplates
+                    var newDefault = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
                         .OrderBy(rt => rt.Id)
                         .FirstOrDefaultAsync();
                     if (newDefault != null)
                     {
                         newDefault.Default = true;
-                        _context.ReportTemplates.Update(newDefault);
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(newDefault);
                     }
                 }
 
-                _context.ReportTemplates.Update(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 var templateDto = new ReportTemplateDto
                 {
@@ -313,7 +309,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == id && !rt.IsDeleted)
                     .FirstOrDefaultAsync();
 
@@ -328,8 +324,8 @@ namespace crm_api.Services
                 template.IsDeleted = true;
                 template.DeletedDate = DateTime.UtcNow;
 
-                _context.ReportTemplates.Update(template);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<bool>.SuccessResult(
                     true,
@@ -349,7 +345,7 @@ namespace crm_api.Services
         {
             try
             {
-                var template = await _context.ReportTemplates
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => rt.Id == templateId && !rt.IsDeleted && rt.IsActive)
                     .FirstOrDefaultAsync();
 

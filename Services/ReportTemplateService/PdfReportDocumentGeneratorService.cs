@@ -12,12 +12,12 @@ using Microsoft.Extensions.Options;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using crm_api.Data;
 using crm_api.DTOs;
 using crm_api.Helpers;
 using crm_api.Infrastructure;
 using crm_api.Interfaces;
 using crm_api.Models;
+using crm_api.UnitOfWork;
 
 namespace crm_api.Services
 {
@@ -26,18 +26,18 @@ namespace crm_api.Services
     /// </summary>
     public class PdfReportDocumentGeneratorService : IPdfReportDocumentGeneratorService
     {
-        private readonly CmsDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PdfReportDocumentGeneratorService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly PdfBuilderOptions _options;
 
         public PdfReportDocumentGeneratorService(
-            CmsDbContext context,
+            IUnitOfWork unitOfWork,
             ILogger<PdfReportDocumentGeneratorService> logger,
             IHttpClientFactory httpClientFactory,
             IOptions<PdfBuilderOptions> options)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _options = options?.Value ?? new PdfBuilderOptions();
@@ -446,7 +446,7 @@ namespace crm_api.Services
         {
             return ruleType switch
             {
-                DocumentRuleType.Demand => await (from d in _context.Demands
+                DocumentRuleType.Demand => await (from d in _unitOfWork.Demands.Query(false, false)
                     where d.Id == entityId && !d.IsDeleted
                     select new
                     {
@@ -466,10 +466,10 @@ namespace crm_api.Services
                         d.Currency,
                         d.CreatedBy,
                         d.UpdatedBy,
-                        ExchangeRates = (from er in _context.DemandExchangeRates
+                        ExchangeRates = (from er in _unitOfWork.DemandExchangeRates.Query(false, false)
                                 where er.DemandId == d.Id && !er.IsDeleted
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
-                        Lines = (from dl in _context.DemandLines
+                        Lines = (from dl in _unitOfWork.DemandLines.Query(false, false)
                                 where dl.DemandId == d.Id && !dl.IsDeleted
                                 select new
                                 {
@@ -490,15 +490,15 @@ namespace crm_api.Services
                                     dl.LineGrandTotal,
                                     dl.Description,
                                     HtmlDescription = dl.RelatedStockId.HasValue
-                                        ? (_context.StockDetails.Where(sd => sd.StockId == dl.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == dl.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
                                     DefaultImagePath = dl.RelatedStockId.HasValue
-                                        ? (_context.StockImages.Where(si => si.StockId == dl.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == dl.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),
 
-                DocumentRuleType.Quotation => await (from q in _context.Quotations
+                DocumentRuleType.Quotation => await (from q in _unitOfWork.Quotations.Query(false, false)
                     where q.Id == entityId && !q.IsDeleted
                     select new
                     {
@@ -518,10 +518,10 @@ namespace crm_api.Services
                         q.Currency,
                         q.CreatedBy,
                         q.UpdatedBy,
-                        ExchangeRates = (from er in _context.QuotationExchangeRates
+                        ExchangeRates = (from er in _unitOfWork.QuotationExchangeRates.Query(false, false)
                                 where er.QuotationId == q.Id && !er.IsDeleted
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
-                        Lines = (from ql in _context.QuotationLines
+                        Lines = (from ql in _unitOfWork.QuotationLines.Query(false, false)
                                 where ql.QuotationId == q.Id && !ql.IsDeleted
                                 select new
                                 {
@@ -542,15 +542,15 @@ namespace crm_api.Services
                                     ql.LineGrandTotal,
                                     ql.Description,
                                     HtmlDescription = ql.RelatedStockId.HasValue
-                                        ? (_context.StockDetails.Where(sd => sd.StockId == ql.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == ql.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
                                     DefaultImagePath = ql.RelatedStockId.HasValue
-                                        ? (_context.StockImages.Where(si => si.StockId == ql.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == ql.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),
 
-                DocumentRuleType.Order => await (from o in _context.Orders
+                DocumentRuleType.Order => await (from o in _unitOfWork.Orders.Query(false, false)
                     where o.Id == entityId && !o.IsDeleted
                     select new
                     {
@@ -570,10 +570,10 @@ namespace crm_api.Services
                         o.Currency,
                         o.CreatedBy,
                         o.UpdatedBy,
-                        ExchangeRates = (from er in _context.OrderExchangeRates
+                        ExchangeRates = (from er in _unitOfWork.OrderExchangeRates.Query(false, false)
                                 where er.OrderId == o.Id && !er.IsDeleted
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
-                        Lines = (from ol in _context.OrderLines
+                        Lines = (from ol in _unitOfWork.OrderLines.Query(false, false)
                                 where ol.OrderId == o.Id && !ol.IsDeleted
                                 select new
                                 {
@@ -594,10 +594,10 @@ namespace crm_api.Services
                                     ol.LineGrandTotal,
                                     ol.Description,
                                     HtmlDescription = ol.RelatedStockId.HasValue
-                                        ? (_context.StockDetails.Where(sd => sd.StockId == ol.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == ol.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
                                     DefaultImagePath = ol.RelatedStockId.HasValue
-                                        ? (_context.StockImages.Where(si => si.StockId == ol.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == ol.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),

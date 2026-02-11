@@ -1,6 +1,5 @@
 using System.Text.Json;
 using AutoMapper;
-using crm_api.Data;
 using crm_api.DTOs;
 using crm_api.DTOs.ReportBuilderDto;
 using crm_api.Interfaces;
@@ -12,7 +11,6 @@ namespace crm_api.Services.ReportBuilderService
 {
     public class ReportService : IReportService
     {
-        private readonly CmsDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IReportingConnectionService _connectionService;
@@ -27,7 +25,6 @@ namespace crm_api.Services.ReportBuilderService
         };
 
         public ReportService(
-            CmsDbContext context,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IReportingConnectionService connectionService,
@@ -35,7 +32,6 @@ namespace crm_api.Services.ReportBuilderService
             ILocalizationService localizationService,
             ILogger<ReportService> logger)
         {
-            _context = context;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _connectionService = connectionService;
@@ -48,7 +44,7 @@ namespace crm_api.Services.ReportBuilderService
         {
             try
             {
-                var entity = await _context.ReportDefinitions
+                var entity = await _unitOfWork.ReportDefinitions.Query()
                     .AsNoTracking()
                     .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
                 if (entity == null)
@@ -67,7 +63,7 @@ namespace crm_api.Services.ReportBuilderService
         {
             try
             {
-                var query = _context.ReportDefinitions.AsNoTracking().Where(r => !r.IsDeleted);
+                var query = _unitOfWork.ReportDefinitions.Query().AsNoTracking().Where(r => !r.IsDeleted);
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var term = search.Trim();
@@ -105,7 +101,7 @@ namespace crm_api.Services.ReportBuilderService
                 var repo = _unitOfWork.Repository<ReportDefinition>();
                 await repo.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
-                var created = await _context.ReportDefinitions.AsNoTracking().FirstOrDefaultAsync(r => r.Id == entity.Id);
+                var created = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == entity.Id);
                 var detail = _mapper.Map<ReportDetailDto>(created!);
                 return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportCreated"));
             }
@@ -139,7 +135,7 @@ namespace crm_api.Services.ReportBuilderService
                 entity.UpdatedDate = DateTime.UtcNow;
                 await repo.UpdateAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
-                var updated = await _context.ReportDefinitions.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+                var updated = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
                 var detail = _mapper.Map<ReportDetailDto>(updated!);
                 return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportUpdated"));
             }
