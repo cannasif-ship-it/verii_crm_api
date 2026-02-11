@@ -151,6 +151,20 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(0m);
 
+            // SalesTypeDefinition relationship
+            builder.Property(e => e.SalesTypeDefinitionId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.SalesTypeDefinition)
+                .WithMany()
+                .HasForeignKey(e => e.SalesTypeDefinitionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ErpProjectCode
+            builder.Property(e => e.ErpProjectCode)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
             builder.HasOne(e => e.DemandNotes)
                 .WithOne(n => n.Demand)
                 .HasForeignKey<DemandNotes>(n => n.DemandId)
@@ -265,6 +279,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Demand_IsDeleted");
+
+            builder.HasIndex(e => e.SalesTypeDefinitionId)
+                .HasDatabaseName("IX_Demand_SalesTypeDefinitionId");
 
             // Global Query Filter for soft delete
             builder.HasQueryFilter(e => !e.IsDeleted);

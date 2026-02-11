@@ -160,7 +160,21 @@ namespace crm_api.Data.Configurations
                 .HasForeignKey(e => e.DemandId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-                        // Navigation - Lines
+            // SalesTypeDefinition relationship
+            builder.Property(e => e.SalesTypeDefinitionId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.SalesTypeDefinition)
+                .WithMany()
+                .HasForeignKey(e => e.SalesTypeDefinitionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ErpProjectCode
+            builder.Property(e => e.ErpProjectCode)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
+            // Navigation - Lines
             builder.HasOne(e => e.QuotationNotes)
                 .WithOne(n => n.Quotation)
                 .HasForeignKey<QuotationNotes>(n => n.QuotationId)
@@ -278,6 +292,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.DemandId)
                 .HasDatabaseName("IX_Quotation_DemandId");
+
+            builder.HasIndex(e => e.SalesTypeDefinitionId)
+                .HasDatabaseName("IX_Quotation_SalesTypeDefinitionId");
 
             // Global Query Filter for soft delete
             builder.HasQueryFilter(e => !e.IsDeleted);
