@@ -22,6 +22,39 @@ namespace crm_api.DTOs
         public ReminderChannel Channel { get; set; } = ReminderChannel.InApp;
     }
 
+    public class ActivityImageDto : BaseEntityDto
+    {
+        public long ActivityId { get; set; }
+        public string? ResimAciklama { get; set; }
+        public string ResimUrl { get; set; } = string.Empty;
+    }
+
+    public class CreateActivityImageDto
+    {
+        [Required]
+        public long ActivityId { get; set; }
+
+        [MaxLength(500)]
+        public string? ResimAciklama { get; set; }
+
+        [Required]
+        [MaxLength(1000)]
+        public string ResimUrl { get; set; } = string.Empty;
+    }
+
+    public class UpdateActivityImageDto
+    {
+        [Required]
+        public long ActivityId { get; set; }
+
+        [MaxLength(500)]
+        public string? ResimAciklama { get; set; }
+
+        [Required]
+        [MaxLength(1000)]
+        public string ResimUrl { get; set; } = string.Empty;
+    }
+
     public class ActivityDto : BaseEntityDto
     {
         public string Subject { get; set; } = string.Empty;
@@ -41,6 +74,7 @@ namespace crm_api.DTOs
         public CustomerGetDto? PotentialCustomer { get; set; }
         public string? ErpCustomerCode { get; set; }
         public List<ActivityReminderDto> Reminders { get; set; } = new List<ActivityReminderDto>();
+        public List<ActivityImageDto> Images { get; set; } = new List<ActivityImageDto>();
     }
 
     public class CreateActivityDto
