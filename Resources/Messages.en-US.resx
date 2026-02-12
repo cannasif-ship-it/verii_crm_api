@@ -2037,6 +2037,9 @@
   <data name="Error.User.InvalidCredentials" xml:space="preserve">
     <value>User.</value>
   </data>
+  <data name="Error.User.CurrentPasswordIncorrect" xml:space="preserve">
+    <value>The current password you entered is incorrect.</value>
+  </data>
   <data name="Error.User.LoginFailed" xml:space="preserve">
     <value>User.</value>
   </data>
@@ -3026,4 +3029,357 @@
   <data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve">
     <value>Available fields retrieved successfully.</value>
   </data>
+
+  <data name="ContactService.DuplicateContact" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="ContactService.FullNameRequired" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="ContactService.InvalidEmail" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.CustomerMerged" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.CustomerNameRequired" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.InvalidEmail" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.InvalidMergeRequest" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.InvalidTaxNumber" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.InvalidTcknNumber" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="CustomerService.MergeCustomersExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="DemandExchangeRateService.UpdateExchangeRateInDemandExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="DemandLineService.DemandLineNotDeleted" xml:space="preserve">
+    <value>Record could not be deleted.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="DemandService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="DemandService.PriceRuleNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="DemandService.PriceRuleOfDemandRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="DemandService.RevisionCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="DocumentSerialTypeService.GetAvaibleDocumentSerialTypesExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="Error.User.AccountInactive" xml:space="preserve">
+    <value>User account is inactive.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="OrderExchangeRateService.UpdateExchangeRateInOrderExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="OrderLineService.OrderLineNotDeleted" xml:space="preserve">
+    <value>Record could not be deleted.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="OrderService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="OrderService.PriceRuleNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="OrderService.PriceRuleOfOrderRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="OrderService.RevisionCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="PowerBIEmbedService.ClientSecretMissing" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIEmbedService.ConfigurationMissing" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemDeleted" xml:space="preserve">
+    <value>Record deleted successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemsRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GroupCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupDeleted" xml:space="preserve">
+    <value>Record deleted successfully.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupsRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionDeleted" xml:space="preserve">
+    <value>Record deleted successfully.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionsRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="QuotationExchangeRateService.UpdateExchangeRateInQuotationExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="QuotationLineService.QuotationLineNotDeleted" xml:space="preserve">
+    <value>Record could not be deleted.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="QuotationService.PriceRuleNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="QuotationService.PriceRuleOfQuotationRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="SmtpSettingsService.GetExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="SmtpSettingsService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrievedDefault" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="SmtpSettingsService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemCreated" xml:space="preserve">
+    <value>Record created successfully.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemDeleted" xml:space="preserve">
+    <value>Record deleted successfully.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemUpdated" xml:space="preserve">
+    <value>Record updated successfully.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemsRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="UserPowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.CreateUserExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.DeleteUserExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.GetAllUsersExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.GetCurrentUserIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.GetUserByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.GetUserProfileExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="UserService.InvalidUserId" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="UserService.UpdateUserExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserService.UserIdRetrieved" xml:space="preserve">
+    <value>Record retrieved successfully.</value>
+  </data>
+  <data name="UserSessionService.CreateSessionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserSessionService.DeleteSessionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserSessionService.GetAllSessionsExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserSessionService.GetSessionByIdExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserSessionService.InternalServerError" xml:space="preserve">
+    <value>An internal server error occurred.</value>
+  </data>
+  <data name="UserSessionService.RevokeActiveSessionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+  <data name="UserSessionService.RevokeSessionExceptionMessage" xml:space="preserve">
+    <value>An error occurred during the operation: {0}</value>
+  </data>
+
 </root>

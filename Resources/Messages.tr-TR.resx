@@ -120,6 +120,9 @@
   <data name="Error.User.InvalidCredentials" xml:space="preserve">
     <value>Geçersiz kullanıcı adı veya şifre.</value>
   </data>
+  <data name="Error.User.CurrentPasswordIncorrect" xml:space="preserve">
+    <value>Girilen eski şifre yanlış.</value>
+  </data>
   <data name="Error.User.LoginFailed" xml:space="preserve">
     <value>Giriş işlemi başarısız.</value>
   </data>
@@ -3020,4 +3023,357 @@
   <data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve">
     <value>Kullanılabilir alanlar başarıyla getirildi.</value>
   </data>
+
+  <data name="ContactService.DuplicateContact" xml:space="preserve">
+    <value>Aynı müşteri için aynı ad, e-posta veya telefon ile kayıtlı kişi zaten var.</value>
+  </data>
+  <data name="ContactService.FullNameRequired" xml:space="preserve">
+    <value>Ad Soyad alanı zorunludur.</value>
+  </data>
+  <data name="ContactService.InvalidEmail" xml:space="preserve">
+    <value>Geçersiz e-posta adresi.</value>
+  </data>
+  <data name="CustomerService.CustomerMerged" xml:space="preserve">
+    <value>Müşteriler başarıyla birleştirildi.</value>
+  </data>
+  <data name="CustomerService.CustomerNameRequired" xml:space="preserve">
+    <value>Müşteri adı zorunludur.</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesRetrieved" xml:space="preserve">
+    <value>Mükerrer müşteri adayları başarıyla getirildi.</value>
+  </data>
+  <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
+    <value>Aynı isim veya vergi numarası/TCKN ile kayıtlı müşteri zaten var.</value>
+  </data>
+  <data name="CustomerService.InvalidEmail" xml:space="preserve">
+    <value>Geçersiz e-posta adresi.</value>
+  </data>
+  <data name="CustomerService.InvalidMergeRequest" xml:space="preserve">
+    <value>Birleştirme için geçersiz istek.</value>
+  </data>
+  <data name="CustomerService.InvalidTaxNumber" xml:space="preserve">
+    <value>Vergi numarası 10 haneli olmalıdır.</value>
+  </data>
+  <data name="CustomerService.InvalidTcknNumber" xml:space="preserve">
+    <value>TCKN 11 haneli olmalıdır.</value>
+  </data>
+  <data name="CustomerService.MergeCustomersExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="DemandExchangeRateService.UpdateExchangeRateInDemandExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="DemandLineService.DemandLineNotDeleted" xml:space="preserve">
+    <value>Talep satırı silinemedi.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesCreated" xml:space="preserve">
+    <value>Talep satırları başarıyla oluşturuldu.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesUpdated" xml:space="preserve">
+    <value>Talep satırları başarıyla güncellendi.</value>
+  </data>
+  <data name="DemandService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="DemandService.PriceRuleNotFound" xml:space="preserve">
+    <value>Fiyat kuralı bulunamadı.</value>
+  </data>
+  <data name="DemandService.PriceRuleOfDemandRetrieved" xml:space="preserve">
+    <value>Talep için fiyat kuralı başarıyla getirildi.</value>
+  </data>
+  <data name="DemandService.RevisionCreated" xml:space="preserve">
+    <value>Revizyon başarıyla oluşturuldu.</value>
+  </data>
+  <data name="DocumentSerialTypeService.GetAvaibleDocumentSerialTypesExceptionMessage" xml:space="preserve">
+    <value>Kullanılabilir belge seri tipleri alınırken bir hata oluştu: {0}</value>
+  </data>
+  <data name="Error.User.AccountInactive" xml:space="preserve">
+    <value>Kullanıcı hesabı aktif değil.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="OrderExchangeRateService.UpdateExchangeRateInOrderExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="OrderLineService.OrderLineNotDeleted" xml:space="preserve">
+    <value>Sipariş satırı silinemedi.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesCreated" xml:space="preserve">
+    <value>Sipariş satırları başarıyla oluşturuldu.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesUpdated" xml:space="preserve">
+    <value>Sipariş satırları başarıyla güncellendi.</value>
+  </data>
+  <data name="OrderService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="OrderService.PriceRuleNotFound" xml:space="preserve">
+    <value>Fiyat kuralı bulunamadı.</value>
+  </data>
+  <data name="OrderService.PriceRuleOfOrderRetrieved" xml:space="preserve">
+    <value>Sipariş için fiyat kuralı başarıyla getirildi.</value>
+  </data>
+  <data name="OrderService.RevisionCreated" xml:space="preserve">
+    <value>Revizyon başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PowerBIEmbedService.ClientSecretMissing" xml:space="preserve">
+    <value>Power BI istemci gizli anahtarı eksik.</value>
+  </data>
+  <data name="PowerBIEmbedService.ConfigurationMissing" xml:space="preserve">
+    <value>Power BI yapılandırması eksik.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemCreated" xml:space="preserve">
+    <value>Kayıt başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemDeleted" xml:space="preserve">
+    <value>Kayıt başarıyla silindi.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemRetrieved" xml:space="preserve">
+    <value>Kayıt başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemsRetrieved" xml:space="preserve">
+    <value>Kayıtlar başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GroupCreated" xml:space="preserve">
+    <value>Kayıt başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupDeleted" xml:space="preserve">
+    <value>Kayıt başarıyla silindi.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupRetrieved" xml:space="preserve">
+    <value>Kayıt başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupsRetrieved" xml:space="preserve">
+    <value>Kayıtlar başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="PowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionCreated" xml:space="preserve">
+    <value>Kayıt başarıyla oluşturuldu.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionDeleted" xml:space="preserve">
+    <value>Kayıt başarıyla silindi.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionRetrieved" xml:space="preserve">
+    <value>Kayıt başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionsRetrieved" xml:space="preserve">
+    <value>Kayıtlar başarıyla getirildi.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="QuotationExchangeRateService.UpdateExchangeRateInQuotationExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="QuotationLineService.QuotationLineNotDeleted" xml:space="preserve">
+    <value>Teklif satırı silinemedi.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesCreated" xml:space="preserve">
+    <value>Teklif satırları başarıyla oluşturuldu.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesUpdated" xml:space="preserve">
+    <value>Teklif satırları başarıyla güncellendi.</value>
+  </data>
+  <data name="QuotationService.PriceRuleNotFound" xml:space="preserve">
+    <value>Fiyat kuralı bulunamadı.</value>
+  </data>
+  <data name="QuotationService.PriceRuleOfQuotationRetrieved" xml:space="preserve">
+    <value>Teklif için fiyat kuralı başarıyla getirildi.</value>
+  </data>
+  <data name="SmtpSettingsService.GetExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="SmtpSettingsService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsCreated" xml:space="preserve">
+    <value>SMTP ayarları başarıyla oluşturuldu.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrieved" xml:space="preserve">
+    <value>SMTP ayarları başarıyla getirildi.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrievedDefault" xml:space="preserve">
+    <value>SMTP ayarları bulunamadı, varsayılan değerler getirildi.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsUpdated" xml:space="preserve">
+    <value>SMTP ayarları başarıyla güncellendi.</value>
+  </data>
+  <data name="SmtpSettingsService.UpdateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemCreated" xml:space="preserve">
+    <value>Kayıt başarıyla oluşturuldu.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemDeleted" xml:space="preserve">
+    <value>Kayıt başarıyla silindi.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemNotFound" xml:space="preserve">
+    <value>Kayıt bulunamadı.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemRetrieved" xml:space="preserve">
+    <value>Kayıt başarıyla getirildi.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemUpdated" xml:space="preserve">
+    <value>Kayıt başarıyla güncellendi.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemsRetrieved" xml:space="preserve">
+    <value>Kayıtlar başarıyla getirildi.</value>
+  </data>
+  <data name="UserPowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.CreateUserExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.DeleteUserExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.GetAllUsersExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.GetCurrentUserIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.GetUserByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.GetUserProfileExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="UserService.InvalidUserId" xml:space="preserve">
+    <value>Geçersiz kullanıcı kimliği.</value>
+  </data>
+  <data name="UserService.UpdateUserExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserService.UserIdRetrieved" xml:space="preserve">
+    <value>Kullanıcı kimliği başarıyla alındı.</value>
+  </data>
+  <data name="UserSessionService.CreateSessionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserSessionService.DeleteSessionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserSessionService.GetAllSessionsExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserSessionService.GetSessionByIdExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserSessionService.InternalServerError" xml:space="preserve">
+    <value>Sunucu tarafında bir hata oluştu.</value>
+  </data>
+  <data name="UserSessionService.RevokeActiveSessionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+  <data name="UserSessionService.RevokeSessionExceptionMessage" xml:space="preserve">
+    <value>İşlem sırasında bir hata oluştu: {0}</value>
+  </data>
+
 </root>

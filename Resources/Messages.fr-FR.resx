@@ -1882,6 +1882,9 @@
   <data name="Error.User.InvalidCredentials" xml:space="preserve">
     <value>User.</value>
   </data>
+  <data name="Error.User.CurrentPasswordIncorrect" xml:space="preserve">
+    <value>Le mot de passe actuel que vous avez saisi est incorrect.</value>
+  </data>
   <data name="Error.User.LoginFailed" xml:space="preserve">
     <value>User.</value>
   </data>
@@ -2648,4 +2651,478 @@
     <value>Une erreur est survenue lors de la mise à jour de the Commande Exchange Rate: {0}</value>
   </data>
   
-<data name="DemandDocumentTypeService.DemandDocumentTypesRetrieved" xml:space="preserve"><value>Devis document types récupéré(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypesRetrieved" xml:space="preserve"><value>Devis document types récupéré(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeNotFound" xml:space="preserve"><value>Devis document type non trouvé(e).</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeNotFound" xml:space="preserve"><value>Devis document type non trouvé(e).</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeRetrieved" xml:space="preserve"><value>Devis document type récupéré(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeRetrieved" xml:space="preserve"><value>Devis document type récupéré(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeCreated" xml:space="preserve"><value>Devis document type créé(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeCreated" xml:space="preserve"><value>Devis document type créé(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeUpdated" xml:space="preserve"><value>Devis document type mis(e) à jour avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeUpdated" xml:space="preserve"><value>Devis document type mis(e) à jour avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeDeleted" xml:space="preserve"><value>Devis document type supprimé(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeDeleted" xml:space="preserve"><value>Devis document type supprimé(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandNumberGenerated" xml:space="preserve"><value>Demand number generated successfully.</value></data><data name="OrderDocumentTypeService.OrderNumberGenerated" xml:space="preserve"><value>Order number generated successfully.</value></data><data name="DemandLineApprovalService.DemandLineApprovalsRetrieved" xml:space="preserve"><value>Devis line approvals récupéré(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalsRetrieved" xml:space="preserve"><value>Devis line approvals récupéré(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalNotFound" xml:space="preserve"><value>Devis line approval non trouvé(e).</value></data><data name="OrderLineApprovalService.OrderLineApprovalNotFound" xml:space="preserve"><value>Devis line approval non trouvé(e).</value></data><data name="DemandLineApprovalService.DemandLineApprovalRetrieved" xml:space="preserve"><value>Devis line approval récupéré(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalRetrieved" xml:space="preserve"><value>Devis line approval récupéré(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalCreated" xml:space="preserve"><value>Devis line approval créé(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalCreated" xml:space="preserve"><value>Devis line approval créé(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalUpdated" xml:space="preserve"><value>Devis line approval mis(e) à jour avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalUpdated" xml:space="preserve"><value>Devis line approval mis(e) à jour avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalDeleted" xml:space="preserve"><value>Devis line approval supprimé(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalDeleted" xml:space="preserve"><value>Devis line approval supprimé(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalsRetrieved" xml:space="preserve"><value>Devis approvals récupéré(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalsRetrieved" xml:space="preserve"><value>Devis approvals récupéré(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalNotFound" xml:space="preserve"><value>Devis approval non trouvé(e).</value></data><data name="OrderApprovalService.OrderApprovalNotFound" xml:space="preserve"><value>Devis approval non trouvé(e).</value></data><data name="DemandApprovalService.DemandApprovalRetrieved" xml:space="preserve"><value>Devis approval récupéré(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalRetrieved" xml:space="preserve"><value>Devis approval récupéré(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalCreated" xml:space="preserve"><value>Devis approval créé(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalCreated" xml:space="preserve"><value>Devis approval créé(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalUpdated" xml:space="preserve"><value>Devis approval mis(e) à jour avec succès.</value></data><data name="OrderApprovalService.OrderApprovalUpdated" xml:space="preserve"><value>Devis approval mis(e) à jour avec succès.</value></data><data name="DemandApprovalService.DemandApprovalDeleted" xml:space="preserve"><value>Devis approval supprimé(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalDeleted" xml:space="preserve"><value>Devis approval supprimé(e) avec succès.</value></data><data name="DemandNotFound" xml:space="preserve"><value>Devis non trouvé(e).</value></data><data name="OrderNotFound" xml:space="preserve"><value>Devis non trouvé(e).</value></data><data name="QuotationService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="QuotationService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="QuotationService.QuotationLinesNotFound" xml:space="preserve"><value>Teklif satırları bulunamadı.</value></data><data name="QuotationService.QuotationExchangeRatesNotFound" xml:space="preserve"><value>Teklif döviz kurları bulunamadı.</value></data><data name="QuotationService.OrderDocumentSerialTypeNotFound" xml:space="preserve"><value>Sipariş belge seri tipi bulunamadı.</value></data><data name="QuotationService.OrderConvertedSuccessfully" xml:space="preserve"><value>Sipariş başarıyla oluşturuldu.</value></data><data name="QuotationService.ConvertToOrderExceptionMessage" xml:space="preserve"><value>Teklif siparişe dönüştürülürken bir hata oluştu: {0}</value></data><data name="DemandService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="DemandService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="DemandService.DemandApproverUsersRetrieved" xml:space="preserve"><value>Talep onaylayıcı kullanıcıları başarıyla getirildi.</value></data><data name="DemandService.DemandLinesNotFound" xml:space="preserve"><value>Talep satırları bulunamadı.</value></data><data name="DemandService.DemandExchangeRatesNotFound" xml:space="preserve"><value>Talep döviz kurları bulunamadı.</value></data><data name="DemandService.QuotationDocumentSerialTypeNotFound" xml:space="preserve"><value>Teklif belge seri tipi bulunamadı.</value></data><data name="DemandService.QuotationConvertedSuccessfully" xml:space="preserve"><value>Teklif başarıyla oluşturuldu.</value></data><data name="DemandService.ConvertToQuotationExceptionMessage" xml:space="preserve"><value>Talep teklife dönüştürülürken bir hata oluştu: {0}</value></data><data name="OrderService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="OrderService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="Notification.QuotationApproval.Title" xml:space="preserve"><value>Onay Bekleyen Teklif</value></data><data name="Notification.QuotationApproval.Message" xml:space="preserve"><value>{0} numaralı teklif onay beklemektedir.</value></data><data name="Notification.QuotationApproved.Title" xml:space="preserve"><value>Teklif Onaylandı</value></data><data name="Notification.QuotationApproved.Message" xml:space="preserve"><value>{0} numaralı teklif onaylandı.</value></data><data name="Notification.OrderApproval.Title" xml:space="preserve"><value>Onay Bekleyen Sipariş</value></data><data name="Notification.OrderApproval.Message" xml:space="preserve"><value>{0} numaralı sipariş onay beklemektedir.</value></data><data name="Notification.OrderApproved.Title" xml:space="preserve"><value>Sipariş Onaylandı</value></data><data name="Notification.OrderApproved.Message" xml:space="preserve"><value>{0} numaralı sipariş onaylandı.</value></data><data name="Notification.DemandApproval.Title" xml:space="preserve"><value>Onay Bekleyen Talep</value></data><data name="Notification.DemandApproval.Message" xml:space="preserve"><value>{0} numaralı talep onay beklemektedir.</value></data><data name="Notification.DemandApproved.Title" xml:space="preserve"><value>Talep Onaylandı</value></data><data name="Notification.DemandApproved.Message" xml:space="preserve"><value>{0} numaralı talep onaylandı.</value></data><data name="DashboardController.DashboardRetrieved" xml:space="preserve"><value>Dashboard verileri başarıyla getirildi.</value></data><data name="DashboardController.CurrencyRatesNotImplemented" xml:space="preserve"><value>Kur bilgileri ucu henüz uygulanmadı.</value></data><data name="NotificationService.NotificationsRetrieved" xml:space="preserve"><value>Bildirimler başarıyla getirildi.</value></data><data name="NotificationService.InternalServerError" xml:space="preserve"><value>Dahili sunucu hatası oluştu.</value></data><data name="NotificationService.UnreadCountRetrieved" xml:space="preserve"><value>Okunmamış bildirim sayısı getirildi.</value></data><data name="NotificationService.NotificationNotFound" xml:space="preserve"><value>Bildirim bulunamadı.</value></data><data name="NotificationService.NotificationMarkedAsRead" xml:space="preserve"><value>Bildirim okundu olarak işaretlendi.</value></data><data name="NotificationService.AllNotificationsMarkedAsRead" xml:space="preserve"><value>Tüm bildirimler okundu olarak işaretlendi.</value></data><data name="ReportingConnectionService.ConnectionsRetrieved" xml:space="preserve"><value>Bağlantılar başarıyla getirildi.</value></data><data name="ReportingConnectionService.ConnectionKeyRequired" xml:space="preserve"><value>Bağlantı anahtarı zorunludur.</value></data><data name="ReportingConnectionService.InvalidConnectionKey" xml:space="preserve"><value>Geçersiz bağlantı anahtarı. CRM veya ERP kullanın.</value></data><data name="ReportingConnectionService.ConnectionStringNotFound" xml:space="preserve"><value>'{0}' bağlantı dizesi bulunamadı.</value></data><data name="ReportingConnectionService.Ok" xml:space="preserve"><value>OK</value></data><data name="ReportService.ReportNotFound" xml:space="preserve"><value>Rapor bulunamadı.</value></data><data name="ReportService.ReportRetrieved" xml:space="preserve"><value>Rapor başarıyla getirildi.</value></data><data name="ReportService.ErrorRetrievingReport" xml:space="preserve"><value>Rapor getirilirken hata oluştu.</value></data><data name="ReportService.ReportListRetrieved" xml:space="preserve"><value>Rapor listesi başarıyla getirildi.</value></data><data name="ReportService.ErrorListingReports" xml:space="preserve"><value>Raporlar listelenirken hata oluştu.</value></data><data name="ReportService.ReportCreated" xml:space="preserve"><value>Rapor başarıyla oluşturuldu.</value></data><data name="ReportService.ErrorCreatingReport" xml:space="preserve"><value>Rapor oluşturulurken hata oluştu.</value></data><data name="ReportService.ReportUpdated" xml:space="preserve"><value>Rapor başarıyla güncellendi.</value></data><data name="ReportService.ErrorUpdatingReport" xml:space="preserve"><value>Rapor güncellenirken hata oluştu.</value></data><data name="ReportService.ReportDeleted" xml:space="preserve"><value>Rapor başarıyla silindi.</value></data><data name="ReportService.InvalidConnection" xml:space="preserve"><value>Geçersiz bağlantı.</value></data><data name="ReportService.CatalogError" xml:space="preserve"><value>Katalog hatası.</value></data><data name="ReportService.DatasourceNotFoundOrEmpty" xml:space="preserve"><value>Veri kaynağı bulunamadı veya boş.</value></data><data name="ReportService.InvalidConfigJson" xml:space="preserve"><value>Geçersiz ConfigJson.</value></data><data name="ReportService.InvalidConfigJsonFormat" xml:space="preserve"><value>Geçersiz ConfigJson formatı.</value></data><data name="ReportService.ReportConfigInvalidChartType" xml:space="preserve"><value>chartType değeri table, bar, line veya pie olmalıdır.</value></data><data name="ReportService.ReportConfigValueRequired" xml:space="preserve"><value>En az bir değer alanı zorunludur.</value></data><data name="ReportService.ReportConfigValueFieldRequired" xml:space="preserve"><value>Her değer için bir alan belirtilmelidir.</value></data><data name="ReportService.ReportConfigInvalidAggregation" xml:space="preserve"><value>Geçersiz aggregation; none, sum, count, avg, min, max kullanılmalıdır.</value></data><data name="ReportPreviewService.InvalidConnection" xml:space="preserve"><value>Geçersiz bağlantı.</value></data><data name="ReportPreviewService.SchemaNotFound" xml:space="preserve"><value>Şema bulunamadı.</value></data><data name="ReportPreviewService.DatasourceNotFoundOrEmpty" xml:space="preserve"><value>Veri kaynağı bulunamadı veya sütun yok.</value></data><data name="ReportPreviewService.InvalidConfigJson" xml:space="preserve"><value>Geçersiz ConfigJson.</value></data><data name="ReportPreviewService.ChartRequiresAxisLegendAndValue" xml:space="preserve"><value>Grafik için axis veya legend ve en az bir value gerekir.</value></data><data name="ReportPreviewService.PreviewOk" xml:space="preserve"><value>Önizleme başarılı.</value></data><data name="ReportPreviewService.PreviewFailed" xml:space="preserve"><value>Önizleme çalıştırma başarısız.</value></data><data name="ReportPreviewService.FieldNotInSchema" xml:space="preserve"><value>'{0}' alanı veri kaynağı şemasında yok.</value></data><data name="NotificationService.NotificationCreated" xml:space="preserve"><value>Bildirim oluşturuldu.</value></data><data name="NotificationService.NotificationDeleted" xml:space="preserve"><value>Bildirim silindi.</value></data><data name="ReportTemplateService.ReportTemplatesRetrieved" xml:space="preserve"><value>Rapor şablonları başarıyla getirildi.</value></data><data name="ReportTemplateService.ErrorRetrievingReportTemplates" xml:space="preserve"><value>Rapor şablonları getirilirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateNotFound" xml:space="preserve"><value>Rapor şablonu bulunamadı.</value></data><data name="ReportTemplateService.ReportTemplateRetrieved" xml:space="preserve"><value>Rapor şablonu başarıyla getirildi.</value></data><data name="ReportTemplateService.ErrorRetrievingReportTemplate" xml:space="preserve"><value>Rapor şablonu getirilirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateCreated" xml:space="preserve"><value>Rapor şablonu başarıyla oluşturuldu.</value></data><data name="ReportTemplateService.ErrorCreatingReportTemplate" xml:space="preserve"><value>Rapor şablonu oluşturulurken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateUpdated" xml:space="preserve"><value>Rapor şablonu başarıyla güncellendi.</value></data><data name="ReportTemplateService.ErrorUpdatingReportTemplate" xml:space="preserve"><value>Rapor şablonu güncellenirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateDeleted" xml:space="preserve"><value>Rapor şablonu başarıyla silindi.</value></data><data name="ReportTemplateService.ErrorDeletingReportTemplate" xml:space="preserve"><value>Rapor şablonu silinirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateNotFoundOrInactive" xml:space="preserve"><value>Rapor şablonu bulunamadı veya pasif.</value></data><data name="ReportTemplateService.InvalidTemplateData" xml:space="preserve"><value>Geçersiz şablon verisi.</value></data><data name="ReportTemplateService.PdfGenerated" xml:space="preserve"><value>PDF başarıyla oluşturuldu.</value></data><data name="ReportTemplateService.ErrorGeneratingPdf" xml:space="preserve"><value>PDF oluşturulurken hata oluştu.</value></data><data name="ReportTemplateService.InternalServerError" xml:space="preserve"><value>Dahili sunucu hatası oluştu.</value></data><data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve"><value>Kullanılabilir alanlar başarıyla getirildi.</value></data></root>
+<data name="DemandDocumentTypeService.DemandDocumentTypesRetrieved" xml:space="preserve"><value>Devis document types récupéré(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypesRetrieved" xml:space="preserve"><value>Devis document types récupéré(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeNotFound" xml:space="preserve"><value>Devis document type non trouvé(e).</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeNotFound" xml:space="preserve"><value>Devis document type non trouvé(e).</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeRetrieved" xml:space="preserve"><value>Devis document type récupéré(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeRetrieved" xml:space="preserve"><value>Devis document type récupéré(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeCreated" xml:space="preserve"><value>Devis document type créé(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeCreated" xml:space="preserve"><value>Devis document type créé(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeUpdated" xml:space="preserve"><value>Devis document type mis(e) à jour avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeUpdated" xml:space="preserve"><value>Devis document type mis(e) à jour avec succès.</value></data><data name="DemandDocumentTypeService.DemandDocumentTypeDeleted" xml:space="preserve"><value>Devis document type supprimé(e) avec succès.</value></data><data name="OrderDocumentTypeService.OrderDocumentTypeDeleted" xml:space="preserve"><value>Devis document type supprimé(e) avec succès.</value></data><data name="DemandDocumentTypeService.DemandNumberGenerated" xml:space="preserve"><value>Demand number generated successfully.</value></data><data name="OrderDocumentTypeService.OrderNumberGenerated" xml:space="preserve"><value>Order number generated successfully.</value></data><data name="DemandLineApprovalService.DemandLineApprovalsRetrieved" xml:space="preserve"><value>Devis line approvals récupéré(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalsRetrieved" xml:space="preserve"><value>Devis line approvals récupéré(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalNotFound" xml:space="preserve"><value>Devis line approval non trouvé(e).</value></data><data name="OrderLineApprovalService.OrderLineApprovalNotFound" xml:space="preserve"><value>Devis line approval non trouvé(e).</value></data><data name="DemandLineApprovalService.DemandLineApprovalRetrieved" xml:space="preserve"><value>Devis line approval récupéré(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalRetrieved" xml:space="preserve"><value>Devis line approval récupéré(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalCreated" xml:space="preserve"><value>Devis line approval créé(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalCreated" xml:space="preserve"><value>Devis line approval créé(e) avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalUpdated" xml:space="preserve"><value>Devis line approval mis(e) à jour avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalUpdated" xml:space="preserve"><value>Devis line approval mis(e) à jour avec succès.</value></data><data name="DemandLineApprovalService.DemandLineApprovalDeleted" xml:space="preserve"><value>Devis line approval supprimé(e) avec succès.</value></data><data name="OrderLineApprovalService.OrderLineApprovalDeleted" xml:space="preserve"><value>Devis line approval supprimé(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalsRetrieved" xml:space="preserve"><value>Devis approvals récupéré(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalsRetrieved" xml:space="preserve"><value>Devis approvals récupéré(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalNotFound" xml:space="preserve"><value>Devis approval non trouvé(e).</value></data><data name="OrderApprovalService.OrderApprovalNotFound" xml:space="preserve"><value>Devis approval non trouvé(e).</value></data><data name="DemandApprovalService.DemandApprovalRetrieved" xml:space="preserve"><value>Devis approval récupéré(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalRetrieved" xml:space="preserve"><value>Devis approval récupéré(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalCreated" xml:space="preserve"><value>Devis approval créé(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalCreated" xml:space="preserve"><value>Devis approval créé(e) avec succès.</value></data><data name="DemandApprovalService.DemandApprovalUpdated" xml:space="preserve"><value>Devis approval mis(e) à jour avec succès.</value></data><data name="OrderApprovalService.OrderApprovalUpdated" xml:space="preserve"><value>Devis approval mis(e) à jour avec succès.</value></data><data name="DemandApprovalService.DemandApprovalDeleted" xml:space="preserve"><value>Devis approval supprimé(e) avec succès.</value></data><data name="OrderApprovalService.OrderApprovalDeleted" xml:space="preserve"><value>Devis approval supprimé(e) avec succès.</value></data><data name="DemandNotFound" xml:space="preserve"><value>Devis non trouvé(e).</value></data><data name="OrderNotFound" xml:space="preserve"><value>Devis non trouvé(e).</value></data><data name="QuotationService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="QuotationService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="QuotationService.QuotationLinesNotFound" xml:space="preserve"><value>Teklif satırları bulunamadı.</value></data><data name="QuotationService.QuotationExchangeRatesNotFound" xml:space="preserve"><value>Teklif döviz kurları bulunamadı.</value></data><data name="QuotationService.OrderDocumentSerialTypeNotFound" xml:space="preserve"><value>Sipariş belge seri tipi bulunamadı.</value></data><data name="QuotationService.OrderConvertedSuccessfully" xml:space="preserve"><value>Sipariş başarıyla oluşturuldu.</value></data><data name="QuotationService.ConvertToOrderExceptionMessage" xml:space="preserve"><value>Teklif siparişe dönüştürülürken bir hata oluştu: {0}</value></data><data name="DemandService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="DemandService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="DemandService.DemandApproverUsersRetrieved" xml:space="preserve"><value>Talep onaylayıcı kullanıcıları başarıyla getirildi.</value></data><data name="DemandService.DemandLinesNotFound" xml:space="preserve"><value>Talep satırları bulunamadı.</value></data><data name="DemandService.DemandExchangeRatesNotFound" xml:space="preserve"><value>Talep döviz kurları bulunamadı.</value></data><data name="DemandService.QuotationDocumentSerialTypeNotFound" xml:space="preserve"><value>Teklif belge seri tipi bulunamadı.</value></data><data name="DemandService.QuotationConvertedSuccessfully" xml:space="preserve"><value>Teklif başarıyla oluşturuldu.</value></data><data name="DemandService.ConvertToQuotationExceptionMessage" xml:space="preserve"><value>Talep teklife dönüştürülürken bir hata oluştu: {0}</value></data><data name="OrderService.ApprovalFlowReportRetrieved" xml:space="preserve"><value>Onay akışı raporu başarıyla getirildi.</value></data><data name="OrderService.ApprovalFlowReportExceptionMessage" xml:space="preserve"><value>Onay akışı raporu getirilirken bir hata oluştu: {0}</value></data><data name="Notification.QuotationApproval.Title" xml:space="preserve"><value>Onay Bekleyen Teklif</value></data><data name="Notification.QuotationApproval.Message" xml:space="preserve"><value>{0} numaralı teklif onay beklemektedir.</value></data><data name="Notification.QuotationApproved.Title" xml:space="preserve"><value>Teklif Onaylandı</value></data><data name="Notification.QuotationApproved.Message" xml:space="preserve"><value>{0} numaralı teklif onaylandı.</value></data><data name="Notification.OrderApproval.Title" xml:space="preserve"><value>Onay Bekleyen Sipariş</value></data><data name="Notification.OrderApproval.Message" xml:space="preserve"><value>{0} numaralı sipariş onay beklemektedir.</value></data><data name="Notification.OrderApproved.Title" xml:space="preserve"><value>Sipariş Onaylandı</value></data><data name="Notification.OrderApproved.Message" xml:space="preserve"><value>{0} numaralı sipariş onaylandı.</value></data><data name="Notification.DemandApproval.Title" xml:space="preserve"><value>Onay Bekleyen Talep</value></data><data name="Notification.DemandApproval.Message" xml:space="preserve"><value>{0} numaralı talep onay beklemektedir.</value></data><data name="Notification.DemandApproved.Title" xml:space="preserve"><value>Talep Onaylandı</value></data><data name="Notification.DemandApproved.Message" xml:space="preserve"><value>{0} numaralı talep onaylandı.</value></data><data name="DashboardController.DashboardRetrieved" xml:space="preserve"><value>Dashboard verileri başarıyla getirildi.</value></data><data name="DashboardController.CurrencyRatesNotImplemented" xml:space="preserve"><value>Kur bilgileri ucu henüz uygulanmadı.</value></data><data name="NotificationService.NotificationsRetrieved" xml:space="preserve"><value>Bildirimler başarıyla getirildi.</value></data><data name="NotificationService.InternalServerError" xml:space="preserve"><value>Dahili sunucu hatası oluştu.</value></data><data name="NotificationService.UnreadCountRetrieved" xml:space="preserve"><value>Okunmamış bildirim sayısı getirildi.</value></data><data name="NotificationService.NotificationNotFound" xml:space="preserve"><value>Bildirim bulunamadı.</value></data><data name="NotificationService.NotificationMarkedAsRead" xml:space="preserve"><value>Bildirim okundu olarak işaretlendi.</value></data><data name="NotificationService.AllNotificationsMarkedAsRead" xml:space="preserve"><value>Tüm bildirimler okundu olarak işaretlendi.</value></data><data name="ReportingConnectionService.ConnectionsRetrieved" xml:space="preserve"><value>Bağlantılar başarıyla getirildi.</value></data><data name="ReportingConnectionService.ConnectionKeyRequired" xml:space="preserve"><value>Bağlantı anahtarı zorunludur.</value></data><data name="ReportingConnectionService.InvalidConnectionKey" xml:space="preserve"><value>Geçersiz bağlantı anahtarı. CRM veya ERP kullanın.</value></data><data name="ReportingConnectionService.ConnectionStringNotFound" xml:space="preserve"><value>'{0}' bağlantı dizesi bulunamadı.</value></data><data name="ReportingConnectionService.Ok" xml:space="preserve"><value>OK</value></data><data name="ReportService.ReportNotFound" xml:space="preserve"><value>Rapor bulunamadı.</value></data><data name="ReportService.ReportRetrieved" xml:space="preserve"><value>Rapor başarıyla getirildi.</value></data><data name="ReportService.ErrorRetrievingReport" xml:space="preserve"><value>Rapor getirilirken hata oluştu.</value></data><data name="ReportService.ReportListRetrieved" xml:space="preserve"><value>Rapor listesi başarıyla getirildi.</value></data><data name="ReportService.ErrorListingReports" xml:space="preserve"><value>Raporlar listelenirken hata oluştu.</value></data><data name="ReportService.ReportCreated" xml:space="preserve"><value>Rapor başarıyla oluşturuldu.</value></data><data name="ReportService.ErrorCreatingReport" xml:space="preserve"><value>Rapor oluşturulurken hata oluştu.</value></data><data name="ReportService.ReportUpdated" xml:space="preserve"><value>Rapor başarıyla güncellendi.</value></data><data name="ReportService.ErrorUpdatingReport" xml:space="preserve"><value>Rapor güncellenirken hata oluştu.</value></data><data name="ReportService.ReportDeleted" xml:space="preserve"><value>Rapor başarıyla silindi.</value></data><data name="ReportService.InvalidConnection" xml:space="preserve"><value>Geçersiz bağlantı.</value></data><data name="ReportService.CatalogError" xml:space="preserve"><value>Katalog hatası.</value></data><data name="ReportService.DatasourceNotFoundOrEmpty" xml:space="preserve"><value>Veri kaynağı bulunamadı veya boş.</value></data><data name="ReportService.InvalidConfigJson" xml:space="preserve"><value>Geçersiz ConfigJson.</value></data><data name="ReportService.InvalidConfigJsonFormat" xml:space="preserve"><value>Geçersiz ConfigJson formatı.</value></data><data name="ReportService.ReportConfigInvalidChartType" xml:space="preserve"><value>chartType değeri table, bar, line veya pie olmalıdır.</value></data><data name="ReportService.ReportConfigValueRequired" xml:space="preserve"><value>En az bir değer alanı zorunludur.</value></data><data name="ReportService.ReportConfigValueFieldRequired" xml:space="preserve"><value>Her değer için bir alan belirtilmelidir.</value></data><data name="ReportService.ReportConfigInvalidAggregation" xml:space="preserve"><value>Geçersiz aggregation; none, sum, count, avg, min, max kullanılmalıdır.</value></data><data name="ReportPreviewService.InvalidConnection" xml:space="preserve"><value>Geçersiz bağlantı.</value></data><data name="ReportPreviewService.SchemaNotFound" xml:space="preserve"><value>Şema bulunamadı.</value></data><data name="ReportPreviewService.DatasourceNotFoundOrEmpty" xml:space="preserve"><value>Veri kaynağı bulunamadı veya sütun yok.</value></data><data name="ReportPreviewService.InvalidConfigJson" xml:space="preserve"><value>Geçersiz ConfigJson.</value></data><data name="ReportPreviewService.ChartRequiresAxisLegendAndValue" xml:space="preserve"><value>Grafik için axis veya legend ve en az bir value gerekir.</value></data><data name="ReportPreviewService.PreviewOk" xml:space="preserve"><value>Önizleme başarılı.</value></data><data name="ReportPreviewService.PreviewFailed" xml:space="preserve"><value>Önizleme çalıştırma başarısız.</value></data><data name="ReportPreviewService.FieldNotInSchema" xml:space="preserve"><value>'{0}' alanı veri kaynağı şemasında yok.</value></data><data name="NotificationService.NotificationCreated" xml:space="preserve"><value>Bildirim oluşturuldu.</value></data><data name="NotificationService.NotificationDeleted" xml:space="preserve"><value>Bildirim silindi.</value></data><data name="ReportTemplateService.ReportTemplatesRetrieved" xml:space="preserve"><value>Rapor şablonları başarıyla getirildi.</value></data><data name="ReportTemplateService.ErrorRetrievingReportTemplates" xml:space="preserve"><value>Rapor şablonları getirilirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateNotFound" xml:space="preserve"><value>Rapor şablonu bulunamadı.</value></data><data name="ReportTemplateService.ReportTemplateRetrieved" xml:space="preserve"><value>Rapor şablonu başarıyla getirildi.</value></data><data name="ReportTemplateService.ErrorRetrievingReportTemplate" xml:space="preserve"><value>Rapor şablonu getirilirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateCreated" xml:space="preserve"><value>Rapor şablonu başarıyla oluşturuldu.</value></data><data name="ReportTemplateService.ErrorCreatingReportTemplate" xml:space="preserve"><value>Rapor şablonu oluşturulurken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateUpdated" xml:space="preserve"><value>Rapor şablonu başarıyla güncellendi.</value></data><data name="ReportTemplateService.ErrorUpdatingReportTemplate" xml:space="preserve"><value>Rapor şablonu güncellenirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateDeleted" xml:space="preserve"><value>Rapor şablonu başarıyla silindi.</value></data><data name="ReportTemplateService.ErrorDeletingReportTemplate" xml:space="preserve"><value>Rapor şablonu silinirken hata oluştu.</value></data><data name="ReportTemplateService.ReportTemplateNotFoundOrInactive" xml:space="preserve"><value>Rapor şablonu bulunamadı veya pasif.</value></data><data name="ReportTemplateService.InvalidTemplateData" xml:space="preserve"><value>Geçersiz şablon verisi.</value></data><data name="ReportTemplateService.PdfGenerated" xml:space="preserve"><value>PDF başarıyla oluşturuldu.</value></data><data name="ReportTemplateService.ErrorGeneratingPdf" xml:space="preserve"><value>PDF oluşturulurken hata oluştu.</value></data><data name="ReportTemplateService.InternalServerError" xml:space="preserve"><value>Dahili sunucu hatası oluştu.</value></data><data name="ReportTemplateController.AvailableFieldsRetrieved" xml:space="preserve"><value>Kullanılabilir alanlar başarıyla getirildi.</value></data>
+
+  <data name="ContactService.DuplicateContact" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="ContactService.FullNameRequired" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="ContactService.InvalidEmail" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.CustomerMerged" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.CustomerNameRequired" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="CustomerService.DuplicateCandidatesRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.InvalidEmail" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.InvalidMergeRequest" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.InvalidTaxNumber" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.InvalidTcknNumber" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="CustomerService.MergeCustomersExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="DemandExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="DemandExchangeRateService.UpdateExchangeRateInDemandExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="DemandLineService.DemandLineNotDeleted" xml:space="preserve">
+    <value>L'enregistrement n'a pas pu être supprimé.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="DemandLineService.DemandLinesUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="DemandService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="DemandService.PriceRuleNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="DemandService.PriceRuleOfDemandRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="DemandService.RevisionCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="DocumentSerialTypeService.GetAvaibleDocumentSerialTypesExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="Error.User.AccountInactive" xml:space="preserve">
+    <value>Le compte utilisateur est inactif.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="OrderExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="OrderExchangeRateService.UpdateExchangeRateInOrderExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="OrderLineService.OrderLineNotDeleted" xml:space="preserve">
+    <value>L'enregistrement n'a pas pu être supprimé.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="OrderLineService.OrderLinesUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="OrderService.CreateRevisionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="OrderService.PriceRuleNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="OrderService.PriceRuleOfOrderRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="OrderService.RevisionCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIConfigurationService.AlreadyExists" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Created" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Deleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="PowerBIConfigurationService.ExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIConfigurationService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIConfigurationService.NotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIConfigurationService.Updated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.AccessDenied" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.ClientSecretMissing" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.ConfigurationMissing" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.DatasetRequired" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedConfigRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.EmbedTokenFailed" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.ExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIEmbedService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIEmbedService.ReportInactive" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.ReportNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIEmbedService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIEmbedService.WorkspaceRequired" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemDeleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.ItemsRetrieved" xml:space="preserve">
+    <value>Enregistrements récupérés avec succès.</value>
+  </data>
+  <data name="PowerBIGroupReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIGroupService.GroupCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupDeleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="PowerBIGroupService.GroupsRetrieved" xml:space="preserve">
+    <value>Enregistrements récupérés avec succès.</value>
+  </data>
+  <data name="PowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.CreateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionDeleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.ReportDefinitionsRetrieved" xml:space="preserve">
+    <value>Enregistrements récupérés avec succès.</value>
+  </data>
+  <data name="PowerBIReportDefinitionService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.CreateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.Duplicate" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemDeleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.ItemsRetrieved" xml:space="preserve">
+    <value>Enregistrements récupérés avec succès.</value>
+  </data>
+  <data name="PowerBIReportRoleMappingService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportSyncService.ClientSecretMissing" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ConfigurationMissing" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportSyncService.ExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="PowerBIReportSyncService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncCompleted" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportSyncService.SyncFailed" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportSyncService.TokenAcquisitionFailed" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="PowerBIReportSyncService.WorkspaceRequired" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="QuotationExchangeRateService.ExchangeRateUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="QuotationExchangeRateService.UpdateExchangeRateInQuotationExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="QuotationLineService.QuotationLineNotDeleted" xml:space="preserve">
+    <value>L'enregistrement n'a pas pu être supprimé.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="QuotationLineService.QuotationLinesUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="QuotationService.PriceRuleNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="QuotationService.PriceRuleOfQuotationRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="ReportTemplateService.UnauthorizedGenerate" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="SmtpSettingsService.GetExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="SmtpSettingsService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsRetrievedDefault" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="SmtpSettingsService.SmtpSettingsUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="SmtpSettingsService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.CreateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.DeleteExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetAllExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.GetByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserPowerBIGroupService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemCreated" xml:space="preserve">
+    <value>Enregistrement créé avec succès.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemDeleted" xml:space="preserve">
+    <value>Enregistrement supprimé avec succès.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemNotFound" xml:space="preserve">
+    <value>Enregistrement introuvable.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemUpdated" xml:space="preserve">
+    <value>Enregistrement mis à jour avec succès.</value>
+  </data>
+  <data name="UserPowerBIGroupService.ItemsRetrieved" xml:space="preserve">
+    <value>Enregistrements récupérés avec succès.</value>
+  </data>
+  <data name="UserPowerBIGroupService.UpdateExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.CreateUserExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.DeleteUserExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.GetAllUsersExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.GetCurrentUserIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.GetUserByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.GetUserProfileExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="UserService.InvalidUserId" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="UserService.UpdateUserExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserService.UserIdRetrieved" xml:space="preserve">
+    <value>Enregistrement récupéré avec succès.</value>
+  </data>
+  <data name="UserSessionService.CreateSessionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserSessionService.DeleteSessionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserSessionService.GetAllSessionsExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserSessionService.GetSessionByIdExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserSessionService.InternalServerError" xml:space="preserve">
+    <value>Une erreur interne du serveur est survenue.</value>
+  </data>
+  <data name="UserSessionService.RevokeActiveSessionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+  <data name="UserSessionService.RevokeSessionExceptionMessage" xml:space="preserve">
+    <value>Une erreur s'est produite pendant l'opération : {0}</value>
+  </data>
+
+</root>
