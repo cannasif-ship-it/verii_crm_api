@@ -555,8 +555,48 @@ app.UseExceptionHandler(errApp =>
     {
         var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
         var logger = ctx.RequestServices.GetService<ILogger<Program>>();
+        var localizationService = ctx.RequestServices.GetService<ILocalizationService>();
         if (ex != null)
             logger?.LogError(ex, "Unhandled exception: {Path}", ctx.Request.Path);
+
+        var dbUpdateException = FindDbUpdateException(ex);
+        if (dbUpdateException != null &&
+            DbUpdateExceptionHelper.TryGetUniqueViolation(dbUpdateException, out _))
+        {
+            var isCountryPath = ctx.Request.Path.StartsWithSegments("/api/Country", StringComparison.OrdinalIgnoreCase);
+            var localizedMessage = isCountryPath
+                ? (localizationService?.GetLocalizedString("CountryService.CountryNameAlreadyExists")
+                   ?? "Country already exists. Duplicate country entries are not allowed.")
+                : (localizationService?.GetLocalizedString("General.RecordAlreadyExists")
+                   ?? "This record already exists.");
+
+            var response = crm_api.DTOs.ApiResponse<object>.ErrorResult(
+                localizedMessage,
+                null,
+                StatusCodes.Status409Conflict);
+            response.Errors = new List<string> { localizedMessage };
+            response.Timestamp = DateTime.UtcNow;
+            response.ExceptionMessage = null!;
+            if (isCountryPath)
+            {
+                response.ClassName = "ApiResponse<CountryGetDto>";
+            }
+
+            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+            ctx.Response.ContentType = "application/json";
+            var conflictOrigin = ctx.Request.Headers["Origin"].ToString();
+            if (!string.IsNullOrEmpty(conflictOrigin) && allowedCorsOrigins.Contains(conflictOrigin))
+            {
+                if (!ctx.Response.Headers.ContainsKey("Access-Control-Allow-Origin"))
+                {
+                    ctx.Response.Headers.Append("Access-Control-Allow-Origin", conflictOrigin);
+                    ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+                }
+            }
+            var conflictJson = System.Text.Json.JsonSerializer.Serialize(response);
+            await ctx.Response.WriteAsync(conflictJson);
+            return;
+        }
 
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
@@ -577,13 +617,28 @@ app.UseExceptionHandler(errApp =>
     });
 });
 
+static DbUpdateException? FindDbUpdateException(Exception? exception)
+{
+    var current = exception;
+    while (current != null)
+    {
+        if (current is DbUpdateException dbUpdateException)
+        {
+            return dbUpdateException;
+        }
+
+        current = current.InnerException;
+    }
+
+    return null;
+}
+
 app.UseRouting();
 
 app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -641,3 +696,5 @@ else
 }
 
 app.Run();
+
+public partial class Program { }
