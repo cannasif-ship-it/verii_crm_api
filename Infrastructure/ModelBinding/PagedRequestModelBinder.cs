@@ -26,6 +26,9 @@ namespace crm_api.Infrastructure.ModelBinding
 
             request.Filters = ParseJsonFilters(query) ?? ParseIndexedFilters(query) ?? new List<Filter>();
 
+            var filterLogic = ParseString(query, new[] { "filterLogic", "FilterLogic" });
+            request.FilterLogic = string.Equals(filterLogic, "or", StringComparison.OrdinalIgnoreCase) ? "or" : "and";
+
             bindingContext.Result = ModelBindingResult.Success(request);
             return Task.CompletedTask;
         }

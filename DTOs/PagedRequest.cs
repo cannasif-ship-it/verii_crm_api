@@ -19,5 +19,9 @@ namespace crm_api.DTOs
         public string? SortBy { get; set; } = "Id";
         public string? SortDirection { get; set; } = "desc";
         public List<Filter>? Filters { get; set; } = new();
+        /// <summary>
+        /// "and" veya "or" — filtrelerin nasıl birleştirileceğini belirler. Varsayılan: "and"
+        /// </summary>
+        public string FilterLogic { get; set; } = "and";
     }
 }
