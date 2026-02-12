@@ -35,7 +35,7 @@ namespace crm_api.Services
                 var query = _unitOfWork.DemandNotes.Query()
                     .AsNoTracking()
                     .Where(x => !x.IsDeleted)
-                    .ApplyFilters(request.Filters)
+                    .ApplyFilters(request.Filters, request.FilterLogic)
                     .ApplySorting(request.SortBy ?? nameof(DemandNotes.Id), request.SortDirection);
 
                 var totalCount = await query.CountAsync();

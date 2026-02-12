@@ -66,6 +66,13 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "potentialCustomerName", "PotentialCustomer.CustomerName" },
+                    { "documentSerialTypeName", "DocumentSerialType.SerialPrefix" },
+                    { "salesTypeDefinitionName", "SalesTypeDefinition.Name" }
+                };
+
                 var query = _unitOfWork.Demands.Query()
                     .AsNoTracking()
                     .Where(q => !q.IsDeleted)
@@ -74,12 +81,11 @@ namespace crm_api.Services
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 
@@ -1695,6 +1701,13 @@ namespace crm_api.Services
                 var avaibleUsersIds = avaibleUsers.Select(x => x.UserId).ToList();
 
 
+                var columnMapping2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "potentialCustomerName", "PotentialCustomer.CustomerName" },
+                    { "documentSerialTypeName", "DocumentSerialType.SerialPrefix" },
+                    { "salesTypeDefinitionName", "SalesTypeDefinition.Name" }
+                };
+
                 var query = _unitOfWork.Demands.Query()
                     .AsNoTracking()
                     .Where(q => !q.IsDeleted && (q.CreatedBy == userId || (q.RepresentativeId.HasValue && avaibleUsersIds.Contains(q.RepresentativeId.Value))))
@@ -1703,12 +1716,11 @@ namespace crm_api.Services
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping2);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping2);
 
                 var totalCount = await query.CountAsync();
 
