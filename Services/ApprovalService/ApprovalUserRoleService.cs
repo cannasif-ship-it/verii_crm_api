@@ -37,6 +37,11 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "approvalRoleName", "ApprovalRole.Name" }
+                };
+
                 var query = _unitOfWork.ApprovalUserRoles
                     .Query()
                     .Where(aur => !aur.IsDeleted)
@@ -45,12 +50,11 @@ namespace crm_api.Services
                     .Include(aur => aur.DeletedByUser)
                     .Include(aur => aur.User)
                     .Include(aur => aur.ApprovalRole)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalUserRole.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 

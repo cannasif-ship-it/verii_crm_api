@@ -43,7 +43,7 @@ namespace crm_api.Services
                     .Include(arg => arg.CreatedByUser)
                     .Include(arg => arg.UpdatedByUser)
                     .Include(arg => arg.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalRoleGroup.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);

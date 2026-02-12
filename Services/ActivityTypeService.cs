@@ -43,7 +43,7 @@ namespace crm_api.Services
                     .Include(at => at.CreatedByUser)
                     .Include(at => at.UpdatedByUser)
                     .Include(at => at.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(ActivityType.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);

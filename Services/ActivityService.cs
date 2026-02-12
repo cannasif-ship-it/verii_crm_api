@@ -40,7 +40,7 @@ namespace crm_api.Services
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(Activity.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);
