@@ -42,7 +42,7 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(UserSession.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);

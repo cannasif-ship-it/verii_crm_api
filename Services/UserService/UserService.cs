@@ -71,6 +71,11 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "role", "RoleNavigation.Title" }
+                };
+
                 var query = _uow.Users.Query()
                     .AsNoTracking()
                     .Where(u => !u.IsDeleted)
@@ -78,12 +83,11 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(User.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 
