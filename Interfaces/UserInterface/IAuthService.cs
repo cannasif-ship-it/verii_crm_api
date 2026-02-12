@@ -15,7 +15,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<IEnumerable<UserDto>>> GetActiveUsersAsync();
         Task<ApiResponse<string>> RequestPasswordResetAsync(ForgotPasswordRequest request);
         Task<ApiResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request);
-        Task<ApiResponse<bool>> ChangePasswordAsync(ChangePasswordRequest request);
+        Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request);
     }
 
     public class LoginWithSessionResponseDto
