@@ -131,6 +131,9 @@
   <data name="General.ValidationError" xml:space="preserve">
     <value>Validation error occurred.</value>
   </data>
+  <data name="General.RecordAlreadyExists" xml:space="preserve">
+    <value>This record already exists.</value>
+  </data>
   <data name="General.InternalServerError" xml:space="preserve">
     <value>An internal server error occurred.</value>
   </data>
@@ -234,6 +237,9 @@
   </data>
   <data name="CountryService.CountryUpdated" xml:space="preserve">
     <value>Country updated successfully.</value>
+  </data>
+  <data name="CountryService.CountryNameAlreadyExists" xml:space="preserve">
+    <value>Country already exists. Duplicate country entries are not allowed.</value>
   </data>
   <data name="CountryService.CountryDeleted" xml:space="preserve">
     <value>Country deleted successfully.</value>

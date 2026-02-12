@@ -170,6 +170,9 @@
   <data name="General.ValidationError" xml:space="preserve">
     <value>Doğrulama hatası oluştu.</value>
   </data>
+  <data name="General.RecordAlreadyExists" xml:space="preserve">
+    <value>Bu kayıt zaten mevcut.</value>
+  </data>
   <data name="General.InternalServerError" xml:space="preserve">
     <value>Dahili sunucu hatası oluştu.</value>
   </data>
@@ -273,6 +276,9 @@
   </data>
   <data name="CountryService.CountryUpdated" xml:space="preserve">
     <value>Ülke başarıyla güncellendi.</value>
+  </data>
+  <data name="CountryService.CountryNameAlreadyExists" xml:space="preserve">
+    <value>Ülke zaten mevcut. Aynı ülke tekrar eklenemez.</value>
   </data>
   <data name="CountryService.CountryDeleted" xml:space="preserve">
     <value>Ülke başarıyla silindi.</value>
