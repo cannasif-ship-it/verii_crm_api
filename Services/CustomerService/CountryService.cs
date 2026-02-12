@@ -105,65 +105,43 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<CountryGetDto>> CreateCountryAsync(CountryCreateDto countryCreateDto)
         {
-            try
-            {
-                var country = _mapper.Map<Country>(countryCreateDto);
-                await _unitOfWork.Countries.AddAsync(country);
-                await _unitOfWork.SaveChangesAsync();
+            var country = _mapper.Map<Country>(countryCreateDto);
+            await _unitOfWork.Countries.AddAsync(country);
+            await _unitOfWork.SaveChangesAsync();
 
-                var countryDto = _mapper.Map<CountryGetDto>(country);
-
-                return ApiResponse<CountryGetDto>.SuccessResult(countryDto, _localizationService.GetLocalizedString("CountryService.CountryCreated"));
-            }
-            catch (Exception ex)
-            {
-                return ApiResponse<CountryGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("CountryService.InternalServerError"),
-                    _localizationService.GetLocalizedString("CountryService.CreateCountryExceptionMessage", ex.Message),
-                    StatusCodes.Status500InternalServerError);
-            }
+            var countryDto = _mapper.Map<CountryGetDto>(country);
+            return ApiResponse<CountryGetDto>.SuccessResult(countryDto, _localizationService.GetLocalizedString("CountryService.CountryCreated"));
         }
 
         public async Task<ApiResponse<CountryGetDto>> UpdateCountryAsync(long id, CountryUpdateDto countryUpdateDto)
         {
-            try
-            {
-                // Get tracked entity for update
-                var country = await _unitOfWork.Countries.GetByIdForUpdateAsync(id);
-                if (country == null)
-                {
-                    return ApiResponse<CountryGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
-                        _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
-                        StatusCodes.Status404NotFound);
-                }
-
-                _mapper.Map(countryUpdateDto, country);
-                await _unitOfWork.Countries.UpdateAsync(country);
-                await _unitOfWork.SaveChangesAsync();
-
-                // Reload with audit navigation properties for mapping (read-only)
-                var countryWithNav = await _unitOfWork.Countries.GetByIdAsync(id);
-
-                if (countryWithNav == null)
-                {
-                    return ApiResponse<CountryGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
-                        _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
-                        StatusCodes.Status404NotFound);
-                }
-
-                var countryDto = _mapper.Map<CountryGetDto>(countryWithNav);
-
-                return ApiResponse<CountryGetDto>.SuccessResult(countryDto, _localizationService.GetLocalizedString("CountryService.CountryUpdated"));
-            }
-            catch (Exception ex)
+            // Get tracked entity for update
+            var country = await _unitOfWork.Countries.GetByIdForUpdateAsync(id);
+            if (country == null)
             {
                 return ApiResponse<CountryGetDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("CountryService.InternalServerError"),
-                    _localizationService.GetLocalizedString("CountryService.UpdateCountryExceptionMessage", ex.Message),
-                    StatusCodes.Status500InternalServerError);
+                    _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
+                    _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
+                    StatusCodes.Status404NotFound);
             }
+
+            _mapper.Map(countryUpdateDto, country);
+            await _unitOfWork.Countries.UpdateAsync(country);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Reload with audit navigation properties for mapping (read-only)
+            var countryWithNav = await _unitOfWork.Countries.GetByIdAsync(id);
+
+            if (countryWithNav == null)
+            {
+                return ApiResponse<CountryGetDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
+                    _localizationService.GetLocalizedString("CountryService.CountryNotFound"),
+                    StatusCodes.Status404NotFound);
+            }
+
+            var countryDto = _mapper.Map<CountryGetDto>(countryWithNav);
+            return ApiResponse<CountryGetDto>.SuccessResult(countryDto, _localizationService.GetLocalizedString("CountryService.CountryUpdated"));
         }
 
         public async Task<ApiResponse<object>> DeleteCountryAsync(long id)
