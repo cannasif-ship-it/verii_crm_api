@@ -32,6 +32,7 @@ namespace crm_api.Data.Configurations
 
             // Indexes
             builder.HasIndex(e => e.Name)
+                .IsUnique()
                 .HasDatabaseName("IX_Country_Name");
 
             builder.HasIndex(e => e.Code)
