@@ -42,7 +42,7 @@ namespace crm_api.Services
                     .Include(l => l.CreatedByUser)
                     .Include(l => l.UpdatedByUser)
                     .Include(l => l.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(PricingRuleLine.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);

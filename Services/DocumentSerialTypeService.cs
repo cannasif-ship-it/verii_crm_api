@@ -43,7 +43,7 @@ namespace crm_api.Services
                     .Include(d => d.CreatedByUser)
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(DocumentSerialType.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);

@@ -43,7 +43,7 @@ namespace crm_api.Services
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
                     .Include(pt => pt.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(PaymentType.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);

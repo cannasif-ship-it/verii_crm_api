@@ -35,7 +35,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .ApplyFilters(request.Filters)
+                    .ApplyFilters(request.Filters, request.FilterLogic)
                     .ApplySorting(request.SortBy ?? nameof(SalesTypeDefinition.Id), request.SortDirection);
 
                 var totalCount = await query.CountAsync();
