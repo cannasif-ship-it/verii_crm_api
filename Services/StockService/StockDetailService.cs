@@ -35,6 +35,11 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "stockName", "Stock.StockName" }
+                };
+
                 var query = _unitOfWork.StockDetails
                     .Query()
                     .Where(sd => !sd.IsDeleted)
@@ -42,10 +47,10 @@ namespace crm_api.Services
                     .Include(sd => sd.CreatedByUser)
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(StockDetail.Id);
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 

@@ -48,7 +48,7 @@ namespace crm_api.Services
                     .Include(s => s.CreatedByUser)
                     .Include(s => s.UpdatedByUser)
                     .Include(s => s.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(Stock.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);
@@ -107,7 +107,7 @@ namespace crm_api.Services
                     .Include(s => s.CreatedByUser)
                     .Include(s => s.UpdatedByUser)
                     .Include(s => s.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(Stock.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);
