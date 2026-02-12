@@ -150,7 +150,7 @@ namespace crm_api.Services
                 }
                 var token = tokenResponse.Data!;
 
-                var activeSession = await _unitOfWork.UserSessions.Query().FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null);
+                var activeSession = await _unitOfWork.UserSessions.Query(tracking: true).FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null);
                 if (activeSession != null)
                 {
                     activeSession.RevokedAt = DateTime.UtcNow;
@@ -341,7 +341,7 @@ namespace crm_api.Services
                 var tokenHash = ComputeSha256Hash(request.Token);
                 var now = DateTime.UtcNow;
 
-                var reset = await _unitOfWork.Repository<PasswordResetRequest>().Query()
+                var reset = await _unitOfWork.Repository<PasswordResetRequest>().Query(tracking: true)
                     .Include(r => r.User)
                     .FirstOrDefaultAsync(r => r.TokenHash == tokenHash && r.UsedAt == null && r.ExpiresAt > now && !r.IsDeleted);
 
@@ -360,6 +360,14 @@ namespace crm_api.Services
 
                 await InvalidateUserSessionsAsync(reset.User.Id);
 
+                var displayName = string.Join(" ", new[] { reset.User.FirstName, reset.User.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                if (string.IsNullOrWhiteSpace(displayName))
+                {
+                    displayName = reset.User.Username;
+                }
+                var frontendBaseUrl = _configuration["FrontendSettings:BaseUrl"] ?? "http://localhost:5173";
+                BackgroundJob.Enqueue<IMailJob>(job => job.SendPasswordResetCompletedEmailAsync(reset.User.Email, displayName, frontendBaseUrl));
+
                 return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("OperationSuccessful"));
             }
             catch (Exception ex)
@@ -368,40 +376,79 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> ChangePasswordAsync(ChangePasswordRequest request)
+        public async Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
         {
             try
             {
                 var userIdRequest = await _userService.GetCurrentUserIdAsync();
                 if (!userIdRequest.Success)
                 {
-                    return ApiResponse<bool>.ErrorResult(userIdRequest.Message, userIdRequest.ExceptionMessage ?? string.Empty, userIdRequest.StatusCode);
+                    return ApiResponse<string>.ErrorResult(userIdRequest.Message, userIdRequest.ExceptionMessage ?? string.Empty, userIdRequest.StatusCode);
                 }
                 var userId = userIdRequest.Data!;
-                var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(u => u.Id == userId);
+                var user = await _unitOfWork.Users.Query(tracking: true).FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
                     var nf = _localizationService.GetLocalizedString("AuthUserNotFound");
-                    return ApiResponse<bool>.ErrorResult(nf, nf, 404);
+                    return ApiResponse<string>.ErrorResult(nf, nf, 404);
                 }
 
                 if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
                 {
-                    var msg = _localizationService.GetLocalizedString("Error.User.InvalidCredentials");
-                    return ApiResponse<bool>.ErrorResult(msg, msg, 400);
+                    var msg = _localizationService.GetLocalizedString("Error.User.CurrentPasswordIncorrect");
+                    if (msg == "Error.User.CurrentPasswordIncorrect")
+                    {
+                        msg = _localizationService.GetLocalizedString("Error.User.InvalidCredentials");
+                    }
+                    return ApiResponse<string>.ErrorResult(msg, msg, 400);
                 }
 
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
                 user.UpdatedDate = DateTime.UtcNow;
-                await _unitOfWork.SaveChangesAsync();
+                var affectedRows = await _unitOfWork.SaveChangesAsync();
+                if (affectedRows == 0 || !BCrypt.Net.BCrypt.Verify(request.NewPassword, user.PasswordHash))
+                {
+                    var saveMsg = _localizationService.GetLocalizedString("AuthErrorOccurred");
+                    return ApiResponse<string>.ErrorResult(saveMsg, saveMsg, 500);
+                }
 
                 await InvalidateUserSessionsAsync(user.Id);
 
-                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("OperationSuccessful"));
+                var tokenResponse = _jwtService.GenerateToken(user);
+                if (!tokenResponse.Success || string.IsNullOrWhiteSpace(tokenResponse.Data))
+                {
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("Error.User.LoginFailed"),
+                        tokenResponse.ExceptionMessage,
+                        tokenResponse.StatusCode == 0 ? 500 : tokenResponse.StatusCode);
+                }
+
+                var newToken = tokenResponse.Data!;
+                var session = new UserSession
+                {
+                    UserId = user.Id,
+                    SessionId = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    Token = ComputeSha256Hash(newToken),
+                    IsDeleted = false,
+                    CreatedDate = DateTime.UtcNow
+                };
+                await _unitOfWork.UserSessions.AddAsync(session);
+                await _unitOfWork.SaveChangesAsync();
+
+                var displayName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                if (string.IsNullOrWhiteSpace(displayName))
+                {
+                    displayName = user.Username;
+                }
+                var frontendBaseUrl = _configuration["FrontendSettings:BaseUrl"] ?? "http://localhost:5173";
+                BackgroundJob.Enqueue<IMailJob>(job => job.SendPasswordChangedEmailAsync(user.Email, displayName, frontendBaseUrl));
+
+                return ApiResponse<string>.SuccessResult(newToken, _localizationService.GetLocalizedString("OperationSuccessful"));
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("AuthErrorOccurred"), ex.Message ?? string.Empty, 500);
+                return ApiResponse<string>.ErrorResult(_localizationService.GetLocalizedString("AuthErrorOccurred"), ex.Message ?? string.Empty, 500);
             }
         }
 
@@ -419,7 +466,7 @@ namespace crm_api.Services
 
         private async Task InvalidateUserSessionsAsync(long userId)
         {
-            var sessions = await _unitOfWork.UserSessions.Query()
+            var sessions = await _unitOfWork.UserSessions.Query(tracking: true)
                 .Where(s => s.UserId == userId && s.RevokedAt == null)
                 .ToListAsync();
 

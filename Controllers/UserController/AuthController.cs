@@ -98,8 +98,9 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("change-password")]
-        public async Task<ActionResult<ApiResponse<bool>>> ChangePassword([FromBody] ChangePasswordRequest request)
+        public async Task<ActionResult<ApiResponse<string>>> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await _authService.ChangePasswordAsync(request);
             return StatusCode(result.StatusCode, result);
