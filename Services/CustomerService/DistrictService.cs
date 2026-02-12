@@ -44,7 +44,7 @@ namespace crm_api.Services
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
                     .Include(d => d.City)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(District.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);

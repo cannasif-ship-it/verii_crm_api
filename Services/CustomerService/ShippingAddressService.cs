@@ -37,18 +37,29 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "customerName", "Customer.CustomerName" },
+                    { "countryName", "Country.Name" },
+                    { "cityName", "City.Name" },
+                    { "districtName", "District.Name" }
+                };
+
                 var query = _unitOfWork.ShippingAddresses
                     .Query()
                     .Where(sa => !sa.IsDeleted)
+                    .Include(sa => sa.Customer)
+                    .Include(sa => sa.Country)
+                    .Include(sa => sa.City)
+                    .Include(sa => sa.District)
                     .Include(sa => sa.CreatedByUser)
                     .Include(sa => sa.UpdatedByUser)
                     .Include(sa => sa.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ShippingAddress.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 

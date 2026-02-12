@@ -39,6 +39,12 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "titleName", "Title.TitleName" },
+                    { "customerName", "Customer.CustomerName" }
+                };
+
                 var query = _unitOfWork.Contacts
                     .Query()
                     .Where(c => !c.IsDeleted)
@@ -47,12 +53,11 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(Contact.Id);
-                var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
-                query = query.ApplySorting(sortBy, request.SortDirection);
+                query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
                 var totalCount = await query.CountAsync();
 
