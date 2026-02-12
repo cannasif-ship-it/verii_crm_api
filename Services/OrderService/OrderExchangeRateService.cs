@@ -42,7 +42,7 @@ namespace crm_api.Services
                     .Include(e => e.CreatedByUser)
                     .Include(e => e.UpdatedByUser)
                     .Include(e => e.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(OrderExchangeRate.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);

@@ -42,7 +42,7 @@ namespace crm_api.Services
                 var query = _unitOfWork.OrderLines.Query()
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(OrderLine.Id);
                 var isDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
