@@ -50,7 +50,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .ApplyFilters(request.Filters);
+                    .ApplyFilters(request.Filters, request.FilterLogic);
 
                 query = query.Where(r =>
                     (string.IsNullOrWhiteSpace(r.AllowedUserIds) || (userId != null && (
