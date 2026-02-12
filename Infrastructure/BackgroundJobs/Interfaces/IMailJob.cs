@@ -6,6 +6,8 @@ namespace Infrastructure.BackgroundJobs.Interfaces
         Task SendEmailWithAttachmentsAsync(string to, string subject, string body, string? fromEmail = null, string? fromName = null, bool isHtml = true, string? cc = null, string? bcc = null, List<string>? attachments = null);
         Task SendUserCreatedEmailAsync(string email, string username, string password, string? firstName, string? lastName, string baseUrl);
         Task SendPasswordResetEmailAsync(string email, string fullName, string resetLink, string emailSubject);
+        Task SendPasswordResetCompletedEmailAsync(string email, string displayName, string baseUrl);
+        Task SendPasswordChangedEmailAsync(string email, string displayName, string baseUrl);
         Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink);
         Task SendDemandApprovalPendingEmailsAsync(
             List<(string Email, string FullName, long UserId)> usersToNotify,

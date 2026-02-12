@@ -110,6 +110,36 @@ namespace Infrastructure.BackgroundJobs
             await SendEmailAsync(email, emailSubject, emailBody, true);
         }
 
+        public async Task SendPasswordChangedEmailAsync(string email, string displayName, string baseUrl)
+        {
+            var emailSubject = "Şifreniz Güncellendi";
+            var content = $@"
+                <p>Sayın {displayName},</p>
+                <p>Eski şifreniz başarılı şekilde güncellenmiştir.</p>
+                <p>Hesabınıza güvenli şekilde devam edebilirsiniz.</p>
+                <div style=""text-align: center; margin-top: 30px;"">
+                    <a href=""{baseUrl}"" class=""btn"">Giriş Yap</a>
+                </div>";
+
+            var emailBody = GetEmailTemplate("Şifre Güncelleme Bildirimi", content);
+            await SendEmailAsync(email, emailSubject, emailBody, true);
+        }
+
+        public async Task SendPasswordResetCompletedEmailAsync(string email, string displayName, string baseUrl)
+        {
+            var emailSubject = "Şifre Sıfırlama İşlemi Tamamlandı";
+            var content = $@"
+                <p>Sayın {displayName},</p>
+                <p>Şifre resetleme işlemi başarılı şekilde tamamlanmıştır.</p>
+                <p>Yeni şifreniz ile güvenli şekilde giriş yapabilirsiniz.</p>
+                <div style=""text-align: center; margin-top: 30px;"">
+                    <a href=""{baseUrl}"" class=""btn"">Giriş Yap</a>
+                </div>";
+
+            var emailBody = GetEmailTemplate("Şifre Sıfırlama Tamamlandı", content);
+            await SendEmailAsync(email, emailSubject, emailBody, true);
+        }
+
         public async Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink)
         {
             var content = $@"
