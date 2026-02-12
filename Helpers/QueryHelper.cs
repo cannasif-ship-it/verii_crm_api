@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Collections.Generic;
 using crm_api.DTOs;
 
@@ -9,12 +10,47 @@ namespace crm_api.Helpers
     public static class QueryHelper
     {
         /// <summary>
-        /// Applies filters to the query based on Filter list
+        /// Resolves a property path (possibly dot-notation like "Country.Name")
+        /// to a chain of Expression.Property calls.
+        /// Returns null if any part of the path does not exist.
         /// </summary>
-        public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, List<Filter>? filters)
+        private static (Expression expression, PropertyInfo property)? ResolvePropertyPath(Expression param, Type rootType, string path)
+        {
+            var parts = path.Split('.');
+            Expression current = param;
+            PropertyInfo? prop = null;
+            Type currentType = rootType;
+
+            foreach (var part in parts)
+            {
+                prop = currentType.GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (prop == null) return null;
+                current = Expression.Property(current, prop);
+                currentType = prop.PropertyType;
+            }
+
+            return prop == null ? null : (current, prop);
+        }
+
+        /// <summary>
+        /// Resolves the actual entity column name from DTO/frontend column name using the columnMapping dictionary.
+        /// </summary>
+        private static string ResolveColumnName(string column, IReadOnlyDictionary<string, string>? columnMapping)
+        {
+            if (columnMapping == null) return column;
+            var mappingKey = columnMapping.Keys.FirstOrDefault(k => string.Equals(k, column, StringComparison.OrdinalIgnoreCase));
+            return mappingKey != null ? columnMapping[mappingKey] : column;
+        }
+
+        /// <summary>
+        /// Applies filters to the query based on Filter list.
+        /// columnMapping: DTO/frontend column names to entity property names (e.g. "name" -> "CustomerName", "countryName" -> "Country.Name").
+        /// Supports dot-notation for navigation properties (left join / Include).
+        /// </summary>
+        public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, List<Filter>? filters, string filterLogic = "and", IReadOnlyDictionary<string, string>? columnMapping = null)
         {
             ParameterExpression param = Expression.Parameter(typeof(T), "x");
-            Expression? predicate = null;
+            Expression? basePredicate = null;
 
             // Default filter: IsDeleted = false (if IsDeleted property exists)
             var isDeletedProperty = typeof(T).GetProperty("IsDeleted");
@@ -22,33 +58,40 @@ namespace crm_api.Helpers
             {
                 var isDeletedLeft = Expression.Property(param, isDeletedProperty);
                 var isDeletedExp = Expression.Equal(isDeletedLeft, Expression.Constant(false));
-                predicate = isDeletedExp;
+                basePredicate = isDeletedExp;
             }
 
             if (filters == null || filters.Count == 0)
             {
-                if (predicate == null) return query;
-                var defaultLambda = Expression.Lambda<Func<T, bool>>(predicate, param);
+                if (basePredicate == null) return query;
+                var defaultLambda = Expression.Lambda<Func<T, bool>>(basePredicate, param);
                 return query.Where(defaultLambda);
             }
+
+            bool useOr = string.Equals(filterLogic, "or", StringComparison.OrdinalIgnoreCase);
+            Expression? filterPredicate = null;
 
             foreach (var filter in filters)
             {
                 if (string.IsNullOrEmpty(filter.Value)) continue;
-                
-                var property = typeof(T).GetProperty(filter.Column);
-                if (property == null) continue;
-                
-                var left = Expression.Property(param, property);
+
+                var columnName = ResolveColumnName(filter.Column, columnMapping);
+
+                var resolved = ResolvePropertyPath(param, typeof(T), columnName);
+                if (resolved == null) continue;
+                var (left, property) = resolved.Value;
+
                 Expression? exp = null;
+
+                var operatorLower = filter.Operator.ToLowerInvariant();
 
                 if (property.PropertyType == typeof(string))
                 {
-                    var method = filter.Operator switch
+                    var method = operatorLower switch
                     {
-                        "Contains" => typeof(string).GetMethod("Contains", new[] { typeof(string) }),
-                        "StartsWith" => typeof(string).GetMethod("StartsWith", new[] { typeof(string) }),
-                        "EndsWith" => typeof(string).GetMethod("EndsWith", new[] { typeof(string) }),
+                        "contains" => typeof(string).GetMethod("Contains", new[] { typeof(string) }),
+                        "startswith" => typeof(string).GetMethod("StartsWith", new[] { typeof(string) }),
+                        "endswith" => typeof(string).GetMethod("EndsWith", new[] { typeof(string) }),
                         _ => null
                     };
                     
@@ -65,12 +108,12 @@ namespace crm_api.Helpers
                 {
                     if (int.TryParse(filter.Value, out int val))
                     {
-                        exp = filter.Operator switch
+                        exp = operatorLower switch
                         {
-                            ">" => Expression.GreaterThan(left, Expression.Constant(val)),
-                            ">=" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
-                            "<" => Expression.LessThan(left, Expression.Constant(val)),
-                            "<=" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
+                            ">" or "gt" => Expression.GreaterThan(left, Expression.Constant(val)),
+                            ">=" or "gte" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
+                            "<" or "lt" => Expression.LessThan(left, Expression.Constant(val)),
+                            "<=" or "lte" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
                             _ => Expression.Equal(left, Expression.Constant(val))
                         };
                     }
@@ -79,12 +122,12 @@ namespace crm_api.Helpers
                 {
                     if (long.TryParse(filter.Value, out long val))
                     {
-                        exp = filter.Operator switch
+                        exp = operatorLower switch
                         {
-                            ">" => Expression.GreaterThan(left, Expression.Constant(val)),
-                            ">=" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
-                            "<" => Expression.LessThan(left, Expression.Constant(val)),
-                            "<=" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
+                            ">" or "gt" => Expression.GreaterThan(left, Expression.Constant(val)),
+                            ">=" or "gte" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
+                            "<" or "lt" => Expression.LessThan(left, Expression.Constant(val)),
+                            "<=" or "lte" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
                             _ => Expression.Equal(left, Expression.Constant(val))
                         };
                     }
@@ -93,12 +136,12 @@ namespace crm_api.Helpers
                 {
                     if (decimal.TryParse(filter.Value, out decimal val))
                     {
-                        exp = filter.Operator switch
+                        exp = operatorLower switch
                         {
-                            ">" => Expression.GreaterThan(left, Expression.Constant(val)),
-                            ">=" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
-                            "<" => Expression.LessThan(left, Expression.Constant(val)),
-                            "<=" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
+                            ">" or "gt" => Expression.GreaterThan(left, Expression.Constant(val)),
+                            ">=" or "gte" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
+                            "<" or "lt" => Expression.LessThan(left, Expression.Constant(val)),
+                            "<=" or "lte" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
                             _ => Expression.Equal(left, Expression.Constant(val))
                         };
                     }
@@ -107,12 +150,12 @@ namespace crm_api.Helpers
                 {
                     if (DateTime.TryParse(filter.Value, out DateTime val))
                     {
-                        exp = filter.Operator switch
+                        exp = operatorLower switch
                         {
-                            ">" => Expression.GreaterThan(left, Expression.Constant(val)),
-                            ">=" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
-                            "<" => Expression.LessThan(left, Expression.Constant(val)),
-                            "<=" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
+                            ">" or "gt" => Expression.GreaterThan(left, Expression.Constant(val)),
+                            ">=" or "gte" => Expression.GreaterThanOrEqual(left, Expression.Constant(val)),
+                            "<" or "lt" => Expression.LessThan(left, Expression.Constant(val)),
+                            "<=" or "lte" => Expression.LessThanOrEqual(left, Expression.Constant(val)),
                             _ => Expression.Equal(left, Expression.Constant(val))
                         };
                     }
@@ -134,37 +177,50 @@ namespace crm_api.Helpers
 
                 if (exp != null)
                 {
-                    predicate = predicate == null ? exp : Expression.AndAlso(predicate, exp);
+                    filterPredicate = filterPredicate == null
+                        ? exp
+                        : useOr
+                            ? Expression.OrElse(filterPredicate, exp)
+                            : Expression.AndAlso(filterPredicate, exp);
                 }
             }
 
-            if (predicate == null) return query;
+            // Combine: basePredicate (IsDeleted) is always AND, filterPredicate is AND/OR based on filterLogic
+            Expression? finalPredicate;
+            if (basePredicate != null && filterPredicate != null)
+                finalPredicate = Expression.AndAlso(basePredicate, filterPredicate);
+            else
+                finalPredicate = basePredicate ?? filterPredicate;
+
+            if (finalPredicate == null) return query;
             
-            var lambda = Expression.Lambda<Func<T, bool>>(predicate, param);
+            var lambda = Expression.Lambda<Func<T, bool>>(finalPredicate, param);
             return query.Where(lambda);
         }
 
         /// <summary>
-        /// Applies sorting to the query
+        /// Applies sorting to the query.
+        /// Supports columnMapping and dot-notation for navigation properties (e.g. "countryName" -> "Country.Name").
         /// </summary>
-        public static IQueryable<T> ApplySorting<T>(this IQueryable<T> query, string? sortBy, string? sortDirection)
+        public static IQueryable<T> ApplySorting<T>(this IQueryable<T> query, string? sortBy, string? sortDirection, IReadOnlyDictionary<string, string>? columnMapping = null)
         {
             if (string.IsNullOrWhiteSpace(sortBy))
             {
                 sortBy = "Id";
             }
 
-            // Check if property exists
-            var property = typeof(T).GetProperty(sortBy);
-            if (property == null)
-            {
-                sortBy = "Id"; // Default to Id if property doesn't exist
-                property = typeof(T).GetProperty(sortBy);
-                if (property == null) return query; // If Id doesn't exist, return as is
-            }
+            var resolvedSortBy = ResolveColumnName(sortBy, columnMapping);
 
             var parameter = Expression.Parameter(typeof(T), "x");
-            var member = Expression.Property(parameter, property);
+            var resolved = ResolvePropertyPath(parameter, typeof(T), resolvedSortBy);
+            if (resolved == null)
+            {
+                // Fallback to Id if resolved property doesn't exist
+                resolved = ResolvePropertyPath(parameter, typeof(T), "Id");
+                if (resolved == null) return query;
+            }
+
+            var (member, _) = resolved.Value;
             var keySelector = Expression.Lambda(
                 typeof(Func<,>).MakeGenericType(typeof(T), member.Type),
                 member,
@@ -201,14 +257,15 @@ namespace crm_api.Helpers
         }
 
         /// <summary>
-        /// Applies all PagedRequest operations (filters, sorting, pagination) to the query
+        /// Applies all PagedRequest operations (filters, sorting, pagination) to the query.
+        /// Supports columnMapping for DTO-to-entity property name resolution.
         /// </summary>
-        public static IQueryable<T> ApplyPagedRequest<T>(this IQueryable<T> query, PagedRequest request)
+        public static IQueryable<T> ApplyPagedRequest<T>(this IQueryable<T> query, PagedRequest request, IReadOnlyDictionary<string, string>? columnMapping = null)
         {
             if (request == null) return query;
 
-            query = query.ApplyFilters(request.Filters);
-            query = query.ApplySorting(request.SortBy, request.SortDirection);
+            query = query.ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
+            query = query.ApplySorting(request.SortBy, request.SortDirection, columnMapping);
             query = query.ApplyPagination(request.PageNumber, request.PageSize);
 
             return query;
