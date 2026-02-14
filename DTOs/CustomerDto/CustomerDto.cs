@@ -42,7 +42,7 @@ namespace crm_api.DTOs
         [MaxLength(250)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(15)]
+        [MaxLength(10)]
         public string? TaxNumber { get; set; }
 
         [MaxLength(100)]
@@ -104,7 +104,7 @@ namespace crm_api.DTOs
         [MaxLength(250)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(15)]
+        [MaxLength(10)]
         public string? TaxNumber { get; set; }
 
         [MaxLength(100)]
