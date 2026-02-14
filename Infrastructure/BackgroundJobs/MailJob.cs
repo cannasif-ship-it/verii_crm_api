@@ -1,6 +1,7 @@
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
 using crm_api.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.BackgroundJobs
@@ -11,11 +12,13 @@ namespace Infrastructure.BackgroundJobs
     {
         private readonly IMailService _mailService;
         private readonly ILogger<MailJob> _logger;
+        private readonly IConfiguration _configuration;
 
-        public MailJob(IMailService mailService, ILogger<MailJob> logger)
+        public MailJob(IMailService mailService, ILogger<MailJob> logger, IConfiguration configuration)
         {
             _mailService = mailService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body, bool isHtml = true, string? cc = null, string? bcc = null, List<string>? attachments = null)
@@ -70,6 +73,7 @@ namespace Infrastructure.BackgroundJobs
 
         public async Task SendUserCreatedEmailAsync(string email, string username, string password, string? firstName, string? lastName, string baseUrl)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
             var emailSubject = "Kullanıcınız oluşturulmuştur";
             var displayName = string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName) 
                 ? username 
@@ -84,7 +88,7 @@ namespace Infrastructure.BackgroundJobs
                 </div>
                 <p>Yukarıdaki bilgilerle giriş yapıp menü üzerinden kullanıcı şifrenizi değiştirebilirsiniz.</p>
                 <div style=""text-align: center; margin-top: 30px;"">
-                    <a href=""{baseUrl}"" class=""btn"">Giriş Yap</a>
+                    <a href=""{effectiveBaseUrl}"" class=""btn"">Giriş Yap</a>
                 </div>";
 
             var emailBody = GetEmailTemplate("Kullanıcınız Oluşturuldu", content);
@@ -112,13 +116,14 @@ namespace Infrastructure.BackgroundJobs
 
         public async Task SendPasswordChangedEmailAsync(string email, string displayName, string baseUrl)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
             var emailSubject = "Şifreniz Güncellendi";
             var content = $@"
                 <p>Sayın {displayName},</p>
                 <p>Eski şifreniz başarılı şekilde güncellenmiştir.</p>
                 <p>Hesabınıza güvenli şekilde devam edebilirsiniz.</p>
                 <div style=""text-align: center; margin-top: 30px;"">
-                    <a href=""{baseUrl}"" class=""btn"">Giriş Yap</a>
+                    <a href=""{effectiveBaseUrl}"" class=""btn"">Giriş Yap</a>
                 </div>";
 
             var emailBody = GetEmailTemplate("Şifre Güncelleme Bildirimi", content);
@@ -127,13 +132,14 @@ namespace Infrastructure.BackgroundJobs
 
         public async Task SendPasswordResetCompletedEmailAsync(string email, string displayName, string baseUrl)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
             var emailSubject = "Şifre Sıfırlama İşlemi Tamamlandı";
             var content = $@"
                 <p>Sayın {displayName},</p>
                 <p>Şifre resetleme işlemi başarılı şekilde tamamlanmıştır.</p>
                 <p>Yeni şifreniz ile güvenli şekilde giriş yapabilirsiniz.</p>
                 <div style=""text-align: center; margin-top: 30px;"">
-                    <a href=""{baseUrl}"" class=""btn"">Giriş Yap</a>
+                    <a href=""{effectiveBaseUrl}"" class=""btn"">Giriş Yap</a>
                 </div>";
 
             var emailBody = GetEmailTemplate("Şifre Sıfırlama Tamamlandı", content);
@@ -162,16 +168,19 @@ namespace Infrastructure.BackgroundJobs
             string demandPath,
             long demandId)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
+            var effectiveApprovalPath = GetFrontendPath("ApprovalPendingPath", "approvals/pending");
+            var effectiveDemandPath = GetFrontendPath("DemandDetailPath", "demands");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
-            var demandLink = $"{baseUrl}/{demandPath}/{demandId}";
+            var demandLink = $"{effectiveBaseUrl}/{effectiveDemandPath}/{demandId}";
 
             foreach (var (email, fullName, uid) in usersToNotify)
             {
                 var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
                 var actionId = userIdToActionId.GetValueOrDefault(uid);
                 var approvalLink = actionId != 0
-                    ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
-                    : $"{baseUrl}/{approvalPath}";
+                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
                 await SendDemandApprovalPendingEmailAsync(
                     email,
@@ -204,16 +213,19 @@ namespace Infrastructure.BackgroundJobs
             string orderPath,
             long orderId)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
+            var effectiveApprovalPath = GetFrontendPath("ApprovalPendingPath", "approvals/pending");
+            var effectiveOrderPath = GetFrontendPath("OrderDetailPath", "orders");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
-            var orderLink = $"{baseUrl}/{orderPath}/{orderId}";
+            var orderLink = $"{effectiveBaseUrl}/{effectiveOrderPath}/{orderId}";
 
             foreach (var (email, fullName, uid) in usersToNotify)
             {
                 var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
                 var actionId = userIdToActionId.GetValueOrDefault(uid);
                 var approvalLink = actionId != 0
-                    ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
-                    : $"{baseUrl}/{approvalPath}";
+                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
                 await SendOrderApprovalPendingEmailAsync(
                     email,
@@ -246,16 +258,19 @@ namespace Infrastructure.BackgroundJobs
             string quotationPath,
             long quotationId)
         {
+            var effectiveBaseUrl = GetFrontendBaseUrl();
+            var effectiveApprovalPath = GetFrontendPath("ApprovalPendingPath", "approvals/pending");
+            var effectiveQuotationPath = GetFrontendPath("QuotationDetailPath", "quotations");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
-            var quotationLink = $"{baseUrl}/{quotationPath}/{quotationId}";
+            var quotationLink = $"{effectiveBaseUrl}/{effectiveQuotationPath}/{quotationId}";
 
             foreach (var (email, fullName, uid) in usersToNotify)
             {
                 var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
                 var actionId = userIdToActionId.GetValueOrDefault(uid);
                 var approvalLink = actionId != 0
-                    ? $"{baseUrl}/{approvalPath}?actionId={actionId}"
-                    : $"{baseUrl}/{approvalPath}";
+                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
                 await SendQuotationApprovalPendingEmailAsync(
                     email,
@@ -402,6 +417,16 @@ namespace Infrastructure.BackgroundJobs
 
             var body = GetEmailTemplate("Sipariş Reddedildi", content);
             await SendEmailAsync(creatorEmail, subject, body, true);
+        }
+
+        private string GetFrontendBaseUrl()
+        {
+            return _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
+        }
+
+        private string GetFrontendPath(string key, string fallback)
+        {
+            return _configuration[$"FrontendSettings:{key}"]?.Trim('/') ?? fallback;
         }
 
         private string GetEmailTemplate(string title, string content)

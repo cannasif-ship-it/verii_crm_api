@@ -27,8 +27,12 @@ using crm_api.Infrastructure.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Local-only secrets (ignored by git)
-builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+// Load local overrides only in Development.
+// Production should rely on appsettings.Production.json and environment variables.
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+}
 
 // Add services to the container.
 builder.Services.AddControllers();

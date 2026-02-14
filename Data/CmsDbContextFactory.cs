@@ -14,11 +14,17 @@ public sealed class CmsDbContextFactory : IDesignTimeDbContextFactory<CmsDbConte
             "Production";
 
         var projectRoot = ResolveProjectRoot();
-        var configuration = new ConfigurationBuilder()
+        var configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(projectRoot)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
-            .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false)
-            .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: false);
+
+        if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
+        {
+            configurationBuilder.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+        }
+
+        var configuration = configurationBuilder
             .AddEnvironmentVariables()
             .Build();
 
