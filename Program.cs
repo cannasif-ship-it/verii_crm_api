@@ -309,7 +309,9 @@ builder.Services.AddCors(options =>
                 "https://crm.v3rii.com",
                 "http://crm.v3rii.com",
                 "http://192.168.10.52",
-                "http://192.168.10.52:5173"
+                "http://192.168.10.52:5173",
+                "http://cloud.windoform.com",
+                "https://cloud.windoform.com"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
