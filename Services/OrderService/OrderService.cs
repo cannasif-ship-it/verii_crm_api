@@ -567,6 +567,9 @@ namespace crm_api.Services
                     newLine.VatAmount = line.VatAmount;
                     newLine.LineGrandTotal = line.LineGrandTotal;
                     newLine.Description = line.Description;
+                    newLine.Description1 = line.Description1;
+                    newLine.Description2 = line.Description2;
+                    newLine.Description3 = line.Description3;
                     newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
                     newLine.RelatedStockId = line.RelatedStockId;
                     newLine.RelatedProductKey = line.RelatedProductKey;

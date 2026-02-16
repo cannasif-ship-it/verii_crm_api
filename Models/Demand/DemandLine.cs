@@ -32,6 +32,9 @@ namespace crm_api.Models
 
         // 🔹 Açıklama
         public string? Description { get; set; } // Satır açıklaması (opsiyonel)
+        public string? Description1 { get; set; } // Satır açıklaması 1 (opsiyonel)
+        public string? Description2 { get; set; } // Satır açıklaması 2 (opsiyonel)
+        public string? Description3 { get; set; } // Satır açıklaması 3 (opsiyonel)
 
         // === Onay ===
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.HavenotStarted;

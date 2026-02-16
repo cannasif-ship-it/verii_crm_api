@@ -24,6 +24,18 @@ namespace crm_api.Data.Configurations
                 .HasMaxLength(50)
                 .IsRequired(false);
 
+            builder.Property(e => e.Description1)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            builder.Property(e => e.Description2)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            builder.Property(e => e.Description3)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
             builder.Property(e => e.IsMainRelatedProduct)
                 .IsRequired()
                 .HasDefaultValue(false);

@@ -605,6 +605,9 @@ namespace crm_api.Services
                     newLine.VatAmount = line.VatAmount;
                     newLine.LineGrandTotal = line.LineGrandTotal;
                     newLine.Description = line.Description;
+                    newLine.Description1 = line.Description1;
+                    newLine.Description2 = line.Description2;
+                    newLine.Description3 = line.Description3;
                     newLine.PricingRuleHeaderId = line.PricingRuleHeaderId;
                     newLine.RelatedStockId = line.RelatedStockId;
                     newLine.RelatedProductKey = line.RelatedProductKey;
@@ -2002,6 +2005,9 @@ namespace crm_api.Services
                         LineTotal = line.LineTotal,
                         LineGrandTotal = line.LineGrandTotal,
                         Description = line.Description,
+                        Description1 = line.Description1,
+                        Description2 = line.Description2,
+                        Description3 = line.Description3,
                         PricingRuleHeaderId = line.PricingRuleHeaderId,
                         RelatedStockId = line.RelatedStockId,
                         RelatedProductKey = line.RelatedProductKey,

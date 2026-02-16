@@ -24,6 +24,9 @@ namespace crm_api.DTOs
         public decimal LineTotal { get; set; }
         public decimal LineGrandTotal { get; set; }
         public string? Description { get; set; }
+        public string? Description1 { get; set; }
+        public string? Description2 { get; set; }
+        public string? Description3 { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
@@ -62,6 +65,12 @@ namespace crm_api.DTOs
         public decimal LineGrandTotal { get; set; }
         [MaxLength(250)]
         public string? Description { get; set; }
+        [MaxLength(200)]
+        public string? Description1 { get; set; }
+        [MaxLength(200)]
+        public string? Description2 { get; set; }
+        [MaxLength(200)]
+        public string? Description3 { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
@@ -99,6 +108,12 @@ namespace crm_api.DTOs
         public decimal LineGrandTotal { get; set; }
         [MaxLength(250)]
         public string? Description { get; set; }
+        [MaxLength(200)]
+        public string? Description1 { get; set; }
+        [MaxLength(200)]
+        public string? Description2 { get; set; }
+        [MaxLength(200)]
+        public string? Description3 { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
@@ -128,6 +143,9 @@ namespace crm_api.DTOs
         public decimal LineTotal { get; set; }
         public decimal LineGrandTotal { get; set; }
         public string? Description { get; set; }
+        public string? Description1 { get; set; }
+        public string? Description2 { get; set; }
+        public string? Description3 { get; set; }
         public long? PricingRuleHeaderId { get; set; }
         public long? RelatedStockId { get; set; }
         public string? RelatedProductKey { get; set; }
