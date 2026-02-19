@@ -16,5 +16,9 @@ namespace crm_api.Interfaces
         Task<ApiResponse<string>> UploadActivityImageAsync(IFormFile file, long activityId);
         Task<ApiResponse<bool>> DeleteActivityImageAsync(string fileUrl);
         string GetActivityImageUrl(string fileName, long activityId);
+
+        Task<ApiResponse<string>> UploadCustomerImageAsync(IFormFile file, long customerId);
+        Task<ApiResponse<bool>> DeleteCustomerImageAsync(string fileUrl);
+        string GetCustomerImageUrl(string fileName, long customerId);
     }
 }

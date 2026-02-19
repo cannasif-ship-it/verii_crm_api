@@ -15,6 +15,7 @@ namespace crm_api.Services
         private const string ProfilePicturesFolder = "user-profiles";
         private const string StockImagesFolder = "stock-images";
         private const string ActivityImagesFolder = "activity-images";
+        private const string CustomerImagesFolder = "customer-images";
         private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
         private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
@@ -507,6 +508,155 @@ namespace crm_api.Services
         public string GetActivityImageUrl(string fileName, long activityId)
         {
             return $"/uploads/{ActivityImagesFolder}/{activityId}/{fileName}";
+        }
+
+        public async Task<ApiResponse<string>> UploadCustomerImageAsync(IFormFile file, long customerId)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.FileRequired"),
+                        null,
+                        400);
+                }
+
+                if (file.Length > MaxFileSize)
+                {
+                    var maxSizeMb = MaxFileSize / (1024 * 1024);
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.FileSizeExceeded", maxSizeMb),
+                        null,
+                        400);
+                }
+
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (!AllowedExtensions.Contains(extension))
+                {
+                    var allowedFormats = string.Join(", ", AllowedExtensions);
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.InvalidFileFormat", allowedFormats),
+                        null,
+                        400);
+                }
+
+                var uploadsBasePath = Path.Combine(_environment.ContentRootPath, "uploads");
+                var customerImagesPath = Path.Combine(uploadsBasePath, CustomerImagesFolder);
+                var customerFolder = Path.Combine(customerImagesPath, customerId.ToString());
+
+                if (!Directory.Exists(uploadsBasePath))
+                {
+                    Directory.CreateDirectory(uploadsBasePath);
+                    SetDirectoryPermissions(uploadsBasePath);
+                }
+
+                if (!Directory.Exists(customerImagesPath))
+                {
+                    Directory.CreateDirectory(customerImagesPath);
+                    SetDirectoryPermissions(customerImagesPath);
+                }
+
+                if (!Directory.Exists(customerFolder))
+                {
+                    Directory.CreateDirectory(customerFolder);
+                    SetDirectoryPermissions(customerFolder);
+                }
+
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(customerFolder, fileName);
+
+                await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
+                {
+                    await using (var sourceStream = file.OpenReadStream())
+                    {
+                        await sourceStream.CopyToAsync(fileStream).ConfigureAwait(false);
+                        await fileStream.FlushAsync().ConfigureAwait(false);
+                    }
+                }
+
+                var url = GetCustomerImageUrl(fileName, customerId);
+                return ApiResponse<string>.SuccessResult(url, _localizationService.GetLocalizedString("FileUploadService.FileUploadedSuccessfully"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.ErrorResult(
+                    _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
+                    _localizationService.GetLocalizedString("FileUploadService.FileUploadExceptionMessage", ex.Message),
+                    500);
+            }
+        }
+
+        public Task<ApiResponse<bool>> DeleteCustomerImageAsync(string fileUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fileUrl))
+                {
+                    return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                        true,
+                        _localizationService.GetLocalizedString("FileUploadService.NoFileToDelete")));
+                }
+
+                var pathToParse = fileUrl.Trim();
+
+                if (pathToParse.Contains('?'))
+                {
+                    pathToParse = pathToParse.Substring(0, pathToParse.IndexOf('?'));
+                }
+
+                if (Uri.TryCreate(pathToParse, UriKind.Absolute, out Uri? absoluteUri))
+                {
+                    pathToParse = absoluteUri.AbsolutePath;
+                }
+
+                if (!pathToParse.StartsWith("/"))
+                {
+                    pathToParse = "/" + pathToParse;
+                }
+
+                var pathSegments = pathToParse.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+                if (pathSegments.Length < 4 || pathSegments[0] != "uploads" || pathSegments[1] != CustomerImagesFolder)
+                {
+                    var expectedFormat = $"/uploads/{CustomerImagesFolder}/{{customerId}}/{{fileName}}";
+                    return Task.FromResult(ApiResponse<bool>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.InvalidFileUrl", expectedFormat, fileUrl),
+                        null,
+                        400));
+                }
+
+                var customerId = pathSegments[2];
+                var fileName = pathSegments[3];
+
+                var filePath = Path.Combine(
+                    _environment.ContentRootPath,
+                    "uploads",
+                    CustomerImagesFolder,
+                    customerId,
+                    fileName);
+
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+
+                return Task.FromResult(ApiResponse<bool>.SuccessResult(
+                    true,
+                    _localizationService.GetLocalizedString("FileUploadService.FileDeletedSuccessfully")));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(ApiResponse<bool>.ErrorResult(
+                    _localizationService.GetLocalizedString("FileUploadService.FileDeletionError"),
+                    _localizationService.GetLocalizedString("FileUploadService.FileDeletionExceptionMessage", ex.Message),
+                    500));
+            }
+        }
+
+        public string GetCustomerImageUrl(string fileName, long customerId)
+        {
+            return $"/uploads/{CustomerImagesFolder}/{customerId}/{fileName}";
         }
 
         /// <summary>

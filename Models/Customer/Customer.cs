@@ -51,6 +51,7 @@ namespace crm_api.Models
         // ✅ Relationships
         public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
         public virtual ICollection<ShippingAddress> ShippingAddresses { get; set; } = new List<ShippingAddress>();
+        public virtual ICollection<CustomerImage> CustomerImages { get; set; } = new List<CustomerImage>();
 
         // ✅ Default Shipping Address (çok işe yarar)
         public long? DefaultShippingAddressId { get; set; }

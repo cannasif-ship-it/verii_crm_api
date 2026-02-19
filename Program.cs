@@ -145,6 +145,7 @@ builder.Services.AddScoped<IErpService, ErpService>();
 
 // Register Customer Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICustomerImageService, CustomerImageService>();
 builder.Services.AddScoped<ICustomerTypeService, CustomerTypeService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<ICityService, CityService>();

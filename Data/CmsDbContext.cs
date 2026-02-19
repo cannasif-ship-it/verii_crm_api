@@ -19,6 +19,7 @@ namespace crm_api.Data
         public DbSet<City> Cities { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<CustomerImage> CustomerImages { get; set; }
         public DbSet<CustomerType> CustomerTypes { get; set; }
         public DbSet<District> Districts { get; set; }
         public DbSet<User> Users { get; set; }

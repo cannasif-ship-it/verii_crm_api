@@ -19,6 +19,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<District> Districts { get; }
         IGenericRepository<CustomerType> CustomerTypes { get; }
         IGenericRepository<Customer> Customers { get; }
+        IGenericRepository<CustomerImage> CustomerImages { get; }
         IGenericRepository<Title> Titles { get; }
         IGenericRepository<UserAuthority> UserAuthorities { get; }
         IGenericRepository<Contact> Contacts { get; }

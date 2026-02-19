@@ -29,6 +29,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<District>? _districts;
         private IGenericRepository<CustomerType>? _customerTypes;
         private IGenericRepository<Customer>? _customers;
+        private IGenericRepository<CustomerImage>? _customerImages;
         private IGenericRepository<Title>? _titles;
         private IGenericRepository<UserAuthority>? _userAuthorities;
         private IGenericRepository<Contact>? _contacts;
@@ -97,6 +98,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<District> Districts{get{_districts ??= new GenericRepository<District>(_context, _httpContextAccessor);return _districts;}}
         public IGenericRepository<CustomerType> CustomerTypes{get{_customerTypes ??= new GenericRepository<CustomerType>(_context, _httpContextAccessor);return _customerTypes;}} 
         public IGenericRepository<Customer> Customers{get{_customers ??= new GenericRepository<Customer>(_context, _httpContextAccessor);return _customers;}}
+        public IGenericRepository<CustomerImage> CustomerImages{get{_customerImages ??= new GenericRepository<CustomerImage>(_context, _httpContextAccessor);return _customerImages;}}
         public IGenericRepository<Title> Titles{get{_titles ??= new GenericRepository<Title>(_context, _httpContextAccessor);return _titles;}}
         public IGenericRepository<UserAuthority> UserAuthorities{get{_userAuthorities ??= new GenericRepository<UserAuthority>(_context, _httpContextAccessor);return _userAuthorities;}}
         public IGenericRepository<Contact> Contacts{get{_contacts ??= new GenericRepository<Contact>(_context, _httpContextAccessor);return _contacts;}}
