@@ -11,6 +11,8 @@ namespace crm_api.Models
         // Sevk adresinde yetkili kişi
         public string? ContactPerson { get; set; }
         public string? Phone { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
 
         public string? Notes { get; set; }  // teslim talimatları vs.
 

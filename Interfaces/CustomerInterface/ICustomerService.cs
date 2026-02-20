@@ -13,5 +13,6 @@ namespace crm_api.Interfaces
         Task<ApiResponse<List<CustomerDuplicateCandidateDto>>> GetDuplicateCandidatesAsync();
         Task<ApiResponse<CustomerGetDto>> MergeCustomersAsync(CustomerMergeRequestDto request);
         Task<ApiResponse<CustomerCreateFromMobileResultDto>> CreateCustomerFromMobileAsync(CustomerCreateFromMobileDto request);
+        Task<ApiResponse<List<NearbyCustomerPinDto>>> GetNearbyCustomersAsync(CustomerNearbyQueryDto query);
     }
 }

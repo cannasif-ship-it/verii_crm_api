@@ -32,6 +32,14 @@ namespace crm_api.Data.Configurations
                 .HasMaxLength(20)
                 .IsRequired(false);
 
+            builder.Property(e => e.Latitude)
+                .HasColumnType("decimal(9,6)")
+                .IsRequired(false);
+
+            builder.Property(e => e.Longitude)
+                .HasColumnType("decimal(9,6)")
+                .IsRequired(false);
+
             builder.Property(e => e.Notes)
                 .HasMaxLength(100)
                 .IsRequired(false);
@@ -88,6 +96,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_ShippingAddress_IsDeleted");
+            
+            builder.HasIndex(e => new { e.Latitude, e.Longitude })
+                .HasDatabaseName("IX_ShippingAddress_Latitude_Longitude");
 
             // Query filter for soft deletion
             builder.HasQueryFilter(e => !e.IsDeleted);

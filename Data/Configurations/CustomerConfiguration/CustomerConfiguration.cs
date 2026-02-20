@@ -81,6 +81,14 @@ namespace crm_api.Data.Configurations
             builder.Property(e => e.Address)
                 .HasMaxLength(500)
                 .IsRequired(false);
+            
+            builder.Property(e => e.Latitude)
+                .HasColumnType("decimal(9,6)")
+                .IsRequired(false);
+
+            builder.Property(e => e.Longitude)
+                .HasColumnType("decimal(9,6)")
+                .IsRequired(false);
 
             // Location Information
             builder.Property(e => e.CountryId)
@@ -153,6 +161,9 @@ namespace crm_api.Data.Configurations
 
             builder.HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Customer_IsDeleted");
+            
+            builder.HasIndex(e => new { e.Latitude, e.Longitude })
+                .HasDatabaseName("IX_Customer_Latitude_Longitude");
 
             // BaseHeaderEntity fields (approval & ERP integration)
             builder.Property(e => e.CompletionDate)

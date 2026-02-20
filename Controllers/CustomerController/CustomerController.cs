@@ -31,6 +31,14 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("nearby")]
+        [HttpGet("/api/Rota/customers")]
+        public async Task<IActionResult> GetNearby([FromQuery] CustomerNearbyQueryDto query)
+        {
+            var result = await _customerService.GetNearbyCustomersAsync(query);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CustomerCreateDto customerCreateDto)
         {

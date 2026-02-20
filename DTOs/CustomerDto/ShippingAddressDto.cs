@@ -20,6 +20,10 @@ namespace crm_api.DTOs
 
         [MaxLength(20)]
         public string? Phone { get; set; }
+        
+        public decimal? Latitude { get; set; }
+        
+        public decimal? Longitude { get; set; }
 
         [MaxLength(100)]
         public string? Notes { get; set; }
@@ -53,6 +57,10 @@ namespace crm_api.DTOs
 
         [MaxLength(20)]
         public string? Phone { get; set; }
+        
+        public decimal? Latitude { get; set; }
+        
+        public decimal? Longitude { get; set; }
 
         [MaxLength(100)]
         public string? Notes { get; set; }
@@ -76,6 +84,8 @@ namespace crm_api.DTOs
         public string? PostalCode { get; set; }
         public string? ContactPerson { get; set; }
         public string? Phone { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
         public string? Notes { get; set; }
         public long CustomerId { get; set; }
         public string? CustomerName { get; set; }

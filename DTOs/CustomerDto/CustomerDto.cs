@@ -12,6 +12,8 @@ namespace crm_api.DTOs
         public string? TaxOffice { get; set; }
         public string? TcknNumber { get; set; }
         public string? Address { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
         public string? Phone { get; set; }
         public string? Phone2 { get; set; }
         public string? Email { get; set; }
@@ -53,6 +55,10 @@ namespace crm_api.DTOs
 
         [MaxLength(500)]
         public string? Address { get; set; }
+
+        public decimal? Latitude { get; set; }
+
+        public decimal? Longitude { get; set; }
 
         [MaxLength(100)]
         public string? Phone { get; set; }
@@ -115,6 +121,10 @@ namespace crm_api.DTOs
 
         [MaxLength(500)]
         public string? Address { get; set; }
+
+        public decimal? Latitude { get; set; }
+
+        public decimal? Longitude { get; set; }
 
         [MaxLength(100)]
         public string? Phone { get; set; }

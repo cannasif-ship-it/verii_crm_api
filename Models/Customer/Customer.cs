@@ -37,6 +37,8 @@ namespace crm_api.Models
         // (Opsiyonel) Merkez/Özet adres gibi kullanacaksan kalsın.
         // Sevk adresleri zaten ShippingAddress tablosunda.
         public string? Address { get; set; } // Adres (opsiyonel / legacy)
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
 
         // Location Information
         public long? CountryId { get; set; } // UlkeId

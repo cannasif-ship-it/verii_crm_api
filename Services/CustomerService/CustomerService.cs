@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace crm_api.Services
 {
@@ -20,19 +22,22 @@ namespace crm_api.Services
         private readonly ILocalizationService _localizationService;
         private readonly IErpService _erpService;
         private readonly ILogger<CustomerService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CustomerService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILocalizationService localizationService,
             IErpService erpService,
-            ILogger<CustomerService> logger)
+            ILogger<CustomerService> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _erpService = erpService;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
@@ -135,6 +140,148 @@ namespace crm_api.Services
                 return ApiResponse<CustomerGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("CustomerService.InternalServerError"),
                     _localizationService.GetLocalizedString("CustomerService.GetCustomerByIdExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<NearbyCustomerPinDto>>> GetNearbyCustomersAsync(CustomerNearbyQueryDto query)
+        {
+            try
+            {
+                if (query == null)
+                {
+                    return ApiResponse<List<NearbyCustomerPinDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("CustomerService.InvalidRequest"),
+                        _localizationService.GetLocalizedString("CustomerService.InvalidRequest"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (query.Latitude < -90 || query.Latitude > 90 || query.Longitude < -180 || query.Longitude > 180)
+                {
+                    return ApiResponse<List<NearbyCustomerPinDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("CustomerService.InvalidCoordinates"),
+                        _localizationService.GetLocalizedString("CustomerService.InvalidCoordinates"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var radiusKm = query.RadiusKm <= 0 ? 10d : Math.Min(query.RadiusKm, 50d);
+
+                var columnMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "name", "CustomerName" },
+                    { "customerCode", "CustomerCode" },
+                    { "customerTypeName", "CustomerType.Name" },
+                    { "countryName", "Country.Name" },
+                    { "cityName", "City.Name" },
+                    { "districtName", "District.Name" },
+                    { "phone", "Phone1" },
+                    { "branchCode", "BranchCode" }
+                };
+
+                var parsedFilters = ParseFiltersJson(query.Filters);
+
+                var customerQuery = _unitOfWork.Customers
+                    .Query()
+                    .Where(c => !c.IsDeleted)
+                    .Include(c => c.CustomerType)
+                    .Include(c => c.Country)
+                    .Include(c => c.City)
+                    .Include(c => c.District)
+                    .Include(c => c.ShippingAddresses)
+                        .ThenInclude(sa => sa.Country)
+                    .Include(c => c.ShippingAddresses)
+                        .ThenInclude(sa => sa.City)
+                    .Include(c => c.ShippingAddresses)
+                        .ThenInclude(sa => sa.District)
+                    .ApplyFilters(parsedFilters, query.FilterLogic, columnMapping);
+
+                var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"]?.ToString();
+                if (short.TryParse(branchCodeStr, out var branchCode) && branchCode > 0)
+                {
+                    customerQuery = customerQuery.Where(c => c.BranchCode == branchCode);
+                }
+
+                var customers = await customerQuery.ToListAsync();
+                var result = new List<NearbyCustomerPinDto>();
+
+                foreach (var customer in customers)
+                {
+                    if (customer.Latitude.HasValue && customer.Longitude.HasValue)
+                    {
+                        var distance = CalculateDistanceKm(
+                            query.Latitude,
+                            query.Longitude,
+                            (double)customer.Latitude.Value,
+                            (double)customer.Longitude.Value);
+
+                        if (distance <= radiusKm)
+                        {
+                            result.Add(new NearbyCustomerPinDto
+                            {
+                                Id = customer.Id,
+                                CustomerId = customer.Id,
+                                CustomerCode = customer.CustomerCode,
+                                Name = customer.CustomerName,
+                                AddressDisplay = BuildAddressDisplay(customer.Address, customer.District?.Name, customer.City?.Name, customer.Country?.Name),
+                                Latitude = (double)customer.Latitude.Value,
+                                Longitude = (double)customer.Longitude.Value,
+                                Source = "main",
+                                ShippingAddressId = null,
+                                CustomerTypeName = customer.CustomerType?.Name,
+                                Phone = FirstNonEmpty(customer.Phone1, customer.Phone2)
+                            });
+                        }
+                    }
+
+                    if (!query.IncludeShippingAddresses || customer.ShippingAddresses == null)
+                        continue;
+
+                    foreach (var shipping in customer.ShippingAddresses.Where(x => !x.IsDeleted))
+                    {
+                        if (!shipping.Latitude.HasValue || !shipping.Longitude.HasValue)
+                            continue;
+
+                        var distance = CalculateDistanceKm(
+                            query.Latitude,
+                            query.Longitude,
+                            (double)shipping.Latitude.Value,
+                            (double)shipping.Longitude.Value);
+
+                        if (distance > radiusKm)
+                            continue;
+
+                        result.Add(new NearbyCustomerPinDto
+                        {
+                            Id = (customer.Id * 1_000_000L) + shipping.Id,
+                            CustomerId = customer.Id,
+                            CustomerCode = customer.CustomerCode,
+                            Name = customer.CustomerName,
+                            AddressDisplay = BuildAddressDisplay(shipping.Address, shipping.District?.Name, shipping.City?.Name, shipping.Country?.Name),
+                            Latitude = (double)shipping.Latitude.Value,
+                            Longitude = (double)shipping.Longitude.Value,
+                            Source = "shipping",
+                            ShippingAddressId = shipping.Id,
+                            CustomerTypeName = customer.CustomerType?.Name,
+                            Phone = FirstNonEmpty(shipping.Phone, FirstNonEmpty(customer.Phone1, customer.Phone2))
+                        });
+                    }
+                }
+
+                const int maxItems = 500;
+                var ordered = result
+                    .OrderBy(x => CalculateDistanceKm(query.Latitude, query.Longitude, x.Latitude, x.Longitude))
+                    .Take(maxItems)
+                    .ToList();
+
+                return ApiResponse<List<NearbyCustomerPinDto>>.SuccessResult(
+                    ordered,
+                    _localizationService.GetLocalizedString("CustomerService.CustomersRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<NearbyCustomerPinDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("CustomerService.InternalServerError"),
+                    _localizationService.GetLocalizedString("CustomerService.GetAllCustomersExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
         }
@@ -995,6 +1142,53 @@ namespace crm_api.Services
         private static string NormalizeText(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToUpperInvariant();
+        }
+
+        private static List<Filter> ParseFiltersJson(string? filtersJson)
+        {
+            if (string.IsNullOrWhiteSpace(filtersJson))
+                return new List<Filter>();
+
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<List<Filter>>(filtersJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                return parsed ?? new List<Filter>();
+            }
+            catch
+            {
+                return new List<Filter>();
+            }
+        }
+
+        private static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double radiusOfEarthKm = 6371.0;
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return radiusOfEarthKm * c;
+        }
+
+        private static double DegreesToRadians(double degrees)
+        {
+            return degrees * (Math.PI / 180.0);
+        }
+
+        private static string BuildAddressDisplay(string? address, string? district, string? city, string? country)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(address)) parts.Add(address.Trim());
+            if (!string.IsNullOrWhiteSpace(district)) parts.Add(district.Trim());
+            if (!string.IsNullOrWhiteSpace(city)) parts.Add(city.Trim());
+            if (!string.IsNullOrWhiteSpace(country)) parts.Add(country.Trim());
+            return parts.Count == 0 ? "-" : string.Join(", ", parts.Distinct(StringComparer.OrdinalIgnoreCase));
         }
 
         private static string NormalizeDigits(string? value)
