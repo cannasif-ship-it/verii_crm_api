@@ -12,5 +12,6 @@ namespace crm_api.Interfaces
         Task SyncCustomersFromErpAsync();
         Task<ApiResponse<List<CustomerDuplicateCandidateDto>>> GetDuplicateCandidatesAsync();
         Task<ApiResponse<CustomerGetDto>> MergeCustomersAsync(CustomerMergeRequestDto request);
+        Task<ApiResponse<CustomerCreateFromMobileResultDto>> CreateCustomerFromMobileAsync(CustomerCreateFromMobileDto request);
     }
 }

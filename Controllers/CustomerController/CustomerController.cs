@@ -38,6 +38,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("mobile/create-from-ocr")]
+        public async Task<IActionResult> CreateFromMobile([FromBody] CustomerCreateFromMobileDto request)
+        {
+            var result = await _customerService.CreateCustomerFromMobileAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, [FromBody] CustomerUpdateDto customerUpdateDto)
         {

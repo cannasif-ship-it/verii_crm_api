@@ -186,6 +186,319 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<CustomerCreateFromMobileResultDto>> CreateCustomerFromMobileAsync(CustomerCreateFromMobileDto request)
+        {
+            try
+            {
+                string? normalizeNullable(string? value)
+                {
+                    return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+                }
+
+                bool tryFillIfEmpty(string? currentValue, string? source, out string? updatedValue)
+                {
+                    updatedValue = currentValue;
+                    if (!string.IsNullOrWhiteSpace(currentValue))
+                        return false;
+
+                    var normalized = normalizeNullable(source);
+                    if (string.IsNullOrWhiteSpace(normalized))
+                        return false;
+
+                    updatedValue = normalized;
+                    return true;
+                }
+
+                (string FirstName, string? MiddleName, string LastName) splitNameParts(string fullName)
+                {
+                    var tokens = fullName
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .ToList();
+
+                    if (tokens.Count == 0)
+                        return ("-", null, "-");
+
+                    if (tokens.Count == 1)
+                        return (tokens[0], null, tokens[0]);
+
+                    var firstName = tokens.First();
+                    var lastName = tokens.Last();
+                    var middleTokens = tokens.Skip(1).Take(tokens.Count - 2).ToList();
+                    var middleName = middleTokens.Count > 0 ? string.Join(" ", middleTokens) : null;
+
+                    return (firstName, middleName, lastName);
+                }
+
+                bool isMobile(string? value)
+                {
+                    var digits = NormalizeDigits(value);
+                    if (string.IsNullOrWhiteSpace(digits)) return false;
+                    if (digits.Length == 12 && digits.StartsWith("90")) return digits.Substring(2).StartsWith("5");
+                    if (digits.Length == 11 && digits.StartsWith("0")) return digits.Substring(1).StartsWith("5");
+                    if (digits.Length == 10) return digits.StartsWith("5");
+                    return false;
+                }
+
+                string? selectMobile(string? phone1, string? phone2)
+                {
+                    var candidate1 = normalizeNullable(phone1);
+                    var candidate2 = normalizeNullable(phone2);
+                    if (isMobile(candidate1)) return candidate1;
+                    if (isMobile(candidate2)) return candidate2;
+                    return null;
+                }
+
+                string? selectLandline(string? phone1, string? phone2)
+                {
+                    var candidate1 = normalizeNullable(phone1);
+                    var candidate2 = normalizeNullable(phone2);
+                    if (!string.IsNullOrWhiteSpace(candidate1) && !isMobile(candidate1)) return candidate1;
+                    if (!string.IsNullOrWhiteSpace(candidate2) && !isMobile(candidate2)) return candidate2;
+                    return null;
+                }
+
+                if (request == null || string.IsNullOrWhiteSpace(request.Name))
+                {
+                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("CustomerService.CustomerNameRequired"),
+                        _localizationService.GetLocalizedString("CustomerService.CustomerNameRequired"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                if (!IsValidEmail(request.Email))
+                {
+                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("CustomerService.InvalidEmail"),
+                        _localizationService.GetLocalizedString("CustomerService.InvalidEmail"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var normalizedCustomerName = NormalizeText(request.Name);
+                var normalizedEmail = NormalizeText(request.Email);
+                var normalizedPhone = NormalizeDigits(request.Phone);
+                var normalizedPhone2 = NormalizeDigits(request.Phone2);
+
+                await _unitOfWork.BeginTransactionAsync();
+
+                try
+                {
+                    var customerQuery = _unitOfWork.Customers
+                        .Query(tracking: true)
+                        .Where(c => !c.IsDeleted);
+
+                    Customer? customer = null;
+
+                    if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                    {
+                        customer = await customerQuery.FirstOrDefaultAsync(c =>
+                            c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail);
+                    }
+
+                    if (customer == null && (!string.IsNullOrWhiteSpace(normalizedPhone) || !string.IsNullOrWhiteSpace(normalizedPhone2)))
+                    {
+                        var phoneCandidates = await customerQuery
+                            .Select(c => new { Customer = c, c.Phone1, c.Phone2 })
+                            .ToListAsync();
+
+                        customer = phoneCandidates.FirstOrDefault(c =>
+                            (!string.IsNullOrWhiteSpace(normalizedPhone) &&
+                             (NormalizeDigits(c.Phone1) == normalizedPhone || NormalizeDigits(c.Phone2) == normalizedPhone)) ||
+                            (!string.IsNullOrWhiteSpace(normalizedPhone2) &&
+                             (NormalizeDigits(c.Phone1) == normalizedPhone2 || NormalizeDigits(c.Phone2) == normalizedPhone2))
+                        )?.Customer;
+                    }
+
+                    if (customer == null)
+                    {
+                        customer = await customerQuery.FirstOrDefaultAsync(c => c.CustomerName.Trim().ToUpper() == normalizedCustomerName);
+                    }
+
+                    var customerCreated = false;
+                    if (customer == null)
+                    {
+                        customer = new Customer
+                        {
+                            CustomerName = request.Name.Trim(),
+                            Email = normalizeNullable(request.Email),
+                            Phone1 = normalizeNullable(request.Phone),
+                            Phone2 = normalizeNullable(request.Phone2),
+                            Address = normalizeNullable(request.Address),
+                            Website = normalizeNullable(request.Website),
+                            Notes = normalizeNullable(request.Notes),
+                            CountryId = request.CountryId,
+                            CityId = request.CityId,
+                            DistrictId = request.DistrictId,
+                            CustomerTypeId = request.CustomerTypeId,
+                            SalesRepCode = normalizeNullable(request.SalesRepCode),
+                            GroupCode = normalizeNullable(request.GroupCode),
+                            CreditLimit = request.CreditLimit,
+                            BranchCode = request.BranchCode ?? 1,
+                            BusinessUnitCode = request.BusinessUnitCode ?? 1
+                        };
+
+                        await _unitOfWork.Customers.AddAsync(customer);
+                        customerCreated = true;
+                    }
+                    else
+                    {
+                        var changed = false;
+                        if (tryFillIfEmpty(customer.Email, request.Email, out var customerEmail)) { customer.Email = customerEmail; changed = true; }
+                        if (tryFillIfEmpty(customer.Phone1, request.Phone, out var customerPhone1)) { customer.Phone1 = customerPhone1; changed = true; }
+                        if (tryFillIfEmpty(customer.Phone2, request.Phone2, out var customerPhone2)) { customer.Phone2 = customerPhone2; changed = true; }
+                        if (tryFillIfEmpty(customer.Address, request.Address, out var customerAddress)) { customer.Address = customerAddress; changed = true; }
+                        if (tryFillIfEmpty(customer.Website, request.Website, out var customerWebsite)) { customer.Website = customerWebsite; changed = true; }
+                        if (tryFillIfEmpty(customer.Notes, request.Notes, out var customerNotes)) { customer.Notes = customerNotes; changed = true; }
+
+                        if (!customer.CountryId.HasValue && request.CountryId.HasValue) { customer.CountryId = request.CountryId; changed = true; }
+                        if (!customer.CityId.HasValue && request.CityId.HasValue) { customer.CityId = request.CityId; changed = true; }
+                        if (!customer.DistrictId.HasValue && request.DistrictId.HasValue) { customer.DistrictId = request.DistrictId; changed = true; }
+                        if (!customer.CustomerTypeId.HasValue && request.CustomerTypeId.HasValue) { customer.CustomerTypeId = request.CustomerTypeId; changed = true; }
+                        if (string.IsNullOrWhiteSpace(customer.SalesRepCode) && !string.IsNullOrWhiteSpace(request.SalesRepCode)) { customer.SalesRepCode = request.SalesRepCode.Trim(); changed = true; }
+                        if (string.IsNullOrWhiteSpace(customer.GroupCode) && !string.IsNullOrWhiteSpace(request.GroupCode)) { customer.GroupCode = request.GroupCode.Trim(); changed = true; }
+                        if (!customer.CreditLimit.HasValue && request.CreditLimit.HasValue) { customer.CreditLimit = request.CreditLimit; changed = true; }
+                        if (customer.BranchCode <= 0 && request.BranchCode.HasValue) { customer.BranchCode = request.BranchCode.Value; changed = true; }
+                        if (customer.BusinessUnitCode <= 0 && request.BusinessUnitCode.HasValue) { customer.BusinessUnitCode = request.BusinessUnitCode.Value; changed = true; }
+
+                        if (changed)
+                        {
+                            await _unitOfWork.Customers.UpdateAsync(customer);
+                        }
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+
+                    long? titleId = null;
+                    var titleCreated = false;
+                    var normalizedTitle = normalizeNullable(request.Title);
+                    if (!string.IsNullOrWhiteSpace(normalizedTitle))
+                    {
+                        var existingTitle = await _unitOfWork.Titles
+                            .Query(tracking: true)
+                            .FirstOrDefaultAsync(t => !t.IsDeleted && t.TitleName.Trim().ToUpper() == normalizedTitle.Trim().ToUpper());
+
+                        if (existingTitle == null)
+                        {
+                            existingTitle = new Title
+                            {
+                                TitleName = normalizedTitle
+                            };
+                            await _unitOfWork.Titles.AddAsync(existingTitle);
+                            await _unitOfWork.SaveChangesAsync();
+                            titleCreated = true;
+                        }
+
+                        titleId = existingTitle.Id;
+                    }
+
+                    long? contactId = null;
+                    var contactCreated = false;
+                    var normalizedContactName = normalizeNullable(request.ContactName);
+                    if (!string.IsNullOrWhiteSpace(normalizedContactName))
+                    {
+                        var (firstName, middleName, lastName) = splitNameParts(normalizedContactName);
+                        var contactPhone = selectLandline(request.Phone, request.Phone2);
+                        var contactMobile = selectMobile(request.Phone, request.Phone2);
+
+                        var contactQuery = _unitOfWork.Contacts
+                            .Query(tracking: true)
+                            .Where(c => !c.IsDeleted && c.CustomerId == customer.Id);
+
+                        Contact? contact = null;
+                        if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                        {
+                            contact = await contactQuery.FirstOrDefaultAsync(c =>
+                                c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail);
+                        }
+
+                        if (contact == null)
+                        {
+                            var normalizedContactPhone = NormalizeDigits(contactPhone);
+                            var normalizedContactMobile = NormalizeDigits(contactMobile);
+                            var normalizedFullName = NormalizeText(normalizedContactName);
+
+                            var existingContacts = await contactQuery
+                                .Select(c => new { Contact = c, c.FullName, c.Mobile, c.Phone })
+                                .ToListAsync();
+
+                            contact = existingContacts.FirstOrDefault(c =>
+                                NormalizeText(c.FullName) == normalizedFullName &&
+                                (
+                                    (!string.IsNullOrWhiteSpace(normalizedContactMobile) && NormalizeDigits(c.Mobile) == normalizedContactMobile) ||
+                                    (!string.IsNullOrWhiteSpace(normalizedContactPhone) && NormalizeDigits(c.Phone) == normalizedContactPhone)
+                                )
+                            )?.Contact;
+                        }
+
+                        if (contact == null)
+                        {
+                            contact = new Contact
+                            {
+                                Salutation = SalutationType.None,
+                                FirstName = firstName,
+                                MiddleName = middleName,
+                                LastName = lastName,
+                                FullName = normalizedContactName,
+                                Email = normalizeNullable(request.Email),
+                                Phone = normalizeNullable(contactPhone),
+                                Mobile = normalizeNullable(contactMobile),
+                                Notes = normalizeNullable(request.Notes),
+                                CustomerId = customer.Id,
+                                TitleId = titleId
+                            };
+
+                            await _unitOfWork.Contacts.AddAsync(contact);
+                            contactCreated = true;
+                        }
+                        else
+                        {
+                            var changed = false;
+                            if (!contact.TitleId.HasValue && titleId.HasValue) { contact.TitleId = titleId; changed = true; }
+                            if (tryFillIfEmpty(contact.Email, request.Email, out var contactEmail)) { contact.Email = contactEmail; changed = true; }
+                            if (tryFillIfEmpty(contact.Phone, contactPhone, out var contactPhoneFilled)) { contact.Phone = contactPhoneFilled; changed = true; }
+                            if (tryFillIfEmpty(contact.Mobile, contactMobile, out var contactMobileFilled)) { contact.Mobile = contactMobileFilled; changed = true; }
+                            if (tryFillIfEmpty(contact.Notes, request.Notes, out var contactNotes)) { contact.Notes = contactNotes; changed = true; }
+
+                            if (changed)
+                            {
+                                await _unitOfWork.Contacts.UpdateAsync(contact);
+                            }
+                        }
+
+                        await _unitOfWork.SaveChangesAsync();
+                        contactId = contact.Id;
+                    }
+
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    var response = new CustomerCreateFromMobileResultDto
+                    {
+                        CustomerId = customer.Id,
+                        CustomerCreated = customerCreated,
+                        ContactId = contactId,
+                        ContactCreated = contactCreated,
+                        TitleId = titleId,
+                        TitleCreated = titleCreated
+                    };
+
+                    return ApiResponse<CustomerCreateFromMobileResultDto>.SuccessResult(
+                        response,
+                        "Customer mobile OCR flow completed.");
+                }
+                catch
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("CustomerService.InternalServerError"),
+                    _localizationService.GetLocalizedString("CustomerService.CreateCustomerExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         public async Task<ApiResponse<CustomerGetDto>> UpdateCustomerAsync(long id, CustomerUpdateDto customerUpdateDto)
         {
             try
@@ -719,6 +1032,6 @@ namespace crm_api.Services
                 return false;
             }
         }
-   
+
     }
 }
