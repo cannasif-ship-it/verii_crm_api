@@ -16,8 +16,8 @@ namespace crm_api.Services
         private const string StockImagesFolder = "stock-images";
         private const string ActivityImagesFolder = "activity-images";
         private const string CustomerImagesFolder = "customer-images";
-        private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
-        private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
+        private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".heif" };
 
         public FileUploadService(IWebHostEnvironment environment, ILocalizationService localizationService)
         {
