@@ -460,6 +460,18 @@
   <data name="Customer360Service.ExceptionMessage" xml:space="preserve">
     <value>{0}</value>
   </data>
+  <data name="CustomerImageService.CustomerImageNotFound" xml:space="preserve">
+    <value>Imagen del cliente no encontrada.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesUploaded" xml:space="preserve">
+    <value>Imágenes del cliente cargadas.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesRetrieved" xml:space="preserve">
+    <value>Imágenes del cliente recuperadas.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImageDeleted" xml:space="preserve">
+    <value>Imagen del cliente eliminada.</value>
+  </data>
   
   
   

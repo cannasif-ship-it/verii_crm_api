@@ -460,6 +460,18 @@
   <data name="Customer360Service.ExceptionMessage" xml:space="preserve">
     <value>{0}</value>
   </data>
+  <data name="CustomerImageService.CustomerImageNotFound" xml:space="preserve">
+    <value>صورة العميل غير موجودة.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesUploaded" xml:space="preserve">
+    <value>تم تحميل صور العميل.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesRetrieved" xml:space="preserve">
+    <value>تم استرجاع صور العميل.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImageDeleted" xml:space="preserve">
+    <value>تم حذف صورة العميل.</value>
+  </data>
   
   
   

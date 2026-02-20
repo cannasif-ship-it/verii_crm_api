@@ -517,6 +517,18 @@
   <data name="Customer360Service.ExceptionMessage" xml:space="preserve">
     <value>{0}</value>
   </data>
+  <data name="CustomerImageService.CustomerImageNotFound" xml:space="preserve">
+    <value>Müşteri görseli bulunamadı.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesUploaded" xml:space="preserve">
+    <value>Müşteri görselleri yüklendi.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImagesRetrieved" xml:space="preserve">
+    <value>Müşteri görselleri getirildi.</value>
+  </data>
+  <data name="CustomerImageService.CustomerImageDeleted" xml:space="preserve">
+    <value>Müşteri görseli silindi.</value>
+  </data>
   
   
   

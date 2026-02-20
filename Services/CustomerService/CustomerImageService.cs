@@ -93,7 +93,7 @@ namespace crm_api.Services
                     ImageDescription = entity.ImageDescription
                 }).ToList();
 
-                return ApiResponse<List<CustomerImageDto>>.SuccessResult(uploadedImages, "Customer images uploaded.");
+                return ApiResponse<List<CustomerImageDto>>.SuccessResult(uploadedImages, _localizationService.GetLocalizedString("CustomerImageService.CustomerImagesUploaded"));
             }
             catch (Exception ex)
             {
@@ -146,7 +146,7 @@ namespace crm_api.Services
                     ImageDescription = x.ImageDescription
                 }).ToList();
 
-                return ApiResponse<List<CustomerImageDto>>.SuccessResult(response, "Customer images retrieved.");
+                return ApiResponse<List<CustomerImageDto>>.SuccessResult(response, _localizationService.GetLocalizedString("CustomerImageService.CustomerImagesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -165,8 +165,8 @@ namespace crm_api.Services
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
-                        "Customer image not found.",
-                        "Customer image not found.",
+                        _localizationService.GetLocalizedString("CustomerImageService.CustomerImageNotFound"),
+                        _localizationService.GetLocalizedString("CustomerImageService.CustomerImageNotFound"),
                         StatusCodes.Status404NotFound);
                 }
 
@@ -178,7 +178,7 @@ namespace crm_api.Services
                     await _fileUploadService.DeleteCustomerImageAsync(entity.ImageUrl);
                 }
 
-                return ApiResponse<object>.SuccessResult(null, "Customer image deleted.");
+                return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CustomerImageService.CustomerImageDeleted"));
             }
             catch (Exception ex)
             {
