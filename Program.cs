@@ -98,6 +98,9 @@ builder.Services.AddHangfire(configuration => configuration
 builder.Services.Configure<HangfireMonitoringOptions>(
     builder.Configuration.GetSection(HangfireMonitoringOptions.SectionName));
 
+builder.Services.Configure<GeocodingOptions>(
+    builder.Configuration.GetSection(GeocodingOptions.SectionName));
+
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
 {
     Attempts = 3,
@@ -142,6 +145,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Register ERP Services
 builder.Services.AddScoped<IErpService, ErpService>();
+
+// Geocoding (adres → enlem/boylam)
+builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 // Register Customer Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
