@@ -24,13 +24,16 @@ namespace crm_api.Services
         private readonly ILogger<CustomerService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
+        private readonly IGeocodingService _geocodingService;
+
         public CustomerService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILocalizationService localizationService,
             IErpService erpService,
             ILogger<CustomerService> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IGeocodingService geocodingService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -38,6 +41,7 @@ namespace crm_api.Services
             _erpService = erpService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _geocodingService = geocodingService;
         }
 
         public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
@@ -297,6 +301,7 @@ namespace crm_api.Services
                 }
 
                 var customer = _mapper.Map<Customer>(customerCreateDto);
+                await TryFillCoordinatesFromAddressAsync(customer);
                 await _unitOfWork.Customers.AddAsync(customer);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -425,6 +430,12 @@ namespace crm_api.Services
                 var normalizedPhone = NormalizeDigits(request.Phone);
                 var normalizedPhone2 = NormalizeDigits(request.Phone2);
 
+                // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
+                var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId);
+                var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
+                    ? await _geocodingService.GeocodeAsync(mobileFullAddress)
+                    : null;
+
                 await _unitOfWork.BeginTransactionAsync();
 
                 try
@@ -480,8 +491,15 @@ namespace crm_api.Services
                             GroupCode = normalizeNullable(request.GroupCode),
                             CreditLimit = request.CreditLimit,
                             BranchCode = request.BranchCode ?? 1,
-                            BusinessUnitCode = request.BusinessUnitCode ?? 1
+                            BusinessUnitCode = request.BusinessUnitCode ?? 1,
+                            Latitude = mobileCoords?.Latitude,
+                            Longitude = mobileCoords?.Longitude
                         };
+
+                        if (mobileCoords.HasValue)
+                            _logger.LogDebug("mobileCreate: set coordinates for new customer from geocoded result.");
+                        else if (!string.IsNullOrWhiteSpace(mobileFullAddress))
+                            _logger.LogDebug("mobileCreate: geocoding did not return result, new customer has no coordinates.");
 
                         await _unitOfWork.Customers.AddAsync(customer);
                         customerCreated = true;
@@ -505,6 +523,18 @@ namespace crm_api.Services
                         if (!customer.CreditLimit.HasValue && request.CreditLimit.HasValue) { customer.CreditLimit = request.CreditLimit; changed = true; }
                         if (customer.BranchCode <= 0 && request.BranchCode.HasValue) { customer.BranchCode = request.BranchCode.Value; changed = true; }
                         if (customer.BusinessUnitCode <= 0 && request.BusinessUnitCode.HasValue) { customer.BusinessUnitCode = request.BusinessUnitCode.Value; changed = true; }
+
+                        if (mobileCoords.HasValue)
+                        {
+                            customer.Latitude = mobileCoords.Value.Latitude;
+                            customer.Longitude = mobileCoords.Value.Longitude;
+                            changed = true;
+                            _logger.LogDebug("mobileCreate override: updated existing customer {CustomerId} coordinates from geocoded result.", customer.Id);
+                        }
+                        else if (!string.IsNullOrWhiteSpace(mobileFullAddress))
+                        {
+                            _logger.LogDebug("mobileCreate override: geocoding did not return result for existing customer {CustomerId}, coordinates unchanged.", customer.Id);
+                        }
 
                         if (changed)
                         {
@@ -665,7 +695,21 @@ namespace crm_api.Services
                     return governanceError;
                 }
 
+                var addressBefore = (customer.Address, customer.CountryId, customer.CityId, customer.DistrictId);
                 _mapper.Map(customerUpdateDto, customer);
+                var addressAfter = (customer.Address, customer.CountryId, customer.CityId, customer.DistrictId);
+                var addressChanged = addressBefore != addressAfter;
+
+                if (addressChanged)
+                {
+                    _logger.LogDebug("Customer {CustomerId}: address fields updated, running geocoding (normal existing-customer flow).", id);
+                    await TryFillCoordinatesFromAddressAsync(customer, allowOverwriteExistingCoords: true);
+                }
+                else
+                {
+                    _logger.LogDebug("Customer {CustomerId}: address unchanged, keeping existing coordinates.", id);
+                }
+
                 await _unitOfWork.Customers.UpdateAsync(customer);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -1227,5 +1271,52 @@ namespace crm_api.Services
             }
         }
 
+        /// <summary>
+        /// Müşteri adresinden enlem/boylam doldurur. Standard flow'da sadece boşsa doldurulur;
+        /// adres değiştiğinde (allowOverwriteExistingCoords=true) mevcut koordinatlar da güncellenir.
+        /// </summary>
+        /// <param name="allowOverwriteExistingCoords">true ise mevcut lat/long olsa bile geocoding sonucuyla üzerine yazar.</param>
+        private async Task TryFillCoordinatesFromAddressAsync(Customer customer, bool allowOverwriteExistingCoords = false)
+        {
+            if (!allowOverwriteExistingCoords && customer.Latitude.HasValue && customer.Longitude.HasValue)
+                return;
+
+            var fullAddress = await BuildFullAddressAsync(customer.Address, customer.CountryId, customer.CityId, customer.DistrictId);
+            if (string.IsNullOrWhiteSpace(fullAddress))
+                return;
+
+            var coords = await _geocodingService.GeocodeAsync(fullAddress);
+            if (coords.HasValue)
+            {
+                customer.Latitude = coords.Value.Latitude;
+                customer.Longitude = coords.Value.Longitude;
+            }
+        }
+
+        private async Task<string?> BuildFullAddressAsync(string? address, long? countryId, long? cityId, long? districtId)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(address))
+                parts.Add(address.Trim());
+            if (districtId.HasValue)
+            {
+                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value);
+                if (district?.Name != null)
+                    parts.Add(district.Name.Trim());
+            }
+            if (cityId.HasValue)
+            {
+                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value);
+                if (city?.Name != null)
+                    parts.Add(city.Name.Trim());
+            }
+            if (countryId.HasValue)
+            {
+                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value);
+                if (country?.Name != null)
+                    parts.Add(country.Name.Trim());
+            }
+            return parts.Count > 0 ? string.Join(", ", parts) : null;
+        }
     }
 }

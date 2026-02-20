@@ -15,12 +15,14 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
+        private readonly IGeocodingService _geocodingService;
 
-        public ShippingAddressService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService)
+        public ShippingAddressService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IGeocodingService geocodingService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
+            _geocodingService = geocodingService;
         }
 
         public async Task<ApiResponse<PagedResponse<ShippingAddressGetDto>>> GetAllShippingAddressesAsync(PagedRequest request)
@@ -155,6 +157,7 @@ namespace crm_api.Services
             try
             {
                 var shippingAddress = _mapper.Map<ShippingAddress>(createShippingAddressDto);
+                await TryFillCoordinatesFromAddressAsync(shippingAddress);
 
                 await _unitOfWork.ShippingAddresses.AddAsync(shippingAddress);
                 await _unitOfWork.SaveChangesAsync();
@@ -202,10 +205,18 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
+                var addressBefore = (existingShippingAddress.Address, existingShippingAddress.CountryId, existingShippingAddress.CityId, existingShippingAddress.DistrictId);
                 _mapper.Map(updateShippingAddressDto, existingShippingAddress);
                 existingShippingAddress.UpdatedDate = DateTime.UtcNow;
+                var addressAfter = (existingShippingAddress.Address, existingShippingAddress.CountryId, existingShippingAddress.CityId, existingShippingAddress.DistrictId);
+                var addressChanged = addressBefore != addressAfter;
 
-               await _unitOfWork.ShippingAddresses.UpdateAsync(existingShippingAddress);
+                if (addressChanged)
+                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress, allowOverwriteExistingCoords: true);
+                else
+                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress);
+
+                await _unitOfWork.ShippingAddresses.UpdateAsync(existingShippingAddress);
                 await _unitOfWork.SaveChangesAsync();
 
                 // Reload with navigation properties for mapping
@@ -265,6 +276,53 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("ShippingAddressService.DeleteShippingAddressExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        /// <summary>
+        /// Adres metninden koordinat doldurur. allowOverwriteExistingCoords=false ise sadece boşsa doldurulur;
+        /// update path'ta adres alanları değiştiyse true ile çağrılarak eski koordinatlar güncellenir.
+        /// </summary>
+        private async Task TryFillCoordinatesFromAddressAsync(ShippingAddress shippingAddress, bool allowOverwriteExistingCoords = false)
+        {
+            if (!allowOverwriteExistingCoords && shippingAddress.Latitude.HasValue && shippingAddress.Longitude.HasValue)
+                return;
+
+            var fullAddress = await BuildFullAddressAsync(shippingAddress.Address, shippingAddress.CountryId, shippingAddress.CityId, shippingAddress.DistrictId);
+            if (string.IsNullOrWhiteSpace(fullAddress))
+                return;
+
+            var coords = await _geocodingService.GeocodeAsync(fullAddress);
+            if (coords.HasValue)
+            {
+                shippingAddress.Latitude = coords.Value.Latitude;
+                shippingAddress.Longitude = coords.Value.Longitude;
+            }
+        }
+
+        private async Task<string?> BuildFullAddressAsync(string? address, long? countryId, long? cityId, long? districtId)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(address))
+                parts.Add(address.Trim());
+            if (districtId.HasValue)
+            {
+                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value);
+                if (district?.Name != null)
+                    parts.Add(district.Name.Trim());
+            }
+            if (cityId.HasValue)
+            {
+                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value);
+                if (city?.Name != null)
+                    parts.Add(city.Name.Trim());
+            }
+            if (countryId.HasValue)
+            {
+                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value);
+                if (country?.Name != null)
+                    parts.Add(country.Name.Trim());
+            }
+            return parts.Count > 0 ? string.Join(", ", parts) : null;
         }
     }
 }
