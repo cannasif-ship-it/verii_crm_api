@@ -25,6 +25,7 @@ namespace crm_api.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly IGeocodingService _geocodingService;
+        private readonly IFileUploadService _fileUploadService;
 
         public CustomerService(
             IUnitOfWork unitOfWork,
@@ -33,7 +34,8 @@ namespace crm_api.Services
             IErpService erpService,
             ILogger<CustomerService> logger,
             IHttpContextAccessor httpContextAccessor,
-            IGeocodingService geocodingService)
+            IGeocodingService geocodingService,
+            IFileUploadService fileUploadService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -42,6 +44,7 @@ namespace crm_api.Services
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _geocodingService = geocodingService;
+            _fileUploadService = fileUploadService;
         }
 
         public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
@@ -347,40 +350,6 @@ namespace crm_api.Services
                     return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
                 }
 
-                bool tryFillIfEmpty(string? currentValue, string? source, out string? updatedValue)
-                {
-                    updatedValue = currentValue;
-                    if (!string.IsNullOrWhiteSpace(currentValue))
-                        return false;
-
-                    var normalized = normalizeNullable(source);
-                    if (string.IsNullOrWhiteSpace(normalized))
-                        return false;
-
-                    updatedValue = normalized;
-                    return true;
-                }
-
-                (string FirstName, string? MiddleName, string LastName) splitNameParts(string fullName)
-                {
-                    var tokens = fullName
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                        .ToList();
-
-                    if (tokens.Count == 0)
-                        return ("-", null, "-");
-
-                    if (tokens.Count == 1)
-                        return (tokens[0], null, tokens[0]);
-
-                    var firstName = tokens.First();
-                    var lastName = tokens.Last();
-                    var middleTokens = tokens.Skip(1).Take(tokens.Count - 2).ToList();
-                    var middleName = middleTokens.Count > 0 ? string.Join(" ", middleTokens) : null;
-
-                    return (firstName, middleName, lastName);
-                }
-
                 bool isMobile(string? value)
                 {
                     var digits = NormalizeDigits(value);
@@ -409,6 +378,37 @@ namespace crm_api.Services
                     return null;
                 }
 
+                (string? FirstName, string? MiddleName, string? LastName) resolveContactNames(CustomerCreateFromMobileDto dto)
+                {
+                    var firstName = normalizeNullable(dto.ContactFirstName);
+                    var middleName = normalizeNullable(dto.ContactMiddleName);
+                    var lastName = normalizeNullable(dto.ContactLastName);
+
+                    if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
+                        return (firstName, middleName, lastName);
+
+                    var fullName = normalizeNullable(dto.ContactName);
+                    if (string.IsNullOrWhiteSpace(fullName))
+                        return (firstName, middleName, lastName);
+
+                    var tokens = fullName
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .ToList();
+
+                    if (tokens.Count == 0)
+                        return (firstName, middleName, lastName);
+
+                    if (tokens.Count == 1)
+                        return (tokens[0], null, tokens[0]);
+
+                    var fallbackFirstName = tokens.First();
+                    var fallbackLastName = tokens.Last();
+                    var middleTokens = tokens.Skip(1).Take(tokens.Count - 2).ToList();
+                    var fallbackMiddleName = middleTokens.Count > 0 ? string.Join(" ", middleTokens) : null;
+
+                    return (fallbackFirstName, fallbackMiddleName, fallbackLastName);
+                }
+
                 if (request == null || string.IsNullOrWhiteSpace(request.Name))
                 {
                     return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
@@ -425,11 +425,6 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var normalizedCustomerName = NormalizeText(request.Name);
-                var normalizedEmail = NormalizeText(request.Email);
-                var normalizedPhone = NormalizeDigits(request.Phone);
-                var normalizedPhone2 = NormalizeDigits(request.Phone2);
-
                 // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
                 var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId);
                 var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
@@ -440,113 +435,68 @@ namespace crm_api.Services
 
                 try
                 {
-                    var customerQuery = _unitOfWork.Customers
-                        .Query(tracking: true)
-                        .Where(c => !c.IsDeleted);
-
-                    Customer? customer = null;
-
-                    if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                    var customer = new Customer
                     {
-                        customer = await customerQuery.FirstOrDefaultAsync(c =>
-                            c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail);
-                    }
+                        CustomerName = request.Name.Trim(),
+                        Email = normalizeNullable(request.Email),
+                        Phone1 = normalizeNullable(request.Phone),
+                        Phone2 = normalizeNullable(request.Phone2),
+                        Address = normalizeNullable(request.Address),
+                        Website = normalizeNullable(request.Website),
+                        Notes = normalizeNullable(request.Notes),
+                        CountryId = request.CountryId,
+                        CityId = request.CityId,
+                        DistrictId = request.DistrictId,
+                        CustomerTypeId = request.CustomerTypeId,
+                        SalesRepCode = normalizeNullable(request.SalesRepCode),
+                        GroupCode = normalizeNullable(request.GroupCode),
+                        CreditLimit = request.CreditLimit,
+                        BranchCode = request.BranchCode ?? 1,
+                        BusinessUnitCode = request.BusinessUnitCode ?? 1,
+                        Latitude = mobileCoords?.Latitude,
+                        Longitude = mobileCoords?.Longitude
+                    };
 
-                    if (customer == null && (!string.IsNullOrWhiteSpace(normalizedPhone) || !string.IsNullOrWhiteSpace(normalizedPhone2)))
-                    {
-                        var phoneCandidates = await customerQuery
-                            .Select(c => new { Customer = c, c.Phone1, c.Phone2 })
-                            .ToListAsync();
-
-                        customer = phoneCandidates.FirstOrDefault(c =>
-                            (!string.IsNullOrWhiteSpace(normalizedPhone) &&
-                             (NormalizeDigits(c.Phone1) == normalizedPhone || NormalizeDigits(c.Phone2) == normalizedPhone)) ||
-                            (!string.IsNullOrWhiteSpace(normalizedPhone2) &&
-                             (NormalizeDigits(c.Phone1) == normalizedPhone2 || NormalizeDigits(c.Phone2) == normalizedPhone2))
-                        )?.Customer;
-                    }
-
-                    if (customer == null)
-                    {
-                        customer = await customerQuery.FirstOrDefaultAsync(c => c.CustomerName.Trim().ToUpper() == normalizedCustomerName);
-                    }
-
-                    var customerCreated = false;
-                    if (customer == null)
-                    {
-                        customer = new Customer
-                        {
-                            CustomerName = request.Name.Trim(),
-                            Email = normalizeNullable(request.Email),
-                            Phone1 = normalizeNullable(request.Phone),
-                            Phone2 = normalizeNullable(request.Phone2),
-                            Address = normalizeNullable(request.Address),
-                            Website = normalizeNullable(request.Website),
-                            Notes = normalizeNullable(request.Notes),
-                            CountryId = request.CountryId,
-                            CityId = request.CityId,
-                            DistrictId = request.DistrictId,
-                            CustomerTypeId = request.CustomerTypeId,
-                            SalesRepCode = normalizeNullable(request.SalesRepCode),
-                            GroupCode = normalizeNullable(request.GroupCode),
-                            CreditLimit = request.CreditLimit,
-                            BranchCode = request.BranchCode ?? 1,
-                            BusinessUnitCode = request.BusinessUnitCode ?? 1,
-                            Latitude = mobileCoords?.Latitude,
-                            Longitude = mobileCoords?.Longitude
-                        };
-
-                        if (mobileCoords.HasValue)
-                            _logger.LogDebug("mobileCreate: set coordinates for new customer from geocoded result.");
-                        else if (!string.IsNullOrWhiteSpace(mobileFullAddress))
-                            _logger.LogDebug("mobileCreate: geocoding did not return result, new customer has no coordinates.");
-
-                        await _unitOfWork.Customers.AddAsync(customer);
-                        customerCreated = true;
-                    }
-                    else
-                    {
-                        var changed = false;
-                        if (tryFillIfEmpty(customer.Email, request.Email, out var customerEmail)) { customer.Email = customerEmail; changed = true; }
-                        if (tryFillIfEmpty(customer.Phone1, request.Phone, out var customerPhone1)) { customer.Phone1 = customerPhone1; changed = true; }
-                        if (tryFillIfEmpty(customer.Phone2, request.Phone2, out var customerPhone2)) { customer.Phone2 = customerPhone2; changed = true; }
-                        if (tryFillIfEmpty(customer.Address, request.Address, out var customerAddress)) { customer.Address = customerAddress; changed = true; }
-                        if (tryFillIfEmpty(customer.Website, request.Website, out var customerWebsite)) { customer.Website = customerWebsite; changed = true; }
-                        if (tryFillIfEmpty(customer.Notes, request.Notes, out var customerNotes)) { customer.Notes = customerNotes; changed = true; }
-
-                        if (!customer.CountryId.HasValue && request.CountryId.HasValue) { customer.CountryId = request.CountryId; changed = true; }
-                        if (!customer.CityId.HasValue && request.CityId.HasValue) { customer.CityId = request.CityId; changed = true; }
-                        if (!customer.DistrictId.HasValue && request.DistrictId.HasValue) { customer.DistrictId = request.DistrictId; changed = true; }
-                        if (!customer.CustomerTypeId.HasValue && request.CustomerTypeId.HasValue) { customer.CustomerTypeId = request.CustomerTypeId; changed = true; }
-                        if (string.IsNullOrWhiteSpace(customer.SalesRepCode) && !string.IsNullOrWhiteSpace(request.SalesRepCode)) { customer.SalesRepCode = request.SalesRepCode.Trim(); changed = true; }
-                        if (string.IsNullOrWhiteSpace(customer.GroupCode) && !string.IsNullOrWhiteSpace(request.GroupCode)) { customer.GroupCode = request.GroupCode.Trim(); changed = true; }
-                        if (!customer.CreditLimit.HasValue && request.CreditLimit.HasValue) { customer.CreditLimit = request.CreditLimit; changed = true; }
-                        if (customer.BranchCode <= 0 && request.BranchCode.HasValue) { customer.BranchCode = request.BranchCode.Value; changed = true; }
-                        if (customer.BusinessUnitCode <= 0 && request.BusinessUnitCode.HasValue) { customer.BusinessUnitCode = request.BusinessUnitCode.Value; changed = true; }
-
-                        if (mobileCoords.HasValue)
-                        {
-                            customer.Latitude = mobileCoords.Value.Latitude;
-                            customer.Longitude = mobileCoords.Value.Longitude;
-                            changed = true;
-                            _logger.LogDebug("mobileCreate override: updated existing customer {CustomerId} coordinates from geocoded result.", customer.Id);
-                        }
-                        else if (!string.IsNullOrWhiteSpace(mobileFullAddress))
-                        {
-                            _logger.LogDebug("mobileCreate override: geocoding did not return result for existing customer {CustomerId}, coordinates unchanged.", customer.Id);
-                        }
-
-                        if (changed)
-                        {
-                            await _unitOfWork.Customers.UpdateAsync(customer);
-                        }
-                    }
-
+                    await _unitOfWork.Customers.AddAsync(customer);
                     await _unitOfWork.SaveChangesAsync();
+
+                    var imageUploaded = false;
+                    string? imageUploadError = null;
+
+                    if (request.ImageFile != null && request.ImageFile.Length > 0)
+                    {
+                        var uploadResult = await _fileUploadService.UploadCustomerImageAsync(request.ImageFile, customer.Id);
+                        if (uploadResult.Success && !string.IsNullOrWhiteSpace(uploadResult.Data))
+                        {
+                            var customerImage = new CustomerImage
+                            {
+                                CustomerId = customer.Id,
+                                ImageUrl = uploadResult.Data,
+                                ImageDescription = normalizeNullable(request.ImageDescription) ?? "Kartvizit görseli"
+                            };
+                            await _unitOfWork.CustomerImages.AddAsync(customerImage);
+                            await _unitOfWork.SaveChangesAsync();
+                            imageUploaded = true;
+                        }
+                        else
+                        {
+                            imageUploadError = uploadResult.Message ?? uploadResult.ExceptionMessage ?? "Customer image upload failed.";
+                            _logger.LogWarning("mobileCreate: customer {CustomerId} created but image upload failed. Error: {Error}", customer.Id, imageUploadError);
+                        }
+                    }
 
                     long? titleId = null;
                     var titleCreated = false;
+                    var (contactFirstName, contactMiddleName, contactLastName) = resolveContactNames(request);
+                    var hasContact = !string.IsNullOrWhiteSpace(contactFirstName) && !string.IsNullOrWhiteSpace(contactLastName);
                     var normalizedTitle = normalizeNullable(request.Title);
+
+                    // If contact exists without title, bind it to a shared fallback title.
+                    if (string.IsNullOrWhiteSpace(normalizedTitle) && hasContact)
+                    {
+                        normalizedTitle = "bilinmeyen";
+                    }
+
                     if (!string.IsNullOrWhiteSpace(normalizedTitle))
                     {
                         var existingTitle = await _unitOfWork.Titles
@@ -569,77 +519,31 @@ namespace crm_api.Services
 
                     long? contactId = null;
                     var contactCreated = false;
-                    var normalizedContactName = normalizeNullable(request.ContactName);
-                    if (!string.IsNullOrWhiteSpace(normalizedContactName))
+                    if (hasContact)
                     {
-                        var (firstName, middleName, lastName) = splitNameParts(normalizedContactName);
                         var contactPhone = selectLandline(request.Phone, request.Phone2);
                         var contactMobile = selectMobile(request.Phone, request.Phone2);
+                        var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
+                            .Where(x => !string.IsNullOrWhiteSpace(x)))
+                            .Trim();
 
-                        var contactQuery = _unitOfWork.Contacts
-                            .Query(tracking: true)
-                            .Where(c => !c.IsDeleted && c.CustomerId == customer.Id);
-
-                        Contact? contact = null;
-                        if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                        var contact = new Contact
                         {
-                            contact = await contactQuery.FirstOrDefaultAsync(c =>
-                                c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail);
-                        }
+                            Salutation = SalutationType.None,
+                            FirstName = contactFirstName!,
+                            MiddleName = contactMiddleName,
+                            LastName = contactLastName!,
+                            FullName = fullName,
+                            Email = normalizeNullable(request.Email),
+                            Phone = normalizeNullable(contactPhone),
+                            Mobile = normalizeNullable(contactMobile),
+                            Notes = normalizeNullable(request.Notes),
+                            CustomerId = customer.Id,
+                            TitleId = titleId
+                        };
 
-                        if (contact == null)
-                        {
-                            var normalizedContactPhone = NormalizeDigits(contactPhone);
-                            var normalizedContactMobile = NormalizeDigits(contactMobile);
-                            var normalizedFullName = NormalizeText(normalizedContactName);
-
-                            var existingContacts = await contactQuery
-                                .Select(c => new { Contact = c, c.FullName, c.Mobile, c.Phone })
-                                .ToListAsync();
-
-                            contact = existingContacts.FirstOrDefault(c =>
-                                NormalizeText(c.FullName) == normalizedFullName &&
-                                (
-                                    (!string.IsNullOrWhiteSpace(normalizedContactMobile) && NormalizeDigits(c.Mobile) == normalizedContactMobile) ||
-                                    (!string.IsNullOrWhiteSpace(normalizedContactPhone) && NormalizeDigits(c.Phone) == normalizedContactPhone)
-                                )
-                            )?.Contact;
-                        }
-
-                        if (contact == null)
-                        {
-                            contact = new Contact
-                            {
-                                Salutation = SalutationType.None,
-                                FirstName = firstName,
-                                MiddleName = middleName,
-                                LastName = lastName,
-                                FullName = normalizedContactName,
-                                Email = normalizeNullable(request.Email),
-                                Phone = normalizeNullable(contactPhone),
-                                Mobile = normalizeNullable(contactMobile),
-                                Notes = normalizeNullable(request.Notes),
-                                CustomerId = customer.Id,
-                                TitleId = titleId
-                            };
-
-                            await _unitOfWork.Contacts.AddAsync(contact);
-                            contactCreated = true;
-                        }
-                        else
-                        {
-                            var changed = false;
-                            if (!contact.TitleId.HasValue && titleId.HasValue) { contact.TitleId = titleId; changed = true; }
-                            if (tryFillIfEmpty(contact.Email, request.Email, out var contactEmail)) { contact.Email = contactEmail; changed = true; }
-                            if (tryFillIfEmpty(contact.Phone, contactPhone, out var contactPhoneFilled)) { contact.Phone = contactPhoneFilled; changed = true; }
-                            if (tryFillIfEmpty(contact.Mobile, contactMobile, out var contactMobileFilled)) { contact.Mobile = contactMobileFilled; changed = true; }
-                            if (tryFillIfEmpty(contact.Notes, request.Notes, out var contactNotes)) { contact.Notes = contactNotes; changed = true; }
-
-                            if (changed)
-                            {
-                                await _unitOfWork.Contacts.UpdateAsync(contact);
-                            }
-                        }
+                        await _unitOfWork.Contacts.AddAsync(contact);
+                        contactCreated = true;
 
                         await _unitOfWork.SaveChangesAsync();
                         contactId = contact.Id;
@@ -650,11 +554,13 @@ namespace crm_api.Services
                     var response = new CustomerCreateFromMobileResultDto
                     {
                         CustomerId = customer.Id,
-                        CustomerCreated = customerCreated,
+                        CustomerCreated = true,
                         ContactId = contactId,
                         ContactCreated = contactCreated,
                         TitleId = titleId,
-                        TitleCreated = titleCreated
+                        TitleCreated = titleCreated,
+                        ImageUploaded = imageUploaded,
+                        ImageUploadError = imageUploadError
                     };
 
                     return ApiResponse<CustomerCreateFromMobileResultDto>.SuccessResult(

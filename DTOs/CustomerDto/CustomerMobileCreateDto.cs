@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace crm_api.DTOs
 {
@@ -10,6 +11,15 @@ namespace crm_api.DTOs
 
         [MaxLength(250)]
         public string? ContactName { get; set; }
+
+        [MaxLength(100)]
+        public string? ContactFirstName { get; set; }
+
+        [MaxLength(100)]
+        public string? ContactMiddleName { get; set; }
+
+        [MaxLength(100)]
+        public string? ContactLastName { get; set; }
 
         [MaxLength(100)]
         public string? Title { get; set; }
@@ -47,6 +57,11 @@ namespace crm_api.DTOs
         public decimal? CreditLimit { get; set; }
         public short? BranchCode { get; set; }
         public short? BusinessUnitCode { get; set; }
+
+        public IFormFile? ImageFile { get; set; }
+
+        [MaxLength(250)]
+        public string? ImageDescription { get; set; }
     }
 
     public class CustomerCreateFromMobileResultDto
@@ -57,5 +72,7 @@ namespace crm_api.DTOs
         public bool ContactCreated { get; set; }
         public long? TitleId { get; set; }
         public bool TitleCreated { get; set; }
+        public bool ImageUploaded { get; set; }
+        public string? ImageUploadError { get; set; }
     }
 }

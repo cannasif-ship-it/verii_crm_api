@@ -47,7 +47,8 @@ namespace crm_api.Controllers
         }
 
         [HttpPost("mobile/create-from-ocr")]
-        public async Task<IActionResult> CreateFromMobile([FromBody] CustomerCreateFromMobileDto request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateFromMobile([FromForm] CustomerCreateFromMobileDto request)
         {
             var result = await _customerService.CreateCustomerFromMobileAsync(request);
             return StatusCode(result.StatusCode, result);
