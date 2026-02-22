@@ -1315,7 +1315,8 @@ namespace crm_api.Services
                                             creatorFullName,
                                             approverFullName,
                                             orderForNotification.OfferNo ?? "",
-                                            orderLink
+                                            orderLink,
+                                            orderForNotification.Id
                                         ));
                                 }
                             }
@@ -1631,7 +1632,8 @@ namespace crm_api.Services
                                     rejectorFullName,
                                     orderForMail.OfferNo ?? "",
                                     request.RejectReason ?? "Belirtilmedi",
-                                    orderLink
+                                    orderLink,
+                                    orderForMail.Id
                                 ));
                         }
                     }

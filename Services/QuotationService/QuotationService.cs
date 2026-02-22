@@ -1526,7 +1526,8 @@ namespace crm_api.Services
                                             creatorFullName,
                                             approverFullName,
                                             quotationForNotification.RevisionNo ?? "",
-                                            quotationLink
+                                            quotationLink,
+                                            quotationForNotification.Id
                                         ));
                                 }
                             }
@@ -1840,7 +1841,8 @@ namespace crm_api.Services
                                     rejectorFullName,
                                     quotationForMail.RevisionNo ?? "",
                                     request.RejectReason ?? "Belirtilmedi",
-                                    quotationLink
+                                    quotationLink,
+                                    quotationForMail.Id
                                 ));
                         }
                     }
