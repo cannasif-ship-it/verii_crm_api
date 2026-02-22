@@ -1732,11 +1732,10 @@ namespace crm_api.Services
                 await _unitOfWork.ApprovalActions.UpdateAsync(action);
                 await _unitOfWork.SaveChangesAsync();
 
-                // ApprovalRequest'i reddedildi olarak işaretle
-                var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
-                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
+                // ApprovalRequest action ile birlikte yüklendi, ikinci kez query edip track çakışması oluşturmuyoruz.
+                var approvalRequest = action.ApprovalRequest;
 
-                if (approvalRequest == null)
+                if (approvalRequest == null || approvalRequest.IsDeleted)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
