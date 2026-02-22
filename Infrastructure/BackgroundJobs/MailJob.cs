@@ -1,8 +1,14 @@
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
+using crm_api.DTOs;
+using crm_api.Helpers;
 using crm_api.Interfaces;
+using crm_api.Models;
+using crm_api.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Infrastructure.BackgroundJobs
 {
@@ -13,12 +19,21 @@ namespace Infrastructure.BackgroundJobs
         private readonly IMailService _mailService;
         private readonly ILogger<MailJob> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IPdfReportDocumentGeneratorService _pdfReportDocumentGeneratorService;
 
-        public MailJob(IMailService mailService, ILogger<MailJob> logger, IConfiguration configuration)
+        public MailJob(
+            IMailService mailService,
+            ILogger<MailJob> logger,
+            IConfiguration configuration,
+            IUnitOfWork unitOfWork,
+            IPdfReportDocumentGeneratorService pdfReportDocumentGeneratorService)
         {
             _mailService = mailService;
             _logger = logger;
             _configuration = configuration;
+            _unitOfWork = unitOfWork;
+            _pdfReportDocumentGeneratorService = pdfReportDocumentGeneratorService;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body, bool isHtml = true, string? cc = null, string? bcc = null, List<string>? attachments = null)
@@ -146,7 +161,7 @@ namespace Infrastructure.BackgroundJobs
             await SendEmailAsync(email, emailSubject, emailBody, true);
         }
 
-        public async Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink)
+        public async Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink, List<string>? attachments = null)
         {
             var content = $@"
                 <p>Sayın {displayName},</p>
@@ -157,7 +172,7 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Onay Bekleyen Kayıt", content);
-            await SendEmailAsync(email, subject, body, true);
+            await SendEmailAsync(email, subject, body, true, attachments: attachments);
         }
 
         public async Task SendDemandApprovalPendingEmailsAsync(
@@ -173,25 +188,34 @@ namespace Infrastructure.BackgroundJobs
             var effectiveDemandPath = GetFrontendPath("DemandDetailPath", "demands");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
             var demandLink = $"{effectiveBaseUrl}/{effectiveDemandPath}/{demandId}";
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Demand, demandId, "demand");
 
-            foreach (var (email, fullName, uid) in usersToNotify)
+            try
             {
-                var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
-                var actionId = userIdToActionId.GetValueOrDefault(uid);
-                var approvalLink = actionId != 0
-                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
-                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
+                foreach (var (email, fullName, uid) in usersToNotify)
+                {
+                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
+                    var actionId = userIdToActionId.GetValueOrDefault(uid);
+                    var approvalLink = actionId != 0
+                        ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                        : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
-                await SendDemandApprovalPendingEmailAsync(
-                    email,
-                    displayName,
-                    subject,
-                    approvalLink,
-                    demandLink);
+                    await SendDemandApprovalPendingEmailAsync(
+                        email,
+                        displayName,
+                        subject,
+                        approvalLink,
+                        demandLink,
+                        attachments);
+                }
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
             }
         }
 
-        public async Task SendOrderApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string orderLink)
+        public async Task SendOrderApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string orderLink, List<string>? attachments = null)
         {
             var content = $@"
                 <p>Sayın {displayName},</p>
@@ -202,7 +226,7 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Onay Bekleyen Sipariş", content);
-            await SendEmailAsync(email, subject, body, true);
+            await SendEmailAsync(email, subject, body, true, attachments: attachments);
         }
 
         public async Task SendBulkOrderApprovalPendingEmailsAsync(
@@ -218,25 +242,34 @@ namespace Infrastructure.BackgroundJobs
             var effectiveOrderPath = GetFrontendPath("OrderDetailPath", "orders");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
             var orderLink = $"{effectiveBaseUrl}/{effectiveOrderPath}/{orderId}";
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Order, orderId, "order");
 
-            foreach (var (email, fullName, uid) in usersToNotify)
+            try
             {
-                var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
-                var actionId = userIdToActionId.GetValueOrDefault(uid);
-                var approvalLink = actionId != 0
-                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
-                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
+                foreach (var (email, fullName, uid) in usersToNotify)
+                {
+                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
+                    var actionId = userIdToActionId.GetValueOrDefault(uid);
+                    var approvalLink = actionId != 0
+                        ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                        : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
-                await SendOrderApprovalPendingEmailAsync(
-                    email,
-                    displayName,
-                    subject,
-                    approvalLink,
-                    orderLink);
+                    await SendOrderApprovalPendingEmailAsync(
+                        email,
+                        displayName,
+                        subject,
+                        approvalLink,
+                        orderLink,
+                        attachments);
+                }
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
             }
         }
 
-        public async Task SendQuotationApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string quotationLink)
+        public async Task SendQuotationApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string quotationLink, List<string>? attachments = null)
         {
             var content = $@"
                 <p>Sayın {displayName},</p>
@@ -247,7 +280,7 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Onay Bekleyen Teklif", content);
-            await SendEmailAsync(email, subject, body, true);
+            await SendEmailAsync(email, subject, body, true, attachments: attachments);
         }
 
         public async Task SendBulkQuotationApprovalPendingEmailsAsync(
@@ -263,21 +296,30 @@ namespace Infrastructure.BackgroundJobs
             var effectiveQuotationPath = GetFrontendPath("QuotationDetailPath", "quotations");
             var subject = "Onay Bekleyen Kaydınız Bulunmaktadır";
             var quotationLink = $"{effectiveBaseUrl}/{effectiveQuotationPath}/{quotationId}";
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Quotation, quotationId, "quotation");
 
-            foreach (var (email, fullName, uid) in usersToNotify)
+            try
             {
-                var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
-                var actionId = userIdToActionId.GetValueOrDefault(uid);
-                var approvalLink = actionId != 0
-                    ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
-                    : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
+                foreach (var (email, fullName, uid) in usersToNotify)
+                {
+                    var displayName = string.IsNullOrWhiteSpace(fullName) ? "Değerli Kullanıcı" : fullName;
+                    var actionId = userIdToActionId.GetValueOrDefault(uid);
+                    var approvalLink = actionId != 0
+                        ? $"{effectiveBaseUrl}/{effectiveApprovalPath}?actionId={actionId}"
+                        : $"{effectiveBaseUrl}/{effectiveApprovalPath}";
 
-                await SendQuotationApprovalPendingEmailAsync(
-                    email,
-                    displayName,
-                    subject,
-                    approvalLink,
-                    quotationLink);
+                    await SendQuotationApprovalPendingEmailAsync(
+                        email,
+                        displayName,
+                        subject,
+                        approvalLink,
+                        quotationLink,
+                        attachments);
+                }
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
             }
         }
 
@@ -286,7 +328,8 @@ namespace Infrastructure.BackgroundJobs
             string creatorFullName,
             string approverFullName,
             string quotationNo,
-            string quotationLink)
+            string quotationLink,
+            long quotationId)
         {
             var subject = $"{quotationNo} Numaralı Teklifiniz Onaylanmıştır";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -299,7 +342,15 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Teklif Onaylandı", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Quotation, quotationId, "quotation");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
         }
 
         public async Task SendQuotationRejectedEmailAsync(
@@ -308,7 +359,8 @@ namespace Infrastructure.BackgroundJobs
             string rejectorFullName,
             string quotationNo,
             string rejectReason,
-            string quotationLink)
+            string quotationLink,
+            long quotationId)
         {
             var subject = $"{quotationNo} Numaralı Teklifiniz Reddedilmiştir";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -324,7 +376,15 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Teklif Reddedildi", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Quotation, quotationId, "quotation");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
         }
 
         public async Task SendDemandApprovedEmailAsync(
@@ -332,7 +392,8 @@ namespace Infrastructure.BackgroundJobs
             string creatorFullName,
             string approverFullName,
             string demandNo,
-            string demandLink)
+            string demandLink,
+            long demandId)
         {
             var subject = $"{demandNo} Numaralı Talebiniz Onaylanmıştır";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -345,7 +406,15 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Talep Onaylandı", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Demand, demandId, "demand");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
         }
 
         public async Task SendDemandRejectedEmailAsync(
@@ -354,7 +423,8 @@ namespace Infrastructure.BackgroundJobs
             string rejectorFullName,
             string demandNo,
             string rejectReason,
-            string demandLink)
+            string demandLink,
+            long demandId)
         {
             var subject = $"{demandNo} Numaralı Talep Reddedilmiştir";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -370,7 +440,15 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Talep Reddedildi", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Demand, demandId, "demand");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
         }
 
         public async Task SendOrderApprovedEmailAsync(
@@ -378,7 +456,8 @@ namespace Infrastructure.BackgroundJobs
             string creatorFullName,
             string approverFullName,
             string orderNo,
-            string orderLink)
+            string orderLink,
+            long orderId)
         {
             var subject = $"{orderNo} Numaralı Siparişiniz Onaylanmıştır";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -391,7 +470,15 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Sipariş Onaylandı", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Order, orderId, "order");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
         }
 
         public async Task SendOrderRejectedEmailAsync(
@@ -400,7 +487,8 @@ namespace Infrastructure.BackgroundJobs
             string rejectorFullName,
             string orderNo,
             string rejectReason,
-            string orderLink)
+            string orderLink,
+            long orderId)
         {
             var subject = $"{orderNo} Numaralı Sipariş Reddedilmiştir";
             var displayName = string.IsNullOrWhiteSpace(creatorFullName) ? "Değerli Kullanıcı" : creatorFullName;
@@ -416,7 +504,85 @@ namespace Infrastructure.BackgroundJobs
                 </div>";
 
             var body = GetEmailTemplate("Sipariş Reddedildi", content);
-            await SendEmailAsync(creatorEmail, subject, body, true);
+            var attachments = await TryCreateDefaultPdfAttachmentAsync(DocumentRuleType.Order, orderId, "order");
+            try
+            {
+                await SendEmailAsync(creatorEmail, subject, body, true, attachments: attachments);
+            }
+            finally
+            {
+                CleanupAttachments(attachments);
+            }
+        }
+
+        private async Task<List<string>?> TryCreateDefaultPdfAttachmentAsync(DocumentRuleType ruleType, long entityId, string filePrefix)
+        {
+            try
+            {
+                var template = await _unitOfWork.Repository<ReportTemplate>().Query()
+                    .Where(rt =>
+                        !rt.IsDeleted &&
+                        rt.IsActive &&
+                        rt.Default &&
+                        rt.RuleType == ruleType)
+                    .OrderByDescending(rt => rt.UpdatedDate ?? rt.CreatedDate)
+                    .FirstOrDefaultAsync();
+
+                if (template == null || string.IsNullOrWhiteSpace(template.TemplateJson))
+                {
+                    return null;
+                }
+
+                var templateData = JsonSerializer.Deserialize<ReportTemplateData>(
+                    template.TemplateJson,
+                    PdfReportTemplateJsonOptions.CamelCase);
+
+                if (templateData == null)
+                {
+                    return null;
+                }
+
+                var pdfBytes = await _pdfReportDocumentGeneratorService.GeneratePdfAsync(ruleType, entityId, templateData);
+                if (pdfBytes == null || pdfBytes.Length == 0)
+                {
+                    return null;
+                }
+
+                var safePrefix = string.IsNullOrWhiteSpace(filePrefix) ? "document" : filePrefix.Trim();
+                var fileName = $"{safePrefix}-{entityId}-{DateTime.UtcNow:yyyyMMddHHmmssfff}.pdf";
+                var filePath = Path.Combine(Path.GetTempPath(), fileName);
+                await File.WriteAllBytesAsync(filePath, pdfBytes);
+
+                return new List<string> { filePath };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "MailJob: Default PDF attachment generation failed. RuleType={RuleType}, EntityId={EntityId}", ruleType, entityId);
+                return null;
+            }
+        }
+
+        private void CleanupAttachments(List<string>? attachments)
+        {
+            if (attachments == null || attachments.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var attachment in attachments)
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(attachment) && File.Exists(attachment))
+                    {
+                        File.Delete(attachment);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "MailJob: Attachment cleanup failed. Path={Path}", attachment);
+                }
+            }
         }
 
         private string GetFrontendBaseUrl()

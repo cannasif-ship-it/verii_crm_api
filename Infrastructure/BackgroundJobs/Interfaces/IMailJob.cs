@@ -8,7 +8,7 @@ namespace Infrastructure.BackgroundJobs.Interfaces
         Task SendPasswordResetEmailAsync(string email, string fullName, string resetLink, string emailSubject);
         Task SendPasswordResetCompletedEmailAsync(string email, string displayName, string baseUrl);
         Task SendPasswordChangedEmailAsync(string email, string displayName, string baseUrl);
-        Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink);
+        Task SendDemandApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string demandLink, List<string>? attachments = null);
         Task SendDemandApprovalPendingEmailsAsync(
             List<(string Email, string FullName, long UserId)> usersToNotify,
             Dictionary<long, long> userIdToActionId,
@@ -17,7 +17,7 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string demandPath,
             long demandId);
 
-        Task SendOrderApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string orderLink);
+        Task SendOrderApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string orderLink, List<string>? attachments = null);
 
         Task SendBulkOrderApprovalPendingEmailsAsync(
             List<(string Email, string FullName, long UserId)> usersToNotify,
@@ -27,7 +27,7 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string orderPath,
             long orderId);
 
-        Task SendQuotationApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string quotationLink);
+        Task SendQuotationApprovalPendingEmailAsync(string email, string displayName, string subject, string approvalLink, string quotationLink, List<string>? attachments = null);
 
         Task SendBulkQuotationApprovalPendingEmailsAsync(
             List<(string Email, string FullName, long UserId)> usersToNotify,
@@ -42,7 +42,8 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string creatorFullName,
             string approverFullName,
             string quotationNo,
-            string quotationLink);
+            string quotationLink,
+            long quotationId);
 
         Task SendQuotationRejectedEmailAsync(
             string creatorEmail,
@@ -50,14 +51,16 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string rejectorFullName,
             string quotationNo,
             string rejectReason,
-            string quotationLink);
+            string quotationLink,
+            long quotationId);
 
         Task SendDemandApprovedEmailAsync(
             string creatorEmail,
             string creatorFullName,
             string approverFullName,
             string demandNo,
-            string demandLink);
+            string demandLink,
+            long demandId);
 
         Task SendDemandRejectedEmailAsync(
             string creatorEmail,
@@ -65,14 +68,16 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string rejectorFullName,
             string demandNo,
             string rejectReason,
-            string demandLink);
+            string demandLink,
+            long demandId);
 
         Task SendOrderApprovedEmailAsync(
             string creatorEmail,
             string creatorFullName,
             string approverFullName,
             string orderNo,
-            string orderLink);
+            string orderLink,
+            long orderId);
 
         Task SendOrderRejectedEmailAsync(
             string creatorEmail,
@@ -80,6 +85,7 @@ namespace Infrastructure.BackgroundJobs.Interfaces
             string rejectorFullName,
             string orderNo,
             string rejectReason,
-            string orderLink);
+            string orderLink,
+            long orderId);
     }
 }
