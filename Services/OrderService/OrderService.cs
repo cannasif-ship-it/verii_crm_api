@@ -888,10 +888,11 @@ namespace crm_api.Services
 
                 if (flow == null)
                 {
+                    const string flowNotFoundMessage = "Bu belge tipi için onay akışı tanımlı değil.";
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("OrderService.ApprovalFlowNotFound"),
-                        "Bu belge tipi için onay akışı tanımlı değil.",
+                        flowNotFoundMessage,
+                        flowNotFoundMessage,
                         StatusCodes.Status404NotFound);
                 }
 

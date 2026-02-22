@@ -911,10 +911,11 @@ namespace crm_api.Services
 
                 if (!steps.Any())
                 {
+                    const string stepsNotFoundMessage = "Flow'a ait step tanımı yok.";
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<bool>.ErrorResult(
-                        _localizationService.GetLocalizedString("DemandService.ApprovalFlowStepsNotFound"),
-                        "Flow'a ait step tanımı yok.",
+                        stepsNotFoundMessage,
+                        stepsNotFoundMessage,
                         StatusCodes.Status404NotFound);
                 }
 
