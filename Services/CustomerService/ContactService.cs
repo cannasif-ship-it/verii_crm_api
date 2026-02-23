@@ -334,6 +334,9 @@ namespace crm_api.Services
 
             var createLike = new CreateContactDto
             {
+                FirstName = dto.FirstName,
+                MiddleName = dto.MiddleName,
+                LastName = dto.LastName,
                 FullName = dto.FullName,
                 Email = dto.Email,
                 Phone = dto.Phone,
@@ -351,7 +354,7 @@ namespace crm_api.Services
             dto.FirstName = (dto.FirstName ?? string.Empty).Trim();
             dto.MiddleName = NormalizeNullable(dto.MiddleName);
             dto.LastName = (dto.LastName ?? string.Empty).Trim();
-            dto.FullName = NormalizeNullable(dto.FullName);
+            dto.FullName = NormalizeNullable(dto.FullName) ?? BuildFullName(dto.FirstName, dto.MiddleName, dto.LastName);
             dto.Email = NormalizeNullable(dto.Email);
             dto.Phone = NormalizeNullable(dto.Phone);
             dto.Mobile = NormalizeNullable(dto.Mobile);
@@ -363,7 +366,7 @@ namespace crm_api.Services
             dto.FirstName = (dto.FirstName ?? string.Empty).Trim();
             dto.MiddleName = NormalizeNullable(dto.MiddleName);
             dto.LastName = (dto.LastName ?? string.Empty).Trim();
-            dto.FullName = NormalizeNullable(dto.FullName);
+            dto.FullName = NormalizeNullable(dto.FullName) ?? BuildFullName(dto.FirstName, dto.MiddleName, dto.LastName);
             dto.Email = NormalizeNullable(dto.Email);
             dto.Phone = NormalizeNullable(dto.Phone);
             dto.Mobile = NormalizeNullable(dto.Mobile);
@@ -373,6 +376,16 @@ namespace crm_api.Services
         private static string? NormalizeNullable(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string? BuildFullName(string? firstName, string? middleName, string? lastName)
+        {
+            var fullName = string.Join(" ", new[] { firstName, middleName, lastName }
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x!.Trim()))
+                .Trim();
+
+            return string.IsNullOrWhiteSpace(fullName) ? null : fullName;
         }
 
         private static string NormalizeText(string? value)
