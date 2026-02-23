@@ -17,6 +17,7 @@ namespace crm_api.Services
         private const string ActivityImagesFolder = "activity-images";
         private const string CustomerImagesFolder = "customer-images";
         private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
+        private const long MinImageSize = 1024; // 1 KB - reject clearly broken/truncated images
         private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".heif" };
 
         public FileUploadService(IWebHostEnvironment environment, ILocalizationService localizationService)
@@ -55,6 +56,25 @@ namespace crm_api.Services
                         _localizationService.GetLocalizedString("FileUploadService.InvalidFileFormat", allowedFormats),
                         null,
                         400);
+                }
+
+                if (file.Length < MinImageSize)
+                {
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
+                        "Uploaded image is too small or corrupted.",
+                        400);
+                }
+
+                await using (var signatureStream = file.OpenReadStream())
+                {
+                    if (!IsSupportedImageSignature(signatureStream, extension))
+                    {
+                        return ApiResponse<string>.ErrorResult(
+                            _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
+                            "Uploaded file content is not a valid image.",
+                            400);
+                    }
                 }
 
                 // Create directory in project root/uploads/user-profiles (not wwwroot)
@@ -541,6 +561,25 @@ namespace crm_api.Services
                         400);
                 }
 
+                if (file.Length < MinImageSize)
+                {
+                    return ApiResponse<string>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
+                        "Uploaded image is too small or corrupted.",
+                        400);
+                }
+
+                await using (var signatureStream = file.OpenReadStream())
+                {
+                    if (!IsSupportedImageSignature(signatureStream, extension))
+                    {
+                        return ApiResponse<string>.ErrorResult(
+                            _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
+                            "Uploaded file content is not a valid image.",
+                            400);
+                    }
+                }
+
                 var uploadsBasePath = Path.Combine(_environment.ContentRootPath, "uploads");
                 var customerImagesPath = Path.Combine(uploadsBasePath, CustomerImagesFolder);
                 var customerFolder = Path.Combine(customerImagesPath, customerId.ToString());
@@ -737,6 +776,28 @@ namespace crm_api.Services
                 // Silently fail if permission setting is not supported (e.g., on Linux)
                 // The directory will still be created, but permissions might need to be set manually
             }
+        }
+
+        private static bool IsSupportedImageSignature(Stream stream, string extension)
+        {
+            stream.Position = 0;
+            Span<byte> header = stackalloc byte[16];
+            var read = stream.Read(header);
+            stream.Position = 0;
+            if (read < 4) return false;
+
+            extension = extension.ToLowerInvariant();
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+                ".png" => read >= 8 && header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
+                                    header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A,
+                ".gif" => read >= 6 && header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x38,
+                ".webp" => read >= 12 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
+                                      header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50,
+                ".heic" or ".heif" => read >= 12 && header[4] == 0x66 && header[5] == 0x74 && header[6] == 0x79 && header[7] == 0x70,
+                _ => false
+            };
         }
     }
 }
