@@ -297,6 +297,7 @@ namespace crm_api.Services
         {
             try
             {
+                NormalizeCustomerDto(customerCreateDto);
                 var governanceError = await ValidateCustomerGovernanceAsync(customerCreateDto, null);
                 if (governanceError != null)
                 {
@@ -331,6 +332,13 @@ namespace crm_api.Services
                 var customerDto = _mapper.Map<CustomerGetDto>(customerWithNav);
 
                 return ApiResponse<CustomerGetDto>.SuccessResult(customerDto, _localizationService.GetLocalizedString("CustomerService.CustomerCreated"));
+            }
+            catch (DbUpdateException ex) when (DbUpdateExceptionHelper.TryGetUniqueViolation(ex, out _))
+            {
+                return ApiResponse<CustomerGetDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    StatusCodes.Status409Conflict);
             }
             catch (Exception ex)
             {
@@ -586,6 +594,7 @@ namespace crm_api.Services
         {
             try
             {
+                NormalizeCustomerDto(customerUpdateDto);
                 var customer = await _unitOfWork.Customers.GetByIdForUpdateAsync(id);
                 if (customer == null)
                 {
@@ -642,6 +651,13 @@ namespace crm_api.Services
                 var customerDto = _mapper.Map<CustomerGetDto>(customerWithNav);
 
                 return ApiResponse<CustomerGetDto>.SuccessResult(customerDto, _localizationService.GetLocalizedString("CustomerService.CustomerUpdated"));
+            }
+            catch (DbUpdateException ex) when (DbUpdateExceptionHelper.TryGetUniqueViolation(ex, out _))
+            {
+                return ApiResponse<CustomerGetDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    StatusCodes.Status409Conflict);
             }
             catch (Exception ex)
             {
@@ -947,6 +963,8 @@ namespace crm_api.Services
 
         private async Task<ApiResponse<CustomerGetDto>?> ValidateCustomerGovernanceAsync(CustomerCreateDto dto, long? excludedId)
         {
+            NormalizeCustomerDto(dto);
+
             if (string.IsNullOrWhiteSpace(dto.Name))
             {
                 return ApiResponse<CustomerGetDto>.ErrorResult(
@@ -993,7 +1011,21 @@ namespace crm_api.Services
                 duplicateQuery = duplicateQuery.Where(c => c.Id != excludedId.Value);
             }
 
-            var isDuplicate = await duplicateQuery.AnyAsync(c =>
+            var duplicateCandidates = await duplicateQuery
+                .Where(c =>
+                    (!string.IsNullOrWhiteSpace(tax) && !string.IsNullOrWhiteSpace(c.TaxNumber)) ||
+                    (!string.IsNullOrWhiteSpace(tckn) && !string.IsNullOrWhiteSpace(c.TcknNumber)) ||
+                    (!string.IsNullOrWhiteSpace(customerCode) && c.BranchCode == branchCode && !string.IsNullOrWhiteSpace(c.CustomerCode)))
+                .Select(c => new
+                {
+                    c.TaxNumber,
+                    c.TcknNumber,
+                    c.CustomerCode,
+                    c.BranchCode
+                })
+                .ToListAsync();
+
+            var isDuplicate = duplicateCandidates.Any(c =>
                 (!string.IsNullOrWhiteSpace(tax) && NormalizeDigits(c.TaxNumber) == tax) ||
                 (!string.IsNullOrWhiteSpace(tckn) && NormalizeDigits(c.TcknNumber) == tckn) ||
                 (!string.IsNullOrWhiteSpace(customerCode) && c.BranchCode == branchCode && NormalizeText(c.CustomerCode) == customerCode));
@@ -1011,6 +1043,8 @@ namespace crm_api.Services
 
         private async Task<ApiResponse<CustomerGetDto>?> ValidateCustomerGovernanceAsync(CustomerUpdateDto dto, long excludedId)
         {
+            NormalizeCustomerDto(dto);
+
             var createLike = new CustomerCreateDto
             {
                 Name = dto.Name,
@@ -1037,6 +1071,45 @@ namespace crm_api.Services
             };
 
             return await ValidateCustomerGovernanceAsync(createLike, excludedId);
+        }
+
+        private static void NormalizeCustomerDto(CustomerCreateDto dto)
+        {
+            dto.CustomerCode = NormalizeNullable(dto.CustomerCode);
+            dto.Name = (dto.Name ?? string.Empty).Trim();
+            dto.TaxNumber = NormalizeNullable(dto.TaxNumber);
+            dto.TaxOffice = NormalizeNullable(dto.TaxOffice);
+            dto.TcknNumber = NormalizeNullable(dto.TcknNumber);
+            dto.Address = NormalizeNullable(dto.Address);
+            dto.Phone = NormalizeNullable(dto.Phone);
+            dto.Phone2 = NormalizeNullable(dto.Phone2);
+            dto.Email = NormalizeNullable(dto.Email);
+            dto.Website = NormalizeNullable(dto.Website);
+            dto.Notes = NormalizeNullable(dto.Notes);
+            dto.SalesRepCode = NormalizeNullable(dto.SalesRepCode);
+            dto.GroupCode = NormalizeNullable(dto.GroupCode);
+        }
+
+        private static void NormalizeCustomerDto(CustomerUpdateDto dto)
+        {
+            dto.CustomerCode = NormalizeNullable(dto.CustomerCode);
+            dto.Name = (dto.Name ?? string.Empty).Trim();
+            dto.TaxNumber = NormalizeNullable(dto.TaxNumber);
+            dto.TaxOffice = NormalizeNullable(dto.TaxOffice);
+            dto.TcknNumber = NormalizeNullable(dto.TcknNumber);
+            dto.Address = NormalizeNullable(dto.Address);
+            dto.Phone = NormalizeNullable(dto.Phone);
+            dto.Phone2 = NormalizeNullable(dto.Phone2);
+            dto.Email = NormalizeNullable(dto.Email);
+            dto.Website = NormalizeNullable(dto.Website);
+            dto.Notes = NormalizeNullable(dto.Notes);
+            dto.SalesRepCode = NormalizeNullable(dto.SalesRepCode);
+            dto.GroupCode = NormalizeNullable(dto.GroupCode);
+        }
+
+        private static string? NormalizeNullable(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
         private static List<CustomerDuplicateCandidateDto> BuildDuplicateCandidates(

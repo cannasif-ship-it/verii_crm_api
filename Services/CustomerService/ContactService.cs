@@ -125,6 +125,7 @@ namespace crm_api.Services
         {
             try
             {
+                NormalizeContactDto(createContactDto);
                 var governanceError = await ValidateContactGovernanceAsync(createContactDto, null);
                 if (governanceError != null)
                 {
@@ -157,6 +158,13 @@ namespace crm_api.Services
 
                 return ApiResponse<ContactDto>.SuccessResult(contactDto, _localizationService.GetLocalizedString("ContactService.ContactCreated"));
             }
+            catch (DbUpdateException ex) when (DbUpdateExceptionHelper.TryGetUniqueViolation(ex, out _))
+            {
+                return ApiResponse<ContactDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    StatusCodes.Status409Conflict);
+            }
             catch (Exception ex)
             {
                 return ApiResponse<ContactDto>.ErrorResult(
@@ -170,6 +178,7 @@ namespace crm_api.Services
         {
             try
             {
+                NormalizeContactDto(updateContactDto);
                 var governanceError = await ValidateContactGovernanceAsync(updateContactDto, id);
                 if (governanceError != null)
                 {
@@ -212,6 +221,13 @@ namespace crm_api.Services
 
                 return ApiResponse<ContactDto>.SuccessResult(contactDto, _localizationService.GetLocalizedString("ContactService.ContactUpdated"));
             }
+            catch (DbUpdateException ex) when (DbUpdateExceptionHelper.TryGetUniqueViolation(ex, out _))
+            {
+                return ApiResponse<ContactDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    _localizationService.GetLocalizedString("General.RecordAlreadyExists"),
+                    StatusCodes.Status409Conflict);
+            }
             catch (Exception ex)
             {
                 return ApiResponse<ContactDto>.ErrorResult(
@@ -249,6 +265,8 @@ namespace crm_api.Services
 
         private async Task<ApiResponse<ContactDto>?> ValidateContactGovernanceAsync(CreateContactDto dto, long? excludedId)
         {
+            NormalizeContactDto(dto);
+
             if (string.IsNullOrWhiteSpace(dto.FullName))
             {
                 return ApiResponse<ContactDto>.ErrorResult(
@@ -279,7 +297,21 @@ namespace crm_api.Services
                 duplicateQuery = duplicateQuery.Where(c => c.Id != excludedId.Value);
             }
 
-            var hasDuplicate = await duplicateQuery.AnyAsync(c =>
+            var duplicateCandidates = await duplicateQuery
+                .Where(c =>
+                    (!string.IsNullOrWhiteSpace(normalizedEmail) && !string.IsNullOrWhiteSpace(c.Email)) ||
+                    ((!string.IsNullOrWhiteSpace(normalizedMobile) || !string.IsNullOrWhiteSpace(normalizedPhone)) &&
+                     !string.IsNullOrWhiteSpace(c.FullName)))
+                .Select(c => new
+                {
+                    c.Email,
+                    c.FullName,
+                    c.Mobile,
+                    c.Phone
+                })
+                .ToListAsync();
+
+            var hasDuplicate = duplicateCandidates.Any(c =>
                 (!string.IsNullOrWhiteSpace(normalizedEmail) && NormalizeText(c.Email) == normalizedEmail) ||
                 ((!string.IsNullOrWhiteSpace(normalizedMobile) || !string.IsNullOrWhiteSpace(normalizedPhone)) &&
                  NormalizeText(c.FullName) == normalizedName &&
@@ -298,6 +330,8 @@ namespace crm_api.Services
 
         private async Task<ApiResponse<ContactDto>?> ValidateContactGovernanceAsync(UpdateContactDto dto, long excludedId)
         {
+            NormalizeContactDto(dto);
+
             var createLike = new CreateContactDto
             {
                 FullName = dto.FullName,
@@ -310,6 +344,35 @@ namespace crm_api.Services
             };
 
             return await ValidateContactGovernanceAsync(createLike, excludedId);
+        }
+
+        private static void NormalizeContactDto(CreateContactDto dto)
+        {
+            dto.FirstName = (dto.FirstName ?? string.Empty).Trim();
+            dto.MiddleName = NormalizeNullable(dto.MiddleName);
+            dto.LastName = (dto.LastName ?? string.Empty).Trim();
+            dto.FullName = NormalizeNullable(dto.FullName);
+            dto.Email = NormalizeNullable(dto.Email);
+            dto.Phone = NormalizeNullable(dto.Phone);
+            dto.Mobile = NormalizeNullable(dto.Mobile);
+            dto.Notes = NormalizeNullable(dto.Notes);
+        }
+
+        private static void NormalizeContactDto(UpdateContactDto dto)
+        {
+            dto.FirstName = (dto.FirstName ?? string.Empty).Trim();
+            dto.MiddleName = NormalizeNullable(dto.MiddleName);
+            dto.LastName = (dto.LastName ?? string.Empty).Trim();
+            dto.FullName = NormalizeNullable(dto.FullName);
+            dto.Email = NormalizeNullable(dto.Email);
+            dto.Phone = NormalizeNullable(dto.Phone);
+            dto.Mobile = NormalizeNullable(dto.Mobile);
+            dto.Notes = NormalizeNullable(dto.Notes);
+        }
+
+        private static string? NormalizeNullable(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
         private static string NormalizeText(string? value)
