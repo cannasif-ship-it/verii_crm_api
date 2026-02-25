@@ -358,6 +358,21 @@ namespace crm_api.Services
                     return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
                 }
 
+                string? normalizeWebsite(string? value)
+                {
+                    if (string.IsNullOrWhiteSpace(value))
+                        return null;
+
+                    var normalized = value.Trim().ToLowerInvariant();
+                    if (normalized.StartsWith("http://"))
+                        normalized = normalized.Substring("http://".Length);
+                    else if (normalized.StartsWith("https://"))
+                        normalized = normalized.Substring("https://".Length);
+
+                    normalized = normalized.TrimEnd('/');
+                    return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
+                }
+
                 bool isMobile(string? value)
                 {
                     var digits = NormalizeDigits(value);
@@ -433,40 +448,147 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
-                var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId);
-                var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
-                    ? await _geocodingService.GeocodeAsync(mobileFullAddress)
-                    : null;
+                var normalizedEmail = normalizeNullable(request.Email)?.ToUpperInvariant();
+                var normalizedWebsite = normalizeWebsite(request.Website);
+                var normalizedPhones = new[] { NormalizeDigits(request.Phone), NormalizeDigits(request.Phone2) }
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .ToList();
+
+                var customerQuery = _unitOfWork.Customers
+                    .Query(tracking: false)
+                    .Where(c => !c.IsDeleted);
+
+                if (request.BranchCode.HasValue)
+                {
+                    customerQuery = customerQuery.Where(c => c.BranchCode == request.BranchCode.Value);
+                }
+
+                var emailMatchedIds = new HashSet<long>();
+                if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                {
+                    var ids = await customerQuery
+                        .Where(c => c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail)
+                        .Select(c => c.Id)
+                        .ToListAsync();
+                    foreach (var id in ids)
+                        emailMatchedIds.Add(id);
+                }
+
+                var phoneMatchedIds = new HashSet<long>();
+                if (normalizedPhones.Count > 0)
+                {
+                    var phoneCandidates = await customerQuery
+                        .Select(c => new { c.Id, c.Phone1, c.Phone2 })
+                        .ToListAsync();
+
+                    foreach (var candidate in phoneCandidates)
+                    {
+                        var candidatePhone1 = NormalizeDigits(candidate.Phone1);
+                        var candidatePhone2 = NormalizeDigits(candidate.Phone2);
+                        if (normalizedPhones.Contains(candidatePhone1) || normalizedPhones.Contains(candidatePhone2))
+                        {
+                            phoneMatchedIds.Add(candidate.Id);
+                        }
+                    }
+                }
+
+                var websiteMatchedIds = new HashSet<long>();
+                if (!string.IsNullOrWhiteSpace(normalizedWebsite))
+                {
+                    var websiteCandidates = await customerQuery
+                        .Where(c => c.Website != null)
+                        .Select(c => new { c.Id, c.Website })
+                        .ToListAsync();
+
+                    foreach (var candidate in websiteCandidates)
+                    {
+                        var candidateWebsite = normalizeWebsite(candidate.Website);
+                        if (!string.IsNullOrWhiteSpace(candidateWebsite) &&
+                            string.Equals(candidateWebsite, normalizedWebsite, StringComparison.OrdinalIgnoreCase))
+                        {
+                            websiteMatchedIds.Add(candidate.Id);
+                        }
+                    }
+                }
+
+                var matchedIds = new HashSet<long>();
+                if (emailMatchedIds.Count > 0) foreach (var id in emailMatchedIds) matchedIds.Add(id);
+                if (phoneMatchedIds.Count > 0) foreach (var id in phoneMatchedIds) matchedIds.Add(id);
+                if (websiteMatchedIds.Count > 0) foreach (var id in websiteMatchedIds) matchedIds.Add(id);
+
+                if (matchedIds.Count > 1)
+                {
+                    var matchedDetails = new List<string>();
+                    if (emailMatchedIds.Count > 0)
+                        matchedDetails.Add($"email=>[{string.Join(", ", emailMatchedIds.OrderBy(x => x))}]");
+                    if (phoneMatchedIds.Count > 0)
+                        matchedDetails.Add($"telefon=>[{string.Join(", ", phoneMatchedIds.OrderBy(x => x))}]");
+                    if (websiteMatchedIds.Count > 0)
+                        matchedDetails.Add($"website=>[{string.Join(", ", websiteMatchedIds.OrderBy(x => x))}]");
+
+                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                        "2 farklı müşteri bulundu. Önce eşleşmeleri düzelt, sonra kayıt at.",
+                        $"Şirket email/telefon/website alanlarında farklı müşteri ID'leri bulundu. Bulunan müşteriler: {string.Join(" | ", matchedDetails)}",
+                        StatusCodes.Status409Conflict);
+                }
+
+                var existingCustomerId = matchedIds.FirstOrDefault();
 
                 await _unitOfWork.BeginTransactionAsync();
 
                 try
                 {
-                    var customer = new Customer
-                    {
-                        CustomerName = request.Name.Trim(),
-                        Email = normalizeNullable(request.Email),
-                        Phone1 = normalizeNullable(request.Phone),
-                        Phone2 = normalizeNullable(request.Phone2),
-                        Address = normalizeNullable(request.Address),
-                        Website = normalizeNullable(request.Website),
-                        Notes = normalizeNullable(request.Notes),
-                        CountryId = request.CountryId,
-                        CityId = request.CityId,
-                        DistrictId = request.DistrictId,
-                        CustomerTypeId = request.CustomerTypeId,
-                        SalesRepCode = normalizeNullable(request.SalesRepCode),
-                        GroupCode = normalizeNullable(request.GroupCode),
-                        CreditLimit = request.CreditLimit,
-                        BranchCode = request.BranchCode ?? 1,
-                        BusinessUnitCode = request.BusinessUnitCode ?? 1,
-                        Latitude = mobileCoords?.Latitude,
-                        Longitude = mobileCoords?.Longitude
-                    };
+                    Customer customer;
+                    var customerCreated = false;
 
-                    await _unitOfWork.Customers.AddAsync(customer);
-                    await _unitOfWork.SaveChangesAsync();
+                    if (existingCustomerId > 0)
+                    {
+                        var existingCustomer = await _unitOfWork.Customers.GetByIdForUpdateAsync(existingCustomerId);
+                        if (existingCustomer == null || existingCustomer.IsDeleted)
+                        {
+                            return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                                _localizationService.GetLocalizedString("CustomerService.CustomerNotFound"),
+                                _localizationService.GetLocalizedString("CustomerService.CustomerNotFound"),
+                                StatusCodes.Status404NotFound);
+                        }
+
+                        customer = existingCustomer;
+                    }
+                    else
+                    {
+                        // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
+                        var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId);
+                        var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
+                            ? await _geocodingService.GeocodeAsync(mobileFullAddress)
+                            : null;
+
+                        customer = new Customer
+                        {
+                            CustomerName = request.Name.Trim(),
+                            Email = normalizeNullable(request.Email),
+                            Phone1 = normalizeNullable(request.Phone),
+                            Phone2 = normalizeNullable(request.Phone2),
+                            Address = normalizeNullable(request.Address),
+                            Website = normalizeNullable(request.Website),
+                            Notes = normalizeNullable(request.Notes),
+                            CountryId = request.CountryId,
+                            CityId = request.CityId,
+                            DistrictId = request.DistrictId,
+                            CustomerTypeId = request.CustomerTypeId,
+                            SalesRepCode = normalizeNullable(request.SalesRepCode),
+                            GroupCode = normalizeNullable(request.GroupCode),
+                            CreditLimit = request.CreditLimit,
+                            BranchCode = request.BranchCode ?? 1,
+                            BusinessUnitCode = request.BusinessUnitCode ?? 1,
+                            Latitude = mobileCoords?.Latitude,
+                            Longitude = mobileCoords?.Longitude
+                        };
+
+                        await _unitOfWork.Customers.AddAsync(customer);
+                        await _unitOfWork.SaveChangesAsync();
+                        customerCreated = true;
+                    }
 
                     var imageUploaded = false;
                     string? imageUploadError = null;
@@ -529,32 +651,48 @@ namespace crm_api.Services
                     var contactCreated = false;
                     if (hasContact)
                     {
-                        var contactPhone = selectLandline(request.Phone, request.Phone2);
-                        var contactMobile = selectMobile(request.Phone, request.Phone2);
-                        var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
-                            .Where(x => !string.IsNullOrWhiteSpace(x)))
-                            .Trim();
+                        var hasAnyContactOnCustomer = await _unitOfWork.Contacts
+                            .Query(tracking: false)
+                            .AnyAsync(c => !c.IsDeleted && c.CustomerId == customer.Id);
 
-                        var contact = new Contact
+                        if (!hasAnyContactOnCustomer)
                         {
-                            Salutation = SalutationType.None,
-                            FirstName = contactFirstName!,
-                            MiddleName = contactMiddleName,
-                            LastName = contactLastName!,
-                            FullName = fullName,
-                            Email = normalizeNullable(request.Email),
-                            Phone = normalizeNullable(contactPhone),
-                            Mobile = normalizeNullable(contactMobile),
-                            Notes = normalizeNullable(request.Notes),
-                            CustomerId = customer.Id,
-                            TitleId = titleId
-                        };
+                            var contactPhone = selectLandline(request.Phone, request.Phone2);
+                            var contactMobile = selectMobile(request.Phone, request.Phone2);
+                            var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
+                                .Where(x => !string.IsNullOrWhiteSpace(x)))
+                                .Trim();
 
-                        await _unitOfWork.Contacts.AddAsync(contact);
-                        contactCreated = true;
+                            var contact = new Contact
+                            {
+                                Salutation = SalutationType.None,
+                                FirstName = contactFirstName!,
+                                MiddleName = contactMiddleName,
+                                LastName = contactLastName!,
+                                FullName = fullName,
+                                Email = normalizeNullable(request.Email),
+                                Phone = normalizeNullable(contactPhone),
+                                Mobile = normalizeNullable(contactMobile),
+                                Notes = normalizeNullable(request.Notes),
+                                CustomerId = customer.Id,
+                                TitleId = titleId
+                            };
 
-                        await _unitOfWork.SaveChangesAsync();
-                        contactId = contact.Id;
+                            await _unitOfWork.Contacts.AddAsync(contact);
+                            contactCreated = true;
+
+                            await _unitOfWork.SaveChangesAsync();
+                            contactId = contact.Id;
+                        }
+                        else
+                        {
+                            contactId = await _unitOfWork.Contacts
+                                .Query(tracking: false)
+                                .Where(c => !c.IsDeleted && c.CustomerId == customer.Id)
+                                .OrderBy(c => c.Id)
+                                .Select(c => (long?)c.Id)
+                                .FirstOrDefaultAsync();
+                        }
                     }
 
                     await _unitOfWork.CommitTransactionAsync();
@@ -562,7 +700,7 @@ namespace crm_api.Services
                     var response = new CustomerCreateFromMobileResultDto
                     {
                         CustomerId = customer.Id,
-                        CustomerCreated = true,
+                        CustomerCreated = customerCreated,
                         ContactId = contactId,
                         ContactCreated = contactCreated,
                         TitleId = titleId,
