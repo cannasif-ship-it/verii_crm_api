@@ -262,9 +262,9 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                shippingAddress.DeletedDate = DateTime.UtcNow;
+           
 
-                await _unitOfWork.ShippingAddresses.UpdateAsync(shippingAddress);
+                await _unitOfWork.ShippingAddresses.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("ShippingAddressService.ShippingAddressDeleted"));
