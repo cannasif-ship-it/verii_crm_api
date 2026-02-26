@@ -358,21 +358,6 @@ namespace crm_api.Services
                     return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
                 }
 
-                string? normalizeWebsite(string? value)
-                {
-                    if (string.IsNullOrWhiteSpace(value))
-                        return null;
-
-                    var normalized = value.Trim().ToLowerInvariant();
-                    if (normalized.StartsWith("http://"))
-                        normalized = normalized.Substring("http://".Length);
-                    else if (normalized.StartsWith("https://"))
-                        normalized = normalized.Substring("https://".Length);
-
-                    normalized = normalized.TrimEnd('/');
-                    return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
-                }
-
                 bool isMobile(string? value)
                 {
                     var digits = NormalizeDigits(value);
@@ -449,7 +434,6 @@ namespace crm_api.Services
                 }
 
                 var normalizedEmail = normalizeNullable(request.Email)?.ToUpperInvariant();
-                var normalizedWebsite = normalizeWebsite(request.Website);
                 var normalizedPhones = new[] { NormalizeDigits(request.Phone), NormalizeDigits(request.Phone2) }
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct()
@@ -493,29 +477,9 @@ namespace crm_api.Services
                     }
                 }
 
-                var websiteMatchedIds = new HashSet<long>();
-                if (!string.IsNullOrWhiteSpace(normalizedWebsite))
-                {
-                    var websiteCandidates = await customerQuery
-                        .Where(c => c.Website != null)
-                        .Select(c => new { c.Id, c.Website })
-                        .ToListAsync();
-
-                    foreach (var candidate in websiteCandidates)
-                    {
-                        var candidateWebsite = normalizeWebsite(candidate.Website);
-                        if (!string.IsNullOrWhiteSpace(candidateWebsite) &&
-                            string.Equals(candidateWebsite, normalizedWebsite, StringComparison.OrdinalIgnoreCase))
-                        {
-                            websiteMatchedIds.Add(candidate.Id);
-                        }
-                    }
-                }
-
                 var matchedIds = new HashSet<long>();
                 if (emailMatchedIds.Count > 0) foreach (var id in emailMatchedIds) matchedIds.Add(id);
                 if (phoneMatchedIds.Count > 0) foreach (var id in phoneMatchedIds) matchedIds.Add(id);
-                if (websiteMatchedIds.Count > 0) foreach (var id in websiteMatchedIds) matchedIds.Add(id);
 
                 if (matchedIds.Count > 1)
                 {
@@ -524,12 +488,10 @@ namespace crm_api.Services
                         matchedDetails.Add($"email=>[{string.Join(", ", emailMatchedIds.OrderBy(x => x))}]");
                     if (phoneMatchedIds.Count > 0)
                         matchedDetails.Add($"telefon=>[{string.Join(", ", phoneMatchedIds.OrderBy(x => x))}]");
-                    if (websiteMatchedIds.Count > 0)
-                        matchedDetails.Add($"website=>[{string.Join(", ", websiteMatchedIds.OrderBy(x => x))}]");
 
                     return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
                         "2 farklı müşteri bulundu. Önce eşleşmeleri düzelt, sonra kayıt at.",
-                        $"Şirket email/telefon/website alanlarında farklı müşteri ID'leri bulundu. Bulunan müşteriler: {string.Join(" | ", matchedDetails)}",
+                        $"Şirket email/telefon alanlarında farklı müşteri ID'leri bulundu. Bulunan müşteriler: {string.Join(" | ", matchedDetails)}",
                         StatusCodes.Status409Conflict);
                 }
 
@@ -651,18 +613,29 @@ namespace crm_api.Services
                     var contactCreated = false;
                     if (hasContact)
                     {
-                        var hasAnyContactOnCustomer = await _unitOfWork.Contacts
+                        var contactPhone = selectLandline(request.Phone, request.Phone2);
+                        var contactMobile = selectMobile(request.Phone, request.Phone2);
+                        var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
+                            .Where(x => !string.IsNullOrWhiteSpace(x)))
+                            .Trim();
+                        var normalizedContactEmail = normalizeNullable(request.Email)?.ToUpperInvariant();
+                        var normalizedContactPhone = NormalizeDigits(contactPhone);
+                        var normalizedContactMobile = NormalizeDigits(contactMobile);
+
+                        var existingSameContactId = await _unitOfWork.Contacts
                             .Query(tracking: false)
-                            .AnyAsync(c => !c.IsDeleted && c.CustomerId == customer.Id);
+                            .Where(c => !c.IsDeleted && c.CustomerId == customer.Id)
+                            .Select(c => new { c.Id, c.FullName, c.Email, c.Phone, c.Mobile })
+                            .ToListAsync();
 
-                        if (!hasAnyContactOnCustomer)
+                        var matchedExistingContact = existingSameContactId.FirstOrDefault(c =>
+                            string.Equals((c.FullName ?? string.Empty).Trim(), fullName, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals((c.Email ?? string.Empty).Trim().ToUpperInvariant(), normalizedContactEmail ?? string.Empty, StringComparison.Ordinal) &&
+                            NormalizeDigits(c.Phone) == normalizedContactPhone &&
+                            NormalizeDigits(c.Mobile) == normalizedContactMobile);
+
+                        if (matchedExistingContact == null)
                         {
-                            var contactPhone = selectLandline(request.Phone, request.Phone2);
-                            var contactMobile = selectMobile(request.Phone, request.Phone2);
-                            var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
-                                .Where(x => !string.IsNullOrWhiteSpace(x)))
-                                .Trim();
-
                             var contact = new Contact
                             {
                                 Salutation = SalutationType.None,
@@ -686,12 +659,7 @@ namespace crm_api.Services
                         }
                         else
                         {
-                            contactId = await _unitOfWork.Contacts
-                                .Query(tracking: false)
-                                .Where(c => !c.IsDeleted && c.CustomerId == customer.Id)
-                                .OrderBy(c => c.Id)
-                                .Select(c => (long?)c.Id)
-                                .FirstOrDefaultAsync();
+                            contactId = matchedExistingContact.Id;
                         }
                     }
 
