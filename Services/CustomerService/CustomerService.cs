@@ -433,11 +433,9 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var normalizedEmail = normalizeNullable(request.Email)?.ToUpperInvariant();
-                var normalizedPhones = new[] { NormalizeDigits(request.Phone), NormalizeDigits(request.Phone2) }
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Distinct()
-                    .ToList();
+                var requestEmail = request.Email;
+                var requestPhone = request.Phone;
+                var requestPhone2 = request.Phone2;
 
                 var customerQuery = _unitOfWork.Customers
                     .Query(tracking: false)
@@ -449,10 +447,10 @@ namespace crm_api.Services
                 }
 
                 var emailMatchedIds = new HashSet<long>();
-                if (!string.IsNullOrWhiteSpace(normalizedEmail))
+                if (!string.IsNullOrWhiteSpace(requestEmail))
                 {
                     var ids = await customerQuery
-                        .Where(c => c.Email != null && c.Email.Trim().ToUpper() == normalizedEmail)
+                        .Where(c => c.Email == requestEmail)
                         .Select(c => c.Id)
                         .ToListAsync();
                     foreach (var id in ids)
@@ -460,21 +458,16 @@ namespace crm_api.Services
                 }
 
                 var phoneMatchedIds = new HashSet<long>();
-                if (normalizedPhones.Count > 0)
+                if (!string.IsNullOrWhiteSpace(requestPhone) || !string.IsNullOrWhiteSpace(requestPhone2))
                 {
-                    var phoneCandidates = await customerQuery
-                        .Select(c => new { c.Id, c.Phone1, c.Phone2 })
+                    var ids = await customerQuery
+                        .Where(c =>
+                            (!string.IsNullOrWhiteSpace(requestPhone) && (c.Phone1 == requestPhone || c.Phone2 == requestPhone)) ||
+                            (!string.IsNullOrWhiteSpace(requestPhone2) && (c.Phone1 == requestPhone2 || c.Phone2 == requestPhone2)))
+                        .Select(c => c.Id)
                         .ToListAsync();
-
-                    foreach (var candidate in phoneCandidates)
-                    {
-                        var candidatePhone1 = NormalizeDigits(candidate.Phone1);
-                        var candidatePhone2 = NormalizeDigits(candidate.Phone2);
-                        if (normalizedPhones.Contains(candidatePhone1) || normalizedPhones.Contains(candidatePhone2))
-                        {
-                            phoneMatchedIds.Add(candidate.Id);
-                        }
-                    }
+                    foreach (var id in ids)
+                        phoneMatchedIds.Add(id);
                 }
 
                 var matchedIds = new HashSet<long>();
