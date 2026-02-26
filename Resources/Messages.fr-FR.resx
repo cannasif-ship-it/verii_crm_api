@@ -2689,6 +2689,9 @@
   <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
     <value>Enregistrement récupéré avec succès.</value>
   </data>
+  <data name="CustomerService.MobileOcrDuplicateContact" xml:space="preserve">
+    <value>This contact has already been added to the system.</value>
+  </data>
   <data name="CustomerService.InvalidEmail" xml:space="preserve">
     <value>Enregistrement récupéré avec succès.</value>
   </data>

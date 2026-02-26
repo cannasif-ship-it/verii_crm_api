@@ -2692,6 +2692,9 @@
   <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
     <value>تم جلب السجل بنجاح.</value>
   </data>
+  <data name="CustomerService.MobileOcrDuplicateContact" xml:space="preserve">
+    <value>This contact has already been added to the system.</value>
+  </data>
   <data name="CustomerService.InvalidEmail" xml:space="preserve">
     <value>تم جلب السجل بنجاح.</value>
   </data>

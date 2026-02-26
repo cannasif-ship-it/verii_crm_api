@@ -3066,6 +3066,9 @@
   <data name="CustomerService.DuplicateCustomer" xml:space="preserve">
     <value>Aynı isim veya vergi numarası/TCKN ile kayıtlı müşteri zaten var.</value>
   </data>
+  <data name="CustomerService.MobileOcrDuplicateContact" xml:space="preserve">
+    <value>Bu kişi sisteme daha önce eklenmiştir.</value>
+  </data>
   <data name="CustomerService.InvalidEmail" xml:space="preserve">
     <value>Geçersiz e-posta adresi.</value>
   </data>
