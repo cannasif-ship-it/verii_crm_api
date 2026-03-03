@@ -18,6 +18,9 @@ namespace crm_api.Data.Configurations
             builder.Property(x => x.UserId)
                 .IsRequired();
 
+            builder.Property(x => x.TenantId)
+                .IsRequired();
+
             builder.Property(x => x.GoogleEmail)
                 .HasMaxLength(256);
 
@@ -50,6 +53,9 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(x => x.UserId)
                 .IsUnique()
                 .HasDatabaseName("IX_UserGoogleAccounts_UserId");
+
+            builder.HasIndex(x => x.TenantId)
+                .HasDatabaseName("IX_UserGoogleAccounts_TenantId");
         }
     }
 }

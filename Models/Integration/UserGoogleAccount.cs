@@ -3,6 +3,7 @@ namespace crm_api.Models
     public class UserGoogleAccount
     {
         public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
 
         public long UserId { get; set; }
         public User? User { get; set; }
