@@ -4,7 +4,6 @@ using crm_api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Options;
 
 namespace crm_api.Controllers
 {
@@ -17,8 +16,9 @@ namespace crm_api.Controllers
         private readonly IGoogleOAuthService _googleOAuthService;
         private readonly IGoogleTokenService _googleTokenService;
         private readonly IGoogleCalendarService _googleCalendarService;
+        private readonly ITenantGoogleOAuthSettingsService _tenantGoogleOAuthSettingsService;
+        private readonly IUserContextService _userContextService;
         private readonly IEncryptionService _encryptionService;
-        private readonly GoogleOptions _googleOptions;
         private readonly IConfiguration _configuration;
         private readonly ILogger<GoogleIntegrationController> _logger;
 
@@ -27,8 +27,9 @@ namespace crm_api.Controllers
             IGoogleOAuthService googleOAuthService,
             IGoogleTokenService googleTokenService,
             IGoogleCalendarService googleCalendarService,
+            ITenantGoogleOAuthSettingsService tenantGoogleOAuthSettingsService,
+            IUserContextService userContextService,
             IEncryptionService encryptionService,
-            IOptions<GoogleOptions> googleOptions,
             IConfiguration configuration,
             ILogger<GoogleIntegrationController> logger)
         {
@@ -36,8 +37,9 @@ namespace crm_api.Controllers
             _googleOAuthService = googleOAuthService;
             _googleTokenService = googleTokenService;
             _googleCalendarService = googleCalendarService;
+            _tenantGoogleOAuthSettingsService = tenantGoogleOAuthSettingsService;
+            _userContextService = userContextService;
             _encryptionService = encryptionService;
-            _googleOptions = googleOptions.Value;
             _configuration = configuration;
             _logger = logger;
         }
@@ -57,9 +59,14 @@ namespace crm_api.Controllers
             }
 
             var account = await _googleTokenService.GetAccountAsync(currentUserIdResult.Data, cancellationToken);
+            var tenantId = _userContextService.GetCurrentTenantId();
+            var tenantSettings = tenantId.HasValue
+                ? await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId.Value, cancellationToken)
+                : null;
             var dto = new GoogleIntegrationStatusDto
             {
                 IsConnected = account?.IsConnected == true,
+                IsOAuthConfigured = tenantSettings?.IsEnabled == true,
                 GoogleEmail = account?.GoogleEmail,
                 Scopes = account?.Scopes,
                 ExpiresAt = account?.ExpiresAt,
@@ -124,7 +131,7 @@ namespace crm_api.Controllers
                 return Redirect(BuildFrontendRedirect(false, error));
             }
 
-            if (string.IsNullOrWhiteSpace(state) || !_googleOAuthService.TryExtractUserIdFromState(state, out var userId))
+            if (string.IsNullOrWhiteSpace(state) || !_googleOAuthService.TryExtractStateContext(state, out var userId, out var tenantId))
             {
                 return Redirect(BuildFrontendRedirect(false, "invalid_state"));
             }
@@ -142,7 +149,7 @@ namespace crm_api.Controllers
 
             try
             {
-                var tokenResult = await _googleOAuthService.ExchangeCodeForTokensAsync(code, cancellationToken);
+                var tokenResult = await _googleOAuthService.ExchangeCodeForTokensAsync(code, tenantId, cancellationToken);
                 var googleEmail = await _googleOAuthService.GetGoogleEmailAsync(
                     tokenResult.AccessToken,
                     tokenResult.IdToken,
@@ -150,9 +157,10 @@ namespace crm_api.Controllers
 
                 await _googleTokenService.UpsertConnectionAsync(
                     userId,
+                    tenantId,
                     tokenResult,
                     googleEmail,
-                    _googleOptions.Scopes,
+                    tokenResult.Scope ?? string.Empty,
                     cancellationToken);
 
                 return Redirect(BuildFrontendRedirect(true));

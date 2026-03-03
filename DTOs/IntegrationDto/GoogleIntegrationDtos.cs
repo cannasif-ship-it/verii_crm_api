@@ -3,6 +3,7 @@ namespace crm_api.DTOs
     public class GoogleIntegrationStatusDto
     {
         public bool IsConnected { get; set; }
+        public bool IsOAuthConfigured { get; set; }
         public string? GoogleEmail { get; set; }
         public string? Scopes { get; set; }
         public DateTimeOffset? ExpiresAt { get; set; }
