@@ -180,6 +180,7 @@ builder.Services.AddScoped<IProductPricingGroupByService, ProductPricingGroupByS
 
 // Register User Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IPermissionAccessService, PermissionAccessService>();
 builder.Services.AddScoped<IPermissionDefinitionService, PermissionDefinitionService>();
 builder.Services.AddScoped<IPermissionGroupService, PermissionGroupService>();
@@ -229,6 +230,7 @@ builder.Services.AddScoped<IApprovalUserRoleService, ApprovalUserRoleService>();
 // Register Mail Services
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
+builder.Services.AddScoped<ITenantGoogleOAuthSettingsService, TenantGoogleOAuthSettingsService>();
 builder.Services.AddScoped<IGoogleOAuthService, GoogleOAuthService>();
 builder.Services.AddScoped<IGoogleTokenService, GoogleTokenService>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
