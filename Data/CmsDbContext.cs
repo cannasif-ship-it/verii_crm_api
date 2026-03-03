@@ -82,6 +82,7 @@ namespace crm_api.Data
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
         public DbSet<PermissionGroupPermission> PermissionGroupPermissions { get; set; }
         public DbSet<UserPermissionGroup> UserPermissionGroups { get; set; }
+        public DbSet<UserGoogleAccount> UserGoogleAccounts { get; set; }
 
 
 

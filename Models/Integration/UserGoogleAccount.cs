@@ -1,0 +1,20 @@
+namespace crm_api.Models
+{
+    public class UserGoogleAccount
+    {
+        public Guid Id { get; set; }
+
+        public long UserId { get; set; }
+        public User? User { get; set; }
+
+        public string? GoogleEmail { get; set; }
+        public string? RefreshTokenEncrypted { get; set; }
+        public string? AccessTokenEncrypted { get; set; }
+        public DateTimeOffset? ExpiresAt { get; set; }
+        public string? Scopes { get; set; }
+        public bool IsConnected { get; set; }
+
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
+    }
+}
