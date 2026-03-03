@@ -24,15 +24,9 @@ using Hangfire.SqlServer;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Caching.Memory;              // ✅ SMTP için (IMemoryCache)
 using crm_api.Infrastructure.Startup;
+using crm_api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Load local overrides only in Development.
-// Production should rely on appsettings.Production.json and environment variables.
-if (builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
-}
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -100,6 +94,8 @@ builder.Services.Configure<HangfireMonitoringOptions>(
 
 builder.Services.Configure<GeocodingOptions>(
     builder.Configuration.GetSection(GeocodingOptions.SectionName));
+builder.Services.Configure<GoogleOptions>(
+    builder.Configuration.GetSection(GoogleOptions.SectionName));
 
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
 {
@@ -232,6 +228,10 @@ builder.Services.AddScoped<IApprovalUserRoleService, ApprovalUserRoleService>();
 
 // Register Mail Services
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
+builder.Services.AddScoped<IGoogleOAuthService, GoogleOAuthService>();
+builder.Services.AddScoped<IGoogleTokenService, GoogleTokenService>();
+builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
 // ✅ SMTP Settings Service kaydı
 builder.Services.AddScoped<ISmtpSettingsService, SmtpSettingsService>();
