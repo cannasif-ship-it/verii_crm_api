@@ -8,6 +8,7 @@ namespace crm_api.Interfaces
         Task<UserGoogleAccount?> GetAccountAsync(long userId, CancellationToken cancellationToken = default);
         Task<UserGoogleAccount> UpsertConnectionAsync(
             long userId,
+            Guid tenantId,
             GoogleOAuthTokenResult tokenResult,
             string? googleEmail,
             string configuredScopes,

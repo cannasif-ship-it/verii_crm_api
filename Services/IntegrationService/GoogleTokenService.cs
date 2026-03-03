@@ -11,17 +11,20 @@ namespace crm_api.Services
         private readonly CmsDbContext _dbContext;
         private readonly IGoogleOAuthService _googleOAuthService;
         private readonly IEncryptionService _encryptionService;
+        private readonly IUserContextService _userContextService;
         private readonly ILogger<GoogleTokenService> _logger;
 
         public GoogleTokenService(
             CmsDbContext dbContext,
             IGoogleOAuthService googleOAuthService,
             IEncryptionService encryptionService,
+            IUserContextService userContextService,
             ILogger<GoogleTokenService> logger)
         {
             _dbContext = dbContext;
             _googleOAuthService = googleOAuthService;
             _encryptionService = encryptionService;
+            _userContextService = userContextService;
             _logger = logger;
         }
 
@@ -32,6 +35,7 @@ namespace crm_api.Services
 
         public async Task<UserGoogleAccount> UpsertConnectionAsync(
             long userId,
+            Guid tenantId,
             GoogleOAuthTokenResult tokenResult,
             string? googleEmail,
             string configuredScopes,
@@ -45,11 +49,14 @@ namespace crm_api.Services
                 {
                     Id = Guid.NewGuid(),
                     UserId = userId,
+                    TenantId = tenantId,
                     CreatedAt = now,
                 };
 
                 await _dbContext.UserGoogleAccounts.AddAsync(account, cancellationToken);
             }
+
+            account.TenantId = tenantId;
 
             if (!string.IsNullOrWhiteSpace(tokenResult.RefreshToken))
             {
@@ -95,9 +102,20 @@ namespace crm_api.Services
                 return null;
             }
 
+            var tenantId = account.TenantId != Guid.Empty
+                ? account.TenantId
+                : (_userContextService.GetCurrentTenantId() ?? Guid.Empty);
+
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("Tenant context could not be resolved for Google token refresh. UserId: {UserId}", userId);
+                await MarkDisconnectedAsync(account, cancellationToken);
+                return null;
+            }
+
             try
             {
-                var refreshed = await _googleOAuthService.RefreshAccessTokenAsync(refreshToken, cancellationToken);
+                var refreshed = await _googleOAuthService.RefreshAccessTokenAsync(refreshToken, tenantId, cancellationToken);
                 account.AccessTokenEncrypted = _encryptionService.Encrypt(refreshed.AccessToken);
                 if (!string.IsNullOrWhiteSpace(refreshed.RefreshToken))
                 {
