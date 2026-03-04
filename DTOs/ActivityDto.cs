@@ -60,6 +60,7 @@ namespace crm_api.DTOs
         public string Subject { get; set; } = string.Empty;
         public string? Description { get; set; }
         public long ActivityTypeId { get; set; }
+        public string? ActivityTypeName { get; set; }
         public ActivityTypeGetDto ActivityType { get; set; } = null!;
         public DateTime StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
@@ -69,10 +70,13 @@ namespace crm_api.DTOs
         public long AssignedUserId { get; set; }
         public UserDto AssignedUser { get; set; } = null!;
         public long? ContactId { get; set; }
+        public string? ContactName { get; set; }
         public ContactDto? Contact { get; set; }
         public long? PotentialCustomerId { get; set; }
+        public string? PotentialCustomerName { get; set; }
         public CustomerGetDto? PotentialCustomer { get; set; }
         public string? ErpCustomerCode { get; set; }
+        public string? GoogleCalendarEventId { get; set; }
         public List<ActivityReminderDto> Reminders { get; set; } = new List<ActivityReminderDto>();
         public List<ActivityImageDto> Images { get; set; } = new List<ActivityImageDto>();
     }
@@ -88,11 +92,13 @@ namespace crm_api.DTOs
 
         [Required]
         public long ActivityTypeId { get; set; }
+        [MaxLength(100)]
+        public string? ActivityTypeName { get; set; }
 
         [Required]
         public DateTime StartDateTime { get; set; }
 
-        public DateTime? EndDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
 
         public bool IsAllDay { get; set; } = false;
 
@@ -104,8 +110,12 @@ namespace crm_api.DTOs
         public long AssignedUserId { get; set; }
 
         public long? ContactId { get; set; }
+        [MaxLength(250)]
+        public string? ContactName { get; set; }
 
         public long? PotentialCustomerId { get; set; }
+        [MaxLength(250)]
+        public string? PotentialCustomerName { get; set; }
 
         [MaxLength(50)]
         public string? ErpCustomerCode { get; set; }
@@ -124,11 +134,13 @@ namespace crm_api.DTOs
 
         [Required]
         public long ActivityTypeId { get; set; }
+        [MaxLength(100)]
+        public string? ActivityTypeName { get; set; }
 
         [Required]
         public DateTime StartDateTime { get; set; }
 
-        public DateTime? EndDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
 
         public bool IsAllDay { get; set; } = false;
 
@@ -140,8 +152,12 @@ namespace crm_api.DTOs
         public long AssignedUserId { get; set; }
 
         public long? ContactId { get; set; }
+        [MaxLength(250)]
+        public string? ContactName { get; set; }
 
         public long? PotentialCustomerId { get; set; }
+        [MaxLength(250)]
+        public string? PotentialCustomerName { get; set; }
 
         [MaxLength(50)]
         public string? ErpCustomerCode { get; set; }

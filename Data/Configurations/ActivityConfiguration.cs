@@ -29,6 +29,10 @@ namespace crm_api.Data.Configurations
             builder.Property(e => e.ErpCustomerCode)
                 .HasMaxLength(50)
                 .IsRequired(false);
+            
+            builder.Property(e => e.GoogleCalendarEventId)
+                .HasMaxLength(512)
+                .IsRequired(false);
 
             builder.Property(e => e.Status)
                 .IsRequired()
