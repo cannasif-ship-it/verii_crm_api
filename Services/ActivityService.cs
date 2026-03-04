@@ -130,6 +130,15 @@ namespace crm_api.Services
             {
                 await _unitOfWork.BeginTransactionAsync();
 
+                if (createActivityDto.EndDateTime == default)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.EndDateRequired"),
+                        StatusCodes.Status400BadRequest);
+                }
+
                 var validationError = await ValidateForeignKeysAsync(
                     createActivityDto.ActivityTypeId,
                     createActivityDto.AssignedUserId,
@@ -141,7 +150,7 @@ namespace crm_api.Services
                     return validationError;
                 }
 
-                if (createActivityDto.EndDateTime.HasValue && createActivityDto.EndDateTime < createActivityDto.StartDateTime)
+                if (createActivityDto.EndDateTime < createActivityDto.StartDateTime)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<ActivityDto>.ErrorResult(
@@ -153,6 +162,7 @@ namespace crm_api.Services
                 var activity = _mapper.Map<Activity>(createActivityDto);
                 var createdActivity = await _unitOfWork.Activities.AddAsync(activity);
                 await _unitOfWork.SaveChangesAsync();
+                var activityWithRelations = await LoadActivityWithRelationsAsync(createdActivity.Id, asNoTracking: true);
 
                 var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(Guid.Empty);
                 if (oauthSettings?.IsEnabled == true)
@@ -162,18 +172,21 @@ namespace crm_api.Services
                     {
                         await _unitOfWork.RollbackTransactionAsync();
                         return ApiResponse<ActivityDto>.ErrorResult(
-                            "Aktivite kaydı oluşturulamadı.",
-                            "Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.",
+                            _localizationService.GetLocalizedString("ActivityService.ActivityCreateFailed"),
+                            _localizationService.GetLocalizedString("ActivityService.UserSessionNotFound"),
                             StatusCodes.Status400BadRequest);
                     }
 
-                    await _googleCalendarService.CreateActivityEventAsync(currentUserId.Value, createdActivity);
+                    var calendarEventId = await _googleCalendarService.CreateActivityEventAsync(currentUserId.Value, activityWithRelations ?? createdActivity);
+                    createdActivity.GoogleCalendarEventId = calendarEventId;
+                    await _unitOfWork.Activities.UpdateAsync(createdActivity);
+                    await _unitOfWork.SaveChangesAsync();
+                    activityWithRelations = await LoadActivityWithRelationsAsync(createdActivity.Id, asNoTracking: true);
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
 
-                var createdWithNav = await LoadActivityWithRelationsAsync(createdActivity.Id, asNoTracking: true);
-                var dto = _mapper.Map<ActivityDto>(createdWithNav ?? createdActivity);
+                var dto = _mapper.Map<ActivityDto>(activityWithRelations ?? createdActivity);
 
                 return ApiResponse<ActivityDto>.SuccessResult(
                     dto,
@@ -184,7 +197,7 @@ namespace crm_api.Services
                 await _unitOfWork.RollbackTransactionAsync();
 
                 return ApiResponse<ActivityDto>.ErrorResult(
-                    "Aktivite kaydı oluşturulamadı.",
+                    _localizationService.GetLocalizedString("ActivityService.ActivityCreateFailed"),
                     ex.Message,
                     StatusCodes.Status400BadRequest);
             }
@@ -202,16 +215,28 @@ namespace crm_api.Services
         {
             try
             {
+                await _unitOfWork.BeginTransactionAsync();
+
                 var activity = await _unitOfWork.Activities.Query()
                     .Include(a => a.Reminders)
                     .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
 
                 if (activity == null)
                 {
+                    await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
                         _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
                         StatusCodes.Status404NotFound);
+                }
+
+                if (updateActivityDto.EndDateTime == default)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<ActivityDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.EndDateRequired"),
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var validationError = await ValidateForeignKeysAsync(
@@ -221,11 +246,13 @@ namespace crm_api.Services
                     updateActivityDto.PotentialCustomerId);
                 if (validationError != null)
                 {
+                    await _unitOfWork.RollbackTransactionAsync();
                     return validationError;
                 }
 
-                if (updateActivityDto.EndDateTime.HasValue && updateActivityDto.EndDateTime < updateActivityDto.StartDateTime)
+                if (updateActivityDto.EndDateTime < updateActivityDto.StartDateTime)
                 {
+                    await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
                         _localizationService.GetLocalizedString("General.ValidationError"),
@@ -252,14 +279,46 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 var updatedWithNav = await LoadActivityWithRelationsAsync(activity.Id, asNoTracking: true);
+
+                var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(Guid.Empty);
+                if (oauthSettings?.IsEnabled == true)
+                {
+                    var currentUserId = _userContextService.GetCurrentUserId();
+                    if (!currentUserId.HasValue || currentUserId.Value <= 0)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<ActivityDto>.ErrorResult(
+                            _localizationService.GetLocalizedString("ActivityService.ActivityUpdateFailed"),
+                            _localizationService.GetLocalizedString("ActivityService.UserSessionNotFound"),
+                            StatusCodes.Status400BadRequest);
+                    }
+
+                    var calendarEventId = await _googleCalendarService.SyncActivityEventAsync(currentUserId.Value, updatedWithNav ?? activity);
+                    activity.GoogleCalendarEventId = calendarEventId;
+                    await _unitOfWork.Activities.UpdateAsync(activity);
+                    await _unitOfWork.SaveChangesAsync();
+                    updatedWithNav = await LoadActivityWithRelationsAsync(activity.Id, asNoTracking: true);
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
                 var dto = _mapper.Map<ActivityDto>(updatedWithNav ?? activity);
 
                 return ApiResponse<ActivityDto>.SuccessResult(
                     dto,
                     _localizationService.GetLocalizedString("ActivityService.ActivityUpdated"));
             }
+            catch (InvalidOperationException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+
+                return ApiResponse<ActivityDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("ActivityService.ActivityUpdateFailed"),
+                    ex.Message,
+                    StatusCodes.Status400BadRequest);
+            }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 return ApiResponse<ActivityDto>.ErrorResult(
                     _localizationService.GetLocalizedString("ActivityService.InternalServerError"),
                     _localizationService.GetLocalizedString("ActivityService.UpdateActivityExceptionMessage", ex.Message),
@@ -271,16 +330,35 @@ namespace crm_api.Services
         {
             try
             {
+                await _unitOfWork.BeginTransactionAsync();
+
                 var activity = await _unitOfWork.Activities.Query()
                     .Include(a => a.Reminders)
                     .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
 
                 if (activity == null)
                 {
+                    await _unitOfWork.RollbackTransactionAsync();
                     return ApiResponse<object>.ErrorResult(
                         _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
                         _localizationService.GetLocalizedString("ActivityService.ActivityNotFound"),
                         StatusCodes.Status404NotFound);
+                }
+
+                var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(Guid.Empty);
+                if (oauthSettings?.IsEnabled == true && !string.IsNullOrWhiteSpace(activity.GoogleCalendarEventId))
+                {
+                    var currentUserId = _userContextService.GetCurrentUserId();
+                    if (!currentUserId.HasValue || currentUserId.Value <= 0)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return ApiResponse<object>.ErrorResult(
+                            _localizationService.GetLocalizedString("ActivityService.ActivityDeleteFailed"),
+                            _localizationService.GetLocalizedString("ActivityService.UserSessionNotFound"),
+                            StatusCodes.Status400BadRequest);
+                    }
+
+                    await _googleCalendarService.DeleteActivityEventAsync(currentUserId.Value, activity.GoogleCalendarEventId);
                 }
 
                 await _unitOfWork.Activities.SoftDeleteAsync(id);
@@ -292,13 +370,23 @@ namespace crm_api.Services
                 }
 
                 await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
 
                 return ApiResponse<object>.SuccessResult(
                     activity,
                     _localizationService.GetLocalizedString("ActivityService.ActivityDeleted"));
             }
+            catch (InvalidOperationException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("ActivityService.InternalServerError"),
+                    ex.Message,
+                    StatusCodes.Status400BadRequest);
+            }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 return ApiResponse<object>.ErrorResult(
                     _localizationService.GetLocalizedString("ActivityService.InternalServerError"),
                     _localizationService.GetLocalizedString("ActivityService.DeleteActivityExceptionMessage", ex.Message),
