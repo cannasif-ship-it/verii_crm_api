@@ -16,6 +16,7 @@ namespace crm_api.Controllers
         private readonly IGoogleOAuthService _googleOAuthService;
         private readonly IGoogleTokenService _googleTokenService;
         private readonly IGoogleCalendarService _googleCalendarService;
+        private readonly IGoogleIntegrationLogService _googleIntegrationLogService;
         private readonly ITenantGoogleOAuthSettingsService _tenantGoogleOAuthSettingsService;
         private readonly IUserContextService _userContextService;
         private readonly IEncryptionService _encryptionService;
@@ -27,6 +28,7 @@ namespace crm_api.Controllers
             IGoogleOAuthService googleOAuthService,
             IGoogleTokenService googleTokenService,
             IGoogleCalendarService googleCalendarService,
+            IGoogleIntegrationLogService googleIntegrationLogService,
             ITenantGoogleOAuthSettingsService tenantGoogleOAuthSettingsService,
             IUserContextService userContextService,
             IEncryptionService encryptionService,
@@ -37,11 +39,64 @@ namespace crm_api.Controllers
             _googleOAuthService = googleOAuthService;
             _googleTokenService = googleTokenService;
             _googleCalendarService = googleCalendarService;
+            _googleIntegrationLogService = googleIntegrationLogService;
             _tenantGoogleOAuthSettingsService = tenantGoogleOAuthSettingsService;
             _userContextService = userContextService;
             _encryptionService = encryptionService;
             _configuration = configuration;
             _logger = logger;
+        }
+
+        [HttpGet("logs")]
+        public async Task<ActionResult<ApiResponse<PagedResponse<GoogleIntegrationLogDto>>>> GetLogs(
+            [FromQuery] GoogleIntegrationLogsQueryDto query,
+            CancellationToken cancellationToken)
+        {
+            var currentUserIdResult = await _userService.GetCurrentUserIdAsync();
+            if (!currentUserIdResult.Success)
+            {
+                var error = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.ErrorResult(
+                    currentUserIdResult.Message,
+                    currentUserIdResult.ExceptionMessage,
+                    currentUserIdResult.StatusCode);
+
+                return StatusCode(error.StatusCode, error);
+            }
+
+            var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
+            if (tenantId == Guid.Empty)
+            {
+                var error = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.ErrorResult(
+                    "Google integration logs could not be loaded.",
+                    "Tenant context is missing.",
+                    StatusCodes.Status400BadRequest);
+
+                return StatusCode(error.StatusCode, error);
+            }
+
+            try
+            {
+                var logs = await _googleIntegrationLogService.GetPagedAsync(
+                    tenantId,
+                    currentUserIdResult.Data,
+                    query,
+                    cancellationToken);
+
+                var response = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.SuccessResult(
+                    logs,
+                    "Google integration logs retrieved.");
+
+                return StatusCode(response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load Google integration logs for tenant {TenantId}", tenantId);
+                var error = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.ErrorResult(
+                    "Google integration logs could not be loaded.",
+                    ex.Message,
+                    StatusCodes.Status500InternalServerError);
+                return StatusCode(error.StatusCode, error);
+            }
         }
 
         [HttpGet("status")]
@@ -93,12 +148,34 @@ namespace crm_api.Controllers
             try
             {
                 var url = await _googleOAuthService.CreateAuthorizeUrlAsync(currentUserIdResult.Data, cancellationToken);
+
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = _userContextService.GetCurrentTenantId(),
+                    UserId = currentUserIdResult.Data,
+                    Operation = "google.oauth.authorize-url",
+                    IsSuccess = true,
+                    Message = "Google authorize URL created.",
+                }, cancellationToken);
+
                 var response = ApiResponse<GoogleAuthorizeUrlDto>.SuccessResult(new GoogleAuthorizeUrlDto { Url = url }, "Google authorize URL created.");
                 return StatusCode(response.StatusCode, response);
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Google authorize URL configuration error for user {UserId}", currentUserIdResult.Data);
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = _userContextService.GetCurrentTenantId(),
+                    UserId = currentUserIdResult.Data,
+                    Operation = "google.oauth.authorize-url",
+                    IsSuccess = false,
+                    Severity = "Warning",
+                    Message = "Google authorize URL configuration error.",
+                    ErrorCode = "configuration_error",
+                    Metadata = ex.Message,
+                }, cancellationToken);
+
                 var error = ApiResponse<GoogleAuthorizeUrlDto>.ErrorResult(
                     "Google authorize URL could not be generated.",
                     ex.Message,
@@ -109,6 +186,18 @@ namespace crm_api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create Google authorize URL for user {UserId}", currentUserIdResult.Data);
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = _userContextService.GetCurrentTenantId(),
+                    UserId = currentUserIdResult.Data,
+                    Operation = "google.oauth.authorize-url",
+                    IsSuccess = false,
+                    Severity = "Error",
+                    Message = "Google authorize URL creation failed.",
+                    ErrorCode = "unexpected_error",
+                    Metadata = ex.Message,
+                }, cancellationToken);
+
                 var error = ApiResponse<GoogleAuthorizeUrlDto>.ErrorResult(
                     "Google authorize URL could not be generated.",
                     ex.Message,
@@ -128,6 +217,20 @@ namespace crm_api.Controllers
         {
             if (!string.IsNullOrWhiteSpace(error))
             {
+                if (_googleOAuthService.TryExtractStateContext(state ?? string.Empty, out var callbackUserIdFromError, out var callbackTenantIdFromError))
+                {
+                    await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                    {
+                        TenantId = callbackTenantIdFromError,
+                        UserId = callbackUserIdFromError,
+                        Operation = "google.oauth.callback",
+                        IsSuccess = false,
+                        Severity = "Warning",
+                        Message = "Google callback returned provider error.",
+                        ErrorCode = error,
+                    }, cancellationToken);
+                }
+
                 return Redirect(BuildFrontendRedirect(false, error));
             }
 
@@ -139,11 +242,33 @@ namespace crm_api.Controllers
             var stateValid = await _googleOAuthService.ValidateAndConsumeStateAsync(userId, state);
             if (!stateValid)
             {
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = tenantId,
+                    UserId = userId,
+                    Operation = "google.oauth.callback",
+                    IsSuccess = false,
+                    Severity = "Warning",
+                    Message = "Google callback state expired or already consumed.",
+                    ErrorCode = "state_expired",
+                }, cancellationToken);
+
                 return Redirect(BuildFrontendRedirect(false, "state_expired"));
             }
 
             if (string.IsNullOrWhiteSpace(code))
             {
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = tenantId,
+                    UserId = userId,
+                    Operation = "google.oauth.callback",
+                    IsSuccess = false,
+                    Severity = "Warning",
+                    Message = "Google callback code was missing.",
+                    ErrorCode = "missing_code",
+                }, cancellationToken);
+
                 return Redirect(BuildFrontendRedirect(false, "missing_code"));
             }
 
@@ -163,11 +288,32 @@ namespace crm_api.Controllers
                     tokenResult.Scope ?? string.Empty,
                     cancellationToken);
 
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = tenantId,
+                    UserId = userId,
+                    Operation = "google.oauth.callback",
+                    IsSuccess = true,
+                    Message = "Google OAuth callback completed successfully.",
+                }, cancellationToken);
+
                 return Redirect(BuildFrontendRedirect(true));
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Google callback validation/token flow failed for user {UserId}", userId);
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = tenantId,
+                    UserId = userId,
+                    Operation = "google.oauth.callback",
+                    IsSuccess = false,
+                    Severity = "Warning",
+                    Message = "Google callback validation/token flow failed.",
+                    ErrorCode = "oauth_flow_error",
+                    Metadata = ex.Message,
+                }, cancellationToken);
+
                 var reason = ex.Message;
                 if (reason.Length > 200)
                 {
@@ -179,6 +325,18 @@ namespace crm_api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Google callback failed for user {UserId}", userId);
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = tenantId,
+                    UserId = userId,
+                    Operation = "google.oauth.callback",
+                    IsSuccess = false,
+                    Severity = "Error",
+                    Message = "Google callback failed.",
+                    ErrorCode = "oauth_callback_failed",
+                    Metadata = ex.Message,
+                }, cancellationToken);
+
                 return Redirect(BuildFrontendRedirect(false, "oauth_callback_failed"));
             }
         }
@@ -213,12 +371,33 @@ namespace crm_api.Controllers
 
                 await _googleTokenService.DisconnectAsync(currentUserIdResult.Data, cancellationToken);
 
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = _userContextService.GetCurrentTenantId(),
+                    UserId = currentUserIdResult.Data,
+                    Operation = "google.oauth.disconnect",
+                    IsSuccess = true,
+                    Message = "Google integration disconnected.",
+                }, cancellationToken);
+
                 var response = ApiResponse<object>.SuccessResult(null, "Google integration disconnected.");
                 return StatusCode(response.StatusCode, response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Google disconnect failed for user {UserId}", currentUserIdResult.Data);
+                await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
+                {
+                    TenantId = _userContextService.GetCurrentTenantId(),
+                    UserId = currentUserIdResult.Data,
+                    Operation = "google.oauth.disconnect",
+                    IsSuccess = false,
+                    Severity = "Error",
+                    Message = "Google disconnect failed.",
+                    ErrorCode = "disconnect_failed",
+                    Metadata = ex.Message,
+                }, cancellationToken);
+
                 var error = ApiResponse<object>.ErrorResult(
                     "Google integration could not be disconnected.",
                     ex.Message,
