@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using crm_api.DTOs;
 using crm_api.Infrastructure;
 using crm_api.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -21,6 +22,7 @@ namespace crm_api.Services
         private readonly IMemoryCache _memoryCache;
         private readonly IUserContextService _userContextService;
         private readonly ITenantGoogleOAuthSettingsService _tenantGoogleOAuthSettingsService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<GoogleOAuthService> _logger;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -33,12 +35,14 @@ namespace crm_api.Services
             IMemoryCache memoryCache,
             IUserContextService userContextService,
             ITenantGoogleOAuthSettingsService tenantGoogleOAuthSettingsService,
+            IHttpContextAccessor httpContextAccessor,
             ILogger<GoogleOAuthService> logger)
         {
             _httpClientFactory = httpClientFactory;
             _memoryCache = memoryCache;
             _userContextService = userContextService;
             _tenantGoogleOAuthSettingsService = tenantGoogleOAuthSettingsService;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
@@ -278,7 +282,50 @@ namespace crm_api.Services
                 throw new InvalidOperationException($"Google OAuth ayarları yapılandırılmamış: {string.Join(", ", missing)}");
             }
 
-            return settings;
+            var resolvedRedirectUri = ResolveRedirectUri(settings.RedirectUri);
+            if (string.IsNullOrWhiteSpace(resolvedRedirectUri))
+            {
+                throw new InvalidOperationException("Google OAuth ayarları yapılandırılmamış: RedirectUri");
+            }
+
+            return new TenantGoogleOAuthRuntimeSettings
+            {
+                TenantId = settings.TenantId,
+                ClientId = settings.ClientId,
+                ClientSecret = settings.ClientSecret,
+                RedirectUri = resolvedRedirectUri,
+                Scopes = settings.Scopes,
+                IsEnabled = settings.IsEnabled,
+            };
+        }
+
+        private string ResolveRedirectUri(string redirectUri)
+        {
+            if (Uri.TryCreate(redirectUri, UriKind.Absolute, out var absoluteUri)
+                && (absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps))
+            {
+                return absoluteUri.ToString();
+            }
+
+            if (!Uri.TryCreate(redirectUri, UriKind.Relative, out var relativeUri))
+            {
+                return string.Empty;
+            }
+
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null || !httpContext.Request.Host.HasValue)
+            {
+                return string.Empty;
+            }
+
+            var request = httpContext.Request;
+            var baseUri = $"{request.Scheme}://{request.Host}{request.PathBase}";
+            if (!Uri.TryCreate(baseUri, UriKind.Absolute, out var requestBaseUri))
+            {
+                return string.Empty;
+            }
+
+            return new Uri(requestBaseUri, relativeUri).ToString();
         }
 
         private static string BuildStateCacheKey(long userId, string state)
