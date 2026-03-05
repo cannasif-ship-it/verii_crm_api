@@ -11,7 +11,7 @@ namespace crm_api.Services
 {
     public class TenantGoogleOAuthSettingsService : ITenantGoogleOAuthSettingsService
     {
-        private const string DefaultScope = "https://www.googleapis.com/auth/calendar.events";
+        private const string DefaultScope = "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.send";
         private static readonly Guid GlobalTenantId = Guid.Empty;
 
         private readonly CmsDbContext _dbContext;
@@ -134,12 +134,12 @@ namespace crm_api.Services
                 }
 
                 entity.ClientId = dto.ClientId.Trim();
-                entity.RedirectUri = string.IsNullOrWhiteSpace(dto.RedirectUri)
-                    ? null
-                    : dto.RedirectUri.Trim();
-                entity.Scopes = string.IsNullOrWhiteSpace(dto.Scopes)
-                    ? null
-                    : dto.Scopes.Trim();
+                entity.RedirectUri = NormalizeRedirectUri(string.IsNullOrWhiteSpace(dto.RedirectUri)
+                    ? entity.RedirectUri
+                    : dto.RedirectUri);
+                entity.Scopes = EnsureRequiredScopes(string.IsNullOrWhiteSpace(dto.Scopes)
+                    ? entity.Scopes
+                    : dto.Scopes);
                 entity.IsEnabled = dto.IsEnabled;
 
                 if (!string.IsNullOrWhiteSpace(dto.ClientSecretPlain))
@@ -238,15 +238,34 @@ namespace crm_api.Services
         {
             if (!string.IsNullOrWhiteSpace(scopes))
             {
-                return scopes.Trim();
+                return EnsureRequiredScopes(scopes);
             }
 
             if (!string.IsNullOrWhiteSpace(_googleOptions.Scopes))
             {
-                return _googleOptions.Scopes.Trim();
+                return EnsureRequiredScopes(_googleOptions.Scopes);
             }
 
-            return DefaultScope;
+            return EnsureRequiredScopes(DefaultScope);
+        }
+
+        private static string EnsureRequiredScopes(string? scopeSource)
+        {
+            var scopeSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (!string.IsNullOrWhiteSpace(scopeSource))
+            {
+                foreach (var scope in scopeSource
+                             .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    scopeSet.Add(scope);
+                }
+            }
+
+            scopeSet.Add("https://www.googleapis.com/auth/calendar.events");
+            scopeSet.Add("https://www.googleapis.com/auth/gmail.send");
+
+            return string.Join(' ', scopeSet);
         }
 
         private string? SafeDecrypt(string? encryptedValue)
