@@ -931,22 +931,34 @@ namespace crm_api.Services
                 if (string.IsNullOrWhiteSpace(code))
                     continue;
 
+                // RII_CUSTOMER için null dönmemesi gereken alanlar: ERP null gelirse '' veya 0 atanır
+                var taxOffice = erpCustomer.VergiDairesi ?? string.Empty;
+                var taxNumber = erpCustomer.VergiNumarasi ?? string.Empty;
+                var tcknNumber = erpCustomer.TcknNumber ?? string.Empty;
+                var email = erpCustomer.Email ?? string.Empty;
+                var website = erpCustomer.Web ?? string.Empty;
+                var phone1 = erpCustomer.CariTel ?? string.Empty;
+                var address = erpCustomer.CariAdres ?? string.Empty;
+                var branchCode = erpCustomer.SubeKodu;
+                var businessUnitCode = erpCustomer.IsletmeKodu;
+
                 if (!customerByCode.TryGetValue(code, out var customer))
                 {
-                    var name = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : erpCustomer.CariIsim!.Trim();
+                    var name = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : (erpCustomer.CariIsim ?? string.Empty).Trim();
+                    if (string.IsNullOrWhiteSpace(name)) name = code;
                     newCustomers.Add(new Customer
                     {
                         CustomerCode = code,
                         CustomerName = name,
-                        TaxOffice = erpCustomer.VergiDairesi,
-                        TaxNumber = erpCustomer.VergiNumarasi,
-                        TcknNumber = erpCustomer.TcknNumber,
-                        Email = erpCustomer.Email,
-                        Website = erpCustomer.Web,
-                        Phone1 = erpCustomer.CariTel,
-                        Address = erpCustomer.CariAdres,
-                        BranchCode = erpCustomer.SubeKodu,
-                        BusinessUnitCode = erpCustomer.IsletmeKodu,
+                        TaxOffice = taxOffice,
+                        TaxNumber = taxNumber,
+                        TcknNumber = tcknNumber,
+                        Email = email,
+                        Website = website,
+                        Phone1 = phone1,
+                        Address = address,
+                        BranchCode = branchCode,
+                        BusinessUnitCode = businessUnitCode,
                         IsERPIntegrated = true,
                         ERPIntegrationNumber = code,
                         LastSyncDate = DateTime.UtcNow
@@ -958,18 +970,19 @@ namespace crm_api.Services
 
                 var updated = false;
                 var reactivated = false;
-                var newName = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : erpCustomer.CariIsim!.Trim();
+                var newName = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : (erpCustomer.CariIsim ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(newName)) newName = code;
 
                 if (customer.CustomerName != newName) { customer.CustomerName = newName; updated = true; }
-                if (customer.TaxOffice != erpCustomer.VergiDairesi) { customer.TaxOffice = erpCustomer.VergiDairesi; updated = true; }
-                if (customer.TaxNumber != erpCustomer.VergiNumarasi) { customer.TaxNumber = erpCustomer.VergiNumarasi; updated = true; }
-                if (customer.TcknNumber != erpCustomer.TcknNumber) { customer.TcknNumber = erpCustomer.TcknNumber; updated = true; }
-                if (customer.Email != erpCustomer.Email) { customer.Email = erpCustomer.Email; updated = true; }
-                if (customer.Website != erpCustomer.Web) { customer.Website = erpCustomer.Web; updated = true; }
-                if (customer.Phone1 != erpCustomer.CariTel) { customer.Phone1 = erpCustomer.CariTel; updated = true; }
-                if (customer.Address != erpCustomer.CariAdres) { customer.Address = erpCustomer.CariAdres; updated = true; }
-                if (customer.BranchCode != erpCustomer.SubeKodu) { customer.BranchCode = erpCustomer.SubeKodu; updated = true; }
-                if (customer.BusinessUnitCode != erpCustomer.IsletmeKodu) { customer.BusinessUnitCode = erpCustomer.IsletmeKodu; updated = true; }
+                if (customer.TaxOffice != taxOffice) { customer.TaxOffice = taxOffice; updated = true; }
+                if (customer.TaxNumber != taxNumber) { customer.TaxNumber = taxNumber; updated = true; }
+                if (customer.TcknNumber != tcknNumber) { customer.TcknNumber = tcknNumber; updated = true; }
+                if (customer.Email != email) { customer.Email = email; updated = true; }
+                if (customer.Website != website) { customer.Website = website; updated = true; }
+                if (customer.Phone1 != phone1) { customer.Phone1 = phone1; updated = true; }
+                if (customer.Address != address) { customer.Address = address; updated = true; }
+                if (customer.BranchCode != branchCode) { customer.BranchCode = branchCode; updated = true; }
+                if (customer.BusinessUnitCode != businessUnitCode) { customer.BusinessUnitCode = businessUnitCode; updated = true; }
 
                 if (customer.IsDeleted)
                 {
@@ -986,6 +999,8 @@ namespace crm_api.Services
 
                 if (updated)
                 {
+                    customer.UpdatedDate = DateTime.UtcNow;
+                    customer.UpdatedBy = null; // ERP sync: background job, kullanıcı yok
                     customer.LastSyncDate = DateTime.UtcNow;
                     hasAnyChange = true;
                     if (!reactivated)
