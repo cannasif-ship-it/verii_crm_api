@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using crm_api.Data;
-using System.Globalization;
 
 namespace crm_api.Controllers
 {
@@ -77,10 +76,8 @@ namespace crm_api.Controllers
                 {
                     x.JobId,
                     x.JobName,
-                    FailedAt = x.FailedAt,
-                    Zaman = x.FailedAt.ToString("o"),
+                    FailedAt = x.FailedAt.ToString("o"),
                     Reason = x.ExceptionMessage ?? x.Reason,
-                    Neden = x.ExceptionMessage ?? x.Reason,
                     x.ExceptionType,
                     x.RetryCount,
                     x.Queue
@@ -132,7 +129,7 @@ namespace crm_api.Controllers
             var job = details.Job;
 
             var failedAt = details.FailedAt;
-            var zaman = failedAt.HasValue ? failedAt.Value.ToString("o") : (string?)null;
+            var failedAtIso = failedAt.HasValue ? failedAt.Value.ToString("o") : (string?)null;
             var neden = !string.IsNullOrEmpty(details.Reason)
                 ? details.Reason
                 : !string.IsNullOrEmpty(details.ExceptionMessage)
@@ -142,7 +139,7 @@ namespace crm_api.Controllers
                         : null;
 
             // State bilgisi eksikse JobDetails.History'den dene
-            if (string.IsNullOrEmpty(zaman) || string.IsNullOrEmpty(neden))
+            if (string.IsNullOrEmpty(failedAtIso) || string.IsNullOrEmpty(neden))
             {
                 try
                 {
@@ -154,8 +151,8 @@ namespace crm_api.Controllers
 
                     if (failedState != null)
                     {
-                        if (string.IsNullOrEmpty(zaman) && failedState.CreatedAt != default)
-                            zaman = failedState.CreatedAt.ToString("o");
+                        if (string.IsNullOrEmpty(failedAtIso) && failedState.CreatedAt != default)
+                            failedAtIso = failedState.CreatedAt.ToString("o");
 
                         if (string.IsNullOrEmpty(neden))
                         {
@@ -169,7 +166,7 @@ namespace crm_api.Controllers
             }
 
             // Hâlâ boşsa SQL RII_JOB_FAILURE_LOG'dan al (müşteri için kaydedilen)
-            if (string.IsNullOrEmpty(zaman) || string.IsNullOrEmpty(neden))
+            if (string.IsNullOrEmpty(failedAtIso) || string.IsNullOrEmpty(neden))
             {
                 try
                 {
@@ -181,8 +178,8 @@ namespace crm_api.Controllers
 
                     if (dbLog != null)
                     {
-                        if (string.IsNullOrEmpty(zaman))
-                            zaman = dbLog.FailedAt.ToString("o");
+                        if (string.IsNullOrEmpty(failedAtIso))
+                            failedAtIso = dbLog.FailedAt.ToString("o");
                         if (string.IsNullOrEmpty(neden))
                             neden = dbLog.ExceptionMessage ?? dbLog.Reason;
                     }
@@ -194,32 +191,20 @@ namespace crm_api.Controllers
             {
                 JobId = jobId,
                 JobName = job == null ? "unknown" : $"{job.Type.Name}.{job.Method.Name}",
-                FailedAt = ResolveFailedAtValue(failedAt, zaman),
+                FailedAt = ResolveFailedAtValue(failedAt, failedAtIso),
                 State = "Failed",
-                Reason = neden ?? details.ExceptionMessage,
-                Zaman = zaman,
-                Neden = neden
+                Reason = neden ?? details.ExceptionMessage
             };
         }
 
-        private static object? ResolveFailedAtValue(DateTime? failedAt, string? zaman)
+        private static string? ResolveFailedAtValue(DateTime? failedAt, string? fallbackIsoDate)
         {
             if (failedAt.HasValue)
             {
-                return failedAt.Value;
+                return failedAt.Value.ToString("o");
             }
 
-            if (!string.IsNullOrWhiteSpace(zaman) &&
-                DateTime.TryParse(
-                    zaman,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var parsed))
-            {
-                return parsed;
-            }
-
-            return null;
+            return string.IsNullOrWhiteSpace(fallbackIsoDate) ? null : fallbackIsoDate;
         }
 
         private static object MapEnqueuedJob(KeyValuePair<string, EnqueuedJobDto> kvp)
@@ -231,7 +216,7 @@ namespace crm_api.Controllers
             {
                 JobId = kvp.Key,
                 JobName = job == null ? "unknown" : $"{job.Type.Name}.{job.Method.Name}",
-                EnqueuedAt = details?.EnqueuedAt,
+                EnqueuedAt = details?.EnqueuedAt?.ToString("o"),
                 State = "Enqueued",
                 Reason = "dead-letter"
             };
