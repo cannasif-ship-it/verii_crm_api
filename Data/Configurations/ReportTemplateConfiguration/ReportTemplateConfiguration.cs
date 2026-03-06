@@ -33,6 +33,8 @@ namespace crm_api.Data.Configurations
                 .HasDefaultValue(false);
 
             builder.HasIndex(rt => new { rt.RuleType, rt.Default })
+                .IsUnique()
+                .HasFilter("[Default] = 1 AND [IsDeleted] = 0")
                 .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_Default");
 
             builder.Property(rt => rt.CreatedByUserId)
