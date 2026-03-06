@@ -85,7 +85,14 @@ namespace crm_api.Infrastructure
             }
 
             var hostLower = host.ToLowerInvariant();
-            var allowed = allowlistedHosts.Any(h => hostLower.Equals((h ?? "").Trim().ToLowerInvariant()) || hostLower.EndsWith("." + (h ?? "").Trim().ToLowerInvariant()));
+            var allowedHosts = allowlistedHosts
+                .Select(NormalizeAllowlistHost)
+                .Where(h => !string.IsNullOrWhiteSpace(h))
+                .ToList();
+
+            var allowed = allowedHosts.Any(allowedHost =>
+                hostLower.Equals(allowedHost!, StringComparison.OrdinalIgnoreCase) ||
+                hostLower.EndsWith("." + allowedHost, StringComparison.OrdinalIgnoreCase));
             if (!allowed)
             {
                 rejectReason = "Host is not in the allowlist.";
@@ -106,7 +113,38 @@ namespace crm_api.Infrastructure
                 if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
                 if (bytes[0] == 192 && bytes[1] == 168) return true;
             }
+            else if (bytes.Length == 16)
+            {
+                // fc00::/7 (unique local) and fe80::/10 (link-local)
+                if ((bytes[0] & 0xFE) == 0xFC) return true;
+                if (bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0x80) return true;
+            }
             return false;
+        }
+
+        private static string? NormalizeAllowlistHost(string? rawValue)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return null;
+            }
+
+            var value = rawValue.Trim();
+
+            // Allow values as host ("cdn.example.com") or URL ("https://cdn.example.com/assets")
+            if (Uri.TryCreate(value, UriKind.Absolute, out var parsedUri) && !string.IsNullOrWhiteSpace(parsedUri.Host))
+            {
+                return parsedUri.Host.ToLowerInvariant();
+            }
+
+            // Remove optional port when a plain host:port value is provided.
+            if (value.Contains(':') && !value.Contains("://"))
+            {
+                var hostOnly = value.Split(':', 2, StringSplitOptions.RemoveEmptyEntries)[0];
+                return hostOnly.ToLowerInvariant();
+            }
+
+            return value.ToLowerInvariant();
         }
     }
 }

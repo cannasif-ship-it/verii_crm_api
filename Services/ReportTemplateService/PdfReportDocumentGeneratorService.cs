@@ -60,7 +60,7 @@ namespace crm_api.Services
                     throw new InvalidOperationException($"Entity with ID {entityId} not found for rule type {ruleType}");
 
                 // Pre-fetch all images async (avoids sync-over-async in render)
-                var imageCache = await PreFetchImagesAsync(templateData.Elements ?? new List<ReportElement>(), (reason) =>
+                var imageCache = await PreFetchImagesAsync(templateData.Elements ?? new List<ReportElement>(), entityData, (reason) =>
                 {
                     _logger.LogWarning("PdfReportDocumentGenerator SSRF reject: {Reason}", reason);
                     warningCount++;
@@ -142,11 +142,13 @@ namespace crm_api.Services
                 c = c.Padding(padding);
             if (!string.IsNullOrEmpty(bg))
             {
-                try { c = c.Background(bg); } catch { }
+                try { c = c.Background(bg); }
+                catch (Exception ex) { _logger.LogDebug(ex, "PdfReportDocumentGenerator style apply failed: Background={Bg}", bg); }
             }
             if (!string.IsNullOrEmpty(border))
             {
-                try { c = c.Border(1).BorderColor(border); } catch { }
+                try { c = c.Border(1).BorderColor(border); }
+                catch (Exception ex) { _logger.LogDebug(ex, "PdfReportDocumentGenerator style apply failed: Border={Border}", border); }
             }
 
             c.Element(inner => renderContent(inner));
@@ -162,14 +164,17 @@ namespace crm_api.Services
 
         private async Task<Dictionary<string, byte[]>> PreFetchImagesAsync(
             List<ReportElement> elements,
+            object entityData,
             Action<string> onReject)
         {
             var cache = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
-            var imageElements = elements.Where(e => "image".Equals(e.Type, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(e.Value)).ToList();
+            var imageElements = elements.Where(e => "image".Equals(e.Type, StringComparison.OrdinalIgnoreCase)).ToList();
 
             foreach (var el in imageElements)
             {
-                var key = el.Value.Trim();
+                var source = ResolveImageSource(el, entityData);
+                if (string.IsNullOrWhiteSpace(source)) continue;
+                var key = source.Trim();
                 if (cache.ContainsKey(key)) continue;
 
                 if (key.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
@@ -204,6 +209,68 @@ namespace crm_api.Services
                     {
                         _logger.LogWarning(ex, "PdfReportDocumentGenerator data URI decode failed");
                         onReject("Failed to decode data URI");
+                    }
+                    continue;
+                }
+
+                // Local/relative file path (e.g. /uploads/stock-images/123/abc.jpg)
+                if (!key.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                    !key.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.IsNullOrEmpty(_options.LocalImageBasePath))
+                    {
+                        _logger.LogWarning("PdfReportDocumentGenerator local image skipped (LocalImageBasePath not configured): Path={Path}", key);
+                        onReject("Local image base path not configured");
+                        continue;
+                    }
+
+                    try
+                    {
+                        var sanitized = key.TrimStart('/').Replace('\\', '/');
+                        if (sanitized.Contains(".."))
+                        {
+                            _logger.LogWarning("PdfReportDocumentGenerator path traversal rejected: Path={Path}", key);
+                            onReject("Path traversal not allowed");
+                            continue;
+                        }
+
+                        var baseFull = System.IO.Path.GetFullPath(_options.LocalImageBasePath);
+                        var fullPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(_options.LocalImageBasePath, sanitized));
+                        if (!fullPath.StartsWith(baseFull, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _logger.LogWarning("PdfReportDocumentGenerator path outside base rejected: Path={Path}, Resolved={Resolved}", key, fullPath);
+                            onReject("Path is outside allowed base directory");
+                            continue;
+                        }
+
+                        if (!System.IO.File.Exists(fullPath))
+                        {
+                            _logger.LogWarning("PdfReportDocumentGenerator local image not found: Path={Path}", fullPath);
+                            onReject("Local image file not found");
+                            continue;
+                        }
+
+                        var localBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+                        if (localBytes.Length > _options.MaxImageSizeBytes)
+                        {
+                            _logger.LogWarning("PdfReportDocumentGenerator local image size exceeded: MaxBytes={Max}, Actual={Actual}, Path={Path}",
+                                _options.MaxImageSizeBytes, localBytes.Length, key);
+                            onReject("Image exceeds max size");
+                            continue;
+                        }
+                        if (localBytes.Length > 0 && !ValidateImageContentType(localBytes, out var localCtReject))
+                        {
+                            _logger.LogWarning("PdfReportDocumentGenerator local image Content-Type reject: {Reason}, Path={Path}", localCtReject, key);
+                            onReject(localCtReject ?? "Invalid content type");
+                            continue;
+                        }
+                        if (localBytes.Length > 0)
+                            cache[key] = localBytes;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "PdfReportDocumentGenerator local image read failed: Path={Path}", key);
+                        onReject("Failed to read local image");
                     }
                     continue;
                 }
@@ -248,18 +315,59 @@ namespace crm_api.Services
             return cache;
         }
 
+        private string? ResolveImageSource(ReportElement element, object entityData)
+        {
+            if (!string.IsNullOrWhiteSpace(element.Value))
+            {
+                return element.Value?.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(element.Path))
+            {
+                var resolved = ResolvePropertyPath(entityData, element.Path);
+                var resolvedString = resolved?.ToString();
+                if (!string.IsNullOrWhiteSpace(resolvedString))
+                    return resolvedString.Trim();
+            }
+
+            return null;
+        }
+
         private bool ValidateImageContentType(byte[] bytes, out string? rejectReason)
         {
             rejectReason = null;
             if (bytes == null || bytes.Length < 12) return true;
             var allowed = _options.AllowedImageContentTypes;
             if (allowed == null || allowed.Count == 0) return true;
+
+            string? detected = null;
             var isPng = bytes.Length >= 8 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E;
+            if (isPng) detected = "image/png";
+
             var isJpeg = bytes.Length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xD8;
+            if (detected == null && isJpeg) detected = "image/jpeg";
+
             var isGif = bytes.Length >= 6 && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46;
+            if (detected == null && isGif) detected = "image/gif";
+
             var isWebp = bytes.Length >= 12 && bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50;
-            if (isPng || isJpeg || isGif || isWebp) return true;
-            rejectReason = "Content is not image/png, image/jpeg, image/gif, or image/webp";
+            if (detected == null && isWebp) detected = "image/webp";
+
+            if (detected == null)
+            {
+                rejectReason = "Content is not a supported image format.";
+                return false;
+            }
+
+            var allowedSet = allowed
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim().ToLowerInvariant())
+                .ToHashSet();
+
+            if (allowedSet.Count == 0 || allowedSet.Contains(detected))
+                return true;
+
+            rejectReason = $"Content type '{detected}' is not allowed.";
             return false;
         }
 
@@ -275,7 +383,7 @@ namespace crm_api.Services
                     RenderField(container, element, entityData);
                     break;
                 case "image":
-                    RenderImage(container, element, imageCache, onWarning);
+                    RenderImage(container, element, entityData, imageCache, onWarning);
                     break;
                 case "table":
                     RenderTable(container, element, entityData, unit);
@@ -340,11 +448,16 @@ namespace crm_api.Services
             return Regex.Replace(stripped, @"\s+", " ").Trim();
         }
 
-        private void RenderImage(IContainer container, ReportElement element,
+        private void RenderImage(IContainer container, ReportElement element, object entityData,
             Dictionary<string, byte[]> imageCache, Action onWarning)
         {
-            if (string.IsNullOrEmpty(element.Value)) return;
-            var key = element.Value.Trim();
+            var source = ResolveImageSource(element, entityData);
+            var key = source?.Trim();
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                onWarning();
+                return;
+            }
             if (!imageCache.TryGetValue(key, out var imageBytes) || imageBytes == null || imageBytes.Length == 0)
             {
                 onWarning();
@@ -357,6 +470,7 @@ namespace crm_api.Services
         {
             if (element.Columns == null || !element.Columns.Any()) return 0;
             var firstPath = element.Columns[0].Path;
+            if (string.IsNullOrEmpty(firstPath)) return 0;
             var collectionName = firstPath.Contains('.') ? firstPath.Split('.')[0] : firstPath;
             var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
             return collection?.Count() ?? 0;
@@ -367,6 +481,7 @@ namespace crm_api.Services
             if (element.Columns == null || !element.Columns.Any()) return;
 
             var firstPath = element.Columns[0].Path;
+            if (string.IsNullOrEmpty(firstPath)) return;
             var collectionName = firstPath.Contains('.') ? firstPath.Split('.')[0] : firstPath;
             var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
             if (collection == null) return;
@@ -393,23 +508,42 @@ namespace crm_api.Services
                     }
                 });
 
-                table.Header(header =>
+                if (repeatHeader)
+                {
+                    table.Header(header =>
+                    {
+                        foreach (var col in element.Columns)
+                        {
+                            var cell = header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(col.Label).Bold();
+                            if (headerStyle?.FontSize.HasValue == true)
+                                cell = cell.FontSize((float)headerStyle.FontSize.Value);
+                            if (!string.IsNullOrEmpty(headerStyle?.Color))
+                                cell = cell.FontColor(headerStyle.Color);
+                        }
+                    });
+                }
+                else
                 {
                     foreach (var col in element.Columns)
                     {
-                        var cell = header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(col.Label).Bold();
+                        var cell = table.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(col.Label).Bold();
                         if (headerStyle?.FontSize.HasValue == true)
                             cell = cell.FontSize((float)headerStyle.FontSize.Value);
                         if (!string.IsNullOrEmpty(headerStyle?.Color))
                             cell = cell.FontColor(headerStyle.Color);
                     }
-                });
+                }
 
                 var rowIndex = 0;
                 foreach (var row in rows)
                 {
                     foreach (var col in element.Columns)
                     {
+                        if (string.IsNullOrEmpty(col.Path))
+                        {
+                            table.Cell().Border(1).Padding(5).Text(string.Empty);
+                            continue;
+                        }
                         var propertyPath = col.Path.Contains('.') ? col.Path.Split('.', 2)[1] : col.Path;
                         var cellValue = ResolvePropertyPath(row, propertyPath)?.ToString() ?? string.Empty;
                         if (cellValue.IndexOf('<') >= 0) cellValue = StripHtml(cellValue);
@@ -434,6 +568,11 @@ namespace crm_api.Services
             foreach (var part in parts)
             {
                 if (current == null) return null;
+                if (current is System.Collections.IEnumerable enumerable && current is not string)
+                {
+                    current = enumerable.Cast<object?>().FirstOrDefault();
+                    if (current == null) return null;
+                }
                 var type = current.GetType();
                 var property = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (property == null) return null;
@@ -471,11 +610,50 @@ namespace crm_api.Services
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from dl in _unitOfWork.DemandLines.Query(false, false)
                                 where dl.DemandId == d.Id && !dl.IsDeleted
+                                let stockData = _unitOfWork.Stocks.Query(false, false)
+                                    .Where(s => !s.IsDeleted &&
+                                        ((dl.RelatedStockId.HasValue && s.Id == dl.RelatedStockId.Value) ||
+                                         (!dl.RelatedStockId.HasValue && s.ErpStockCode == dl.ProductCode)))
+                                    .Select(s => new
+                                    {
+                                        Id = (long?)s.Id,
+                                        s.ErpStockCode,
+                                        s.StockName,
+                                        s.Unit,
+                                        s.UreticiKodu,
+                                        s.GrupKodu,
+                                        s.GrupAdi,
+                                        s.Kod1,
+                                        s.Kod1Adi,
+                                        s.Kod2,
+                                        s.Kod2Adi,
+                                        s.Kod3,
+                                        s.Kod3Adi,
+                                        s.Kod4,
+                                        s.Kod4Adi,
+                                        s.Kod5,
+                                        s.Kod5Adi
+                                    })
+                                    .FirstOrDefault()
                                 select new
                                 {
                                     dl.ProductCode,
-                                    ProductName = dl.ProductCode,
-                                    GroupCode = "",
+                                    ProductName = stockData != null ? stockData.StockName : dl.ProductCode,
+                                    GroupCode = stockData != null ? (stockData.GrupKodu ?? "") : "",
+                                    StockCode = stockData != null ? (stockData.ErpStockCode ?? "") : "",
+                                    StockUnit = stockData != null ? (stockData.Unit ?? "") : "",
+                                    StockManufacturerCode = stockData != null ? (stockData.UreticiKodu ?? "") : "",
+                                    StockGroupName = stockData != null ? (stockData.GrupAdi ?? "") : "",
+                                    StockCode1 = stockData != null ? (stockData.Kod1 ?? "") : "",
+                                    StockCode1Name = stockData != null ? (stockData.Kod1Adi ?? "") : "",
+                                    StockCode2 = stockData != null ? (stockData.Kod2 ?? "") : "",
+                                    StockCode2Name = stockData != null ? (stockData.Kod2Adi ?? "") : "",
+                                    StockCode3 = stockData != null ? (stockData.Kod3 ?? "") : "",
+                                    StockCode3Name = stockData != null ? (stockData.Kod3Adi ?? "") : "",
+                                    StockCode4 = stockData != null ? (stockData.Kod4 ?? "") : "",
+                                    StockCode4Name = stockData != null ? (stockData.Kod4Adi ?? "") : "",
+                                    StockCode5 = stockData != null ? (stockData.Kod5 ?? "") : "",
+                                    StockCode5Name = stockData != null ? (stockData.Kod5Adi ?? "") : "",
                                     dl.Quantity,
                                     dl.UnitPrice,
                                     dl.DiscountRate1,
@@ -489,11 +667,11 @@ namespace crm_api.Services
                                     dl.LineTotal,
                                     dl.LineGrandTotal,
                                     dl.Description,
-                                    HtmlDescription = dl.RelatedStockId.HasValue
-                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == dl.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                    HtmlDescription = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == stockData.Id.Value && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
-                                    DefaultImagePath = dl.RelatedStockId.HasValue
-                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == dl.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                    DefaultImagePath = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),
@@ -523,11 +701,50 @@ namespace crm_api.Services
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from ql in _unitOfWork.QuotationLines.Query(false, false)
                                 where ql.QuotationId == q.Id && !ql.IsDeleted
+                                let stockData = _unitOfWork.Stocks.Query(false, false)
+                                    .Where(s => !s.IsDeleted &&
+                                        ((ql.RelatedStockId.HasValue && s.Id == ql.RelatedStockId.Value) ||
+                                         (!ql.RelatedStockId.HasValue && s.ErpStockCode == ql.ProductCode)))
+                                    .Select(s => new
+                                    {
+                                        Id = (long?)s.Id,
+                                        s.ErpStockCode,
+                                        s.StockName,
+                                        s.Unit,
+                                        s.UreticiKodu,
+                                        s.GrupKodu,
+                                        s.GrupAdi,
+                                        s.Kod1,
+                                        s.Kod1Adi,
+                                        s.Kod2,
+                                        s.Kod2Adi,
+                                        s.Kod3,
+                                        s.Kod3Adi,
+                                        s.Kod4,
+                                        s.Kod4Adi,
+                                        s.Kod5,
+                                        s.Kod5Adi
+                                    })
+                                    .FirstOrDefault()
                                 select new
                                 {
                                     ql.ProductCode,
-                                    ProductName = ql.ProductCode,
-                                    GroupCode = "",
+                                    ProductName = stockData != null ? stockData.StockName : ql.ProductCode,
+                                    GroupCode = stockData != null ? (stockData.GrupKodu ?? "") : "",
+                                    StockCode = stockData != null ? (stockData.ErpStockCode ?? "") : "",
+                                    StockUnit = stockData != null ? (stockData.Unit ?? "") : "",
+                                    StockManufacturerCode = stockData != null ? (stockData.UreticiKodu ?? "") : "",
+                                    StockGroupName = stockData != null ? (stockData.GrupAdi ?? "") : "",
+                                    StockCode1 = stockData != null ? (stockData.Kod1 ?? "") : "",
+                                    StockCode1Name = stockData != null ? (stockData.Kod1Adi ?? "") : "",
+                                    StockCode2 = stockData != null ? (stockData.Kod2 ?? "") : "",
+                                    StockCode2Name = stockData != null ? (stockData.Kod2Adi ?? "") : "",
+                                    StockCode3 = stockData != null ? (stockData.Kod3 ?? "") : "",
+                                    StockCode3Name = stockData != null ? (stockData.Kod3Adi ?? "") : "",
+                                    StockCode4 = stockData != null ? (stockData.Kod4 ?? "") : "",
+                                    StockCode4Name = stockData != null ? (stockData.Kod4Adi ?? "") : "",
+                                    StockCode5 = stockData != null ? (stockData.Kod5 ?? "") : "",
+                                    StockCode5Name = stockData != null ? (stockData.Kod5Adi ?? "") : "",
                                     ql.Quantity,
                                     ql.UnitPrice,
                                     ql.DiscountRate1,
@@ -541,11 +758,11 @@ namespace crm_api.Services
                                     ql.LineTotal,
                                     ql.LineGrandTotal,
                                     ql.Description,
-                                    HtmlDescription = ql.RelatedStockId.HasValue
-                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == ql.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                    HtmlDescription = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == stockData.Id.Value && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
-                                    DefaultImagePath = ql.RelatedStockId.HasValue
-                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == ql.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                    DefaultImagePath = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),
@@ -575,11 +792,50 @@ namespace crm_api.Services
                                 select new { er.Currency, er.ExchangeRate, er.ExchangeRateDate, er.IsOfficial }).ToList(),
                         Lines = (from ol in _unitOfWork.OrderLines.Query(false, false)
                                 where ol.OrderId == o.Id && !ol.IsDeleted
+                                let stockData = _unitOfWork.Stocks.Query(false, false)
+                                    .Where(s => !s.IsDeleted &&
+                                        ((ol.RelatedStockId.HasValue && s.Id == ol.RelatedStockId.Value) ||
+                                         (!ol.RelatedStockId.HasValue && s.ErpStockCode == ol.ProductCode)))
+                                    .Select(s => new
+                                    {
+                                        Id = (long?)s.Id,
+                                        s.ErpStockCode,
+                                        s.StockName,
+                                        s.Unit,
+                                        s.UreticiKodu,
+                                        s.GrupKodu,
+                                        s.GrupAdi,
+                                        s.Kod1,
+                                        s.Kod1Adi,
+                                        s.Kod2,
+                                        s.Kod2Adi,
+                                        s.Kod3,
+                                        s.Kod3Adi,
+                                        s.Kod4,
+                                        s.Kod4Adi,
+                                        s.Kod5,
+                                        s.Kod5Adi
+                                    })
+                                    .FirstOrDefault()
                                 select new
                                 {
                                     ol.ProductCode,
-                                    ProductName = ol.ProductCode,
-                                    GroupCode = "",
+                                    ProductName = stockData != null ? stockData.StockName : ol.ProductCode,
+                                    GroupCode = stockData != null ? (stockData.GrupKodu ?? "") : "",
+                                    StockCode = stockData != null ? (stockData.ErpStockCode ?? "") : "",
+                                    StockUnit = stockData != null ? (stockData.Unit ?? "") : "",
+                                    StockManufacturerCode = stockData != null ? (stockData.UreticiKodu ?? "") : "",
+                                    StockGroupName = stockData != null ? (stockData.GrupAdi ?? "") : "",
+                                    StockCode1 = stockData != null ? (stockData.Kod1 ?? "") : "",
+                                    StockCode1Name = stockData != null ? (stockData.Kod1Adi ?? "") : "",
+                                    StockCode2 = stockData != null ? (stockData.Kod2 ?? "") : "",
+                                    StockCode2Name = stockData != null ? (stockData.Kod2Adi ?? "") : "",
+                                    StockCode3 = stockData != null ? (stockData.Kod3 ?? "") : "",
+                                    StockCode3Name = stockData != null ? (stockData.Kod3Adi ?? "") : "",
+                                    StockCode4 = stockData != null ? (stockData.Kod4 ?? "") : "",
+                                    StockCode4Name = stockData != null ? (stockData.Kod4Adi ?? "") : "",
+                                    StockCode5 = stockData != null ? (stockData.Kod5 ?? "") : "",
+                                    StockCode5Name = stockData != null ? (stockData.Kod5Adi ?? "") : "",
                                     ol.Quantity,
                                     ol.UnitPrice,
                                     ol.DiscountRate1,
@@ -593,11 +849,11 @@ namespace crm_api.Services
                                     ol.LineTotal,
                                     ol.LineGrandTotal,
                                     ol.Description,
-                                    HtmlDescription = ol.RelatedStockId.HasValue
-                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == ol.RelatedStockId && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
+                                    HtmlDescription = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == stockData.Id.Value && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",
-                                    DefaultImagePath = ol.RelatedStockId.HasValue
-                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == ol.RelatedStockId && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
+                                    DefaultImagePath = stockData != null && stockData.Id.HasValue
+                                        ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
                     }).FirstOrDefaultAsync(),

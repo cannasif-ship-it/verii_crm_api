@@ -27,6 +27,13 @@ namespace crm_api.Infrastructure
         public int MaxImageSizeBytes { get; set; } = 5 * 1024 * 1024;
 
         /// <summary>
+        /// Absolute base path for resolving local/relative image paths (e.g. ContentRootPath).
+        /// When empty, relative paths like "/uploads/stock-images/..." are skipped.
+        /// Path traversal is always blocked.
+        /// </summary>
+        public string LocalImageBasePath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Allowed image content types for data: URIs (e.g. image/png, image/jpeg). Empty = allow common image types.
         /// </summary>
         public List<string> AllowedImageContentTypes { get; set; } = new() { "image/png", "image/jpeg", "image/gif", "image/webp" };
