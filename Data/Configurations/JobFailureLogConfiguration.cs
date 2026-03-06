@@ -31,7 +31,7 @@ namespace crm_api.Data.Configurations
                 .HasMaxLength(4000);
 
             builder.Property(x => x.StackTrace)
-                .HasMaxLength(8000);
+                .HasMaxLength(4000);
 
             builder.Property(x => x.Queue)
                 .HasMaxLength(100);
