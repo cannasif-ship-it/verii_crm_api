@@ -7,18 +7,18 @@ namespace Infrastructure.BackgroundJobs
 {
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
     [AutomaticRetry(Attempts = 3, DelaysInSeconds = new[] { 60, 120, 300 })]
-    public class StockSyncJob : IStockSyncJob
+    public class CustomerSyncJob : ICustomerSyncJob
     {
-        private readonly IStockService _stockService;
+        private readonly ICustomerService _customerService;
         private readonly ILocalizationService _localizationService;
-        private readonly ILogger<StockSyncJob> _logger;
+        private readonly ILogger<CustomerSyncJob> _logger;
 
-        public StockSyncJob(
-            IStockService stockService,
+        public CustomerSyncJob(
+            ICustomerService customerService,
             ILocalizationService localizationService,
-            ILogger<StockSyncJob> logger)
+            ILogger<CustomerSyncJob> logger)
         {
-            _stockService = stockService;
+            _customerService = customerService;
             _localizationService = localizationService;
             _logger = logger;
         }
@@ -27,15 +27,15 @@ namespace Infrastructure.BackgroundJobs
         {
             try
             {
-                _logger.LogInformation(_localizationService.GetLocalizedString("StockSyncJob.Started"));
+                _logger.LogInformation(_localizationService.GetLocalizedString("CustomerSyncJob.Started"));
 
-                await _stockService.SyncStocksFromErpAsync();
+                await _customerService.SyncCustomersFromErpAsync();
 
-                _logger.LogInformation(_localizationService.GetLocalizedString("StockSyncJob.Completed"));
+                _logger.LogInformation(_localizationService.GetLocalizedString("CustomerSyncJob.Completed"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, _localizationService.GetLocalizedString("StockSyncJob.Failed"));
+                _logger.LogError(ex, _localizationService.GetLocalizedString("CustomerSyncJob.Failed"));
                 throw;
             }
         }

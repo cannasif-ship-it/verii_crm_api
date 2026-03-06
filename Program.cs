@@ -242,6 +242,7 @@ builder.Services.AddScoped<ISmtpSettingsService, SmtpSettingsService>();
 
 // Register Background Jobs
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IStockSyncJob, Infrastructure.BackgroundJobs.StockSyncJob>();
+builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.ICustomerSyncJob, Infrastructure.BackgroundJobs.CustomerSyncJob>();
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IMailJob, Infrastructure.BackgroundJobs.MailJob>();
 builder.Services.AddScoped<Infrastructure.BackgroundJobs.Interfaces.IHangfireDeadLetterJob, Infrastructure.BackgroundJobs.HangfireDeadLetterJob>();
 
@@ -707,10 +708,15 @@ if (!app.Environment.IsDevelopment())
         "erp-stock-sync-job",
         job => job.ExecuteAsync(),
         Cron.MinuteInterval(30));
+    RecurringJob.AddOrUpdate<ICustomerSyncJob>(
+        "erp-customer-sync-job",
+        job => job.ExecuteAsync(),
+        Cron.MinuteInterval(30));
 }
 else
 {
     RecurringJob.RemoveIfExists("erp-stock-sync-job");
+    RecurringJob.RemoveIfExists("erp-customer-sync-job");
     app.Logger.LogInformation("Skipping recurring ERP sync jobs in Development environment.");
 }
 

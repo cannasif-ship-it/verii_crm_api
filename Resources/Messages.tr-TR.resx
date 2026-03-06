@@ -1756,6 +1756,9 @@
   <data name="CustomerSyncJob.Completed" xml:space="preserve">
     <value>Cari senkronizasyonu tamamlandı.</value>
   </data>
+  <data name="CustomerSyncJob.Failed" xml:space="preserve">
+    <value>Cari senkronizasyonu başarısız oldu.</value>
+  </data>
   <data name="PowerBIConfigurationService.Retrieved" xml:space="preserve">
     <value>Yapılandırma getirildi.</value>
   </data>

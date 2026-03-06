@@ -45,7 +45,7 @@ namespace crm_api.Controllers
             if (count > 100) count = 100;
 
             var failed = _monitoringApi.FailedJobs(from, count)
-                .Select(MapJob)
+                .Select(kvp => MapJob(kvp))
                 .ToList();
 
             return Ok(new
@@ -80,18 +80,65 @@ namespace crm_api.Controllers
             });
         }
 
-        private static object MapJob(KeyValuePair<string, FailedJobDto> kvp)
+        /// <summary>
+        /// FailedJobDto'dan item oluşturur. FailedAt/Reason state'te yoksa (eski veya eksik kayıt)
+        /// JobDetails.History içindeki "Failed" state'ten Zaman ve Neden doldurulur.
+        /// </summary>
+        private object MapJob(KeyValuePair<string, FailedJobDto> kvp)
         {
+            var jobId = kvp.Key;
             var details = kvp.Value;
             var job = details.Job;
 
+            var failedAt = details.FailedAt;
+            var zaman = failedAt.HasValue ? failedAt.Value.ToString("o") : (string?)null;
+            var neden = !string.IsNullOrEmpty(details.Reason)
+                ? details.Reason
+                : !string.IsNullOrEmpty(details.ExceptionMessage)
+                    ? details.ExceptionMessage
+                    : !string.IsNullOrEmpty(details.ExceptionDetails)
+                        ? details.ExceptionDetails
+                        : null;
+
+            // State bilgisi eksikse (eski job veya state tablosunda kayıt yok) JobDetails.History'den dene
+            if (string.IsNullOrEmpty(zaman) || string.IsNullOrEmpty(neden))
+            {
+                try
+                {
+                    var jobDetails = _monitoringApi.JobDetails(jobId);
+                    var failedState = jobDetails?.History?
+                        .Where(h => "Failed".Equals(h.StateName, StringComparison.OrdinalIgnoreCase))
+                        .OrderByDescending(h => h.CreatedAt)
+                        .FirstOrDefault();
+
+                    if (failedState != null)
+                    {
+                        if (string.IsNullOrEmpty(zaman) && failedState.CreatedAt != default)
+                            zaman = failedState.CreatedAt.ToString("o");
+
+                        if (string.IsNullOrEmpty(neden))
+                        {
+                            neden = !string.IsNullOrEmpty(failedState.Reason)
+                                ? failedState.Reason
+                                : (failedState.Data != null && failedState.Data.TryGetValue("ExceptionMessage", out var msg) ? msg : null);
+                        }
+                    }
+                }
+                catch
+                {
+                    // JobDetails veya History alınamazsa mevcut (null) değerlerle devam et
+                }
+            }
+
             return new
             {
-                JobId = kvp.Key,
+                JobId = jobId,
                 JobName = job == null ? "unknown" : $"{job.Type.Name}.{job.Method.Name}",
-                FailedAt = details.FailedAt,
+                FailedAt = failedAt,
                 State = "Failed",
-                Reason = details.ExceptionMessage
+                Reason = neden ?? details.ExceptionMessage,
+                Zaman = zaman,
+                Neden = neden
             };
         }
 
