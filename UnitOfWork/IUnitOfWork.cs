@@ -33,6 +33,9 @@ namespace crm_api.UnitOfWork
         IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions { get; }
         IGenericRepository<ShippingAddress> ShippingAddresses { get; }
         IGenericRepository<Quotation> Quotations { get; }
+        IGenericRepository<TempQuotattion> TempQuotattions { get; }
+        IGenericRepository<TempQuotattionLine> TempQuotattionLines { get; }
+        IGenericRepository<TempQuotattionExchangeLine> TempQuotattionExchangeLines { get; }
         IGenericRepository<QuotationLine> QuotationLines { get; }
         IGenericRepository<UserSession> UserSessions { get; }
         IGenericRepository<QuotationExchangeRate> QuotationExchangeRates { get; }

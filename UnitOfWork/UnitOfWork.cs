@@ -43,6 +43,9 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<UserDiscountLimit>? _userDiscountLimits;
         private IGenericRepository<ShippingAddress>? _shippingAddresses;
         private IGenericRepository<Quotation>? _quotations;
+        private IGenericRepository<TempQuotattion>? _tempQuotattions;
+        private IGenericRepository<TempQuotattionLine>? _tempQuotattionLines;
+        private IGenericRepository<TempQuotattionExchangeLine>? _tempQuotattionExchangeLines;
         private IGenericRepository<QuotationLine>? _quotationLines;
         private IGenericRepository<UserSession>? _userSessions;
         private IGenericRepository<QuotationExchangeRate>? _quotationExchangeRates;
@@ -113,6 +116,9 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<UserDiscountLimit> UserDiscountLimits{get{_userDiscountLimits ??= new GenericRepository<UserDiscountLimit>(_context, _httpContextAccessor);return _userDiscountLimits;}}
         public IGenericRepository<ShippingAddress> ShippingAddresses{get{_shippingAddresses ??= new GenericRepository<ShippingAddress>(_context, _httpContextAccessor);return _shippingAddresses;}}
         public IGenericRepository<Quotation> Quotations{get{_quotations ??= new GenericRepository<Quotation>(_context, _httpContextAccessor);return _quotations;}}
+        public IGenericRepository<TempQuotattion> TempQuotattions{get{_tempQuotattions ??= new GenericRepository<TempQuotattion>(_context, _httpContextAccessor);return _tempQuotattions;}}
+        public IGenericRepository<TempQuotattionLine> TempQuotattionLines{get{_tempQuotattionLines ??= new GenericRepository<TempQuotattionLine>(_context, _httpContextAccessor);return _tempQuotattionLines;}}
+        public IGenericRepository<TempQuotattionExchangeLine> TempQuotattionExchangeLines{get{_tempQuotattionExchangeLines ??= new GenericRepository<TempQuotattionExchangeLine>(_context, _httpContextAccessor);return _tempQuotattionExchangeLines;}}
         public IGenericRepository<QuotationLine> QuotationLines{get{_quotationLines ??= new GenericRepository<QuotationLine>(_context, _httpContextAccessor);return _quotationLines;}}
         public IGenericRepository<UserSession> UserSessions{get{_userSessions ??= new GenericRepository<UserSession>(_context, _httpContextAccessor);return _userSessions;}}
        public IGenericRepository<QuotationExchangeRate> QuotationExchangeRates{get{_quotationExchangeRates ??= new GenericRepository<QuotationExchangeRate>(_context, _httpContextAccessor);return _quotationExchangeRates;}}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using crm_api.Data;
 
@@ -11,9 +12,11 @@ using crm_api.Data;
 namespace crm_api.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    partial class CmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307142249_AddTempQuotationHeaderTablePhase1")]
+    partial class AddTempQuotationHeaderTablePhase1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5280,7 +5283,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_RELATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
+            modelBuilder.Entity("crm_api.Models.TempQuotation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5371,178 +5374,7 @@ namespace crm_api.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("RII_TEMP_QUOTATTION", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionExchangeLine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTime>("ExchangeRateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsManual")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<long>("TempQuotattionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("Currency");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("TempQuotattionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_TEMP_QUOTATTION_EXCHANGE_LINE", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionLine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasDefaultValue("");
-
-                    b.Property<decimal>("DiscountAmount1")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountAmount2")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountAmount3")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate1")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate2")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate3")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("LineGrandTotal")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("LineTotal")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("ProductCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<long>("TempQuotattionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("VatAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("VatRate")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("ProductCode");
-
-                    b.HasIndex("TempQuotattionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_TEMP_QUOTATTION_LINE", (string)null);
+                    b.ToTable("RII_TEMP_QUOTATION", (string)null);
                 });
 
             modelBuilder.Entity("crm_api.Models.TenantGoogleOAuthSettings", b =>
@@ -8637,7 +8469,7 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
+            modelBuilder.Entity("crm_api.Models.TempQuotation", b =>
                 {
                     b.HasOne("crm_api.Models.User", "CreatedByUser")
                         .WithMany()
@@ -8665,70 +8497,6 @@ namespace crm_api.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionExchangeLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.TempQuotattion", "TempQuotattion")
-                        .WithMany("ExchangeLines")
-                        .HasForeignKey("TempQuotattionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("TempQuotattion");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.TempQuotattion", "TempQuotattion")
-                        .WithMany("Lines")
-                        .HasForeignKey("TempQuotattionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("TempQuotattion");
 
                     b.Navigation("UpdatedByUser");
                 });
@@ -9121,13 +8889,6 @@ namespace crm_api.Migrations
                     b.Navigation("StockDetail");
 
                     b.Navigation("StockImages");
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
-                {
-                    b.Navigation("ExchangeLines");
-
-                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("crm_api.Models.Title", b =>

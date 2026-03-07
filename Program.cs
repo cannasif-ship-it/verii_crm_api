@@ -158,6 +158,7 @@ builder.Services.AddScoped<ICustomer360Service, Customer360Service>();
 
 // Register Quotation Services
 builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<ITempQuotattionService, TempQuotattionService>();
 builder.Services.AddScoped<IQuotationLineService, QuotationLineService>();
 builder.Services.AddScoped<IQuotationExchangeRateService, QuotationExchangeRateService>();
 builder.Services.AddScoped<IQuotationNotesService, QuotationNotesService>();

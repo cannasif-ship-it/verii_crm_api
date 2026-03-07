@@ -36,6 +36,9 @@ namespace crm_api.Data
         public DbSet<SalesTypeDefinition> SalesTypeDefinitions { get; set; }
         public DbSet<ShippingAddress> ShippingAddresses { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
+        public DbSet<TempQuotattion> TempQuotattions { get; set; }
+        public DbSet<TempQuotattionLine> TempQuotattionLines { get; set; }
+        public DbSet<TempQuotattionExchangeLine> TempQuotattionExchangeLines { get; set; }
         public DbSet<QuotationLine> QuotationLines { get; set; }
         public DbSet<QuotationExchangeRate> QuotationExchangeRates { get; set; }
         public DbSet<QuotationNotes> QuotationNotes { get; set; }
