@@ -103,23 +103,8 @@ namespace crm_api.Services
         {
             try
             {
-                var normalizedSalesType = NormalizeSalesType(createSalesTypeDto.SalesType);
-                if (normalizedSalesType == null)
-                {
-                    return ApiResponse<SalesTypeGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("SalesTypeService.SalesTypeInvalid"),
-                        _localizationService.GetLocalizedString("SalesTypeService.SalesTypeInvalid"),
-                        StatusCodes.Status400BadRequest);
-                }
-
-                var normalizedName = (createSalesTypeDto.Name ?? string.Empty).Trim();
-                if (string.IsNullOrWhiteSpace(normalizedName))
-                {
-                    return ApiResponse<SalesTypeGetDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("General.NameRequired"),
-                        _localizationService.GetLocalizedString("General.NameRequired"),
-                        StatusCodes.Status400BadRequest);
-                }
+                var normalizedSalesType = NormalizeSalesType(createSalesTypeDto.SalesType)!;
+                var normalizedName = createSalesTypeDto.Name.Trim();
 
                 var exists = await _unitOfWork.SalesTypeDefinitions.Query()
                     .AnyAsync(x => !x.IsDeleted && x.SalesType == normalizedSalesType && x.Name == normalizedName).ConfigureAwait(false);
