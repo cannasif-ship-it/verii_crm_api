@@ -20,6 +20,7 @@ namespace crm_api.Controllers
         private readonly ITenantGoogleOAuthSettingsService _tenantGoogleOAuthSettingsService;
         private readonly IUserContextService _userContextService;
         private readonly IEncryptionService _encryptionService;
+        private readonly ILocalizationService _localizationService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<GoogleIntegrationController> _logger;
 
@@ -32,6 +33,7 @@ namespace crm_api.Controllers
             ITenantGoogleOAuthSettingsService tenantGoogleOAuthSettingsService,
             IUserContextService userContextService,
             IEncryptionService encryptionService,
+            ILocalizationService localizationService,
             IConfiguration configuration,
             ILogger<GoogleIntegrationController> logger)
         {
@@ -43,6 +45,7 @@ namespace crm_api.Controllers
             _tenantGoogleOAuthSettingsService = tenantGoogleOAuthSettingsService;
             _userContextService = userContextService;
             _encryptionService = encryptionService;
+            _localizationService = localizationService;
             _configuration = configuration;
             _logger = logger;
         }
@@ -67,8 +70,8 @@ namespace crm_api.Controllers
             if (tenantId == Guid.Empty)
             {
                 var error = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.ErrorResult(
-                    "Google integration logs could not be loaded.",
-                    "Tenant context is missing.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationLogsCouldNotBeLoaded"),
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.TenantContextIsMissing"),
                     StatusCodes.Status400BadRequest);
 
                 return StatusCode(error.StatusCode, error);
@@ -84,7 +87,7 @@ namespace crm_api.Controllers
 
                 var response = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.SuccessResult(
                     logs,
-                    "Google integration logs retrieved.");
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationLogsRetrieved"));
 
                 return StatusCode(response.StatusCode, response);
             }
@@ -92,7 +95,7 @@ namespace crm_api.Controllers
             {
                 _logger.LogError(ex, "Failed to load Google integration logs for tenant {TenantId}", tenantId);
                 var error = ApiResponse<PagedResponse<GoogleIntegrationLogDto>>.ErrorResult(
-                    "Google integration logs could not be loaded.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationLogsCouldNotBeLoaded"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
                 return StatusCode(error.StatusCode, error);
@@ -127,7 +130,9 @@ namespace crm_api.Controllers
                 ExpiresAt = account?.ExpiresAt,
             };
 
-            var response = ApiResponse<GoogleIntegrationStatusDto>.SuccessResult(dto, "Google integration status retrieved.");
+            var response = ApiResponse<GoogleIntegrationStatusDto>.SuccessResult(
+                dto,
+                _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationStatusRetrieved"));
             return StatusCode(response.StatusCode, response);
         }
 
@@ -158,7 +163,9 @@ namespace crm_api.Controllers
                     Message = "Google authorize URL created.",
                 }, cancellationToken);
 
-                var response = ApiResponse<GoogleAuthorizeUrlDto>.SuccessResult(new GoogleAuthorizeUrlDto { Url = url }, "Google authorize URL created.");
+                var response = ApiResponse<GoogleAuthorizeUrlDto>.SuccessResult(
+                    new GoogleAuthorizeUrlDto { Url = url },
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleAuthorizeUrlCreated"));
                 return StatusCode(response.StatusCode, response);
             }
             catch (InvalidOperationException ex)
@@ -177,7 +184,7 @@ namespace crm_api.Controllers
                 }, cancellationToken);
 
                 var error = ApiResponse<GoogleAuthorizeUrlDto>.ErrorResult(
-                    "Google authorize URL could not be generated.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleAuthorizeUrlCouldNotBeGenerated"),
                     ex.Message,
                     StatusCodes.Status400BadRequest);
 
@@ -199,7 +206,7 @@ namespace crm_api.Controllers
                 }, cancellationToken);
 
                 var error = ApiResponse<GoogleAuthorizeUrlDto>.ErrorResult(
-                    "Google authorize URL could not be generated.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleAuthorizeUrlCouldNotBeGenerated"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
 
@@ -380,7 +387,9 @@ namespace crm_api.Controllers
                     Message = "Google integration disconnected.",
                 }, cancellationToken);
 
-                var response = ApiResponse<object>.SuccessResult(null, "Google integration disconnected.");
+                var response = ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationDisconnected"));
                 return StatusCode(response.StatusCode, response);
             }
             catch (Exception ex)
@@ -399,7 +408,7 @@ namespace crm_api.Controllers
                 }, cancellationToken);
 
                 var error = ApiResponse<object>.ErrorResult(
-                    "Google integration could not be disconnected.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleIntegrationCouldNotBeDisconnected"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
 
@@ -426,14 +435,14 @@ namespace crm_api.Controllers
                 var eventId = await _googleCalendarService.CreateTestEventAsync(currentUserIdResult.Data, cancellationToken);
                 var response = ApiResponse<GoogleTestEventDto>.SuccessResult(
                     new GoogleTestEventDto { EventId = eventId },
-                    "Google calendar test event created.");
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleCalendarTestEventCreated"));
 
                 return StatusCode(response.StatusCode, response);
             }
             catch (InvalidOperationException ex)
             {
                 var error = ApiResponse<GoogleTestEventDto>.ErrorResult(
-                    "Google calendar test event could not be created.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleCalendarTestEventCouldNotBeCreated"),
                     ex.Message,
                     StatusCodes.Status400BadRequest);
 
@@ -443,7 +452,7 @@ namespace crm_api.Controllers
             {
                 _logger.LogError(ex, "Google test event creation failed for user {UserId}", currentUserIdResult.Data);
                 var error = ApiResponse<GoogleTestEventDto>.ErrorResult(
-                    "Google calendar test event could not be created.",
+                    _localizationService.GetLocalizedString("GoogleIntegrationController.GoogleCalendarTestEventCouldNotBeCreated"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
 

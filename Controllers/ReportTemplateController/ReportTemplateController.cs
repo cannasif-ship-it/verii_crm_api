@@ -78,7 +78,10 @@ namespace crm_api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateReportTemplateDto dto)
         {
             if (!long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
-                return Unauthorized(ApiResponse<object>.ErrorResult("Unauthorized", "Invalid or missing user claim", 401));
+                return Unauthorized(ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.Unauthorized"),
+                    _localizationService.GetLocalizedString("General.InvalidOrMissingUserClaim"),
+                    401));
 
             var result = await _reportTemplateService.CreateAsync(dto, userId);
 
@@ -97,7 +100,10 @@ namespace crm_api.Controllers
         public async Task<IActionResult> Update(long id, [FromBody] UpdateReportTemplateDto dto)
         {
             if (!long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
-                return Unauthorized(ApiResponse<object>.ErrorResult("Unauthorized", "Invalid or missing user claim", 401));
+                return Unauthorized(ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("General.Unauthorized"),
+                    _localizationService.GetLocalizedString("General.InvalidOrMissingUserClaim"),
+                    401));
 
             var result = await _reportTemplateService.UpdateAsync(id, dto, userId);
 
