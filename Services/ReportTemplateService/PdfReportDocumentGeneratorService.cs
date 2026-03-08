@@ -55,7 +55,7 @@ namespace crm_api.Services
 
             try
             {
-                var entityData = await FetchEntityDataAsync(ruleType, entityId);
+                var entityData = await FetchEntityDataAsync(ruleType, entityId).ConfigureAwait(false);
                 if (entityData == null)
                     throw new InvalidOperationException($"Entity with ID {entityId} not found for rule type {ruleType}");
 
@@ -64,7 +64,7 @@ namespace crm_api.Services
                 {
                     _logger.LogWarning("PdfReportDocumentGenerator SSRF reject: {Reason}", reason);
                     warningCount++;
-                });
+                }).ConfigureAwait(false);
 
                 var page = templateData.Page ?? new PageConfig();
                 var unit = page.Unit ?? "px";
@@ -250,7 +250,7 @@ namespace crm_api.Services
                             continue;
                         }
 
-                        var localBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+                        var localBytes = await System.IO.File.ReadAllBytesAsync(fullPath).ConfigureAwait(false);
                         if (localBytes.Length > _options.MaxImageSizeBytes)
                         {
                             _logger.LogWarning("PdfReportDocumentGenerator local image size exceeded: MaxBytes={Max}, Actual={Actual}, Path={Path}",
@@ -288,7 +288,7 @@ namespace crm_api.Services
                     using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(_options.ImageFetchTimeoutSeconds));
                     using var httpClient = _httpClientFactory.CreateClient();
                     httpClient.Timeout = TimeSpan.FromSeconds(_options.ImageFetchTimeoutSeconds);
-                    var bytes = await httpClient.GetByteArrayAsync(key, cts.Token);
+                    var bytes = await httpClient.GetByteArrayAsync(key, cts.Token).ConfigureAwait(false);
                     if (bytes != null && bytes.Length > _options.MaxImageSizeBytes)
                     {
                         _logger.LogWarning("PdfReportDocumentGenerator URL image size exceeded: MaxBytes={Max}, Actual={Actual}, Url={Url}",
@@ -674,7 +674,7 @@ namespace crm_api.Services
                                         ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
-                    }).FirstOrDefaultAsync(),
+                    }).FirstOrDefaultAsync().ConfigureAwait(false),
 
                 DocumentRuleType.Quotation => await (from q in _unitOfWork.Quotations.Query(false, false)
                     where q.Id == entityId && !q.IsDeleted
@@ -765,7 +765,7 @@ namespace crm_api.Services
                                         ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
-                    }).FirstOrDefaultAsync(),
+                    }).FirstOrDefaultAsync().ConfigureAwait(false),
 
                 DocumentRuleType.Order => await (from o in _unitOfWork.Orders.Query(false, false)
                     where o.Id == entityId && !o.IsDeleted
@@ -856,7 +856,7 @@ namespace crm_api.Services
                                         ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
-                    }).FirstOrDefaultAsync(),
+                    }).FirstOrDefaultAsync().ConfigureAwait(false),
 
                 _ => throw new ArgumentException($"Unsupported rule type: {ruleType}")
             };

@@ -46,7 +46,7 @@ namespace crm_api.Services.ReportBuilderService
             {
                 var entity = await _unitOfWork.ReportDefinitions.Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted).ConfigureAwait(false);
                 if (entity == null)
                     return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
                 var dto = _mapper.Map<ReportDetailDto>(entity);
@@ -69,12 +69,12 @@ namespace crm_api.Services.ReportBuilderService
                     var term = search.Trim();
                     query = query.Where(r => r.Name.Contains(term) || (r.Description != null && r.Description.Contains(term)));
                 }
-                var total = await query.CountAsync();
+                var total = await query.CountAsync().ConfigureAwait(false);
                 var list = await query
                     .OrderByDescending(r => r.UpdatedDate ?? r.CreatedDate)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
                 var items = _mapper.Map<List<ReportListItemDto>>(list);
                 var paged = new PagedResponse<ReportListItemDto> { Items = items, TotalCount = total, PageNumber = pageNumber, PageSize = pageSize };
                 return ApiResponse<PagedResponse<ReportListItemDto>>.SuccessResult(paged, _localizationService.GetLocalizedString("ReportService.ReportListRetrieved"));
@@ -88,7 +88,7 @@ namespace crm_api.Services.ReportBuilderService
 
         public async Task<ApiResponse<ReportDetailDto>> CreateAsync(ReportCreateDto dto, long userId)
         {
-            var validation = await ValidateForSaveAsync(dto.ConnectionKey, dto.DataSourceType, dto.DataSourceName, dto.ConfigJson);
+            var validation = await ValidateForSaveAsync(dto.ConnectionKey, dto.DataSourceType, dto.DataSourceName, dto.ConfigJson).ConfigureAwait(false);
             if (!validation.Success)
                 return ApiResponse<ReportDetailDto>.ErrorResult(validation.Message, validation.ExceptionMessage, validation.StatusCode);
 
@@ -99,9 +99,9 @@ namespace crm_api.Services.ReportBuilderService
                 entity.CreatedDate = DateTime.UtcNow;
                 entity.IsDeleted = false;
                 var repo = _unitOfWork.Repository<ReportDefinition>();
-                await repo.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
-                var created = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == entity.Id);
+                await repo.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                var created = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == entity.Id).ConfigureAwait(false);
                 var detail = _mapper.Map<ReportDetailDto>(created!);
                 return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportCreated"));
             }
@@ -114,12 +114,12 @@ namespace crm_api.Services.ReportBuilderService
 
         public async Task<ApiResponse<ReportDetailDto>> UpdateAsync(long id, ReportUpdateDto dto, long userId)
         {
-            var validation = await ValidateForSaveAsync(dto.ConnectionKey, dto.DataSourceType, dto.DataSourceName, dto.ConfigJson);
+            var validation = await ValidateForSaveAsync(dto.ConnectionKey, dto.DataSourceType, dto.DataSourceName, dto.ConfigJson).ConfigureAwait(false);
             if (!validation.Success)
                 return ApiResponse<ReportDetailDto>.ErrorResult(validation.Message, validation.ExceptionMessage, validation.StatusCode);
 
             var repo = _unitOfWork.Repository<ReportDefinition>();
-            var entity = await repo.GetByIdForUpdateAsync(id);
+            var entity = await repo.GetByIdForUpdateAsync(id).ConfigureAwait(false);
             if (entity == null)
                 return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
 
@@ -133,9 +133,9 @@ namespace crm_api.Services.ReportBuilderService
                 entity.ConfigJson = dto.ConfigJson;
                 entity.UpdatedBy = userId;
                 entity.UpdatedDate = DateTime.UtcNow;
-                await repo.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
-                var updated = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+                await repo.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                var updated = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
                 var detail = _mapper.Map<ReportDetailDto>(updated!);
                 return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportUpdated"));
             }
@@ -149,10 +149,10 @@ namespace crm_api.Services.ReportBuilderService
         public async Task<ApiResponse<bool>> SoftDeleteAsync(long id)
         {
             var repo = _unitOfWork.Repository<ReportDefinition>();
-            var ok = await repo.SoftDeleteAsync(id);
+            var ok = await repo.SoftDeleteAsync(id).ConfigureAwait(false);
             if (!ok)
                 return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("ReportService.ReportDeleted"));
         }
 
@@ -162,7 +162,7 @@ namespace crm_api.Services.ReportBuilderService
             if (!connResp.Success)
                 return ApiResponse<object>.ErrorResult(connResp.Message ?? _localizationService.GetLocalizedString("ReportService.InvalidConnection"), null, connResp.StatusCode);
 
-            var catalogResp = await _catalogService.CheckAndGetSchemaAsync(connectionKey, dataSourceType, dataSourceName);
+            var catalogResp = await _catalogService.CheckAndGetSchemaAsync(connectionKey, dataSourceType, dataSourceName).ConfigureAwait(false);
             if (!catalogResp.Success)
                 return ApiResponse<object>.ErrorResult(catalogResp.Message ?? _localizationService.GetLocalizedString("ReportService.CatalogError"), catalogResp.ExceptionMessage, catalogResp.StatusCode);
             if (catalogResp.Data == null || catalogResp.Data.Count == 0)

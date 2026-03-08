@@ -52,7 +52,7 @@ namespace crm_api.Services.ReportBuilderService
             try
             {
                 await using var conn = new SqlConnection(connResp.Data);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
 
                 string objectTypeFilter = typeNorm == "view"
                     ? "AND o.type = 'V'"
@@ -72,8 +72,8 @@ ORDER BY c.column_id";
                 {
                     cmd.Parameters.AddWithValue("@schemaName", schemaName);
                     cmd.Parameters.AddWithValue("@objectName", objectName);
-                    await using var reader = await cmd.ExecuteReaderAsync();
-                    while (await reader.ReadAsync())
+                    await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                    while (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         columns.Add(new FieldSchemaDto
                         {

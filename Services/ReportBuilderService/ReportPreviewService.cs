@@ -44,7 +44,7 @@ namespace crm_api.Services.ReportBuilderService
             if (!connResp.Success || string.IsNullOrEmpty(connResp.Data))
                 return ApiResponse<PreviewResponseDto>.ErrorResult(connResp.Message ?? _localizationService.GetLocalizedString("ReportPreviewService.InvalidConnection"), null, connResp.StatusCode);
 
-            var schemaResp = await _catalogService.CheckAndGetSchemaAsync(request.ConnectionKey, request.DataSourceType, request.DataSourceName);
+            var schemaResp = await _catalogService.CheckAndGetSchemaAsync(request.ConnectionKey, request.DataSourceType, request.DataSourceName).ConfigureAwait(false);
             if (!schemaResp.Success || schemaResp.Data == null)
                 return ApiResponse<PreviewResponseDto>.ErrorResult(schemaResp.Message ?? _localizationService.GetLocalizedString("ReportPreviewService.SchemaNotFound"), schemaResp.ExceptionMessage, schemaResp.StatusCode);
             if (schemaResp.Data.Count == 0)
@@ -187,7 +187,7 @@ namespace crm_api.Services.ReportBuilderService
             try
             {
                 await using var conn = new SqlConnection(connResp.Data);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
                 var columns = new List<FieldSchemaDto>();
                 var rows = new List<Dictionary<string, object?>>();
                 await using (var cmd = new SqlCommand(sql, conn))
@@ -197,7 +197,7 @@ namespace crm_api.Services.ReportBuilderService
                     {
                         cmd.Parameters.AddWithValue(p.Name, p.Value ?? DBNull.Value);
                     }
-                    await using var reader = await cmd.ExecuteReaderAsync();
+                    await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
                     for (var i = 0; i < reader.FieldCount; i++)
                     {
                         columns.Add(new FieldSchemaDto

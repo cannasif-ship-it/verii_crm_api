@@ -50,7 +50,7 @@ namespace crm_api.Services
                     pagedRequest = new PagedRequest();
                 }
 
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if(!userIdResponse.Success)
                 {
                     return ApiResponse<PagedResponse<NotificationDto>>.ErrorResult(userIdResponse.Message, userIdResponse.Message, userIdResponse.StatusCode);
@@ -61,12 +61,12 @@ namespace crm_api.Services
                     .Where(x => x.UserId == userId && !x.IsDeleted)
                     .OrderByDescending(x => x.CreatedDate);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var notifications = await query
                     .Skip((pagedRequest.PageNumber - 1) * pagedRequest.PageSize)
                     .Take(pagedRequest.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var notificationDtos = new List<NotificationDto>();
 
@@ -157,7 +157,7 @@ namespace crm_api.Services
             try
             {
                 var count = await _unitOfWork.Notifications
-                    .CountAsync(x => x.UserId == userId && !x.IsRead && !x.IsDeleted);
+                    .CountAsync(x => x.UserId == userId && !x.IsRead && !x.IsDeleted).ConfigureAwait(false);
 
                 return ApiResponse<int>.SuccessResult(count, _localizationService.GetLocalizedString("NotificationService.UnreadCountRetrieved"));
             }
@@ -173,7 +173,7 @@ namespace crm_api.Services
             try
             {
                 var notification = await _unitOfWork.Notifications.Query(tracking: true)
-                    .FirstOrDefaultAsync(x => x.Id == notificationId && x.UserId == userId);
+                    .FirstOrDefaultAsync(x => x.Id == notificationId && x.UserId == userId).ConfigureAwait(false);
 
                 if (notification == null)
                 {
@@ -184,8 +184,8 @@ namespace crm_api.Services
                 notification.UpdatedDate = DateTime.UtcNow;
                 notification.UpdatedBy = userId;
 
-                await _unitOfWork.Notifications.UpdateAsync(notification);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Notifications.UpdateAsync(notification).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.NotificationMarkedAsRead"));
             }
@@ -202,7 +202,7 @@ namespace crm_api.Services
             {
                 var notifications = await _unitOfWork.Notifications.Query(tracking: true)
                     .Where(x => x.UserId == userId && !x.IsRead)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (notifications.Any())
                 {
@@ -211,9 +211,9 @@ namespace crm_api.Services
                         notification.IsRead = true;
                         notification.UpdatedDate = DateTime.UtcNow;
                         notification.UpdatedBy = userId;
-                        await _unitOfWork.Notifications.UpdateAsync(notification);
+                        await _unitOfWork.Notifications.UpdateAsync(notification).ConfigureAwait(false);
                     }
-                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 }
 
                 return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.AllNotificationsMarkedAsRead"));
@@ -243,8 +243,8 @@ namespace crm_api.Services
                     CreatedBy = createDto.UserId
                 };
 
-                await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Notifications.AddAsync(notification).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Send real-time notification via SignalR
                 var notificationDto = _mapper.Map<NotificationDto>(notification);
@@ -290,7 +290,7 @@ namespace crm_api.Services
                 // Send to user via SignalR group (user_{userId})
                 try
                 {
-                    await _hubContext.Clients.Group($"user_{createDto.UserId}").SendAsync("ReceiveNotification", notificationDto);
+                    await _hubContext.Clients.Group($"user_{createDto.UserId}").SendAsync("ReceiveNotification", notificationDto).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -312,7 +312,7 @@ namespace crm_api.Services
             try
             {
                 var notification = await _unitOfWork.Notifications.Query(tracking: true)
-                    .FirstOrDefaultAsync(x => x.Id == notificationId && x.UserId == userId);
+                    .FirstOrDefaultAsync(x => x.Id == notificationId && x.UserId == userId).ConfigureAwait(false);
 
                 if (notification == null)
                 {
@@ -323,8 +323,8 @@ namespace crm_api.Services
                 notification.DeletedDate = DateTime.UtcNow;
                 notification.DeletedBy = userId;
 
-                await _unitOfWork.Notifications.UpdateAsync(notification);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Notifications.UpdateAsync(notification).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("NotificationService.NotificationDeleted"));
             }
