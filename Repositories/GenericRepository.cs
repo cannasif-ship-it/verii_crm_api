@@ -53,7 +53,7 @@ namespace crm_api.Repositories
         {
             return await _dbSet
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
         }
 
         public async Task<T?> GetByIdWithAuditUsersAsync(long id)
@@ -63,7 +63,7 @@ namespace crm_api.Repositories
                 .Include(e => e.UpdatedByUser)
                 .Include(e => e.DeletedByUser)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -73,14 +73,14 @@ namespace crm_api.Repositories
         public async Task<T?> GetByIdForUpdateAsync(long id)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
@@ -88,7 +88,7 @@ namespace crm_api.Repositories
             return await _dbSet
                 .Where(expression)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
         }
 
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression)
@@ -96,7 +96,7 @@ namespace crm_api.Repositories
             return await _dbSet
                 .Where(expression)
                 .AsNoTracking()
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync().ConfigureAwait(false);
         }
 
         public async Task<T> AddAsync(T entity)
@@ -104,7 +104,7 @@ namespace crm_api.Repositories
             entity.CreatedDate = DateTime.UtcNow;
             entity.CreatedBy = GetCurrentUserId();
             entity.IsDeleted = false;
-            await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity).ConfigureAwait(false);
             return entity;
         }
 
@@ -124,7 +124,7 @@ namespace crm_api.Repositories
                 entity.IsDeleted = false;
             }
 
-            await _dbSet.AddRangeAsync(entityList);
+            await _dbSet.AddRangeAsync(entityList).ConfigureAwait(false);
             return entityList;
         }
 
@@ -166,7 +166,7 @@ namespace crm_api.Repositories
         /// </summary>
         public async Task<bool> SoftDeleteAsync(long id)
         {
-            var entity = await GetByIdForUpdateAsync(id);
+            var entity = await GetByIdForUpdateAsync(id).ConfigureAwait(false);
             if (entity == null)
                 return false;
 
@@ -179,17 +179,17 @@ namespace crm_api.Repositories
 
         public async Task<bool> ExistsAsync(long id)
         {
-            return await _dbSet.AnyAsync(e => e.Id == id && !e.IsDeleted);
+            return await _dbSet.AnyAsync(e => e.Id == id && !e.IsDeleted).ConfigureAwait(false);
         }
 
         public async Task<int> CountAsync()
         {
-            return await _dbSet.CountAsync();
+            return await _dbSet.CountAsync().ConfigureAwait(false);
         }
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
         {
-            return await _dbSet.CountAsync(expression);
+            return await _dbSet.CountAsync(expression).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
@@ -198,7 +198,7 @@ namespace crm_api.Repositories
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter)
@@ -208,7 +208,7 @@ namespace crm_api.Repositories
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
         }
     }
 }
