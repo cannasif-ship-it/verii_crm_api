@@ -28,18 +28,18 @@ namespace crm_api.Services
         {
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 var images = new List<StockImage>();
                 foreach (var imageDto in imageDtos)
                 {
                     var image = _mapper.Map<StockImage>(imageDto);
                     images.Add(image);
-                    await _unitOfWork.Repository<StockImage>().AddAsync(image);
+                    await _unitOfWork.Repository<StockImage>().AddAsync(image).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var dtos = images.Select(x => _mapper.Map<StockImageDto>(x)).ToList();
 
@@ -49,7 +49,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<List<StockImageDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("StockImageService.InternalServerError"),
                     _localizationService.GetLocalizedString("StockImageService.AddImagesExceptionMessage", ex.Message),
@@ -69,7 +69,7 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockId);
+                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockId).ConfigureAwait(false);
                 if (stock == null)
                 {
                     return ApiResponse<List<StockImageDto>>.ErrorResult(
@@ -78,7 +78,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 var uploadedImages = new List<StockImageDto>();
                 var maxSortOrder = await _unitOfWork.Repository<StockImage>()
@@ -86,7 +86,7 @@ namespace crm_api.Services
                     .Where(x => x.StockId == stockId && !x.IsDeleted)
                     .OrderByDescending(x => x.SortOrder)
                     .Select(x => x.SortOrder)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 var currentSortOrder = maxSortOrder + 1;
 
@@ -95,10 +95,10 @@ namespace crm_api.Services
                     var file = files[i];
                     var altText = altTexts != null && i < altTexts.Count ? altTexts[i] : null;
 
-                    var uploadResult = await _fileUploadService.UploadStockImageAsync(file, stockId);
+                    var uploadResult = await _fileUploadService.UploadStockImageAsync(file, stockId).ConfigureAwait(false);
                     if (!uploadResult.Success || string.IsNullOrEmpty(uploadResult.Data))
                     {
-                        await _unitOfWork.RollbackTransactionAsync();
+                        await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                         return ApiResponse<List<StockImageDto>>.ErrorResult(
                             uploadResult.Message ?? _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
                             uploadResult.ExceptionMessage,
@@ -114,12 +114,12 @@ namespace crm_api.Services
                         IsPrimary = false
                     };
 
-                    await _unitOfWork.Repository<StockImage>().AddAsync(image);
+                    await _unitOfWork.Repository<StockImage>().AddAsync(image).ConfigureAwait(false);
                     uploadedImages.Add(_mapper.Map<StockImageDto>(image));
                 }
 
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 return ApiResponse<List<StockImageDto>>.SuccessResult(
                     uploadedImages,
@@ -127,7 +127,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<List<StockImageDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("StockImageService.InternalServerError"),
                     _localizationService.GetLocalizedString("StockImageService.UploadImagesExceptionMessage", ex.Message),
@@ -148,7 +148,7 @@ namespace crm_api.Services
                     .Include(x => x.DeletedByUser)
                     .AsNoTracking()
                     .OrderBy(x => x.SortOrder)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = images.Select(x => _mapper.Map<StockImageDto>(x)).ToList();
 
@@ -169,7 +169,7 @@ namespace crm_api.Services
         {
             try
             {
-                var image = await _unitOfWork.Repository<StockImage>().GetByIdAsync(id);
+                var image = await _unitOfWork.Repository<StockImage>().GetByIdAsync(id).ConfigureAwait(false);
                 if (image == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -178,8 +178,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<StockImage>().SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Repository<StockImage>().SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null,
@@ -198,12 +198,12 @@ namespace crm_api.Services
         {
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                var image = await _unitOfWork.Repository<StockImage>().GetByIdForUpdateAsync(imageId);
+                var image = await _unitOfWork.Repository<StockImage>().GetByIdForUpdateAsync(imageId).ConfigureAwait(false);
                 if (image == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<StockImageDto>.ErrorResult(
                         _localizationService.GetLocalizedString("StockImageService.ImageNotFound"),
                         _localizationService.GetLocalizedString("StockImageService.ImageNotFound"),
@@ -213,18 +213,18 @@ namespace crm_api.Services
                 var otherPrimaryImages = await _unitOfWork.Repository<StockImage>()
                     .Query()
                     .Where(x => x.StockId == image.StockId && x.Id != imageId && x.IsPrimary && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 foreach (var otherImage in otherPrimaryImages)
                 {
                     otherImage.IsPrimary = false;
-                    await _unitOfWork.Repository<StockImage>().UpdateAsync(otherImage);
+                    await _unitOfWork.Repository<StockImage>().UpdateAsync(otherImage).ConfigureAwait(false);
                 }
 
                 image.IsPrimary = true;
-                await _unitOfWork.Repository<StockImage>().UpdateAsync(image);
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.Repository<StockImage>().UpdateAsync(image).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var imageWithNav = await _unitOfWork.Repository<StockImage>()
                     .Query()
@@ -233,7 +233,7 @@ namespace crm_api.Services
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == imageId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == imageId && !x.IsDeleted).ConfigureAwait(false);
 
                 var dto = _mapper.Map<StockImageDto>(imageWithNav);
 
@@ -243,7 +243,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<StockImageDto>.ErrorResult(
                     _localizationService.GetLocalizedString("StockImageService.InternalServerError"),
                     _localizationService.GetLocalizedString("StockImageService.SetPrimaryExceptionMessage", ex.Message),

@@ -52,12 +52,12 @@ namespace crm_api.Services
                 var sortBy = request.SortBy ?? nameof(StockDetail.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<StockDetailGetDto>(x)).ToList();
 
@@ -93,7 +93,7 @@ namespace crm_api.Services
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(sd => sd.Id == id && !sd.IsDeleted);
+                    .FirstOrDefaultAsync(sd => sd.Id == id && !sd.IsDeleted).ConfigureAwait(false);
 
                 if (stockDetail == null)
                 {
@@ -130,7 +130,7 @@ namespace crm_api.Services
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 var stockDetailDto = _mapper.Map<StockDetailGetDto>(stockDetail);
 
@@ -152,7 +152,7 @@ namespace crm_api.Services
             try
             {
                 // Business Rule: Check if Stock exists
-                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockDetailCreateDto.StockId);
+                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockDetailCreateDto.StockId).ConfigureAwait(false);
                 if (stock == null || stock.IsDeleted)
                 {
                     return ApiResponse<StockDetailGetDto>.ErrorResult(
@@ -165,7 +165,7 @@ namespace crm_api.Services
                 var existingStockDetail = await _unitOfWork.StockDetails
                     .Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(sd => sd.StockId == stockDetailCreateDto.StockId && !sd.IsDeleted);
+                    .FirstOrDefaultAsync(sd => sd.StockId == stockDetailCreateDto.StockId && !sd.IsDeleted).ConfigureAwait(false);
 
                 if (existingStockDetail != null)
                 {
@@ -176,8 +176,8 @@ namespace crm_api.Services
                 }
 
                 var stockDetail = _mapper.Map<StockDetail>(stockDetailCreateDto);
-                await _unitOfWork.StockDetails.AddAsync(stockDetail);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.StockDetails.AddAsync(stockDetail).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var stockDetailWithNav = await _unitOfWork.StockDetails
@@ -187,7 +187,7 @@ namespace crm_api.Services
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(sd => sd.Id == stockDetail.Id && !sd.IsDeleted);
+                    .FirstOrDefaultAsync(sd => sd.Id == stockDetail.Id && !sd.IsDeleted).ConfigureAwait(false);
 
                 if (stockDetailWithNav == null)
                 {
@@ -216,7 +216,7 @@ namespace crm_api.Services
         {
             try
             {
-                var stockDetail = await _unitOfWork.StockDetails.GetByIdForUpdateAsync(id);
+                var stockDetail = await _unitOfWork.StockDetails.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (stockDetail == null)
                 {
                     return ApiResponse<StockDetailGetDto>.ErrorResult(
@@ -226,7 +226,7 @@ namespace crm_api.Services
                 }
 
                 // Business Rule: Check if Stock exists
-                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockDetailUpdateDto.StockId);
+                var stock = await _unitOfWork.Stocks.GetByIdAsync(stockDetailUpdateDto.StockId).ConfigureAwait(false);
                 if (stock == null || stock.IsDeleted)
                 {
                     return ApiResponse<StockDetailGetDto>.ErrorResult(
@@ -241,7 +241,7 @@ namespace crm_api.Services
                     var existingStockDetail = await _unitOfWork.StockDetails
                         .Query()
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(sd => sd.StockId == stockDetailUpdateDto.StockId && sd.Id != id && !sd.IsDeleted);
+                        .FirstOrDefaultAsync(sd => sd.StockId == stockDetailUpdateDto.StockId && sd.Id != id && !sd.IsDeleted).ConfigureAwait(false);
 
                     if (existingStockDetail != null)
                     {
@@ -253,8 +253,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(stockDetailUpdateDto, stockDetail);
-                await _unitOfWork.StockDetails.UpdateAsync(stockDetail);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.StockDetails.UpdateAsync(stockDetail).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var stockDetailWithNav = await _unitOfWork.StockDetails
@@ -264,7 +264,7 @@ namespace crm_api.Services
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(sd => sd.Id == stockDetail.Id && !sd.IsDeleted);
+                    .FirstOrDefaultAsync(sd => sd.Id == stockDetail.Id && !sd.IsDeleted).ConfigureAwait(false);
 
                 if (stockDetailWithNav == null)
                 {
@@ -293,7 +293,7 @@ namespace crm_api.Services
         {
             try
             {
-                var stockDetail = await _unitOfWork.StockDetails.GetByIdAsync(id);
+                var stockDetail = await _unitOfWork.StockDetails.GetByIdAsync(id).ConfigureAwait(false);
                 if (stockDetail == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -302,8 +302,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.StockDetails.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.StockDetails.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null, 

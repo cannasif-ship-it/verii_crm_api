@@ -31,7 +31,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x => 
                         x.StockId == relationDto.StockId && 
                         x.RelatedStockId == relationDto.RelatedStockId && 
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (existingRelation != null)
                 {
@@ -41,12 +41,12 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 var relation = _mapper.Map<StockRelation>(relationDto);
-                await _unitOfWork.Repository<StockRelation>().AddAsync(relation);
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.Repository<StockRelation>().AddAsync(relation).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var relationWithNav = await _unitOfWork.Repository<StockRelation>()
                     .Query()
@@ -56,7 +56,7 @@ namespace crm_api.Services
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == relation.Id && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == relation.Id && !x.IsDeleted).ConfigureAwait(false);
 
                 var dto = _mapper.Map<StockRelationDto>(relationWithNav);
 
@@ -66,7 +66,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<StockRelationDto>.ErrorResult(
                     _localizationService.GetLocalizedString("StockRelationService.InternalServerError"),
                     _localizationService.GetLocalizedString("StockRelationService.CreateExceptionMessage", ex.Message),
@@ -87,7 +87,7 @@ namespace crm_api.Services
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = relations.Select(x => _mapper.Map<StockRelationDto>(x)).ToList();
 
@@ -108,7 +108,7 @@ namespace crm_api.Services
         {
             try
             {
-                var relation = await _unitOfWork.Repository<StockRelation>().GetByIdAsync(id);
+                var relation = await _unitOfWork.Repository<StockRelation>().GetByIdAsync(id).ConfigureAwait(false);
                 if (relation == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -117,8 +117,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Repository<StockRelation>().SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Repository<StockRelation>().SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null,

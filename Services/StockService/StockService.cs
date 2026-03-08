@@ -53,12 +53,12 @@ namespace crm_api.Services
                 var sortBy = request.SortBy ?? nameof(Stock.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<StockGetDto>(x)).ToList();
 
@@ -112,12 +112,12 @@ namespace crm_api.Services
                 var sortBy = request.SortBy ?? nameof(Stock.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var baseDtos = items.Select(x => _mapper.Map<StockGetDto>(x)).ToList();
                 
@@ -165,7 +165,7 @@ namespace crm_api.Services
                     .Include(s => s.UpdatedByUser)
                     .Include(s => s.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+                    .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted).ConfigureAwait(false);
 
                 if (stock == null)
                 {
@@ -198,7 +198,7 @@ namespace crm_api.Services
                 var existingStock = await _unitOfWork.Stocks
                     .Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.ErpStockCode == stockCreateDto.ErpStockCode && !s.IsDeleted);
+                    .FirstOrDefaultAsync(s => s.ErpStockCode == stockCreateDto.ErpStockCode && !s.IsDeleted).ConfigureAwait(false);
 
                 if (existingStock != null)
                 {
@@ -209,8 +209,8 @@ namespace crm_api.Services
                 }
 
                 var stock = _mapper.Map<Stock>(stockCreateDto);
-                await _unitOfWork.Stocks.AddAsync(stock);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Stocks.AddAsync(stock).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var stockWithNav = await _unitOfWork.Stocks
@@ -223,7 +223,7 @@ namespace crm_api.Services
                     .Include(s => s.UpdatedByUser)
                     .Include(s => s.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.Id == stock.Id && !s.IsDeleted);
+                    .FirstOrDefaultAsync(s => s.Id == stock.Id && !s.IsDeleted).ConfigureAwait(false);
 
                 if (stockWithNav == null)
                 {
@@ -252,7 +252,7 @@ namespace crm_api.Services
         {
             try
             {
-                var stock = await _unitOfWork.Stocks.GetByIdForUpdateAsync(id);
+                var stock = await _unitOfWork.Stocks.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (stock == null)
                 {
                     return ApiResponse<StockGetDto>.ErrorResult(
@@ -265,7 +265,7 @@ namespace crm_api.Services
                 var existingStock = await _unitOfWork.Stocks
                     .Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.ErpStockCode == stockUpdateDto.ErpStockCode && s.Id != id && !s.IsDeleted);
+                    .FirstOrDefaultAsync(s => s.ErpStockCode == stockUpdateDto.ErpStockCode && s.Id != id && !s.IsDeleted).ConfigureAwait(false);
 
                 if (existingStock != null)
                 {
@@ -276,8 +276,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(stockUpdateDto, stock);
-                await _unitOfWork.Stocks.UpdateAsync(stock);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Stocks.UpdateAsync(stock).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var stockWithNav = await _unitOfWork.Stocks
@@ -290,7 +290,7 @@ namespace crm_api.Services
                     .Include(s => s.UpdatedByUser)
                     .Include(s => s.DeletedByUser)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.Id == stock.Id && !s.IsDeleted);
+                    .FirstOrDefaultAsync(s => s.Id == stock.Id && !s.IsDeleted).ConfigureAwait(false);
 
                 if (stockWithNav == null)
                 {
@@ -319,7 +319,7 @@ namespace crm_api.Services
         {
             try
             {
-                var stock = await _unitOfWork.Stocks.GetByIdAsync(id);
+                var stock = await _unitOfWork.Stocks.GetByIdAsync(id).ConfigureAwait(false);
                 if (stock == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -328,8 +328,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Stocks.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Stocks.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null, 
@@ -346,7 +346,7 @@ namespace crm_api.Services
                 
         public async Task SyncStocksFromErpAsync()
         {
-            var erpResponse = await _erpService.GetStoksAsync(null);
+            var erpResponse = await _erpService.GetStoksAsync(null).ConfigureAwait(false);
 
             if (erpResponse?.Data == null || erpResponse.Data.Count == 0)
                 return;
@@ -355,7 +355,7 @@ namespace crm_api.Services
             var existingStocks = await _unitOfWork.Stocks
                 .Query(tracking:true)
                 .Where(x => !x.IsDeleted)
-                .ToDictionaryAsync(x => x.ErpStockCode);
+                .ToDictionaryAsync(x => x.ErpStockCode).ConfigureAwait(false);
 
             var newStocks = new List<Stock>();
             var hasAnyChange = false;
@@ -463,20 +463,20 @@ namespace crm_api.Services
 
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 if (newStocks.Count > 0)
-                    await _unitOfWork.Stocks.AddAllAsync(newStocks);
+                    await _unitOfWork.Stocks.AddAllAsync(newStocks).ConfigureAwait(false);
 
                 // Update için ayrıca çağrı yok
                 // EF ChangeTracker zaten değişenleri takip ediyor
 
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             }
             catch
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 throw;
             }
         }
