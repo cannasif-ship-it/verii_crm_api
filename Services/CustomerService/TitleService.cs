@@ -49,11 +49,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var titles = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var items = titles.Select(x => _mapper.Map<TitleDto>(x)).ToList();
 
@@ -80,7 +80,7 @@ namespace crm_api.Services
         {
             try
             {
-                var title = await _unitOfWork.Titles.GetByIdAsync(id);
+                var title = await _unitOfWork.Titles.GetByIdAsync(id).ConfigureAwait(false);
                 if (title == null)
                 {
                     return ApiResponse<TitleDto>.ErrorResult(
@@ -95,7 +95,7 @@ namespace crm_api.Services
                     .Include(t => t.CreatedByUser)
                     .Include(t => t.UpdatedByUser)
                     .Include(t => t.DeletedByUser)
-                    .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
+                    .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted).ConfigureAwait(false);
 
                 var titleDto = _mapper.Map<TitleDto>(titleWithNav ?? title);
                 return ApiResponse<TitleDto>.SuccessResult(titleDto, _localizationService.GetLocalizedString("TitleService.TitleRetrieved"));
@@ -114,8 +114,8 @@ namespace crm_api.Services
             try
             {
                 var title = _mapper.Map<Title>(titleCreateDto);
-                await _unitOfWork.Titles.AddAsync(title);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Titles.AddAsync(title).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var titleWithNav = await _unitOfWork.Titles
                     .Query()
@@ -123,7 +123,7 @@ namespace crm_api.Services
                     .Include(t => t.CreatedByUser)
                     .Include(t => t.UpdatedByUser)
                     .Include(t => t.DeletedByUser)
-                    .FirstOrDefaultAsync(t => t.Id == title.Id && !t.IsDeleted);
+                    .FirstOrDefaultAsync(t => t.Id == title.Id && !t.IsDeleted).ConfigureAwait(false);
 
                 if (titleWithNav == null)
                 {
@@ -150,7 +150,7 @@ namespace crm_api.Services
         {
             try
             {
-                var title = await _unitOfWork.Titles.GetByIdForUpdateAsync(id);
+                var title = await _unitOfWork.Titles.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (title == null)
                 {
                     return ApiResponse<TitleDto>.ErrorResult(
@@ -160,8 +160,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(titleUpdateDto, title);
-                await _unitOfWork.Titles.UpdateAsync(title);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Titles.UpdateAsync(title).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var titleWithNav = await _unitOfWork.Titles
                     .Query()
@@ -169,7 +169,7 @@ namespace crm_api.Services
                     .Include(t => t.CreatedByUser)
                     .Include(t => t.UpdatedByUser)
                     .Include(t => t.DeletedByUser)
-                    .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
+                    .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted).ConfigureAwait(false);
 
                 if (titleWithNav == null)
                 {
@@ -196,7 +196,7 @@ namespace crm_api.Services
         {
             try
             {
-                var deleted = await _unitOfWork.Titles.SoftDeleteAsync(id);
+                var deleted = await _unitOfWork.Titles.SoftDeleteAsync(id).ConfigureAwait(false);
                 if (!deleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -205,7 +205,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("TitleService.TitleDeleted"));
             }

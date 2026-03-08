@@ -63,11 +63,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<ShippingAddressGetDto>(x)).ToList();
 
@@ -94,7 +94,7 @@ namespace crm_api.Services
         {
             try
             {
-                var shippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id);
+                var shippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id).ConfigureAwait(false);
 
                 if (shippingAddress == null)
                 {
@@ -110,7 +110,7 @@ namespace crm_api.Services
                     .Include(sa => sa.CreatedByUser)
                     .Include(sa => sa.UpdatedByUser)
                     .Include(sa => sa.DeletedByUser)
-                    .FirstOrDefaultAsync(sa => sa.Id == id && !sa.IsDeleted);
+                    .FirstOrDefaultAsync(sa => sa.Id == id && !sa.IsDeleted).ConfigureAwait(false);
 
                 if (shippingAddressWithNav == null)
                 {
@@ -137,7 +137,7 @@ namespace crm_api.Services
         {
             try
             {
-                var shippingAddresses = await _unitOfWork.ShippingAddresses.FindAsync(sa => sa.CustomerId == customerId);
+                var shippingAddresses = await _unitOfWork.ShippingAddresses.FindAsync(sa => sa.CustomerId == customerId).ConfigureAwait(false);
 
                 var shippingAddressDtos = _mapper.Map<List<ShippingAddressGetDto>>(shippingAddresses);
 
@@ -157,10 +157,10 @@ namespace crm_api.Services
             try
             {
                 var shippingAddress = _mapper.Map<ShippingAddress>(createShippingAddressDto);
-                await TryFillCoordinatesFromAddressAsync(shippingAddress);
+                await TryFillCoordinatesFromAddressAsync(shippingAddress).ConfigureAwait(false);
 
-                await _unitOfWork.ShippingAddresses.AddAsync(shippingAddress);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ShippingAddresses.AddAsync(shippingAddress).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var shippingAddressWithNav = await _unitOfWork.ShippingAddresses
@@ -168,7 +168,7 @@ namespace crm_api.Services
                     .Include(sa => sa.CreatedByUser)
                     .Include(sa => sa.UpdatedByUser)
                     .Include(sa => sa.DeletedByUser)
-                    .FirstOrDefaultAsync(sa => sa.Id == shippingAddress.Id && !sa.IsDeleted);
+                    .FirstOrDefaultAsync(sa => sa.Id == shippingAddress.Id && !sa.IsDeleted).ConfigureAwait(false);
 
                 if (shippingAddressWithNav == null)
                 {
@@ -195,7 +195,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existingShippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id);
+                var existingShippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id).ConfigureAwait(false);
 
                 if (existingShippingAddress == null)
                 {
@@ -212,12 +212,12 @@ namespace crm_api.Services
                 var addressChanged = addressBefore != addressAfter;
 
                 if (addressChanged)
-                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress, allowOverwriteExistingCoords: true);
+                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress, allowOverwriteExistingCoords: true).ConfigureAwait(false);
                 else
-                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress);
+                    await TryFillCoordinatesFromAddressAsync(existingShippingAddress).ConfigureAwait(false);
 
-                await _unitOfWork.ShippingAddresses.UpdateAsync(existingShippingAddress);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ShippingAddresses.UpdateAsync(existingShippingAddress).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var shippingAddressWithNav = await _unitOfWork.ShippingAddresses
@@ -225,7 +225,7 @@ namespace crm_api.Services
                     .Include(sa => sa.CreatedByUser)
                     .Include(sa => sa.UpdatedByUser)
                     .Include(sa => sa.DeletedByUser)
-                    .FirstOrDefaultAsync(sa => sa.Id == id && !sa.IsDeleted);
+                    .FirstOrDefaultAsync(sa => sa.Id == id && !sa.IsDeleted).ConfigureAwait(false);
 
                 if (shippingAddressWithNav == null)
                 {
@@ -252,7 +252,7 @@ namespace crm_api.Services
         {
             try
             {
-                var shippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id);
+                var shippingAddress = await _unitOfWork.ShippingAddresses.GetByIdAsync(id).ConfigureAwait(false);
 
                 if (shippingAddress == null)
                 {
@@ -264,8 +264,8 @@ namespace crm_api.Services
 
            
 
-                await _unitOfWork.ShippingAddresses.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ShippingAddresses.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("ShippingAddressService.ShippingAddressDeleted"));
             }
@@ -287,11 +287,11 @@ namespace crm_api.Services
             if (!allowOverwriteExistingCoords && shippingAddress.Latitude.HasValue && shippingAddress.Longitude.HasValue)
                 return;
 
-            var fullAddress = await BuildFullAddressAsync(shippingAddress.Address, shippingAddress.CountryId, shippingAddress.CityId, shippingAddress.DistrictId);
+            var fullAddress = await BuildFullAddressAsync(shippingAddress.Address, shippingAddress.CountryId, shippingAddress.CityId, shippingAddress.DistrictId).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(fullAddress))
                 return;
 
-            var coords = await _geocodingService.GeocodeAsync(fullAddress);
+            var coords = await _geocodingService.GeocodeAsync(fullAddress).ConfigureAwait(false);
             if (coords.HasValue)
             {
                 shippingAddress.Latitude = coords.Value.Latitude;
@@ -306,19 +306,19 @@ namespace crm_api.Services
                 parts.Add(address.Trim());
             if (districtId.HasValue)
             {
-                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value);
+                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value).ConfigureAwait(false);
                 if (district?.Name != null)
                     parts.Add(district.Name.Trim());
             }
             if (cityId.HasValue)
             {
-                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value);
+                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value).ConfigureAwait(false);
                 if (city?.Name != null)
                     parts.Add(city.Name.Trim());
             }
             if (countryId.HasValue)
             {
-                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value);
+                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value).ConfigureAwait(false);
                 if (country?.Name != null)
                     parts.Add(country.Name.Trim());
             }

@@ -35,7 +35,7 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId).ConfigureAwait(false);
                 if (customer == null)
                 {
                     return ApiResponse<List<CustomerImageDto>>.ErrorResult(
@@ -44,7 +44,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 var entities = new List<CustomerImage>();
 
@@ -55,10 +55,10 @@ namespace crm_api.Services
                         ? imageDescriptions[i]
                         : null;
 
-                    var uploadResult = await _fileUploadService.UploadCustomerImageAsync(file, customerId);
+                    var uploadResult = await _fileUploadService.UploadCustomerImageAsync(file, customerId).ConfigureAwait(false);
                     if (!uploadResult.Success || string.IsNullOrWhiteSpace(uploadResult.Data))
                     {
-                        await _unitOfWork.RollbackTransactionAsync();
+                        await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                         return ApiResponse<List<CustomerImageDto>>.ErrorResult(
                             uploadResult.Message ?? _localizationService.GetLocalizedString("FileUploadService.FileUploadError"),
                             uploadResult.ExceptionMessage,
@@ -72,13 +72,13 @@ namespace crm_api.Services
                         ImageDescription = description
                     };
 
-                    await _unitOfWork.CustomerImages.AddAsync(entity);
+                    await _unitOfWork.CustomerImages.AddAsync(entity).ConfigureAwait(false);
 
                     entities.Add(entity);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var uploadedImages = entities.Select(entity => new CustomerImageDto
                 {
@@ -97,7 +97,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<List<CustomerImageDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("CustomerService.InternalServerError"),
                     ex.Message,
@@ -110,7 +110,7 @@ namespace crm_api.Services
             try
             {
                 var customerExists = await _unitOfWork.Customers.Query(tracking: false)
-                    .AnyAsync(x => x.Id == customerId && !x.IsDeleted);
+                    .AnyAsync(x => x.Id == customerId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (!customerExists)
                 {
@@ -128,7 +128,7 @@ namespace crm_api.Services
                     .Include(x => x.DeletedByUser)
                     .AsNoTracking()
                     .OrderBy(x => x.Id)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var response = items.Select(x => new CustomerImageDto
                 {
@@ -161,7 +161,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.CustomerImages.GetByIdAsync(id);
+                var entity = await _unitOfWork.CustomerImages.GetByIdAsync(id).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -170,12 +170,12 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.CustomerImages.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CustomerImages.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 if (!string.IsNullOrWhiteSpace(entity.ImageUrl))
                 {
-                    await _fileUploadService.DeleteCustomerImageAsync(entity.ImageUrl);
+                    await _fileUploadService.DeleteCustomerImageAsync(entity.ImageUrl).ConfigureAwait(false);
                 }
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CustomerImageService.CustomerImageDeleted"));

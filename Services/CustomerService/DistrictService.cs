@@ -51,11 +51,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<DistrictGetDto>(x)).ToList();
 
@@ -82,7 +82,7 @@ namespace crm_api.Services
         {
             try
             {
-                var district = await _unitOfWork.Districts.GetByIdAsync(id);
+                var district = await _unitOfWork.Districts.GetByIdAsync(id).ConfigureAwait(false);
                 if (district == null)
                 {
                     return ApiResponse<DistrictGetDto>.ErrorResult(
@@ -98,7 +98,7 @@ namespace crm_api.Services
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
                     .Include(d => d.City)
-                    .FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted);
+                    .FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted).ConfigureAwait(false);
 
                 var districtDto = _mapper.Map<DistrictGetDto>(districtWithNav ?? district);
                 return ApiResponse<DistrictGetDto>.SuccessResult(districtDto, _localizationService.GetLocalizedString("DistrictService.DistrictRetrieved"));
@@ -117,8 +117,8 @@ namespace crm_api.Services
             try
             {
                 var district = _mapper.Map<District>(districtCreateDto);
-                await _unitOfWork.Districts.AddAsync(district);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Districts.AddAsync(district).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var districtWithNav = await _unitOfWork.Districts
@@ -127,7 +127,7 @@ namespace crm_api.Services
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
                     .Include(d => d.City)
-                    .FirstOrDefaultAsync(d => d.Id == district.Id && !d.IsDeleted);
+                    .FirstOrDefaultAsync(d => d.Id == district.Id && !d.IsDeleted).ConfigureAwait(false);
 
                 if (districtWithNav == null)
                 {
@@ -154,7 +154,7 @@ namespace crm_api.Services
         {
             try
             {
-                var district = await _unitOfWork.Districts.GetByIdAsync(id);
+                var district = await _unitOfWork.Districts.GetByIdAsync(id).ConfigureAwait(false);
                 if (district == null)
                 {
                     return ApiResponse<DistrictGetDto>.ErrorResult(
@@ -164,8 +164,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(districtUpdateDto, district);
-                await _unitOfWork.Districts.UpdateAsync(district);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Districts.UpdateAsync(district).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var districtWithNav = await _unitOfWork.Districts
@@ -174,7 +174,7 @@ namespace crm_api.Services
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
                     .Include(d => d.City)
-                    .FirstOrDefaultAsync(d => d.Id == district.Id && !d.IsDeleted);
+                    .FirstOrDefaultAsync(d => d.Id == district.Id && !d.IsDeleted).ConfigureAwait(false);
 
                 if (districtWithNav == null)
                 {
@@ -201,7 +201,7 @@ namespace crm_api.Services
         {
             try
             {
-                var district = await _unitOfWork.Districts.GetByIdAsync(id);
+                var district = await _unitOfWork.Districts.GetByIdAsync(id).ConfigureAwait(false);
                 if (district == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -210,8 +210,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Districts.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Districts.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("DistrictService.DistrictDeleted"));
             }

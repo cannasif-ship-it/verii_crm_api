@@ -59,11 +59,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<ContactDto>(x)).ToList();
 
@@ -90,7 +90,7 @@ namespace crm_api.Services
         {
             try
             {
-                var contact = await _unitOfWork.Contacts.GetByIdAsync(id);
+                var contact = await _unitOfWork.Contacts.GetByIdAsync(id).ConfigureAwait(false);
                 if (contact == null)
                 {
                     return ApiResponse<ContactDto>.ErrorResult(
@@ -107,7 +107,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted).ConfigureAwait(false);
 
                 var contactDto = _mapper.Map<ContactDto>(contactWithNav ?? contact);
                 return ApiResponse<ContactDto>.SuccessResult(contactDto, _localizationService.GetLocalizedString("ContactService.ContactRetrieved"));
@@ -126,15 +126,15 @@ namespace crm_api.Services
             try
             {
                 NormalizeContactDto(createContactDto);
-                var governanceError = await ValidateContactGovernanceAsync(createContactDto, null);
+                var governanceError = await ValidateContactGovernanceAsync(createContactDto, null).ConfigureAwait(false);
                 if (governanceError != null)
                 {
                     return governanceError;
                 }
 
                 var contact = _mapper.Map<Contact>(createContactDto);
-                await _unitOfWork.Contacts.AddAsync(contact);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Contacts.AddAsync(contact).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var contactWithNav = await _unitOfWork.Contacts
@@ -144,7 +144,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == contact.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == contact.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (contactWithNav == null)
                 {
@@ -179,14 +179,14 @@ namespace crm_api.Services
             try
             {
                 NormalizeContactDto(updateContactDto);
-                var governanceError = await ValidateContactGovernanceAsync(updateContactDto, id);
+                var governanceError = await ValidateContactGovernanceAsync(updateContactDto, id).ConfigureAwait(false);
                 if (governanceError != null)
                 {
                     return governanceError;
                 }
 
                 // Get tracked entity for update
-                var contact = await _unitOfWork.Contacts.GetByIdForUpdateAsync(id);
+                var contact = await _unitOfWork.Contacts.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (contact == null)
                 {
                     return ApiResponse<ContactDto>.ErrorResult(
@@ -196,8 +196,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(updateContactDto, contact);
-                await _unitOfWork.Contacts.UpdateAsync(contact);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Contacts.UpdateAsync(contact).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping (read-only)
                 var contactWithNav = await _unitOfWork.Contacts
@@ -207,7 +207,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == id);
+                    .FirstOrDefaultAsync(c => c.Id == id).ConfigureAwait(false);
 
                 if (contactWithNav == null)
                 {
@@ -241,7 +241,7 @@ namespace crm_api.Services
         {
             try
             {
-                var deleted = await _unitOfWork.Contacts.SoftDeleteAsync(id);
+                var deleted = await _unitOfWork.Contacts.SoftDeleteAsync(id).ConfigureAwait(false);
                 if (!deleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -250,7 +250,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("ContactService.ContactDeleted"));
             }
@@ -309,7 +309,7 @@ namespace crm_api.Services
                     c.Mobile,
                     c.Phone
                 })
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var hasDuplicate = duplicateCandidates.Any(c =>
                 (!string.IsNullOrWhiteSpace(normalizedEmail) && NormalizeText(c.Email) == normalizedEmail) ||
@@ -346,7 +346,7 @@ namespace crm_api.Services
                 TitleId = dto.TitleId
             };
 
-            return await ValidateContactGovernanceAsync(createLike, excludedId);
+            return await ValidateContactGovernanceAsync(createLike, excludedId).ConfigureAwait(false);
         }
 
         private static void NormalizeContactDto(CreateContactDto dto)

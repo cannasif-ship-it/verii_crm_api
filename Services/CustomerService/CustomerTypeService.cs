@@ -50,11 +50,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<CustomerTypeGetDto>(x)).ToList();
 
@@ -81,7 +81,7 @@ namespace crm_api.Services
         {
             try
             {
-                var customerType = await _unitOfWork.CustomerTypes.GetByIdAsync(id);
+                var customerType = await _unitOfWork.CustomerTypes.GetByIdAsync(id).ConfigureAwait(false);
                 if (customerType == null)
                 {
                     return ApiResponse<CustomerTypeGetDto>.ErrorResult(
@@ -96,7 +96,7 @@ namespace crm_api.Services
                     .Include(ct => ct.CreatedByUser)
                     .Include(ct => ct.UpdatedByUser)
                     .Include(ct => ct.DeletedByUser)
-                    .FirstOrDefaultAsync(ct => ct.Id == id && !ct.IsDeleted);
+                    .FirstOrDefaultAsync(ct => ct.Id == id && !ct.IsDeleted).ConfigureAwait(false);
 
                 var customerTypeDto = _mapper.Map<CustomerTypeGetDto>(customerTypeWithNav ?? customerType);
                 return ApiResponse<CustomerTypeGetDto>.SuccessResult(customerTypeDto, _localizationService.GetLocalizedString("CustomerTypeService.CustomerTypeRetrieved"));
@@ -115,8 +115,8 @@ namespace crm_api.Services
             try
             {
                 var customerType = _mapper.Map<CustomerType>(customerTypeCreateDto);
-                await _unitOfWork.CustomerTypes.AddAsync(customerType);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CustomerTypes.AddAsync(customerType).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var customerTypeWithNav = await _unitOfWork.CustomerTypes
@@ -124,7 +124,7 @@ namespace crm_api.Services
                     .Include(ct => ct.CreatedByUser)
                     .Include(ct => ct.UpdatedByUser)
                     .Include(ct => ct.DeletedByUser)
-                    .FirstOrDefaultAsync(ct => ct.Id == customerType.Id && !ct.IsDeleted);
+                    .FirstOrDefaultAsync(ct => ct.Id == customerType.Id && !ct.IsDeleted).ConfigureAwait(false);
 
                 if (customerTypeWithNav == null)
                 {
@@ -152,7 +152,7 @@ namespace crm_api.Services
             try
             {
                 // Get tracked entity for update
-                var customerType = await _unitOfWork.CustomerTypes.GetByIdForUpdateAsync(id);
+                var customerType = await _unitOfWork.CustomerTypes.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (customerType == null)
                 {
                     return ApiResponse<CustomerTypeGetDto>.ErrorResult(
@@ -162,8 +162,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(customerTypeUpdateDto, customerType);
-                await _unitOfWork.CustomerTypes.UpdateAsync(customerType);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CustomerTypes.UpdateAsync(customerType).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping (read-only)
                 var customerTypeWithNav = await _unitOfWork.CustomerTypes
@@ -171,7 +171,7 @@ namespace crm_api.Services
                     .Include(ct => ct.CreatedByUser)
                     .Include(ct => ct.UpdatedByUser)
                     .Include(ct => ct.DeletedByUser)
-                    .FirstOrDefaultAsync(ct => ct.Id == id);
+                    .FirstOrDefaultAsync(ct => ct.Id == id).ConfigureAwait(false);
 
                 if (customerTypeWithNav == null)
                 {
@@ -198,7 +198,7 @@ namespace crm_api.Services
         {
             try
             {
-                var deleted = await _unitOfWork.CustomerTypes.SoftDeleteAsync(id);
+                var deleted = await _unitOfWork.CustomerTypes.SoftDeleteAsync(id).ConfigureAwait(false);
                 if (!deleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -207,7 +207,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CustomerTypeService.CustomerTypeDeleted"));
             }

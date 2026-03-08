@@ -87,11 +87,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<CustomerGetDto>(x)).ToList();
 
@@ -118,7 +118,7 @@ namespace crm_api.Services
         {
             try
             {
-                var customer = await _unitOfWork.Customers.GetByIdAsync(id);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(id).ConfigureAwait(false);
                 if (customer == null)
                 {
                     return ApiResponse<CustomerGetDto>.ErrorResult(
@@ -137,7 +137,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted).ConfigureAwait(false);
 
                 var customerDto = _mapper.Map<CustomerGetDto>(customerWithNav ?? customer);
                 return ApiResponse<CustomerGetDto>.SuccessResult(customerDto, _localizationService.GetLocalizedString("CustomerService.CustomerRetrieved"));
@@ -208,7 +208,7 @@ namespace crm_api.Services
                     customerQuery = customerQuery.Where(c => c.BranchCode == branchCode);
                 }
 
-                var customers = await customerQuery.ToListAsync();
+                var customers = await customerQuery.ToListAsync().ConfigureAwait(false);
                 var result = new List<NearbyCustomerPinDto>();
 
                 foreach (var customer in customers)
@@ -298,16 +298,16 @@ namespace crm_api.Services
             try
             {
                 NormalizeCustomerDto(customerCreateDto);
-                var governanceError = await ValidateCustomerGovernanceAsync(customerCreateDto, null);
+                var governanceError = await ValidateCustomerGovernanceAsync(customerCreateDto, null).ConfigureAwait(false);
                 if (governanceError != null)
                 {
                     return governanceError;
                 }
 
                 var customer = _mapper.Map<Customer>(customerCreateDto);
-                await TryFillCoordinatesFromAddressAsync(customer);
-                await _unitOfWork.Customers.AddAsync(customer);
-                await _unitOfWork.SaveChangesAsync();
+                await TryFillCoordinatesFromAddressAsync(customer).ConfigureAwait(false);
+                await _unitOfWork.Customers.AddAsync(customer).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var customerWithNav = await _unitOfWork.Customers
@@ -319,7 +319,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (customerWithNav == null)
                 {
@@ -472,7 +472,7 @@ namespace crm_api.Services
                     var ids = await customerQuery
                         .Where(c => c.Email == requestEmail)
                         .Select(c => c.Id)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
                     foreach (var id in ids)
                         emailMatchedIds.Add(id);
                 }
@@ -485,7 +485,7 @@ namespace crm_api.Services
                             (!string.IsNullOrWhiteSpace(requestPhone) && (c.Phone1 == requestPhone || c.Phone2 == requestPhone)) ||
                             (!string.IsNullOrWhiteSpace(requestPhone2) && (c.Phone1 == requestPhone2 || c.Phone2 == requestPhone2)))
                         .Select(c => c.Id)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
                     foreach (var id in ids)
                         phoneMatchedIds.Add(id);
                 }
@@ -510,7 +510,7 @@ namespace crm_api.Services
 
                 var existingCustomerId = matchedIds.FirstOrDefault();
 
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 try
                 {
@@ -521,7 +521,7 @@ namespace crm_api.Services
                     {
                         var existingCustomer = await _unitOfWork.Customers
                             .Query(tracking: true, ignoreQueryFilters: true)
-                            .FirstOrDefaultAsync(c => c.Id == existingCustomerId);
+                            .FirstOrDefaultAsync(c => c.Id == existingCustomerId).ConfigureAwait(false);
 
                         if (existingCustomer == null)
                         {
@@ -536,8 +536,8 @@ namespace crm_api.Services
                             existingCustomer.IsDeleted = false;
                             existingCustomer.DeletedDate = null;
                             existingCustomer.DeletedBy = null;
-                            await _unitOfWork.Customers.UpdateAsync(existingCustomer);
-                            await _unitOfWork.SaveChangesAsync();
+                            await _unitOfWork.Customers.UpdateAsync(existingCustomer).ConfigureAwait(false);
+                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                         }
 
                         customer = existingCustomer;
@@ -545,9 +545,9 @@ namespace crm_api.Services
                     else
                     {
                         // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
-                        var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId);
+                        var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId).ConfigureAwait(false);
                         var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
-                            ? await _geocodingService.GeocodeAsync(mobileFullAddress)
+                            ? await _geocodingService.GeocodeAsync(mobileFullAddress).ConfigureAwait(false)
                             : null;
 
                         customer = new Customer
@@ -572,8 +572,8 @@ namespace crm_api.Services
                             Longitude = mobileCoords?.Longitude
                         };
 
-                        await _unitOfWork.Customers.AddAsync(customer);
-                        await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.Customers.AddAsync(customer).ConfigureAwait(false);
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                         customerCreated = true;
                     }
 
@@ -582,7 +582,7 @@ namespace crm_api.Services
 
                     if (request.ImageFile != null && request.ImageFile.Length > 0)
                     {
-                        var uploadResult = await _fileUploadService.UploadCustomerImageAsync(request.ImageFile, customer.Id);
+                        var uploadResult = await _fileUploadService.UploadCustomerImageAsync(request.ImageFile, customer.Id).ConfigureAwait(false);
                         if (uploadResult.Success && !string.IsNullOrWhiteSpace(uploadResult.Data))
                         {
                             var customerImage = new CustomerImage
@@ -591,8 +591,8 @@ namespace crm_api.Services
                                 ImageUrl = uploadResult.Data,
                                 ImageDescription = normalizeNullable(request.ImageDescription)
                             };
-                            await _unitOfWork.CustomerImages.AddAsync(customerImage);
-                            await _unitOfWork.SaveChangesAsync();
+                            await _unitOfWork.CustomerImages.AddAsync(customerImage).ConfigureAwait(false);
+                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                             imageUploaded = true;
                         }
                         else
@@ -615,7 +615,7 @@ namespace crm_api.Services
 
                     var existingTitle = await _unitOfWork.Titles
                         .Query(tracking: true, ignoreQueryFilters: true)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
 
                     var matchedTitle = existingTitle.FirstOrDefault(t => normalizeTitleKey(t.TitleName) == resolvedTitleKey);
 
@@ -625,8 +625,8 @@ namespace crm_api.Services
                         {
                             TitleName = resolvedTitleName
                         };
-                        await _unitOfWork.Titles.AddAsync(matchedTitle);
-                        await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.Titles.AddAsync(matchedTitle).ConfigureAwait(false);
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                         titleCreated = true;
                     }
                     else
@@ -643,8 +643,8 @@ namespace crm_api.Services
                             matchedTitle.TitleName = resolvedTitleName;
                         }
 
-                        await _unitOfWork.Titles.UpdateAsync(matchedTitle);
-                        await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.Titles.UpdateAsync(matchedTitle).ConfigureAwait(false);
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     }
 
                     titleId = matchedTitle.Id;
@@ -673,7 +673,7 @@ namespace crm_api.Services
 
                         var sameContacts = await _unitOfWork.Contacts
                             .Query(tracking: true, ignoreQueryFilters: true)
-                            .ToListAsync();
+                            .ToListAsync().ConfigureAwait(false);
 
                         bool isSameContact(Contact c)
                         {
@@ -706,7 +706,7 @@ namespace crm_api.Services
                         var matchedExistingActiveContact = sameContacts.FirstOrDefault(c => !c.IsDeleted && isSameContact(c));
                         if (matchedExistingActiveContact != null)
                         {
-                            await _unitOfWork.RollbackTransactionAsync();
+                            await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                             var duplicateContactMessage = _localizationService.GetLocalizedString("CustomerService.MobileOcrDuplicateContact");
                             return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
                                 duplicateContactMessage,
@@ -732,8 +732,8 @@ namespace crm_api.Services
                             matchedDeletedContact.CustomerId = customer.Id;
                             matchedDeletedContact.TitleId = titleId;
 
-                            await _unitOfWork.Contacts.UpdateAsync(matchedDeletedContact);
-                            await _unitOfWork.SaveChangesAsync();
+                            await _unitOfWork.Contacts.UpdateAsync(matchedDeletedContact).ConfigureAwait(false);
+                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                             contactId = matchedDeletedContact.Id;
                         }
                         else
@@ -753,15 +753,15 @@ namespace crm_api.Services
                                 TitleId = titleId
                             };
 
-                            await _unitOfWork.Contacts.AddAsync(contact);
+                            await _unitOfWork.Contacts.AddAsync(contact).ConfigureAwait(false);
                             contactCreated = true;
 
-                            await _unitOfWork.SaveChangesAsync();
+                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                             contactId = contact.Id;
                         }
                     }
 
-                    await _unitOfWork.CommitTransactionAsync();
+                    await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                     var response = new CustomerCreateFromMobileResultDto
                     {
@@ -781,7 +781,7 @@ namespace crm_api.Services
                 }
                 catch
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     throw;
                 }
             }
@@ -799,7 +799,7 @@ namespace crm_api.Services
             try
             {
                 NormalizeCustomerDto(customerUpdateDto);
-                var customer = await _unitOfWork.Customers.GetByIdForUpdateAsync(id);
+                var customer = await _unitOfWork.Customers.GetByIdForUpdateAsync(id).ConfigureAwait(false);
                 if (customer == null)
                 {
                     return ApiResponse<CustomerGetDto>.ErrorResult(
@@ -808,7 +808,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                var governanceError = await ValidateCustomerGovernanceAsync(customerUpdateDto, id);
+                var governanceError = await ValidateCustomerGovernanceAsync(customerUpdateDto, id).ConfigureAwait(false);
                 if (governanceError != null)
                 {
                     return governanceError;
@@ -822,15 +822,15 @@ namespace crm_api.Services
                 if (addressChanged)
                 {
                     _logger.LogDebug("Customer {CustomerId}: address fields updated, running geocoding (normal existing-customer flow).", id);
-                    await TryFillCoordinatesFromAddressAsync(customer, allowOverwriteExistingCoords: true);
+                    await TryFillCoordinatesFromAddressAsync(customer, allowOverwriteExistingCoords: true).ConfigureAwait(false);
                 }
                 else
                 {
                     _logger.LogDebug("Customer {CustomerId}: address unchanged, keeping existing coordinates.", id);
                 }
 
-                await _unitOfWork.Customers.UpdateAsync(customer);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Customers.UpdateAsync(customer).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var customerWithNav = await _unitOfWork.Customers
@@ -842,7 +842,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (customerWithNav == null)
                 {
@@ -876,7 +876,7 @@ namespace crm_api.Services
         {
             try
             {
-                var customer = await _unitOfWork.Customers.GetByIdAsync(id);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(id).ConfigureAwait(false);
                 if (customer == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -885,8 +885,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Customers.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Customers.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CustomerService.CustomerDeleted"));
             }
@@ -901,7 +901,7 @@ namespace crm_api.Services
 
         public async Task SyncCustomersFromErpAsync()
         {
-            var erpResponse = await _erpService.GetCarisAsync(null);
+            var erpResponse = await _erpService.GetCarisAsync(null).ConfigureAwait(false);
 
             if (erpResponse?.Data == null || erpResponse.Data.Count == 0)
             {
@@ -913,7 +913,7 @@ namespace crm_api.Services
 
             var existingCustomers = await _unitOfWork.Customers
                 .Query(tracking: true, ignoreQueryFilters: true)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var customerByCode = existingCustomers
                 .Where(x => !string.IsNullOrWhiteSpace(x.CustomerCode))
@@ -1018,13 +1018,13 @@ namespace crm_api.Services
 
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 if (newCustomers.Count > 0)
-                    await _unitOfWork.Customers.AddAllAsync(newCustomers);
+                    await _unitOfWork.Customers.AddAllAsync(newCustomers).ConfigureAwait(false);
 
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 _logger.LogInformation(
                     "Customer sync completed: created={Created}, updated={Updated}, reactivated={Reactivated}.",
@@ -1034,7 +1034,7 @@ namespace crm_api.Services
             }
             catch
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 throw;
             }
         }
@@ -1047,7 +1047,7 @@ namespace crm_api.Services
                     .Query()
                     .Where(x => !x.IsDeleted)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var candidates = new List<CustomerDuplicateCandidateDto>();
                 candidates.AddRange(BuildDuplicateCandidates(customers, c => NormalizeDigits(c.TaxNumber), "TaxNumber", 0.95m));
@@ -1087,8 +1087,8 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var master = await _unitOfWork.Customers.GetByIdForUpdateAsync(request.MasterCustomerId);
-                var duplicate = await _unitOfWork.Customers.GetByIdForUpdateAsync(request.DuplicateCustomerId);
+                var master = await _unitOfWork.Customers.GetByIdForUpdateAsync(request.MasterCustomerId).ConfigureAwait(false);
+                var duplicate = await _unitOfWork.Customers.GetByIdForUpdateAsync(request.DuplicateCustomerId).ConfigureAwait(false);
                 if (master == null || duplicate == null || master.IsDeleted || duplicate.IsDeleted)
                 {
                     return ApiResponse<CustomerGetDto>.ErrorResult(
@@ -1100,13 +1100,13 @@ namespace crm_api.Services
                 var duplicateContacts = await _unitOfWork.Contacts
                     .Query(tracking: true)
                     .Where(x => !x.IsDeleted && x.CustomerId == duplicate.Id)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var masterContactKeys = await _unitOfWork.Contacts
                     .Query()
                     .Where(x => !x.IsDeleted && x.CustomerId == master.Id)
                     .Select(x => BuildContactKey(x.FullName, x.Email, x.Mobile, x.Phone))
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var masterContactSet = masterContactKeys.ToHashSet(StringComparer.OrdinalIgnoreCase);
                 foreach (var contact in duplicateContacts)
@@ -1114,12 +1114,12 @@ namespace crm_api.Services
                     var key = BuildContactKey(contact.FullName, contact.Email, contact.Mobile, contact.Phone);
                     if (masterContactSet.Contains(key))
                     {
-                        await _unitOfWork.Contacts.SoftDeleteAsync(contact.Id);
+                        await _unitOfWork.Contacts.SoftDeleteAsync(contact.Id).ConfigureAwait(false);
                         continue;
                     }
 
                     contact.CustomerId = master.Id;
-                    await _unitOfWork.Contacts.UpdateAsync(contact);
+                    await _unitOfWork.Contacts.UpdateAsync(contact).ConfigureAwait(false);
                     masterContactSet.Add(key);
                 }
 
@@ -1138,9 +1138,9 @@ namespace crm_api.Services
                     master.Notes = FirstNonEmpty(master.Notes, duplicate.Notes);
                 }
 
-                await _unitOfWork.Customers.UpdateAsync(master);
-                await _unitOfWork.Customers.SoftDeleteAsync(duplicate.Id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Customers.UpdateAsync(master).ConfigureAwait(false);
+                await _unitOfWork.Customers.SoftDeleteAsync(duplicate.Id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 _logger.LogInformation(
                     "Customer merge completed. Master: {MasterId}, Duplicate: {DuplicateId}, PreferMasterValues: {PreferMasterValues}",
@@ -1157,7 +1157,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == master.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == master.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (merged == null)
                 {
@@ -1242,7 +1242,7 @@ namespace crm_api.Services
                     c.CustomerCode,
                     c.BranchCode
                 })
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var isDuplicate = duplicateCandidates.Any(c =>
                 (!string.IsNullOrWhiteSpace(tax) && NormalizeDigits(c.TaxNumber) == tax) ||
@@ -1289,7 +1289,7 @@ namespace crm_api.Services
                 IsCompleted = dto.IsCompleted
             };
 
-            return await ValidateCustomerGovernanceAsync(createLike, excludedId);
+            return await ValidateCustomerGovernanceAsync(createLike, excludedId).ConfigureAwait(false);
         }
 
         private static void NormalizeCustomerDto(CustomerCreateDto dto)
@@ -1479,11 +1479,11 @@ namespace crm_api.Services
             if (!allowOverwriteExistingCoords && customer.Latitude.HasValue && customer.Longitude.HasValue)
                 return;
 
-            var fullAddress = await BuildFullAddressAsync(customer.Address, customer.CountryId, customer.CityId, customer.DistrictId);
+            var fullAddress = await BuildFullAddressAsync(customer.Address, customer.CountryId, customer.CityId, customer.DistrictId).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(fullAddress))
                 return;
 
-            var coords = await _geocodingService.GeocodeAsync(fullAddress);
+            var coords = await _geocodingService.GeocodeAsync(fullAddress).ConfigureAwait(false);
             if (coords.HasValue)
             {
                 customer.Latitude = coords.Value.Latitude;
@@ -1498,19 +1498,19 @@ namespace crm_api.Services
                 parts.Add(address.Trim());
             if (districtId.HasValue)
             {
-                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value);
+                var district = await _unitOfWork.Districts.GetByIdAsync(districtId.Value).ConfigureAwait(false);
                 if (district?.Name != null)
                     parts.Add(district.Name.Trim());
             }
             if (cityId.HasValue)
             {
-                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value);
+                var city = await _unitOfWork.Cities.GetByIdAsync(cityId.Value).ConfigureAwait(false);
                 if (city?.Name != null)
                     parts.Add(city.Name.Trim());
             }
             if (countryId.HasValue)
             {
-                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value);
+                var country = await _unitOfWork.Countries.GetByIdAsync(countryId.Value).ConfigureAwait(false);
                 if (country?.Name != null)
                     parts.Add(country.Name.Trim());
             }

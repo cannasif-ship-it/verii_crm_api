@@ -51,11 +51,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<CityGetDto>(x)).ToList();
 
@@ -82,7 +82,7 @@ namespace crm_api.Services
         {
             try
             {
-                var city = await _unitOfWork.Cities.GetByIdAsync(id);
+                var city = await _unitOfWork.Cities.GetByIdAsync(id).ConfigureAwait(false);
                 if (city == null)
                 {
                     return ApiResponse<CityGetDto>.ErrorResult(
@@ -98,7 +98,7 @@ namespace crm_api.Services
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
                     .Include(c => c.Country)
-                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted).ConfigureAwait(false);
 
                 var cityDto = _mapper.Map<CityGetDto>(cityWithNav ?? city);
                 return ApiResponse<CityGetDto>.SuccessResult(cityDto, _localizationService.GetLocalizedString("CityService.CityRetrieved"));
@@ -117,8 +117,8 @@ namespace crm_api.Services
             try
             {
                 var city = _mapper.Map<City>(cityCreateDto);
-                await _unitOfWork.Cities.AddAsync(city);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Cities.AddAsync(city).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var cityWithNav = await _unitOfWork.Cities
@@ -127,7 +127,7 @@ namespace crm_api.Services
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
                     .Include(c => c.Country)
-                    .FirstOrDefaultAsync(c => c.Id == city.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == city.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (cityWithNav == null)
                 {
@@ -154,7 +154,7 @@ namespace crm_api.Services
         {
             try
             {
-                var city = await _unitOfWork.Cities.GetByIdAsync(id);
+                var city = await _unitOfWork.Cities.GetByIdAsync(id).ConfigureAwait(false);
                 if (city == null)
                 {
                     return ApiResponse<CityGetDto>.ErrorResult(
@@ -164,8 +164,8 @@ namespace crm_api.Services
                 }
 
                 _mapper.Map(cityUpdateDto, city);
-                await _unitOfWork.Cities.UpdateAsync(city);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Cities.UpdateAsync(city).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var cityWithNav = await _unitOfWork.Cities
@@ -174,7 +174,7 @@ namespace crm_api.Services
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
                     .Include(c => c.Country)
-                    .FirstOrDefaultAsync(c => c.Id == city.Id && !c.IsDeleted);
+                    .FirstOrDefaultAsync(c => c.Id == city.Id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (cityWithNav == null)
                 {
@@ -201,7 +201,7 @@ namespace crm_api.Services
         {
             try
             {
-                var city = await _unitOfWork.Cities.GetByIdAsync(id);
+                var city = await _unitOfWork.Cities.GetByIdAsync(id).ConfigureAwait(false);
                 if (city == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -210,8 +210,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.Cities.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Cities.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CityService.CityDeleted"));
             }

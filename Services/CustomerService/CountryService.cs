@@ -49,11 +49,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<CountryGetDto>(x)).ToList();
 
@@ -81,7 +81,7 @@ namespace crm_api.Services
             try
             {
                 // Get entity with audit navigation properties
-                var country = await _unitOfWork.Countries.GetByIdAsync(id);
+                var country = await _unitOfWork.Countries.GetByIdAsync(id).ConfigureAwait(false);
 
                 if (country == null)
                 {
@@ -106,8 +106,8 @@ namespace crm_api.Services
         public async Task<ApiResponse<CountryGetDto>> CreateCountryAsync(CountryCreateDto countryCreateDto)
         {
             var country = _mapper.Map<Country>(countryCreateDto);
-            await _unitOfWork.Countries.AddAsync(country);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Countries.AddAsync(country).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             var countryDto = _mapper.Map<CountryGetDto>(country);
             return ApiResponse<CountryGetDto>.SuccessResult(countryDto, _localizationService.GetLocalizedString("CountryService.CountryCreated"));
@@ -116,7 +116,7 @@ namespace crm_api.Services
         public async Task<ApiResponse<CountryGetDto>> UpdateCountryAsync(long id, CountryUpdateDto countryUpdateDto)
         {
             // Get tracked entity for update
-            var country = await _unitOfWork.Countries.GetByIdForUpdateAsync(id);
+            var country = await _unitOfWork.Countries.GetByIdForUpdateAsync(id).ConfigureAwait(false);
             if (country == null)
             {
                 return ApiResponse<CountryGetDto>.ErrorResult(
@@ -126,11 +126,11 @@ namespace crm_api.Services
             }
 
             _mapper.Map(countryUpdateDto, country);
-            await _unitOfWork.Countries.UpdateAsync(country);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Countries.UpdateAsync(country).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             // Reload with audit navigation properties for mapping (read-only)
-            var countryWithNav = await _unitOfWork.Countries.GetByIdAsync(id);
+            var countryWithNav = await _unitOfWork.Countries.GetByIdAsync(id).ConfigureAwait(false);
 
             if (countryWithNav == null)
             {
@@ -148,7 +148,7 @@ namespace crm_api.Services
         {
             try
             {
-                var deleted = await _unitOfWork.Countries.SoftDeleteAsync(id);
+                var deleted = await _unitOfWork.Countries.SoftDeleteAsync(id).ConfigureAwait(false);
                 if (!deleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -157,7 +157,7 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("CountryService.CountryDeleted"));
             }
