@@ -172,7 +172,8 @@ namespace crm_api.Services
                 .FirstOrDefaultAsync();
 
             if (entity == null)
-                throw new InvalidOperationException("SMTP settings missing in DB (Id=1).");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("SmtpSettingsService.SmtpSettingsMissingInDatabase"));
 
             var password = string.IsNullOrWhiteSpace(entity.PasswordEncrypted)
                 ? ""
