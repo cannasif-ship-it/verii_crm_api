@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -25,27 +27,24 @@ using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Caching.Memory;              // ✅ SMTP için (IMemoryCache)
 using crm_api.Infrastructure.Startup;
 using crm_api.Infrastructure;
+using crm_api.Infrastructure.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
-
-// Centralized validation response
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
 {
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        var localization = context.HttpContext.RequestServices.GetRequiredService<crm_api.Interfaces.ILocalizationService>();
-        var errors = context.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-        var response = crm_api.DTOs.ApiResponse<object>.ErrorResult(
-            localization.GetLocalizedString("General.ValidationError"),
-            localization.GetLocalizedString("General.ValidationError"),
-            StatusCodes.Status400BadRequest);
-        response.Errors = errors;
-        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(response);
-    };
+    options.SuppressModelStateInvalidFilter = true;
 });
+
+// Add services to the container.
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilterAttribute>();
+});
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddScoped<ValidationFilterAttribute>();
 
 
 // ✅ SMTP için: MemoryCache + DataProtection
