@@ -25,7 +25,7 @@ namespace crm_api.Services
             string? bcc = null,
             List<string>? attachments = null)
         {
-            return await SendEmailAsync(to, subject, body, null, null, isHtml, cc, bcc, attachments);
+            return await SendEmailAsync(to, subject, body, null, null, isHtml, cc, bcc, attachments).ConfigureAwait(false);
         }
 
         public async Task<bool> SendEmailAsync(
@@ -41,7 +41,7 @@ namespace crm_api.Services
         {
             try
             {
-                var smtp = await _smtpSettingsService.GetRuntimeAsync();
+                var smtp = await _smtpSettingsService.GetRuntimeAsync().ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(smtp.Host))
                 {
@@ -98,7 +98,7 @@ namespace crm_api.Services
                     }
                 }
 
-                await client.SendMailAsync(message);
+                await client.SendMailAsync(message).ConfigureAwait(false);
                 _logger.LogInformation($"Email sent successfully to {to} with subject: {subject}");
                 return true;
             }

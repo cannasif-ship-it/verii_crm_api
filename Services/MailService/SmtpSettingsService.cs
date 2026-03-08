@@ -49,7 +49,7 @@ namespace crm_api.Services
                     .Query()
                     .AsNoTracking()
                     .Where(x => x.Id == 1 && !x.IsDeleted)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -93,7 +93,7 @@ namespace crm_api.Services
                 var entity = await _unitOfWork.SmtpSettings
                     .Query()
                     .Where(x => x.Id == 1 && !x.IsDeleted)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -115,8 +115,8 @@ namespace crm_api.Services
                     entity.UpdatedDate = DateTime.UtcNow;
                     entity.UpdatedBy = userId;
 
-                    await _unitOfWork.SmtpSettings.AddAsync(entity);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SmtpSettings.AddAsync(entity).ConfigureAwait(false);
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                     // cache invalidate (bu instance)
                     InvalidateCache();
@@ -138,8 +138,8 @@ namespace crm_api.Services
                 entity.UpdatedDate = DateTime.UtcNow;
                 entity.UpdatedBy = userId;
 
-                await _unitOfWork.SmtpSettings.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SmtpSettings.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // cache invalidate (bu instance)
                 InvalidateCache();
@@ -169,7 +169,7 @@ namespace crm_api.Services
                 .Query()
                 .AsNoTracking()
                 .Where(x => x.Id == 1 && !x.IsDeleted)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync().ConfigureAwait(false);
 
             if (entity == null)
                 throw new InvalidOperationException(
