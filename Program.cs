@@ -347,7 +347,7 @@ builder.Services.AddAuthentication(options =>
     var jwtSecret = builder.Configuration["JwtSettings:SecretKey"];
     if (string.IsNullOrWhiteSpace(jwtSecret))
     {
-        throw new InvalidOperationException("JwtSettings:SecretKey is required.");
+        throw new InvalidOperationException("General.JwtSecretRequired");
     }
 
     options.TokenValidationParameters = new TokenValidationParameters

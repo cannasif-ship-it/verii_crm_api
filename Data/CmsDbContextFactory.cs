@@ -21,7 +21,7 @@ namespace crm_api.Data
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+                ?? throw new InvalidOperationException("General.DefaultConnectionStringNotConfigured");
 
             var optionsBuilder = new DbContextOptionsBuilder<CmsDbContext>();
             optionsBuilder.UseSqlServer(connectionString);
