@@ -52,10 +52,10 @@ namespace crm_api.Services
                 var sortBy = request.SortBy ?? nameof(TempQuotattion.Id);
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<TempQuotattionGetDto>(x)).ToList();
                 var pagedResponse = new PagedResponse<TempQuotattionGetDto>
@@ -89,7 +89,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted).ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -120,8 +120,8 @@ namespace crm_api.Services
                 entity.CreatedDate = DateTime.UtcNow;
                 entity.OfferDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattions.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattions.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var created = await _unitOfWork.TempQuotattions.Query()
                     .AsNoTracking()
@@ -129,7 +129,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .FirstOrDefaultAsync(x => x.Id == entity.Id && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == entity.Id && !x.IsDeleted).ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionGetDto>(created ?? entity),
@@ -148,7 +148,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id);
+                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<TempQuotattionGetDto>.ErrorResult(
@@ -160,8 +160,8 @@ namespace crm_api.Services
                 _mapper.Map(dto, entity);
                 entity.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattions.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattions.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var updated = await _unitOfWork.TempQuotattions.Query()
                     .AsNoTracking()
@@ -169,7 +169,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted).ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionGetDto>(updated ?? entity),
@@ -188,7 +188,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id);
+                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<TempQuotattionGetDto>.ErrorResult(
@@ -201,8 +201,8 @@ namespace crm_api.Services
                 entity.ApprovedDate = DateTime.UtcNow;
                 entity.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattions.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattions.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var approved = await _unitOfWork.TempQuotattions.Query()
                     .AsNoTracking()
@@ -210,7 +210,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted).ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionGetDto>(approved ?? entity),
@@ -229,7 +229,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id);
+                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -238,8 +238,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.TempQuotattions.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattions.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null,
@@ -258,7 +258,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == tempQuotattionId && !x.IsDeleted);
+                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == tempQuotattionId && !x.IsDeleted).ConfigureAwait(false);
                 if (!exists)
                 {
                     return ApiResponse<List<TempQuotattionLineGetDto>>.ErrorResult(
@@ -270,7 +270,7 @@ namespace crm_api.Services
                 var lines = await _unitOfWork.TempQuotattionLines.Query()
                     .AsNoTracking()
                     .Where(x => x.TempQuotattionId == tempQuotattionId && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = lines.Select(_mapper.Map<TempQuotattionLineGetDto>).ToList();
                 return ApiResponse<List<TempQuotattionLineGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLinesRetrieved"));
@@ -290,7 +290,7 @@ namespace crm_api.Services
             {
                 var entity = await _unitOfWork.TempQuotattionLines.Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == lineId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == lineId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -317,7 +317,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == dto.TempQuotattionId && !x.IsDeleted);
+                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == dto.TempQuotattionId && !x.IsDeleted).ConfigureAwait(false);
                 if (!exists)
                 {
                     return ApiResponse<TempQuotattionLineGetDto>.ErrorResult(
@@ -329,8 +329,8 @@ namespace crm_api.Services
                 var entity = _mapper.Map<TempQuotattionLine>(dto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattionLines.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionLines.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionLineGetDto>(entity),
@@ -360,7 +360,7 @@ namespace crm_api.Services
                 var existingHeaderIds = await _unitOfWork.TempQuotattions.Query()
                     .Where(x => headerIds.Contains(x.Id) && !x.IsDeleted)
                     .Select(x => x.Id)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (existingHeaderIds.Count != headerIds.Count)
                 {
@@ -376,8 +376,8 @@ namespace crm_api.Services
                     entity.CreatedDate = DateTime.UtcNow;
                 }
 
-                await _unitOfWork.TempQuotattionLines.AddAllAsync(entities);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionLines.AddAllAsync(entities).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var response = entities.Select(_mapper.Map<TempQuotattionLineGetDto>).ToList();
                 return ApiResponse<List<TempQuotattionLineGetDto>>.SuccessResult(response, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLinesCreated"));
@@ -395,7 +395,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattionLines.GetByIdAsync(lineId);
+                var entity = await _unitOfWork.TempQuotattionLines.GetByIdAsync(lineId).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<TempQuotattionLineGetDto>.ErrorResult(
@@ -407,8 +407,8 @@ namespace crm_api.Services
                 _mapper.Map(dto, entity);
                 entity.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattionLines.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionLines.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionLineGetDto>(entity),
@@ -427,7 +427,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattionLines.GetByIdAsync(lineId);
+                var entity = await _unitOfWork.TempQuotattionLines.GetByIdAsync(lineId).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -436,8 +436,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.TempQuotattionLines.SoftDeleteAsync(lineId);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionLines.SoftDeleteAsync(lineId).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLineDeleted"));
             }
@@ -454,7 +454,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == tempQuotattionId && !x.IsDeleted);
+                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == tempQuotattionId && !x.IsDeleted).ConfigureAwait(false);
                 if (!exists)
                 {
                     return ApiResponse<List<TempQuotattionExchangeLineGetDto>>.ErrorResult(
@@ -466,7 +466,7 @@ namespace crm_api.Services
                 var rows = await _unitOfWork.TempQuotattionExchangeLines.Query()
                     .AsNoTracking()
                     .Where(x => x.TempQuotattionId == tempQuotattionId && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = rows.Select(_mapper.Map<TempQuotattionExchangeLineGetDto>).ToList();
                 return ApiResponse<List<TempQuotattionExchangeLineGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionExchangeLinesRetrieved"));
@@ -486,7 +486,7 @@ namespace crm_api.Services
             {
                 var entity = await _unitOfWork.TempQuotattionExchangeLines.Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == exchangeLineId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == exchangeLineId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -513,7 +513,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == dto.TempQuotattionId && !x.IsDeleted);
+                var exists = await _unitOfWork.TempQuotattions.Query().AnyAsync(x => x.Id == dto.TempQuotattionId && !x.IsDeleted).ConfigureAwait(false);
                 if (!exists)
                 {
                     return ApiResponse<TempQuotattionExchangeLineGetDto>.ErrorResult(
@@ -525,8 +525,8 @@ namespace crm_api.Services
                 var entity = _mapper.Map<TempQuotattionExchangeLine>(dto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattionExchangeLines.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionExchangeLines.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionExchangeLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionExchangeLineGetDto>(entity),
@@ -545,7 +545,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattionExchangeLines.GetByIdAsync(exchangeLineId);
+                var entity = await _unitOfWork.TempQuotattionExchangeLines.GetByIdAsync(exchangeLineId).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<TempQuotattionExchangeLineGetDto>.ErrorResult(
@@ -557,8 +557,8 @@ namespace crm_api.Services
                 _mapper.Map(dto, entity);
                 entity.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.TempQuotattionExchangeLines.UpdateAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionExchangeLines.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionExchangeLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionExchangeLineGetDto>(entity),
@@ -577,7 +577,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.TempQuotattionExchangeLines.GetByIdAsync(exchangeLineId);
+                var entity = await _unitOfWork.TempQuotattionExchangeLines.GetByIdAsync(exchangeLineId).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -586,8 +586,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.TempQuotattionExchangeLines.SoftDeleteAsync(exchangeLineId);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.TempQuotattionExchangeLines.SoftDeleteAsync(exchangeLineId).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionExchangeLineDeleted"));
             }

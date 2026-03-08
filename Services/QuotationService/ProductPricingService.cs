@@ -50,11 +50,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<ProductPricingGetDto>(x)).ToList();
 
@@ -81,7 +81,7 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id);
+                var productPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id).ConfigureAwait(false);
                 if (productPricing == null)
                 {
                     return ApiResponse<ProductPricingGetDto>.ErrorResult(
@@ -96,7 +96,7 @@ namespace crm_api.Services
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)
                     .Include(pp => pp.DeletedByUser)
-                    .FirstOrDefaultAsync(pp => pp.Id == id && !pp.IsDeleted);
+                    .FirstOrDefaultAsync(pp => pp.Id == id && !pp.IsDeleted).ConfigureAwait(false);
 
                 var productPricingDto = _mapper.Map<ProductPricingGetDto>(productPricingWithNav ?? productPricing);
                 return ApiResponse<ProductPricingGetDto>.SuccessResult(productPricingDto, _localizationService.GetLocalizedString("ProductPricingService.ProductPricingRetrieved"));
@@ -116,7 +116,7 @@ namespace crm_api.Services
             {
                 // Aynı ErpProductCode + ErpGroupCode ile mevcut kayıt var mı kontrol et (silinmiş dahil)
                 var existing = await _unitOfWork.ProductPricings.Query(tracking: true, ignoreQueryFilters: true)
-                    .FirstOrDefaultAsync(pp => pp.ErpProductCode == createProductPricingDto.ErpProductCode && pp.ErpGroupCode == createProductPricingDto.ErpGroupCode);
+                    .FirstOrDefaultAsync(pp => pp.ErpProductCode == createProductPricingDto.ErpProductCode && pp.ErpGroupCode == createProductPricingDto.ErpGroupCode).ConfigureAwait(false);
 
                 ProductPricing productPricing;
 
@@ -128,7 +128,7 @@ namespace crm_api.Services
                     existing.DeletedDate = null;
                     existing.DeletedBy = null;
 
-                    await _unitOfWork.ProductPricings.UpdateAsync(existing);
+                    await _unitOfWork.ProductPricings.UpdateAsync(existing).ConfigureAwait(false);
                     productPricing = existing;
                 }
                 else
@@ -138,10 +138,10 @@ namespace crm_api.Services
                     productPricing.CreatedDate = DateTime.UtcNow;
                     productPricing.IsDeleted = false;
 
-                    await _unitOfWork.ProductPricings.AddAsync(productPricing);
+                    await _unitOfWork.ProductPricings.AddAsync(productPricing).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var productPricingWithNav = await _unitOfWork.ProductPricings.Query()
@@ -149,7 +149,7 @@ namespace crm_api.Services
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)
                     .Include(pp => pp.DeletedByUser)
-                    .FirstOrDefaultAsync(pp => pp.Id == productPricing.Id && !pp.IsDeleted);
+                    .FirstOrDefaultAsync(pp => pp.Id == productPricing.Id && !pp.IsDeleted).ConfigureAwait(false);
 
                 var productPricingDto = _mapper.Map<ProductPricingGetDto>(productPricingWithNav ?? productPricing);
                 var messageKey = existing != null ? "ProductPricingService.ProductPricingUpdated" : "ProductPricingService.ProductPricingCreated";
@@ -168,7 +168,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existingProductPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id);
+                var existingProductPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id).ConfigureAwait(false);
                 if (existingProductPricing == null)
                 {
                     return ApiResponse<ProductPricingGetDto>.ErrorResult(
@@ -180,8 +180,8 @@ namespace crm_api.Services
                 _mapper.Map(updateProductPricingDto, existingProductPricing);
                 existingProductPricing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.ProductPricings.UpdateAsync(existingProductPricing);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ProductPricings.UpdateAsync(existingProductPricing).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var productPricingWithNav = await _unitOfWork.ProductPricings.Query()
@@ -189,7 +189,7 @@ namespace crm_api.Services
                     .Include(pp => pp.CreatedByUser)
                     .Include(pp => pp.UpdatedByUser)
                     .Include(pp => pp.DeletedByUser)
-                    .FirstOrDefaultAsync(pp => pp.Id == existingProductPricing.Id && !pp.IsDeleted);
+                    .FirstOrDefaultAsync(pp => pp.Id == existingProductPricing.Id && !pp.IsDeleted).ConfigureAwait(false);
 
                 var productPricingDto = _mapper.Map<ProductPricingGetDto>(productPricingWithNav ?? existingProductPricing);
                 return ApiResponse<ProductPricingGetDto>.SuccessResult(productPricingDto, _localizationService.GetLocalizedString("ProductPricingService.ProductPricingUpdated"));
@@ -207,7 +207,7 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id);
+                var productPricing = await _unitOfWork.ProductPricings.GetByIdAsync(id).ConfigureAwait(false);
                 if (productPricing == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -219,8 +219,8 @@ namespace crm_api.Services
                 productPricing.IsDeleted = true;
                 productPricing.DeletedDate = DateTime.UtcNow;
 
-                await _unitOfWork.ProductPricings.UpdateAsync(productPricing);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ProductPricings.UpdateAsync(productPricing).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("ProductPricingService.ProductPricingDeleted"));
             }

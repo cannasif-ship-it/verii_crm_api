@@ -51,11 +51,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<UserDiscountLimitDto>(x)).ToList();
 
@@ -82,7 +82,7 @@ namespace crm_api.Services
         {
             try
             {
-                var userDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id);
+                var userDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id).ConfigureAwait(false);
                 if (userDiscountLimit == null)
                 {
                     return ApiResponse<UserDiscountLimitDto>.ErrorResult(
@@ -97,7 +97,7 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+                    .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted).ConfigureAwait(false);
 
                 var userDiscountLimitDto = _mapper.Map<UserDiscountLimitDto>(userDiscountLimitWithNav ?? userDiscountLimit);
                 return ApiResponse<UserDiscountLimitDto>.SuccessResult(userDiscountLimitDto, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitRetrieved"));
@@ -118,7 +118,7 @@ namespace crm_api.Services
                 var userDiscountLimits = await _unitOfWork.UserDiscountLimits.Query()
                     .AsNoTracking()
                     .Where(x => x.SalespersonId == salespersonId && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
                 var userDiscountLimitDtos = _mapper.Map<List<UserDiscountLimitDto>>(userDiscountLimits);
 
                 return ApiResponse<List<UserDiscountLimitDto>>.SuccessResult(userDiscountLimitDtos, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitsRetrieved"));
@@ -136,7 +136,7 @@ namespace crm_api.Services
             try
             {
                 var userDiscountLimits = await _unitOfWork.UserDiscountLimits
-                    .FindAsync(x => x.ErpProductGroupCode == erpProductGroupCode);
+                    .FindAsync(x => x.ErpProductGroupCode == erpProductGroupCode).ConfigureAwait(false);
                 var userDiscountLimitDtos = _mapper.Map<List<UserDiscountLimitDto>>(userDiscountLimits);
 
                 return ApiResponse<List<UserDiscountLimitDto>>.SuccessResult(userDiscountLimitDtos, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitsRetrieved"));
@@ -154,7 +154,7 @@ namespace crm_api.Services
             try
             {
                 var userDiscountLimit = await _unitOfWork.UserDiscountLimits
-                    .FindAsync(x => x.SalespersonId == salespersonId && x.ErpProductGroupCode == erpProductGroupCode);
+                    .FindAsync(x => x.SalespersonId == salespersonId && x.ErpProductGroupCode == erpProductGroupCode).ConfigureAwait(false);
                 var result = userDiscountLimit.FirstOrDefault();
                 
                 if (result == null)
@@ -184,8 +184,8 @@ namespace crm_api.Services
                 var userDiscountLimit = _mapper.Map<UserDiscountLimit>(createDto);
                 userDiscountLimit.CreatedDate = DateTime.UtcNow;
                 
-                await _unitOfWork.UserDiscountLimits.AddAsync(userDiscountLimit);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.UserDiscountLimits.AddAsync(userDiscountLimit).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var userDiscountLimitWithNav = await _unitOfWork.UserDiscountLimits.Query()
@@ -193,7 +193,7 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .FirstOrDefaultAsync(u => u.Id == userDiscountLimit.Id && !u.IsDeleted);
+                    .FirstOrDefaultAsync(u => u.Id == userDiscountLimit.Id && !u.IsDeleted).ConfigureAwait(false);
 
                 var userDiscountLimitDto = _mapper.Map<UserDiscountLimitDto>(userDiscountLimitWithNav ?? userDiscountLimit);
                 return ApiResponse<UserDiscountLimitDto>.SuccessResult(userDiscountLimitDto, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitCreated"));
@@ -211,7 +211,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existingUserDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id);
+                var existingUserDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id).ConfigureAwait(false);
                 if (existingUserDiscountLimit == null)
                 {
                     return ApiResponse<UserDiscountLimitDto>.ErrorResult(
@@ -223,8 +223,8 @@ namespace crm_api.Services
                 _mapper.Map(updateDto, existingUserDiscountLimit);
                 existingUserDiscountLimit.UpdatedDate = DateTime.UtcNow;
                 
-                await _unitOfWork.UserDiscountLimits.UpdateAsync(existingUserDiscountLimit);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.UserDiscountLimits.UpdateAsync(existingUserDiscountLimit).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var userDiscountLimitWithNav = await _unitOfWork.UserDiscountLimits.Query()
@@ -232,7 +232,7 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .FirstOrDefaultAsync(u => u.Id == existingUserDiscountLimit.Id && !u.IsDeleted);
+                    .FirstOrDefaultAsync(u => u.Id == existingUserDiscountLimit.Id && !u.IsDeleted).ConfigureAwait(false);
 
                 var userDiscountLimitDto = _mapper.Map<UserDiscountLimitDto>(userDiscountLimitWithNav ?? existingUserDiscountLimit);
                 return ApiResponse<UserDiscountLimitDto>.SuccessResult(userDiscountLimitDto, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitUpdated"));
@@ -250,7 +250,7 @@ namespace crm_api.Services
         {
             try
             {
-                var userDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id);
+                var userDiscountLimit = await _unitOfWork.UserDiscountLimits.GetByIdAsync(id).ConfigureAwait(false);
                 if (userDiscountLimit == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -262,8 +262,8 @@ namespace crm_api.Services
                 userDiscountLimit.IsDeleted = true;
                 userDiscountLimit.DeletedDate = DateTime.UtcNow;
                 
-                await _unitOfWork.UserDiscountLimits.UpdateAsync(userDiscountLimit);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.UserDiscountLimits.UpdateAsync(userDiscountLimit).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitDeleted"));
             }
@@ -280,7 +280,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.UserDiscountLimits.ExistsAsync(id);
+                var exists = await _unitOfWork.UserDiscountLimits.ExistsAsync(id).ConfigureAwait(false);
                 return ApiResponse<bool>.SuccessResult(exists, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitExistsChecked"));
             }
             catch (Exception ex)
@@ -297,7 +297,7 @@ namespace crm_api.Services
             try
             {
                 var userDiscountLimits = await _unitOfWork.UserDiscountLimits
-                    .FindAsync(x => x.SalespersonId == salespersonId && x.ErpProductGroupCode == erpProductGroupCode);
+                    .FindAsync(x => x.SalespersonId == salespersonId && x.ErpProductGroupCode == erpProductGroupCode).ConfigureAwait(false);
                 var exists = userDiscountLimits.Any();
 
                 return ApiResponse<bool>.SuccessResult(exists, _localizationService.GetLocalizedString("UserDiscountLimitService.UserDiscountLimitExistsChecked"));

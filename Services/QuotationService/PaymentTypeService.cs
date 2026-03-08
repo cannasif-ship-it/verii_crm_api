@@ -50,11 +50,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<PaymentTypeGetDto>(x)).ToList();
 
@@ -81,7 +81,7 @@ namespace crm_api.Services
         {
             try
             {
-                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
+                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id).ConfigureAwait(false);
                 if (paymentType == null)
                 {
                     return ApiResponse<PaymentTypeGetDto>.ErrorResult(
@@ -96,7 +96,7 @@ namespace crm_api.Services
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
                     .Include(pt => pt.DeletedByUser)
-                    .FirstOrDefaultAsync(pt => pt.Id == id && !pt.IsDeleted);
+                    .FirstOrDefaultAsync(pt => pt.Id == id && !pt.IsDeleted).ConfigureAwait(false);
 
                 var paymentTypeDto = _mapper.Map<PaymentTypeGetDto>(paymentTypeWithNav ?? paymentType);
 
@@ -118,8 +118,8 @@ namespace crm_api.Services
                 var paymentType = _mapper.Map<PaymentType>(createPaymentTypeDto);
                 paymentType.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.PaymentTypes.AddAsync(paymentType);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.PaymentTypes.AddAsync(paymentType).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var paymentTypeWithNav = await _unitOfWork.PaymentTypes.Query()
@@ -127,7 +127,7 @@ namespace crm_api.Services
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
                     .Include(pt => pt.DeletedByUser)
-                    .FirstOrDefaultAsync(pt => pt.Id == paymentType.Id && !pt.IsDeleted);
+                    .FirstOrDefaultAsync(pt => pt.Id == paymentType.Id && !pt.IsDeleted).ConfigureAwait(false);
 
                 var paymentTypeDto = _mapper.Map<PaymentTypeGetDto>(paymentTypeWithNav ?? paymentType);
 
@@ -146,7 +146,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existingPaymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
+                var existingPaymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id).ConfigureAwait(false);
                 if (existingPaymentType == null)
                 {
                     return ApiResponse<PaymentTypeGetDto>.ErrorResult(
@@ -158,8 +158,8 @@ namespace crm_api.Services
                 _mapper.Map(updatePaymentTypeDto, existingPaymentType);
                 existingPaymentType.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.PaymentTypes.UpdateAsync(existingPaymentType);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.PaymentTypes.UpdateAsync(existingPaymentType).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var paymentTypeWithNav = await _unitOfWork.PaymentTypes.Query()
@@ -167,7 +167,7 @@ namespace crm_api.Services
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
                     .Include(pt => pt.DeletedByUser)
-                    .FirstOrDefaultAsync(pt => pt.Id == existingPaymentType.Id && !pt.IsDeleted);
+                    .FirstOrDefaultAsync(pt => pt.Id == existingPaymentType.Id && !pt.IsDeleted).ConfigureAwait(false);
 
                 var paymentTypeDto = _mapper.Map<PaymentTypeGetDto>(paymentTypeWithNav ?? existingPaymentType);
 
@@ -186,7 +186,7 @@ namespace crm_api.Services
         {
             try
             {
-                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
+                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id).ConfigureAwait(false);
                 if (paymentType == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -195,8 +195,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.PaymentTypes.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.PaymentTypes.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("PaymentTypeService.PaymentTypeDeleted"));
             }

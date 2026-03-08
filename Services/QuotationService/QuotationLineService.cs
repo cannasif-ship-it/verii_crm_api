@@ -39,12 +39,12 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .Select(x => _mapper.Map<QuotationLineGetDto>(x))
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<QuotationLineGetDto>
                 {
@@ -68,7 +68,7 @@ namespace crm_api.Services
         {
             try
             {
-                var line = await _unitOfWork.QuotationLines.GetByIdAsync(id);
+                var line = await _unitOfWork.QuotationLines.GetByIdAsync(id).ConfigureAwait(false);
                 if (line == null)
                 {
                     return ApiResponse<QuotationLineGetDto>.ErrorResult(
@@ -95,8 +95,8 @@ namespace crm_api.Services
                 var entity = _mapper.Map<QuotationLine>(createQuotationLineDto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.QuotationLines.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationLines.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationLineDto>(entity);
                 return ApiResponse<QuotationLineDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationLineService.QuotationLineCreated"));
@@ -114,8 +114,8 @@ namespace crm_api.Services
             try
             {
                 var entities = _mapper.Map<List<QuotationLine>>(createQuotationLineDtos);
-                await _unitOfWork.QuotationLines.AddAllAsync(entities);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationLines.AddAllAsync(entities).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 var dtos = _mapper.Map<List<QuotationLineDto>>(entities);
                 return ApiResponse<List<QuotationLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesCreated"));
             }
@@ -132,8 +132,8 @@ namespace crm_api.Services
             try
             {
                 var entities = _mapper.Map<List<QuotationLine>>(quotationLineDtos);
-                await _unitOfWork.QuotationLines.UpdateAllAsync(entities);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationLines.UpdateAllAsync(entities).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 var dtos = _mapper.Map<List<QuotationLineDto>>(entities);
                 return ApiResponse<List<QuotationLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesUpdated"));
             }
@@ -149,7 +149,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.QuotationLines.GetByIdAsync(id);
+                var existing = await _unitOfWork.QuotationLines.GetByIdAsync(id).ConfigureAwait(false);
                 if (existing == null)
                 {
                     return ApiResponse<QuotationLineDto>.ErrorResult(
@@ -161,8 +161,8 @@ namespace crm_api.Services
                 _mapper.Map(updateQuotationLineDto, existing);
                 existing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.QuotationLines.UpdateAsync(existing);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationLines.UpdateAsync(existing).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationLineDto>(existing);
                 return ApiResponse<QuotationLineDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationLineService.QuotationLineUpdated"));
@@ -178,7 +178,7 @@ namespace crm_api.Services
         {
             try
             {
-                var currentUserResponse = await _userService.GetCurrentUserIdAsync();
+                var currentUserResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!currentUserResponse.Success)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -191,7 +191,7 @@ namespace crm_api.Services
                     .Query()
                     .Where(x => x.Id == id && !x.IsDeleted)
                     .Select(x => new { x.RelatedProductKey, x.QuotationId })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 if (existing == null)
                 {
@@ -208,7 +208,7 @@ namespace crm_api.Services
                     .ExecuteUpdateAsync(s => s
                         .SetProperty(p => p.IsDeleted, true)
                         .SetProperty(p => p.DeletedDate, DateTime.UtcNow)
-                        .SetProperty(p => p.DeletedBy, currentUserId));
+                        .SetProperty(p => p.DeletedBy, currentUserId)).ConfigureAwait(false);
 
                 if (rowsAffected == 0)
                 {
@@ -283,7 +283,7 @@ namespace crm_api.Services
                         ErpProjectCode = x.QuotationLine.ErpProjectCode,
                         ApprovalStatus = x.QuotationLine.ApprovalStatus
                     })
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 return ApiResponse<List<QuotationLineGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationLineService.QuotationLinesByQuotationRetrieved"));
             }

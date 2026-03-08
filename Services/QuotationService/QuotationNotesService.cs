@@ -38,11 +38,11 @@ namespace crm_api.Services
                     .ApplyFilters(request.Filters, request.FilterLogic)
                     .ApplySorting(request.SortBy ?? nameof(QuotationNotes.Id), request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .Select(x => _mapper.Map<QuotationNotesGetDto>(x))
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<QuotationNotesGetDto>
                 {
@@ -69,7 +69,7 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
+                var entity = await _unitOfWork.QuotationNotes.GetByIdAsync(id).ConfigureAwait(false);
                 if (entity == null || entity.IsDeleted)
                 {
                     return ApiResponse<QuotationNotesGetDto>.ErrorResult(
@@ -97,7 +97,7 @@ namespace crm_api.Services
             try
             {
                 var quotationExists = await _unitOfWork.Quotations.Query()
-                    .AnyAsync(x => x.Id == quotationId && !x.IsDeleted);
+                    .AnyAsync(x => x.Id == quotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (!quotationExists)
                 {
@@ -109,7 +109,7 @@ namespace crm_api.Services
 
                 var entity = await _unitOfWork.QuotationNotes.Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.QuotationId == quotationId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.QuotationId == quotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -135,7 +135,7 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<QuotationNotesGetDto>> GetByQuotationIdAsync(long quotationId)
         {
-            return await GetNotesByQuotationIdAsync(quotationId);
+            return await GetNotesByQuotationIdAsync(quotationId).ConfigureAwait(false);
         }
 
         public async Task<ApiResponse<QuotationNotesDto>> CreateQuotationNotesAsync(CreateQuotationNotesDto createQuotationNotesDto)
@@ -143,7 +143,7 @@ namespace crm_api.Services
             try
             {
                 var quotationExists = await _unitOfWork.Quotations.Query()
-                    .AnyAsync(x => x.Id == createQuotationNotesDto.QuotationId && !x.IsDeleted);
+                    .AnyAsync(x => x.Id == createQuotationNotesDto.QuotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (!quotationExists)
                 {
@@ -154,7 +154,7 @@ namespace crm_api.Services
                 }
 
                 var alreadyExists = await _unitOfWork.QuotationNotes.Query()
-                    .AnyAsync(x => x.QuotationId == createQuotationNotesDto.QuotationId && !x.IsDeleted);
+                    .AnyAsync(x => x.QuotationId == createQuotationNotesDto.QuotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (alreadyExists)
                 {
@@ -167,8 +167,8 @@ namespace crm_api.Services
                 var entity = _mapper.Map<QuotationNotes>(createQuotationNotesDto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.QuotationNotes.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationNotes.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationNotesDto>(entity);
                 return ApiResponse<QuotationNotesDto>.SuccessResult(
@@ -188,7 +188,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
+                var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id).ConfigureAwait(false);
                 if (existing == null || existing.IsDeleted)
                 {
                     return ApiResponse<QuotationNotesDto>.ErrorResult(
@@ -200,8 +200,8 @@ namespace crm_api.Services
                 _mapper.Map(updateQuotationNotesDto, existing);
                 existing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.QuotationNotes.UpdateAsync(existing);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationNotes.UpdateAsync(existing).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationNotesDto>(existing);
                 return ApiResponse<QuotationNotesDto>.SuccessResult(
@@ -222,7 +222,7 @@ namespace crm_api.Services
             try
             {
                 var quotationExists = await _unitOfWork.Quotations.Query()
-                    .AnyAsync(x => x.Id == quotationId && !x.IsDeleted);
+                    .AnyAsync(x => x.Id == quotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (!quotationExists)
                 {
@@ -248,7 +248,7 @@ namespace crm_api.Services
                 }
 
                 var entity = await _unitOfWork.QuotationNotes.Query()
-                    .FirstOrDefaultAsync(x => x.QuotationId == quotationId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.QuotationId == quotationId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (entity == null)
                 {
@@ -259,16 +259,16 @@ namespace crm_api.Services
                     };
 
                     ApplyNotesToEntity(entity, normalizedNotes);
-                    await _unitOfWork.QuotationNotes.AddAsync(entity);
+                    await _unitOfWork.QuotationNotes.AddAsync(entity).ConfigureAwait(false);
                 }
                 else
                 {
                     ApplyNotesToEntity(entity, normalizedNotes);
                     entity.UpdatedDate = DateTime.UtcNow;
-                    await _unitOfWork.QuotationNotes.UpdateAsync(entity);
+                    await _unitOfWork.QuotationNotes.UpdateAsync(entity).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationNotesGetDto>(entity);
                 return ApiResponse<QuotationNotesGetDto>.SuccessResult(
@@ -288,7 +288,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
+                var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id).ConfigureAwait(false);
                 if (existing == null || existing.IsDeleted)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -297,8 +297,8 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                await _unitOfWork.QuotationNotes.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.QuotationNotes.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(
                     null,

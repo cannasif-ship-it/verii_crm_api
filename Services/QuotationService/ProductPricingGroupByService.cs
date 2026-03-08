@@ -51,11 +51,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<ProductPricingGroupByDto>(x)).ToList();
 
@@ -82,7 +82,7 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id);
+                var productPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id).ConfigureAwait(false);
                 if (productPricingGroupBy == null)
                 {
                     return ApiResponse<ProductPricingGroupByDto>.ErrorResult(
@@ -97,7 +97,7 @@ namespace crm_api.Services
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)
                     .Include(ppgb => ppgb.DeletedByUser)
-                    .FirstOrDefaultAsync(ppgb => ppgb.Id == id && !ppgb.IsDeleted);
+                    .FirstOrDefaultAsync(ppgb => ppgb.Id == id && !ppgb.IsDeleted).ConfigureAwait(false);
 
                 var productPricingGroupByDto = _mapper.Map<ProductPricingGroupByDto>(productPricingGroupByWithNav ?? productPricingGroupBy);
                 return ApiResponse<ProductPricingGroupByDto>.SuccessResult(productPricingGroupByDto, _localizationService.GetLocalizedString("ProductPricingGroupByService.ProductPricingGroupByRetrieved"));
@@ -117,7 +117,7 @@ namespace crm_api.Services
             {
                 // Aynı ErpGroupCode ile mevcut kayıt var mı kontrol et (silinmiş dahil)
                 var existing = await _unitOfWork.ProductPricingGroupBys.Query(tracking: true, ignoreQueryFilters: true)
-                    .FirstOrDefaultAsync(ppgb => ppgb.ErpGroupCode == createDto.ErpGroupCode);
+                    .FirstOrDefaultAsync(ppgb => ppgb.ErpGroupCode == createDto.ErpGroupCode).ConfigureAwait(false);
 
                 ProductPricingGroupBy productPricingGroupBy;
 
@@ -129,7 +129,7 @@ namespace crm_api.Services
                     existing.DeletedDate = null;
                     existing.DeletedBy = null;
 
-                    await _unitOfWork.ProductPricingGroupBys.UpdateAsync(existing);
+                    await _unitOfWork.ProductPricingGroupBys.UpdateAsync(existing).ConfigureAwait(false);
                     productPricingGroupBy = existing;
                 }
                 else
@@ -139,10 +139,10 @@ namespace crm_api.Services
                     productPricingGroupBy.CreatedDate = DateTime.UtcNow;
                     productPricingGroupBy.IsDeleted = false;
 
-                    await _unitOfWork.ProductPricingGroupBys.AddAsync(productPricingGroupBy);
+                    await _unitOfWork.ProductPricingGroupBys.AddAsync(productPricingGroupBy).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var productPricingGroupByWithNav = await _unitOfWork.ProductPricingGroupBys.Query()
@@ -150,7 +150,7 @@ namespace crm_api.Services
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)
                     .Include(ppgb => ppgb.DeletedByUser)
-                    .FirstOrDefaultAsync(ppgb => ppgb.Id == productPricingGroupBy.Id && !ppgb.IsDeleted);
+                    .FirstOrDefaultAsync(ppgb => ppgb.Id == productPricingGroupBy.Id && !ppgb.IsDeleted).ConfigureAwait(false);
 
                 var productPricingGroupByDto = _mapper.Map<ProductPricingGroupByDto>(productPricingGroupByWithNav ?? productPricingGroupBy);
                 var messageKey = existing != null ? "ProductPricingGroupByService.ProductPricingGroupByUpdated" : "ProductPricingGroupByService.ProductPricingGroupByCreated";
@@ -169,7 +169,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existingProductPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id);
+                var existingProductPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id).ConfigureAwait(false);
                 if (existingProductPricingGroupBy == null)
                 {
                     return ApiResponse<ProductPricingGroupByDto>.ErrorResult(
@@ -181,8 +181,8 @@ namespace crm_api.Services
                 _mapper.Map(updateDto, existingProductPricingGroupBy);
                 existingProductPricingGroupBy.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.ProductPricingGroupBys.UpdateAsync(existingProductPricingGroupBy);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ProductPricingGroupBys.UpdateAsync(existingProductPricingGroupBy).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Reload with navigation properties for mapping
                 var productPricingGroupByWithNav = await _unitOfWork.ProductPricingGroupBys.Query()
@@ -190,7 +190,7 @@ namespace crm_api.Services
                     .Include(ppgb => ppgb.CreatedByUser)
                     .Include(ppgb => ppgb.UpdatedByUser)
                     .Include(ppgb => ppgb.DeletedByUser)
-                    .FirstOrDefaultAsync(ppgb => ppgb.Id == existingProductPricingGroupBy.Id && !ppgb.IsDeleted);
+                    .FirstOrDefaultAsync(ppgb => ppgb.Id == existingProductPricingGroupBy.Id && !ppgb.IsDeleted).ConfigureAwait(false);
 
                 var productPricingGroupByDto = _mapper.Map<ProductPricingGroupByDto>(productPricingGroupByWithNav ?? existingProductPricingGroupBy);
                 return ApiResponse<ProductPricingGroupByDto>.SuccessResult(productPricingGroupByDto, _localizationService.GetLocalizedString("ProductPricingGroupByService.ProductPricingGroupByUpdated"));
@@ -208,7 +208,7 @@ namespace crm_api.Services
         {
             try
             {
-                var productPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id);
+                var productPricingGroupBy = await _unitOfWork.ProductPricingGroupBys.GetByIdAsync(id).ConfigureAwait(false);
                 if (productPricingGroupBy == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -220,8 +220,8 @@ namespace crm_api.Services
                 productPricingGroupBy.IsDeleted = true;
                 productPricingGroupBy.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.ProductPricingGroupBys.UpdateAsync(productPricingGroupBy);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ProductPricingGroupBys.UpdateAsync(productPricingGroupBy).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("ProductPricingGroupByService.ProductPricingGroupByDeleted"));
             }
