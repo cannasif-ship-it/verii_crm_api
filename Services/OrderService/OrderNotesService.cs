@@ -52,7 +52,9 @@ namespace crm_api.Services
                     PageSize = request.PageSize
                 };
 
-                return ApiResponse<PagedResponse<OrderNotesGetDto>>.SuccessResult(pagedResponse, "Order notes retrieved.");
+                return ApiResponse<PagedResponse<OrderNotesGetDto>>.SuccessResult(
+                    pagedResponse,
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -70,11 +72,16 @@ namespace crm_api.Services
                 var entity = await _unitOfWork.OrderNotes.GetByIdAsync(id);
                 if (entity == null || entity.IsDeleted)
                 {
-                    return ApiResponse<OrderNotesGetDto>.ErrorResult("Order notes not found.", "Order notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<OrderNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var dto = _mapper.Map<OrderNotesGetDto>(entity);
-                return ApiResponse<OrderNotesGetDto>.SuccessResult(dto, "Order notes retrieved.");
+                return ApiResponse<OrderNotesGetDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -92,16 +99,23 @@ namespace crm_api.Services
                 var orderExists = await _unitOfWork.Orders.Query().AnyAsync(x => x.Id == orderId && !x.IsDeleted);
                 if (!orderExists)
                 {
-                    return ApiResponse<OrderNotesGetDto>.ErrorResult("Order not found.", "Order not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<OrderNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var entity = await _unitOfWork.OrderNotes.Query().AsNoTracking().FirstOrDefaultAsync(x => x.OrderId == orderId && !x.IsDeleted);
                 if (entity == null)
                 {
-                    return ApiResponse<OrderNotesGetDto>.SuccessResult(new OrderNotesGetDto { OrderId = orderId }, "Order notes retrieved.");
+                    return ApiResponse<OrderNotesGetDto>.SuccessResult(
+                        new OrderNotesGetDto { OrderId = orderId },
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesRetrieved"));
                 }
 
-                return ApiResponse<OrderNotesGetDto>.SuccessResult(_mapper.Map<OrderNotesGetDto>(entity), "Order notes retrieved.");
+                return ApiResponse<OrderNotesGetDto>.SuccessResult(
+                    _mapper.Map<OrderNotesGetDto>(entity),
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -119,13 +133,19 @@ namespace crm_api.Services
                 var orderExists = await _unitOfWork.Orders.Query().AnyAsync(x => x.Id == createOrderNotesDto.OrderId && !x.IsDeleted);
                 if (!orderExists)
                 {
-                    return ApiResponse<OrderNotesDto>.ErrorResult("Order not found.", "Order not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<OrderNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var exists = await _unitOfWork.OrderNotes.Query().AnyAsync(x => x.OrderId == createOrderNotesDto.OrderId && !x.IsDeleted);
                 if (exists)
                 {
-                    return ApiResponse<OrderNotesDto>.ErrorResult("Order notes already exist for this order.", "Order notes already exist for this order.", StatusCodes.Status400BadRequest);
+                    return ApiResponse<OrderNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesAlreadyExist"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesAlreadyExist"),
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var entity = _mapper.Map<OrderNotes>(createOrderNotesDto);
@@ -133,7 +153,9 @@ namespace crm_api.Services
                 await _unitOfWork.OrderNotes.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<OrderNotesDto>.SuccessResult(_mapper.Map<OrderNotesDto>(entity), "Order notes created.");
+                return ApiResponse<OrderNotesDto>.SuccessResult(
+                    _mapper.Map<OrderNotesDto>(entity),
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesCreated"));
             }
             catch (Exception ex)
             {
@@ -151,7 +173,10 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.OrderNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<OrderNotesDto>.ErrorResult("Order notes not found.", "Order notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<OrderNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 _mapper.Map(updateOrderNotesDto, existing);
@@ -159,7 +184,9 @@ namespace crm_api.Services
                 await _unitOfWork.OrderNotes.UpdateAsync(existing);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<OrderNotesDto>.SuccessResult(_mapper.Map<OrderNotesDto>(existing), "Order notes updated.");
+                return ApiResponse<OrderNotesDto>.SuccessResult(
+                    _mapper.Map<OrderNotesDto>(existing),
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -177,7 +204,10 @@ namespace crm_api.Services
                 var orderExists = await _unitOfWork.Orders.Query().AnyAsync(x => x.Id == orderId && !x.IsDeleted);
                 if (!orderExists)
                 {
-                    return ApiResponse<OrderNotesGetDto>.ErrorResult("Order not found.", "Order not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<OrderNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var notes = (request?.Notes ?? new List<string>())
@@ -188,12 +218,14 @@ namespace crm_api.Services
 
                 if (notes.Count > MaxNoteCount)
                 {
-                    return ApiResponse<OrderNotesGetDto>.ErrorResult($"A maximum of {MaxNoteCount} notes is allowed.", $"A maximum of {MaxNoteCount} notes is allowed.", StatusCodes.Status400BadRequest);
+                    var maxCountMessage = _localizationService.GetLocalizedString("OrderNotesService.MaxNoteCountExceeded", MaxNoteCount);
+                    return ApiResponse<OrderNotesGetDto>.ErrorResult(maxCountMessage, maxCountMessage, StatusCodes.Status400BadRequest);
                 }
 
                 if (notes.Any(x => x.Length > MaxNoteLength))
                 {
-                    return ApiResponse<OrderNotesGetDto>.ErrorResult($"Each note can be at most {MaxNoteLength} characters.", $"Each note can be at most {MaxNoteLength} characters.", StatusCodes.Status400BadRequest);
+                    var maxLengthMessage = _localizationService.GetLocalizedString("OrderNotesService.MaxNoteLengthExceeded", MaxNoteLength);
+                    return ApiResponse<OrderNotesGetDto>.ErrorResult(maxLengthMessage, maxLengthMessage, StatusCodes.Status400BadRequest);
                 }
 
                 var entity = await _unitOfWork.OrderNotes.Query().FirstOrDefaultAsync(x => x.OrderId == orderId && !x.IsDeleted);
@@ -226,7 +258,9 @@ namespace crm_api.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<OrderNotesGetDto>.SuccessResult(_mapper.Map<OrderNotesGetDto>(entity), "Order notes updated.");
+                return ApiResponse<OrderNotesGetDto>.SuccessResult(
+                    _mapper.Map<OrderNotesGetDto>(entity),
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -244,12 +278,17 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.OrderNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<object>.ErrorResult("Order notes not found.", "Order notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        _localizationService.GetLocalizedString("OrderNotesService.OrderNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 await _unitOfWork.OrderNotes.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
-                return ApiResponse<object>.SuccessResult(null, "Order notes deleted.");
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("OrderNotesService.OrderNotesDeleted"));
             }
             catch (Exception ex)
             {
