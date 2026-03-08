@@ -87,11 +87,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<OrderGetDto>(x)).ToList();
 
@@ -118,7 +118,7 @@ namespace crm_api.Services
         {
             try
             {
-                var order = await _unitOfWork.Orders.GetByIdAsync(id);
+                var order = await _unitOfWork.Orders.GetByIdAsync(id).ConfigureAwait(false);
                 if (order == null)
                 {
                     return ApiResponse<OrderGetDto>.ErrorResult(
@@ -135,7 +135,7 @@ namespace crm_api.Services
                     .Include(q => q.DeletedByUser)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
-                    .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
+                    .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted).ConfigureAwait(false);
 
                 var orderDto = _mapper.Map<OrderGetDto>(orderWithNav ?? order);
                 return ApiResponse<OrderGetDto>.SuccessResult(orderDto, _localizationService.GetLocalizedString("OrderService.OrderRetrieved"));
@@ -158,8 +158,8 @@ namespace crm_api.Services
                 order.GeneralDiscountAmount = createOrderDto.GeneralDiscountAmount;
                 order.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.Orders.AddAsync(order);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.AddAsync(order).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var orderDto = _mapper.Map<OrderDto>(order);
                 return ApiResponse<OrderDto>.SuccessResult(orderDto, _localizationService.GetLocalizedString("OrderService.OrderCreated"));
@@ -177,7 +177,7 @@ namespace crm_api.Services
             try
             {
                 // Get userId from HttpContext (should be set by middleware)
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
                     return ApiResponse<OrderDto>.ErrorResult(
@@ -190,7 +190,7 @@ namespace crm_api.Services
                 var order = await _unitOfWork.Orders
                     .Query()
                     .Include(q => q.Lines)
-                    .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted);
+                    .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted).ConfigureAwait(false);
 
                 if (order == null)
                 {
@@ -221,8 +221,8 @@ namespace crm_api.Services
                 order.Total = total;
                 order.GrandTotal = grandTotal;
 
-                await _unitOfWork.Orders.UpdateAsync(order);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.UpdateAsync(order).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var orderDto = _mapper.Map<OrderDto>(order);
                 return ApiResponse<OrderDto>.SuccessResult(orderDto, _localizationService.GetLocalizedString("OrderService.OrderUpdated"));
@@ -240,7 +240,7 @@ namespace crm_api.Services
             try
             {
                 // Get userId from HttpContext (should be set by middleware)
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -251,7 +251,7 @@ namespace crm_api.Services
                 var userId = userIdResponse.Data;
 
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(id);
+                var order = await _unitOfWork.Orders.GetByIdAsync(id).ConfigureAwait(false);
                 if (order == null)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -262,8 +262,8 @@ namespace crm_api.Services
 
 
                 // 3. Soft delete
-                await _unitOfWork.Orders.SoftDeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.SoftDeleteAsync(id).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 return ApiResponse<object>.SuccessResult(null, _localizationService.GetLocalizedString("OrderService.OrderDeleted"));
             }
@@ -279,7 +279,7 @@ namespace crm_api.Services
         {
             try
             {
-                var orders = await _unitOfWork.Orders.FindAsync(q => q.PotentialCustomerId == potentialCustomerId);
+                var orders = await _unitOfWork.Orders.FindAsync(q => q.PotentialCustomerId == potentialCustomerId).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByPotentialCustomerRetrieved"));
             }
@@ -295,7 +295,7 @@ namespace crm_api.Services
         {
             try
             {
-                var orders = await _unitOfWork.Orders.FindAsync(q => q.RepresentativeId == representativeId);
+                var orders = await _unitOfWork.Orders.FindAsync(q => q.RepresentativeId == representativeId).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByRepresentativeRetrieved"));
             }
@@ -311,7 +311,7 @@ namespace crm_api.Services
         {
             try
             {
-                var orders = await _unitOfWork.Orders.FindAsync(q => (int?)q.Status == status);
+                var orders = await _unitOfWork.Orders.FindAsync(q => (int?)q.Status == status).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByStatusRetrieved"));
             }
@@ -327,7 +327,7 @@ namespace crm_api.Services
         {
             try
             {
-                var exists = await _unitOfWork.Orders.ExistsAsync(id);
+                var exists = await _unitOfWork.Orders.ExistsAsync(id).ConfigureAwait(false);
                 return ApiResponse<bool>.SuccessResult(exists, exists ? _localizationService.GetLocalizedString("OrderService.OrderRetrieved") : _localizationService.GetLocalizedString("OrderService.OrderNotFound"));
             }
             catch (Exception ex)
@@ -340,11 +340,11 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<OrderGetDto>> CreateOrderBulkAsync(OrderBulkCreateDto bulkDto)
         {
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
-                var documentSerialType = await _documentSerialTypeService.GenerateDocumentSerialAsync(bulkDto.Order.DocumentSerialTypeId);
+                var documentSerialType = await _documentSerialTypeService.GenerateDocumentSerialAsync(bulkDto.Order.DocumentSerialTypeId).ConfigureAwait(false);
                 if (!documentSerialType.Success)
                 {
                     return ApiResponse<OrderGetDto>.ErrorResult(
@@ -387,8 +387,8 @@ namespace crm_api.Services
                 order.GrandTotal = grandTotal;
 
                 // 3. Save header
-                await _unitOfWork.Orders.AddAsync(order);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.AddAsync(order).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // 4. Map & calculate lines
                 var lines = new List<OrderLine>(bulkDto.Lines.Count);
@@ -417,14 +417,14 @@ namespace crm_api.Services
                     lines.Add(line);
                 }
 
-                await _unitOfWork.OrderLines.AddAllAsync(lines);
+                await _unitOfWork.OrderLines.AddAllAsync(lines).ConfigureAwait(false);
 
                 // 5. Order notes
                 if (bulkDto.OrderNotes != null)
                 {
                     var orderNotes = _mapper.Map<OrderNotes>(bulkDto.OrderNotes);
                     orderNotes.OrderId = order.Id;
-                    await _unitOfWork.OrderNotes.AddAsync(orderNotes);
+                    await _unitOfWork.OrderNotes.AddAsync(orderNotes).ConfigureAwait(false);
                 }
 
                 // 6. Exchange rates
@@ -438,12 +438,12 @@ namespace crm_api.Services
                             return rate;
                         }).ToList();
 
-                    await _unitOfWork.OrderExchangeRates.AddAllAsync(rates);
+                    await _unitOfWork.OrderExchangeRates.AddAllAsync(rates).ConfigureAwait(false);
                 }
 
                 // 6. Commit
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 // 8. Reload
                 var orderWithNav = await _unitOfWork.Orders
@@ -456,7 +456,7 @@ namespace crm_api.Services
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
-                    .FirstOrDefaultAsync(q => q.Id == order.Id);
+                    .FirstOrDefaultAsync(q => q.Id == order.Id).ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderGetDto>(orderWithNav);
 
@@ -464,7 +464,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
 
                 return ApiResponse<OrderGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderService.InternalServerError"),
@@ -474,13 +474,13 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<OrderGetDto>> CreateRevisionOfOrderAsync(long orderId)
         {
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             try
             {
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<OrderGetDto>.ErrorResult(
                         userIdResponse.Message,
                         userIdResponse.Message,
@@ -488,7 +488,7 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+                var order = await _unitOfWork.Orders.GetByIdAsync(orderId).ConfigureAwait(false);
                 if (order == null)
                 {
                     return ApiResponse<OrderGetDto>.ErrorResult(
@@ -498,15 +498,15 @@ namespace crm_api.Services
                 }
 
                 var orderLines = await _unitOfWork.OrderLines.Query()
-                    .Where(x => !x.IsDeleted && x.OrderId == orderId).ToListAsync();
+                    .Where(x => !x.IsDeleted && x.OrderId == orderId).ToListAsync().ConfigureAwait(false);
 
                 var orderExchangeRates = await _unitOfWork.OrderExchangeRates.Query()
-                    .Where(x => !x.IsDeleted && x.OrderId == orderId).ToListAsync();
+                    .Where(x => !x.IsDeleted && x.OrderId == orderId).ToListAsync().ConfigureAwait(false);
 
                 var orderNotes = await _unitOfWork.OrderNotes.Query()
-                    .FirstOrDefaultAsync(x => !x.IsDeleted && x.OrderId == orderId);
+                    .FirstOrDefaultAsync(x => !x.IsDeleted && x.OrderId == orderId).ConfigureAwait(false);
 
-                var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(order.DocumentSerialTypeId, false, order.RevisionNo);
+                var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(order.DocumentSerialTypeId, false, order.RevisionNo).ConfigureAwait(false);
                 if (!documentSerialTypeWithRevision.Success)
                 {
                     return ApiResponse<OrderGetDto>.ErrorResult(
@@ -545,8 +545,8 @@ namespace crm_api.Services
                 newOrder.ErpProjectCode = order.ErpProjectCode;
                 newOrder.Status = (int)ApprovalStatus.HavenotStarted;
 
-                await _unitOfWork.Orders.AddAsync(newOrder);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.AddAsync(newOrder).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var newOrderLines = new List<OrderLine>();
                 foreach (var line in orderLines)
@@ -578,8 +578,8 @@ namespace crm_api.Services
                     newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
                     newOrderLines.Add(newLine);
                 }
-                await _unitOfWork.OrderLines.AddAllAsync(newOrderLines);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.OrderLines.AddAllAsync(newOrderLines).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var newOrderExchangeRates = new List<OrderExchangeRate>();
                 foreach (var exchangeRate in orderExchangeRates)
@@ -594,7 +594,7 @@ namespace crm_api.Services
                     newExchangeRate.CreatedBy = userId;
                     newOrderExchangeRates.Add(newExchangeRate);
                 }
-                await _unitOfWork.OrderExchangeRates.AddAllAsync(newOrderExchangeRates);
+                await _unitOfWork.OrderExchangeRates.AddAllAsync(newOrderExchangeRates).ConfigureAwait(false);
 
                 if (orderNotes != null)
                 {
@@ -618,19 +618,19 @@ namespace crm_api.Services
                         Note15 = orderNotes.Note15
                     };
 
-                    await _unitOfWork.OrderNotes.AddAsync(newOrderNotes);
+                    await _unitOfWork.OrderNotes.AddAsync(newOrderNotes).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderGetDto>(newOrder);
                 return ApiResponse<OrderGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OrderService.RevisionCreated"));
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<OrderGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderService.InternalServerError"),
                     _localizationService.GetLocalizedString("OrderService.CreateRevisionExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
@@ -681,7 +681,7 @@ namespace crm_api.Services
         {
             try
             {
-                var branchCodeRequest = await _erpService.GetBranchCodeFromContext();
+                var branchCodeRequest = await _erpService.GetBranchCodeFromContext().ConfigureAwait(false);
                 if (!branchCodeRequest.Success)
                 {
                     return ApiResponse<List<PricingRuleLineGetDto>>.ErrorResult(
@@ -732,7 +732,7 @@ namespace crm_api.Services
                         .Where(x =>
                             string.IsNullOrEmpty(x.ErpCustomerCode) &&
                             !x.Salesmen.Any(s => !s.IsDeleted))
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync().ConfigureAwait(false);
                 // 3️⃣ Kural yoksa → bilinçli boş dönüş
                 if (header == null)
                 {
@@ -748,7 +748,7 @@ namespace crm_api.Services
                     .Where(x =>
                         x.PricingRuleHeaderId == header.Id &&
                         !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<List<PricingRuleLineGetDto>>(lines);
 
@@ -778,7 +778,7 @@ namespace crm_api.Services
                 // 1. `ProductCode`'a göre fiyat bilgisi almak
                 var pricePricing = await _unitOfWork.ProductPricings.Query()
                     .Where(x => productCodes.Contains(x.ErpProductCode) && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 // Eğer fiyatlar varsa, bunları ekleyelim
                 if (pricePricing.Count > 0)
@@ -812,7 +812,7 @@ namespace crm_api.Services
                     // 2. `ProductPricingGroupBys` tablosundan, sadece `GroupCode`'larına göre fiyatları alıyoruz
                     var priceGroupBy = await _unitOfWork.ProductPricingGroupBys.Query()
                         .Where(x => groupCodeValues.Contains(x.ErpGroupCode) && !x.IsDeleted)  // Grup kodlarıyla eşleşen fiyatları alıyoruz
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
 
                     foreach (var groupItem in priceGroupBy)
                     {
@@ -847,14 +847,14 @@ namespace crm_api.Services
         public async Task<ApiResponse<bool>> StartApprovalFlowAsync(StartApprovalFlowDto request)
         {
 
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             try
             {
                 // Get userId from HttpContext
-                var startedByUserIdResponse = await _userService.GetCurrentUserIdAsync();
+                var startedByUserIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!startedByUserIdResponse.Success)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         startedByUserIdResponse.Message,
                         startedByUserIdResponse.Message,
@@ -868,11 +868,11 @@ namespace crm_api.Services
                         x.EntityId == request.EntityId &&
                         x.DocumentType == request.DocumentType &&
                         x.Status == ApprovalStatus.Waiting &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (exists)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalFlowAlreadyExists"),
                         "Bu belge için zaten aktif bir onay süreci var.",
@@ -884,12 +884,12 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x => 
                         x.DocumentType == request.DocumentType && 
                         x.IsActive && 
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (flow == null)
                 {
                     const string flowNotFoundMessage = "Bu belge tipi için onay akışı tanımlı değil.";
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         flowNotFoundMessage,
                         flowNotFoundMessage,
@@ -902,11 +902,11 @@ namespace crm_api.Services
                         x.ApprovalFlowId == flow.Id && 
                         !x.IsDeleted)
                     .OrderBy(x => x.StepOrder)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (!steps.Any())
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalFlowStepsNotFound"),
                         "Flow'a ait step tanımı yok.",
@@ -924,7 +924,7 @@ namespace crm_api.Services
                             r.ApprovalRoleGroupId == step.ApprovalRoleGroupId &&
                             r.MaxAmount >= request.TotalAmount &&
                             !r.IsDeleted)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
 
                     if (roles.Any())
                     {
@@ -936,7 +936,7 @@ namespace crm_api.Services
 
                 if (selectedStep == null || validRoles == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalRoleNotFound"),
                         "Bu tutarı karşılayan onay yetkisi bulunamadı.",
@@ -956,8 +956,8 @@ namespace crm_api.Services
                     IsDeleted = false
                 };
 
-                await _unitOfWork.ApprovalRequests.AddAsync(approvalRequest);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ApprovalRequests.AddAsync(approvalRequest).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // 6️⃣ Bu step için onaylayacak kullanıcıları bul
                 var roleIds = validRoles.Select(r => r.Id).ToList();
@@ -967,11 +967,11 @@ namespace crm_api.Services
                         !x.IsDeleted)
                     .Select(x => x.UserId)
                     .Distinct()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (!userIds.Any())
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalUsersNotFound"),
                         "Bu step için onay yetkisi olan kullanıcı bulunamadı.",
@@ -984,10 +984,10 @@ namespace crm_api.Services
 
                 foreach (var userId in userIds)
                 {
-                    var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                    var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted).ConfigureAwait(false);
                     if (user == null)
                     {
-                        await _unitOfWork.RollbackTransactionAsync();
+                        await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                         return ApiResponse<bool>.ErrorResult(
                             _localizationService.GetLocalizedString("OrderService.UserNotFound"),
                             "Kullanıcı bulunamadı.",
@@ -1012,13 +1012,13 @@ namespace crm_api.Services
                     actions.Add(action);
                 }
 
-                await _unitOfWork.ApprovalActions.AddAllAsync(actions);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ApprovalActions.AddAllAsync(actions).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(request.EntityId);
+                var order = await _unitOfWork.Orders.GetByIdAsync(request.EntityId).ConfigureAwait(false);
                 if (order == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.OrderNotFound"),
                         "Sipariş bulunamadı.",
@@ -1026,11 +1026,11 @@ namespace crm_api.Services
                 }
                 order.Status = ApprovalStatus.Waiting;
 
-                await _unitOfWork.Orders.UpdateAsync(order);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Orders.UpdateAsync(order).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Transaction'ı commit et
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 // UserId -> ApprovalActionId eşlemesi (onay linkleri için)
                 var userIdToActionId = actions.ToDictionary(a => a.ApprovedByUserId, a => a.Id);
@@ -1053,7 +1053,7 @@ namespace crm_api.Services
                             NotificationType = NotificationType.OrderApproval,
                             RelatedEntityName = "Order",
                             RelatedEntityId = order.Id
-                        });
+                        }).ConfigureAwait(false);
                     }
                     catch (Exception)
                     {
@@ -1076,7 +1076,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderService.InternalServerError"),
                     _localizationService.GetLocalizedString("OrderService.StartApprovalFlowExceptionMessage", ex.Message),
@@ -1089,7 +1089,7 @@ namespace crm_api.Services
             try
             {
                 // Eğer userId verilmemişse HttpContext'ten al
-                var targetUserIdResponse = await _userService.GetCurrentUserIdAsync();
+                var targetUserIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!targetUserIdResponse.Success)
                 {
                     return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
@@ -1105,7 +1105,7 @@ namespace crm_api.Services
                         x.ApprovedByUserId == targetUserId &&
                         x.Status == ApprovalStatus.Waiting &&
                         !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = _mapper.Map<List<ApprovalActionGetDto>>(approvalActions);
 
@@ -1124,14 +1124,14 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request)
         {
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         userIdResponse.Message,
                         userIdResponse.Message,
@@ -1145,11 +1145,11 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x =>
                         x.Id == request.ApprovalActionId &&
                         x.ApprovedByUserId == userId &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (action == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalActionNotFound"),
                         "Onay kaydı bulunamadı.",
@@ -1162,8 +1162,8 @@ namespace crm_api.Services
                 action.UpdatedDate = DateTime.UtcNow;
                 action.UpdatedBy = userId;
 
-                await _unitOfWork.ApprovalActions.UpdateAsync(action);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ApprovalActions.UpdateAsync(action).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Aynı step'te bekleyen var mı?
                 bool anyWaiting = await _unitOfWork.ApprovalActions.Query()
@@ -1171,12 +1171,12 @@ namespace crm_api.Services
                         x.ApprovalRequestId == action.ApprovalRequestId &&
                         x.StepOrder == action.StepOrder &&
                         x.Status == ApprovalStatus.Waiting &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (anyWaiting)
                 {
                     // Herkes onaylamadan ilerleme
-                    await _unitOfWork.CommitTransactionAsync();
+                    await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.SuccessResult(
                         true,
                         _localizationService.GetLocalizedString("OrderService.ApprovalActionApproved"));
@@ -1185,11 +1185,11 @@ namespace crm_api.Services
                 // Step tamamlandı → sonraki step'e geç
                 var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
                     .Include(ar => ar.ApprovalFlow)
-                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (approvalRequest == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalRequestNotFound"),
                         "Onay talebi bulunamadı.",
@@ -1198,11 +1198,11 @@ namespace crm_api.Services
 
                 // Order'ı al (hem akış bittiğinde hem de sonraki step için gerekli)
                 var order = await _unitOfWork.Orders.Query()
-                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted).ConfigureAwait(false);
 
                 if (order == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.OrderNotFound"),
                         "Sipariş bulunamadı.",
@@ -1215,7 +1215,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x =>
                         x.ApprovalFlowId == approvalRequest.ApprovalFlowId &&
                         x.StepOrder == nextStepOrder &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (nextStep == null)
                 {
@@ -1225,44 +1225,44 @@ namespace crm_api.Services
                     order.Status = ApprovalStatus.Approved;
                     order.UpdatedDate = now;
                     order.UpdatedBy = userId;
-                    await _unitOfWork.Orders.UpdateAsync(order);
+                    await _unitOfWork.Orders.UpdateAsync(order).ConfigureAwait(false);
 
                     if (!string.IsNullOrWhiteSpace(order.OfferNo))
                     {
                         var siblingOrders = await _unitOfWork.Orders.Query()
                             .Where(o => !o.IsDeleted && o.Id != order.Id && o.OfferNo == order.OfferNo)
-                            .ToListAsync();
+                            .ToListAsync().ConfigureAwait(false);
 
                         foreach (var siblingOrder in siblingOrders)
                         {
                             siblingOrder.Status = ApprovalStatus.Closed;
                             siblingOrder.UpdatedDate = now;
                             siblingOrder.UpdatedBy = userId;
-                            await _unitOfWork.Orders.UpdateAsync(siblingOrder);
+                            await _unitOfWork.Orders.UpdateAsync(siblingOrder).ConfigureAwait(false);
                         }
                     }
 
                     approvalRequest.Status = ApprovalStatus.Approved;
                     approvalRequest.UpdatedDate = now;
                     approvalRequest.UpdatedBy = userId;
-                    await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest).ConfigureAwait(false);
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                     // OrderLine'ların ApprovalStatus'unu Approved yap
                     var orderLines = await _unitOfWork.OrderLines.Query()
                         .Where(ql => ql.OrderId == order.Id && !ql.IsDeleted)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
 
                     foreach (var line in orderLines)
                     {
                         line.ApprovalStatus = ApprovalStatus.Approved;
                         line.UpdatedDate = now;
                         line.UpdatedBy = userId;
-                        await _unitOfWork.OrderLines.UpdateAsync(line);
+                        await _unitOfWork.OrderLines.UpdateAsync(line).ConfigureAwait(false);
                     }
 
-                    await _unitOfWork.SaveChangesAsync();
-                    await _unitOfWork.CommitTransactionAsync();
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                     // Sipariş sahibine onaylandı bildirimi ve mail gönder (eğer onaylayan kişi sipariş sahibi değilse)
                     if (order.CreatedBy > 0 && order.CreatedBy != userId)
@@ -1271,7 +1271,7 @@ namespace crm_api.Services
                         {
                             var orderForNotification = await _unitOfWork.Orders.Query()
                                 .Include(o => o.CreatedByUser)
-                                .FirstOrDefaultAsync(o => o.Id == order.Id);
+                                .FirstOrDefaultAsync(o => o.Id == order.Id).ConfigureAwait(false);
 
                             if (orderForNotification != null && orderForNotification.CreatedByUser != null)
                             {
@@ -1288,7 +1288,7 @@ namespace crm_api.Services
                                         NotificationType = NotificationType.OrderDetail,
                                         RelatedEntityName = "Order",
                                         RelatedEntityId = orderForNotification.Id
-                                    });
+                                    }).ConfigureAwait(false);
                                 }
                                 catch (Exception)
                                 {
@@ -1296,7 +1296,7 @@ namespace crm_api.Services
                                 }
 
                                 // Mail gönder
-                                var approverUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+                                var approverUser = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted).ConfigureAwait(false);
                                 if (approverUser != null && !string.IsNullOrWhiteSpace(orderForNotification.CreatedByUser.Email))
                                 {
                                     var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
@@ -1336,8 +1336,8 @@ namespace crm_api.Services
                 approvalRequest.CurrentStep = nextStep.StepOrder;
                 approvalRequest.UpdatedDate = DateTime.UtcNow;
                 approvalRequest.UpdatedBy = userId;
-                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Yeni step için rolleri bul (StartApprovalFlow'daki mantık)
                 var validRoles = await _unitOfWork.ApprovalRoles.Query()
@@ -1345,11 +1345,11 @@ namespace crm_api.Services
                         r.ApprovalRoleGroupId == nextStep.ApprovalRoleGroupId &&
                         r.MaxAmount >= order.GrandTotal &&
                         !r.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (!validRoles.Any())
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalRoleNotFound"),
                         "Yeni step için uygun onay yetkisi bulunamadı.",
@@ -1364,11 +1364,11 @@ namespace crm_api.Services
                         !x.IsDeleted)
                     .Select(x => x.UserId)
                     .Distinct()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 if (!userIds.Any())
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalUsersNotFound"),
                         "Yeni step için onay yetkisi olan kullanıcı bulunamadı.",
@@ -1394,15 +1394,15 @@ namespace crm_api.Services
                     newActions.Add(newAction);
                 }
 
-                await _unitOfWork.ApprovalActions.AddAllAsync(newActions);
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.ApprovalActions.AddAllAsync(newActions).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 // Yeni step için onaycılara bildirim ve mail gönder
                 try
                 {
                     var orderForNotification = await _unitOfWork.Orders.Query()
-                        .FirstOrDefaultAsync(o => o.Id == order.Id);
+                        .FirstOrDefaultAsync(o => o.Id == order.Id).ConfigureAwait(false);
 
                     if (orderForNotification != null)
                     {
@@ -1416,7 +1416,7 @@ namespace crm_api.Services
 
                         foreach (var newUserId in userIds)
                         {
-                            var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted);
+                            var user = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == newUserId && !x.IsDeleted).ConfigureAwait(false);
                             if (user != null && !string.IsNullOrWhiteSpace(user.Email))
                             {
                                 usersToNotify.Add((user.Email, user.FullName, newUserId));
@@ -1438,7 +1438,7 @@ namespace crm_api.Services
                                     NotificationType = NotificationType.OrderApproval,
                                     RelatedEntityName = "Order",
                                     RelatedEntityId = orderForNotification.Id
-                                });
+                                }).ConfigureAwait(false);
                             }
                             catch (Exception)
                             {
@@ -1472,7 +1472,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderService.InternalServerError"),
                     _localizationService.GetLocalizedString("OrderService.ApproveExceptionMessage", ex.Message),
@@ -1482,14 +1482,14 @@ namespace crm_api.Services
 
         public async Task<ApiResponse<bool>> RejectAsync(RejectActionDto request)
         {
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         userIdResponse.Message,
                         userIdResponse.Message,
@@ -1503,11 +1503,11 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x =>
                         x.Id == request.ApprovalActionId &&
                         x.ApprovedByUserId == userId &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (action == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalActionNotFound"),
                         "Onay kaydı bulunamadı.",
@@ -1520,16 +1520,16 @@ namespace crm_api.Services
                 action.UpdatedDate = DateTime.UtcNow;
                 action.UpdatedBy = userId;
 
-                await _unitOfWork.ApprovalActions.UpdateAsync(action);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.ApprovalActions.UpdateAsync(action).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // ApprovalRequest'i reddedildi olarak işaretle
                 var approvalRequest = await _unitOfWork.ApprovalRequests.Query()
-                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted);
+                    .FirstOrDefaultAsync(x => x.Id == action.ApprovalRequestId && !x.IsDeleted).ConfigureAwait(false);
 
                 if (approvalRequest == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<bool>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.ApprovalRequestNotFound"),
                         "Onay talebi bulunamadı.",
@@ -1540,55 +1540,55 @@ namespace crm_api.Services
                 approvalRequest.UpdatedDate = DateTime.UtcNow;
                 approvalRequest.UpdatedBy = userId;
 
-                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest);
+                await _unitOfWork.ApprovalRequests.UpdateAsync(approvalRequest).ConfigureAwait(false);
 
                 // Sipariş durumunu ve red sebebini güncelle (raporlama için)
                 var orderForReject = await _unitOfWork.Orders.Query(tracking: true)
-                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+                    .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted).ConfigureAwait(false);
                 if (orderForReject != null)
                 {
                     orderForReject.Status = ApprovalStatus.Rejected;
                     orderForReject.RejectedReason = request.RejectReason;
                     orderForReject.UpdatedDate = DateTime.UtcNow;
                     orderForReject.UpdatedBy = userId;
-                    await _unitOfWork.Orders.UpdateAsync(orderForReject);
+                    await _unitOfWork.Orders.UpdateAsync(orderForReject).ConfigureAwait(false);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 // Eğer reddeden kullanıcı siparişi oluşturan kullanıcıysa ve en alt aşamadaysa (CurrentStep == 1)
                 // OrderLine'ların ApprovalStatus'unu Rejected yap
                 if (approvalRequest.CurrentStep == 1)
                 {
                     var order = await _unitOfWork.Orders.Query()
-                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted);
+                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId && !q.IsDeleted).ConfigureAwait(false);
 
                     if (order != null && order.CreatedBy == userId)
                     {
                         var orderLines = await _unitOfWork.OrderLines.Query()
                             .Where(ql => ql.OrderId == order.Id && !ql.IsDeleted)
-                            .ToListAsync();
+                            .ToListAsync().ConfigureAwait(false);
 
                         foreach (var line in orderLines)
                         {
                             line.ApprovalStatus = ApprovalStatus.Rejected;
                             line.UpdatedDate = DateTime.UtcNow;
                             line.UpdatedBy = userId;
-                            await _unitOfWork.OrderLines.UpdateAsync(line);
+                            await _unitOfWork.OrderLines.UpdateAsync(line).ConfigureAwait(false);
                         }
 
-                        await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
 
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 // Sipariş sahibine mail gönder (eğer reddeden kişi sipariş sahibi değilse)
                 try 
                 {
                     var orderForMail = await _unitOfWork.Orders.Query()
                         .Include(q => q.CreatedByUser)
-                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId);
+                        .FirstOrDefaultAsync(q => q.Id == approvalRequest.EntityId).ConfigureAwait(false);
 
                     if (orderForMail != null && orderForMail.CreatedBy != userId)
                     {
@@ -1605,14 +1605,14 @@ namespace crm_api.Services
                                 NotificationType = NotificationType.OrderDetail,
                                 RelatedEntityName = "Order",
                                 RelatedEntityId = orderForMail.Id
-                            });
+                            }).ConfigureAwait(false);
                         }
                         catch (Exception)
                         {
                             // ignore
                         }
 
-                        var rejectorUser = await _unitOfWork.Users.Query().Where(x => x.Id == userId).FirstOrDefaultAsync();
+                        var rejectorUser = await _unitOfWork.Users.Query().Where(x => x.Id == userId).FirstOrDefaultAsync().ConfigureAwait(false);
                         if (rejectorUser != null && orderForMail.CreatedByUser != null)
                         {
                             var baseUrl = _configuration["FrontendSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
@@ -1649,7 +1649,7 @@ namespace crm_api.Services
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<bool>.ErrorResult(
                     _localizationService.GetLocalizedString("OrderService.InternalServerError"),
                     _localizationService.GetLocalizedString("OrderService.RejectExceptionMessage", ex.Message),
@@ -1671,7 +1671,7 @@ namespace crm_api.Services
                     request.Filters = new List<Filter>();
                 }
 
-                var userIdResponse = await _userService.GetCurrentUserIdAsync();
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!userIdResponse.Success)
                 {
                     return ApiResponse<PagedResponse<OrderGetDto>>.ErrorResult(
@@ -1681,7 +1681,7 @@ namespace crm_api.Services
                 }
                 var userId = userIdResponse.Data;
 
-                var avaibleUsersResponse = await GetOrderRelatedUsersAsync(userId);
+                var avaibleUsersResponse = await GetOrderRelatedUsersAsync(userId).ConfigureAwait(false);
                 if (!avaibleUsersResponse.Success)
                 {
                     return ApiResponse<PagedResponse<OrderGetDto>>.ErrorResult(
@@ -1714,11 +1714,11 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection, columnMapping);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<OrderGetDto>(x)).ToList();
 
@@ -1770,11 +1770,11 @@ namespace crm_api.Services
                         ApprovalFlowId = g.Key,
                         MaxStepOrder = g.Max(x => x.StepOrder)
                     }
-                ).ToListAsync();
+                ).ToListAsync().ConfigureAwait(false);
 
                 if (!myFlowSteps.Any())
                 {
-                    var userData = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId);
+                    var userData = await _unitOfWork.Users.Query().FirstOrDefaultAsync(x => x.Id == userId).ConfigureAwait(false);
                     if (userData == null)
                     {
                         return ApiResponse<List<ApprovalScopeUserDto>>
@@ -1885,7 +1885,7 @@ namespace crm_api.Services
             {
                 var order = await _unitOfWork.Orders.Query()
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(q => q.Id == orderId && !q.IsDeleted);
+                    .FirstOrDefaultAsync(q => q.Id == orderId && !q.IsDeleted).ConfigureAwait(false);
 
                 if (order == null)
                 {
@@ -1912,7 +1912,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(x =>
                         x.EntityId == orderId &&
                         x.DocumentType == PricingRuleType.Order &&
-                        !x.IsDeleted);
+                        !x.IsDeleted).ConfigureAwait(false);
 
                 if (approvalRequest == null)
                 {
@@ -1935,13 +1935,13 @@ namespace crm_api.Services
                     .Include(s => s.ApprovalRoleGroup)
                     .Where(x => x.ApprovalFlowId == approvalRequest.ApprovalFlowId && !x.IsDeleted)
                     .OrderBy(x => x.StepOrder)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var allActions = await _unitOfWork.ApprovalActions.Query()
                     .AsNoTracking()
                     .Include(a => a.ApprovedByUser)
                     .Where(x => x.ApprovalRequestId == approvalRequest.Id && !x.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 foreach (var step in steps)
                 {

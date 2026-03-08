@@ -49,12 +49,12 @@ namespace crm_api.Services
 
                 query = query.ApplySorting(sortBy, request.SortDirection);
 
-                var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync().ConfigureAwait(false);
 
                 var items = await query
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .Select(x => _mapper.Map<OrderLineGetDto>(x))
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<OrderLineGetDto>
                 {
@@ -78,7 +78,7 @@ namespace crm_api.Services
         {
             try
             {
-                var line = await _unitOfWork.OrderLines.GetByIdAsync(id);
+                var line = await _unitOfWork.OrderLines.GetByIdAsync(id).ConfigureAwait(false);
                 if (line == null)
                 {
                     return ApiResponse<OrderLineGetDto>.ErrorResult(
@@ -105,8 +105,8 @@ namespace crm_api.Services
                 var entity = _mapper.Map<OrderLine>(createOrderLineDto);
                 entity.CreatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.OrderLines.AddAsync(entity);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.OrderLines.AddAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderLineDto>(entity);
                 return ApiResponse<OrderLineDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OrderLineService.OrderLineCreated"));
@@ -124,8 +124,8 @@ namespace crm_api.Services
             try
             {
                 var entities = _mapper.Map<List<OrderLine>>(createOrderLineDtos);
-                await _unitOfWork.OrderLines.AddAllAsync(entities);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.OrderLines.AddAllAsync(entities).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 var dtos = _mapper.Map<List<OrderLineDto>>(entities);
                 return ApiResponse<List<OrderLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderLineService.OrderLinesCreated"));
             }
@@ -142,8 +142,8 @@ namespace crm_api.Services
             try
             {
                 var entities = _mapper.Map<List<OrderLine>>(orderLineDtos);
-                await _unitOfWork.OrderLines.UpdateAllAsync(entities);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.OrderLines.UpdateAllAsync(entities).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 var dtos = _mapper.Map<List<OrderLineDto>>(entities);
                 return ApiResponse<List<OrderLineDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderLineService.OrderLinesUpdated"));
             }
@@ -160,7 +160,7 @@ namespace crm_api.Services
         {
             try
             {
-                var existing = await _unitOfWork.OrderLines.GetByIdAsync(id);
+                var existing = await _unitOfWork.OrderLines.GetByIdAsync(id).ConfigureAwait(false);
                 if (existing == null)
                 {
                     return ApiResponse<OrderLineDto>.ErrorResult(
@@ -172,8 +172,8 @@ namespace crm_api.Services
                 _mapper.Map(updateOrderLineDto, existing);
                 existing.UpdatedDate = DateTime.UtcNow;
 
-                await _unitOfWork.OrderLines.UpdateAsync(existing);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.OrderLines.UpdateAsync(existing).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderLineDto>(existing);
                 return ApiResponse<OrderLineDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OrderLineService.OrderLineUpdated"));
@@ -190,7 +190,7 @@ namespace crm_api.Services
         {
             try
             {
-                var currentUserResponse = await _userService.GetCurrentUserIdAsync();
+                var currentUserResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!currentUserResponse.Success)
                 {
                     return ApiResponse<object>.ErrorResult(
@@ -203,7 +203,7 @@ namespace crm_api.Services
                     .Query()
                     .Where(x => x.Id == id && !x.IsDeleted)
                     .Select(x => new { x.RelatedProductKey, x.OrderId })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync().ConfigureAwait(false);
 
                 if (existing == null)
                 {
@@ -220,7 +220,7 @@ namespace crm_api.Services
                     .ExecuteUpdateAsync(s => s
                         .SetProperty(p => p.IsDeleted, true)
                         .SetProperty(p => p.DeletedDate, DateTime.UtcNow)
-                        .SetProperty(p => p.DeletedBy, currentUserId));
+                        .SetProperty(p => p.DeletedBy, currentUserId)).ConfigureAwait(false);
 
                 if (rowsAffected == 0)
                 {
@@ -294,7 +294,7 @@ namespace crm_api.Services
                         ErpProjectCode = x.OrderLine.ErpProjectCode,
                         ApprovalStatus = x.OrderLine.ApprovalStatus
                     })
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
 
                 return ApiResponse<List<OrderLineGetDto>>.SuccessResult(dtos, _localizationService.GetLocalizedString("OrderLineService.OrderLinesByOrderRetrieved"));
             }
