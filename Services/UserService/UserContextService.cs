@@ -9,10 +9,12 @@ namespace crm_api.Services
     public class UserContextService : IUserContextService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILocalizationService _localizationService;
 
-        public UserContextService(IHttpContextAccessor httpContextAccessor)
+        public UserContextService(IHttpContextAccessor httpContextAccessor, ILocalizationService localizationService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _localizationService = localizationService;
         }
 
         public long? GetCurrentUserId()
@@ -61,7 +63,8 @@ namespace crm_api.Services
             var tenantId = GetCurrentTenantId();
             if (!tenantId.HasValue)
             {
-                throw new InvalidOperationException("Tenant context could not be resolved.");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("UserContextService.TenantContextCouldNotBeResolved"));
             }
 
             return tenantId.Value;
