@@ -52,7 +52,9 @@ namespace crm_api.Services
                     PageSize = request.PageSize
                 };
 
-                return ApiResponse<PagedResponse<DemandNotesGetDto>>.SuccessResult(pagedResponse, "Demand notes retrieved.");
+                return ApiResponse<PagedResponse<DemandNotesGetDto>>.SuccessResult(
+                    pagedResponse,
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -70,11 +72,16 @@ namespace crm_api.Services
                 var entity = await _unitOfWork.DemandNotes.GetByIdAsync(id);
                 if (entity == null || entity.IsDeleted)
                 {
-                    return ApiResponse<DemandNotesGetDto>.ErrorResult("Demand notes not found.", "Demand notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<DemandNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var dto = _mapper.Map<DemandNotesGetDto>(entity);
-                return ApiResponse<DemandNotesGetDto>.SuccessResult(dto, "Demand notes retrieved.");
+                return ApiResponse<DemandNotesGetDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -92,16 +99,23 @@ namespace crm_api.Services
                 var demandExists = await _unitOfWork.Demands.Query().AnyAsync(x => x.Id == demandId && !x.IsDeleted);
                 if (!demandExists)
                 {
-                    return ApiResponse<DemandNotesGetDto>.ErrorResult("Demand not found.", "Demand not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<DemandNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var entity = await _unitOfWork.DemandNotes.Query().AsNoTracking().FirstOrDefaultAsync(x => x.DemandId == demandId && !x.IsDeleted);
                 if (entity == null)
                 {
-                    return ApiResponse<DemandNotesGetDto>.SuccessResult(new DemandNotesGetDto { DemandId = demandId }, "Demand notes retrieved.");
+                    return ApiResponse<DemandNotesGetDto>.SuccessResult(
+                        new DemandNotesGetDto { DemandId = demandId },
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesRetrieved"));
                 }
 
-                return ApiResponse<DemandNotesGetDto>.SuccessResult(_mapper.Map<DemandNotesGetDto>(entity), "Demand notes retrieved.");
+                return ApiResponse<DemandNotesGetDto>.SuccessResult(
+                    _mapper.Map<DemandNotesGetDto>(entity),
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -119,13 +133,19 @@ namespace crm_api.Services
                 var demandExists = await _unitOfWork.Demands.Query().AnyAsync(x => x.Id == createDemandNotesDto.DemandId && !x.IsDeleted);
                 if (!demandExists)
                 {
-                    return ApiResponse<DemandNotesDto>.ErrorResult("Demand not found.", "Demand not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<DemandNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var exists = await _unitOfWork.DemandNotes.Query().AnyAsync(x => x.DemandId == createDemandNotesDto.DemandId && !x.IsDeleted);
                 if (exists)
                 {
-                    return ApiResponse<DemandNotesDto>.ErrorResult("Demand notes already exist for this demand.", "Demand notes already exist for this demand.", StatusCodes.Status400BadRequest);
+                    return ApiResponse<DemandNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesAlreadyExist"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesAlreadyExist"),
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var entity = _mapper.Map<DemandNotes>(createDemandNotesDto);
@@ -133,7 +153,9 @@ namespace crm_api.Services
                 await _unitOfWork.DemandNotes.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<DemandNotesDto>.SuccessResult(_mapper.Map<DemandNotesDto>(entity), "Demand notes created.");
+                return ApiResponse<DemandNotesDto>.SuccessResult(
+                    _mapper.Map<DemandNotesDto>(entity),
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesCreated"));
             }
             catch (Exception ex)
             {
@@ -151,7 +173,10 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.DemandNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<DemandNotesDto>.ErrorResult("Demand notes not found.", "Demand notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<DemandNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 _mapper.Map(updateDemandNotesDto, existing);
@@ -159,7 +184,9 @@ namespace crm_api.Services
                 await _unitOfWork.DemandNotes.UpdateAsync(existing);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<DemandNotesDto>.SuccessResult(_mapper.Map<DemandNotesDto>(existing), "Demand notes updated.");
+                return ApiResponse<DemandNotesDto>.SuccessResult(
+                    _mapper.Map<DemandNotesDto>(existing),
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -177,7 +204,10 @@ namespace crm_api.Services
                 var demandExists = await _unitOfWork.Demands.Query().AnyAsync(x => x.Id == demandId && !x.IsDeleted);
                 if (!demandExists)
                 {
-                    return ApiResponse<DemandNotesGetDto>.ErrorResult("Demand not found.", "Demand not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<DemandNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var notes = (request?.Notes ?? new List<string>())
@@ -188,12 +218,14 @@ namespace crm_api.Services
 
                 if (notes.Count > MaxNoteCount)
                 {
-                    return ApiResponse<DemandNotesGetDto>.ErrorResult($"A maximum of {MaxNoteCount} notes is allowed.", $"A maximum of {MaxNoteCount} notes is allowed.", StatusCodes.Status400BadRequest);
+                    var maxCountMessage = _localizationService.GetLocalizedString("DemandNotesService.MaxNoteCountExceeded", MaxNoteCount);
+                    return ApiResponse<DemandNotesGetDto>.ErrorResult(maxCountMessage, maxCountMessage, StatusCodes.Status400BadRequest);
                 }
 
                 if (notes.Any(x => x.Length > MaxNoteLength))
                 {
-                    return ApiResponse<DemandNotesGetDto>.ErrorResult($"Each note can be at most {MaxNoteLength} characters.", $"Each note can be at most {MaxNoteLength} characters.", StatusCodes.Status400BadRequest);
+                    var maxLengthMessage = _localizationService.GetLocalizedString("DemandNotesService.MaxNoteLengthExceeded", MaxNoteLength);
+                    return ApiResponse<DemandNotesGetDto>.ErrorResult(maxLengthMessage, maxLengthMessage, StatusCodes.Status400BadRequest);
                 }
 
                 var entity = await _unitOfWork.DemandNotes.Query().FirstOrDefaultAsync(x => x.DemandId == demandId && !x.IsDeleted);
@@ -226,7 +258,9 @@ namespace crm_api.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<DemandNotesGetDto>.SuccessResult(_mapper.Map<DemandNotesGetDto>(entity), "Demand notes updated.");
+                return ApiResponse<DemandNotesGetDto>.SuccessResult(
+                    _mapper.Map<DemandNotesGetDto>(entity),
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -244,12 +278,17 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.DemandNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<object>.ErrorResult("Demand notes not found.", "Demand notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        _localizationService.GetLocalizedString("DemandNotesService.DemandNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 await _unitOfWork.DemandNotes.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
-                return ApiResponse<object>.SuccessResult(null, "Demand notes deleted.");
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("DemandNotesService.DemandNotesDeleted"));
             }
             catch (Exception ex)
             {

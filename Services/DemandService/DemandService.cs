@@ -1792,7 +1792,9 @@ namespace crm_api.Services
                     if (userData == null)
                     {
                         return ApiResponse<List<ApprovalScopeUserDto>>
-                            .SuccessResult(new List<ApprovalScopeUserDto>(), "");
+                            .SuccessResult(
+                                new List<ApprovalScopeUserDto>(),
+                                _localizationService.GetLocalizedString("DemandService.ApprovalScopeUsersRetrieved"));
                     }
                     var approvalScopeUserDtos = new List<ApprovalScopeUserDto>();
                     approvalScopeUserDtos.Add(new ApprovalScopeUserDto
@@ -1805,7 +1807,9 @@ namespace crm_api.Services
                         StepOrder = 0
                     });
                     return ApiResponse<List<ApprovalScopeUserDto>>
-                        .SuccessResult(approvalScopeUserDtos, "");
+                        .SuccessResult(
+                            approvalScopeUserDtos,
+                            _localizationService.GetLocalizedString("DemandService.ApprovalScopeUsersRetrieved"));
                 }
 
                 var flowStepMap = myFlowSteps
