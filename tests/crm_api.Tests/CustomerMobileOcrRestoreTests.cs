@@ -94,7 +94,7 @@ public class CustomerMobileOcrRestoreTests
 
         var fileUpload = new Mock<IFileUploadService>();
         fileUpload.Setup(x => x.UploadCustomerImageAsync(It.IsAny<IFormFile>(), It.IsAny<long>()))
-            .ReturnsAsync(ApiResponse<string>.ErrorResult("upload disabled in test"));
+            .ReturnsAsync(ApiResponse<string>.ErrorResult("Test.UploadDisabled"));
 
         var service = new CustomerService(
             uow.Object,
@@ -245,4 +245,3 @@ public class CustomerMobileOcrRestoreTests
         Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
     }
 }
-
