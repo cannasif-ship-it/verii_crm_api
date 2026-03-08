@@ -3234,4 +3234,19 @@
   <data name="TempQuotattionService.NoLineToCreate" xml:space="preserve">
     <value>Nessuna riga da creare.</value>
   </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeRequired" xml:space="preserve">
+    <value>Il tipo di vendita è obbligatorio.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeTooLong" xml:space="preserve">
+    <value>Il tipo di vendita deve contenere al massimo 20 caratteri.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeInvalid" xml:space="preserve">
+    <value>Il tipo di vendita non è valido. Valori consentiti: YURTICI, YURTDISI.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameRequired" xml:space="preserve">
+    <value>Il nome è obbligatorio.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameTooLong" xml:space="preserve">
+    <value>Il nome deve contenere al massimo 150 caratteri.</value>
+  </data>
 </root>

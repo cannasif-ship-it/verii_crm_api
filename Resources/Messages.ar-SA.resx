@@ -3234,4 +3234,19 @@
   <data name="TempQuotattionService.NoLineToCreate" xml:space="preserve">
     <value>لا يوجد سطر لإنشائه.</value>
   </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeRequired" xml:space="preserve">
+    <value>نوع المبيعات مطلوب.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeTooLong" xml:space="preserve">
+    <value>يجب ألا يزيد نوع المبيعات عن 20 حرفًا.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeInvalid" xml:space="preserve">
+    <value>نوع المبيعات غير صالح. القيم المسموح بها: YURTICI و YURTDISI.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameRequired" xml:space="preserve">
+    <value>الاسم مطلوب.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameTooLong" xml:space="preserve">
+    <value>يجب ألا يزيد الاسم عن 150 حرفًا.</value>
+  </data>
 </root>

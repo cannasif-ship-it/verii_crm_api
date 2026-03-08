@@ -3545,4 +3545,19 @@
   <data name="TempQuotattionService.NoLineToCreate" xml:space="preserve">
     <value>Oluşturulacak satır yok.</value>
   </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeRequired" xml:space="preserve">
+    <value>Satış tipi zorunludur.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeTooLong" xml:space="preserve">
+    <value>Satış tipi en fazla 20 karakter olabilir.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.SalesTypeInvalid" xml:space="preserve">
+    <value>Satış tipi geçersiz. Geçerli değerler: YURTICI, YURTDISI.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameRequired" xml:space="preserve">
+    <value>Ad alanı zorunludur.</value>
+  </data>
+  <data name="SalesTypeCreateDtoValidator.NameTooLong" xml:space="preserve">
+    <value>Ad alanı en fazla 150 karakter olabilir.</value>
+  </data>
 </root>
