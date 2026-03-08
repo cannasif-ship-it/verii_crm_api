@@ -20,13 +20,15 @@ namespace crm_api.Services
         private readonly IHubContext<AuthHub> _hubContext;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly IUserSessionCacheService _userSessionCacheService;
         public AuthService(
             IUnitOfWork unitOfWork,
             IJwtService jwtService,
             ILocalizationService localizationService,
             IHubContext<AuthHub> hubContext,
             IConfiguration configuration,
-            IUserService userService)
+            IUserService userService,
+            IUserSessionCacheService userSessionCacheService)
         {
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
@@ -34,6 +36,7 @@ namespace crm_api.Services
             _hubContext = hubContext;
             _configuration = configuration;
             _userService = userService;
+            _userSessionCacheService = userSessionCacheService;
         }
 
         public async Task<ApiResponse<UserDto>> GetUserByUsernameAsync(string username)
@@ -143,25 +146,28 @@ namespace crm_api.Services
                     return ApiResponse<string>.ErrorResult(msg, msg, 401);
                 }
 
-                var tokenResponse = _jwtService.GenerateToken(user);
+                var activeSession = await _unitOfWork.UserSessions.Query(tracking: true).FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null).ConfigureAwait(false);
+                if (activeSession != null)
+                {
+                    activeSession.RevokedAt = DateTime.UtcNow;
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    _userSessionCacheService.RemoveSession(activeSession.SessionId);
+                    await AuthHub.ForceLogoutUser(_hubContext, user.Id.ToString()).ConfigureAwait(false);
+                }
+
+                var sessionId = Guid.NewGuid();
+
+                var tokenResponse = _jwtService.GenerateToken(user, sessionId);
                 if (!tokenResponse.Success)
                 {
                     return ApiResponse<string>.ErrorResult(_localizationService.GetLocalizedString("Error.User.LoginFailed"), tokenResponse.Message ?? string.Empty, 500);
                 }
                 var token = tokenResponse.Data!;
 
-                var activeSession = await _unitOfWork.UserSessions.Query(tracking: true).FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null).ConfigureAwait(false);
-                if (activeSession != null)
-                {
-                    activeSession.RevokedAt = DateTime.UtcNow;
-                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                    await AuthHub.ForceLogoutUser(_hubContext, user.Id.ToString()).ConfigureAwait(false);
-                }
-
                 var session = new UserSession
                 {
                     UserId = user.Id,
-                    SessionId = Guid.NewGuid(),
+                    SessionId = sessionId,
                     CreatedAt = DateTime.UtcNow,
                     Token = ComputeSha256Hash(token),
                     IsDeleted = false,
@@ -169,6 +175,7 @@ namespace crm_api.Services
                 };
                 await _unitOfWork.UserSessions.AddAsync(session).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, session.CreatedAt.AddDays(30));
                 
                 return ApiResponse<string>.SuccessResult(token, _localizationService.GetLocalizedString("Success.User.LoginSuccessful"));
             }
@@ -414,7 +421,8 @@ namespace crm_api.Services
 
                 await InvalidateUserSessionsAsync(user.Id).ConfigureAwait(false);
 
-                var tokenResponse = _jwtService.GenerateToken(user);
+                var sessionId = Guid.NewGuid();
+                var tokenResponse = _jwtService.GenerateToken(user, sessionId);
                 if (!tokenResponse.Success || string.IsNullOrWhiteSpace(tokenResponse.Data))
                 {
                     return ApiResponse<string>.ErrorResult(
@@ -427,7 +435,7 @@ namespace crm_api.Services
                 var session = new UserSession
                 {
                     UserId = user.Id,
-                    SessionId = Guid.NewGuid(),
+                    SessionId = sessionId,
                     CreatedAt = DateTime.UtcNow,
                     Token = ComputeSha256Hash(newToken),
                     IsDeleted = false,
@@ -435,6 +443,7 @@ namespace crm_api.Services
                 };
                 await _unitOfWork.UserSessions.AddAsync(session).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, session.CreatedAt.AddDays(30));
 
                 var displayName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
                 if (string.IsNullOrWhiteSpace(displayName))
@@ -477,6 +486,7 @@ namespace crm_api.Services
                 {
                     s.RevokedAt = now;
                     s.UpdatedDate = now;
+                    _userSessionCacheService.RemoveSession(s.SessionId);
                 }
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 await AuthHub.ForceLogoutUser(_hubContext, userId.ToString()).ConfigureAwait(false);
