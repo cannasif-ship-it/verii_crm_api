@@ -33,11 +33,11 @@ namespace crm_api.Services
 
         public async Task<TenantGoogleOAuthRuntimeSettings?> GetRuntimeSettingsAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var entity = await GetPrimarySettingsEntityAsync(cancellationToken);
+            var entity = await GetPrimarySettingsEntityAsync(cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
             {
-                entity = await TryBootstrapFromLegacyGoogleOptionsAsync(cancellationToken);
+                entity = await TryBootstrapFromLegacyGoogleOptionsAsync(cancellationToken).ConfigureAwait(false);
             }
 
             if (entity == null)
@@ -69,11 +69,11 @@ namespace crm_api.Services
         {
             try
             {
-                var entity = await GetPrimarySettingsEntityAsync(cancellationToken);
+                var entity = await GetPrimarySettingsEntityAsync(cancellationToken).ConfigureAwait(false);
 
                 if (entity == null)
                 {
-                    entity = await TryBootstrapFromLegacyGoogleOptionsAsync(cancellationToken);
+                    entity = await TryBootstrapFromLegacyGoogleOptionsAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 var responseDto = MapToDto(entity?.TenantId ?? GlobalTenantId, entity);
@@ -111,7 +111,7 @@ namespace crm_api.Services
 
                 var allSettings = await _dbContext.Set<TenantGoogleOAuthSettings>()
                     .OrderByDescending(x => x.UpdatedAt)
-                    .ToListAsync(cancellationToken);
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
                 var entity = allSettings.FirstOrDefault();
 
                 var now = DateTimeOffset.UtcNow;
@@ -132,7 +132,7 @@ namespace crm_api.Services
                         CreatedAt = now,
                     };
 
-                    await _dbContext.Set<TenantGoogleOAuthSettings>().AddAsync(entity, cancellationToken);
+                    await _dbContext.Set<TenantGoogleOAuthSettings>().AddAsync(entity, cancellationToken).ConfigureAwait(false);
                 }
 
                 entity.ClientId = dto.ClientId.Trim();
@@ -166,7 +166,7 @@ namespace crm_api.Services
                     _dbContext.Set<TenantGoogleOAuthSettings>().RemoveRange(duplicates);
                 }
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 var responseDto = MapToDto(entity.TenantId, entity);
                 return ApiResponse<TenantGoogleOAuthSettingsDto>.SuccessResult(
@@ -309,7 +309,7 @@ namespace crm_api.Services
                 return null;
             }
 
-            var existing = await GetPrimarySettingsEntityAsync(cancellationToken);
+            var existing = await GetPrimarySettingsEntityAsync(cancellationToken).ConfigureAwait(false);
             if (existing != null)
             {
                 return existing;
@@ -329,8 +329,8 @@ namespace crm_api.Services
                 UpdatedAt = now,
             };
 
-            await _dbContext.Set<TenantGoogleOAuthSettings>().AddAsync(entity, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.Set<TenantGoogleOAuthSettings>().AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return entity;
         }
 
@@ -339,7 +339,7 @@ namespace crm_api.Services
             return await _dbContext.Set<TenantGoogleOAuthSettings>()
                 .AsNoTracking()
                 .OrderByDescending(x => x.UpdatedAt)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

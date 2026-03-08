@@ -100,7 +100,7 @@ namespace crm_api.Services
             }
 
             var customer = await _uow.Customers.Query(tracking: false)
-                .FirstOrDefaultAsync(x => x.Id == dto.CustomerId && !x.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == dto.CustomerId && !x.IsDeleted, cancellationToken).ConfigureAwait(false);
             if (customer == null)
             {
                 return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
@@ -113,7 +113,7 @@ namespace crm_api.Services
             if (dto.ContactId.HasValue)
             {
                 contact = await _uow.Contacts.Query(tracking: false)
-                    .FirstOrDefaultAsync(x => x.Id == dto.ContactId.Value && !x.IsDeleted, cancellationToken);
+                    .FirstOrDefaultAsync(x => x.Id == dto.ContactId.Value && !x.IsDeleted, cancellationToken).ConfigureAwait(false);
 
                 if (contact == null)
                 {
@@ -156,20 +156,20 @@ namespace crm_api.Services
             var ccRecipients = ParseEmails(dto.Cc);
             var bccRecipients = ParseEmails(dto.Bcc);
 
-            var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken);
+            var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
             if (oauthSettings == null || !oauthSettings.IsEnabled)
             {
-                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google OAuth is not configured or disabled.", "oauth_disabled", cancellationToken);
+                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google OAuth is not configured or disabled.", "oauth_disabled", cancellationToken).ConfigureAwait(false);
                 return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
                     "Google OAuth ayarları yapılandırılmamış.",
                     "Google OAuth settings are missing or disabled.",
                     StatusCodes.Status400BadRequest);
             }
 
-            var account = await _googleTokenService.GetAccountAsync(userId, cancellationToken);
+            var account = await _googleTokenService.GetAccountAsync(userId, cancellationToken).ConfigureAwait(false);
             if (account == null || !account.IsConnected)
             {
-                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google account is not connected.", "account_not_connected", cancellationToken);
+                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google account is not connected.", "account_not_connected", cancellationToken).ConfigureAwait(false);
                 return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
                     "Google hesabınız bağlı değil.",
                     "Google account is not connected.",
@@ -181,17 +181,17 @@ namespace crm_api.Services
                 .Select(x => x!.Trim()));
             if (!ScopeContains(scopes, GmailSendScope))
             {
-                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google account does not have gmail.send scope.", "insufficient_scope", cancellationToken);
+                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google account does not have gmail.send scope.", "insufficient_scope", cancellationToken).ConfigureAwait(false);
                 return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
                     "Google hesabınızda mail gönderme yetkisi yok. Lütfen yeniden bağlanın.",
                     "Google scope does not contain gmail.send.",
                     StatusCodes.Status400BadRequest);
             }
 
-            var accessToken = await _googleTokenService.GetValidAccessTokenAsync(userId, cancellationToken: cancellationToken);
+            var accessToken = await _googleTokenService.GetValidAccessTokenAsync(userId, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(accessToken))
             {
-                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google token is invalid or expired.", "token_invalid", cancellationToken);
+                await WriteGoogleOperationalLogAsync(userId, tenantId, dto.CustomerId, false, "Warning", "google.gmail.send", "Google token is invalid or expired.", "token_invalid", cancellationToken).ConfigureAwait(false);
                 return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
                     "Google token geçersiz veya süresi dolmuş. Lütfen tekrar bağlanın.",
                     "Google token invalid or expired.",
@@ -199,20 +199,20 @@ namespace crm_api.Services
             }
 
             var senderEmail = string.IsNullOrWhiteSpace(account.GoogleEmail) ? null : account.GoogleEmail!.Trim();
-            var senderDisplayName = await ResolveSenderDisplayNameAsync(userId, cancellationToken);
+            var senderDisplayName = await ResolveSenderDisplayNameAsync(userId, cancellationToken).ConfigureAwait(false);
             var mimeRaw = BuildMimeRaw(senderDisplayName, senderEmail, toRecipients, ccRecipients, bccRecipients, dto.Subject.Trim(), dto.Body, dto.IsHtml);
 
-            var gmailResponse = await SendViaGmailApiAsync(accessToken, mimeRaw, cancellationToken);
+            var gmailResponse = await SendViaGmailApiAsync(accessToken, mimeRaw, cancellationToken).ConfigureAwait(false);
             if (!gmailResponse.IsSuccess && IsInsufficientScopeError(gmailResponse))
             {
                 var refreshedAccessToken = await _googleTokenService.GetValidAccessTokenAsync(
                     userId,
                     forceRefresh: true,
-                    cancellationToken: cancellationToken);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (!string.IsNullOrWhiteSpace(refreshedAccessToken))
                 {
-                    gmailResponse = await SendViaGmailApiAsync(refreshedAccessToken, mimeRaw, cancellationToken);
+                    gmailResponse = await SendViaGmailApiAsync(refreshedAccessToken, mimeRaw, cancellationToken).ConfigureAwait(false);
                 }
             }
             if (!gmailResponse.IsSuccess)
@@ -235,7 +235,7 @@ namespace crm_api.Services
                         googleMessageId: null,
                         googleThreadId: null,
                         sentAt: null,
-                        cancellationToken: cancellationToken);
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 catch (DbUpdateException dbEx)
                 {
@@ -261,7 +261,7 @@ namespace crm_api.Services
                         customerId = dto.CustomerId,
                         to = string.Join("; ", toRecipients),
                         status = gmailResponse.ErrorCode
-                    });
+                    }).ConfigureAwait(false);
 
                 if (IsInsufficientScopeError(gmailResponse))
                 {
@@ -310,7 +310,7 @@ namespace crm_api.Services
                     gmailResponse.MessageId,
                     gmailResponse.ThreadId,
                     sentAt,
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
             }
             catch (DbUpdateException dbEx)
             {
@@ -344,7 +344,7 @@ namespace crm_api.Services
                     customerId = dto.CustomerId,
                     logId = successLog.Id,
                     messageId = gmailResponse.MessageId
-                });
+                }).ConfigureAwait(false);
 
             return ApiResponse<GoogleCustomerMailSendResultDto>.SuccessResult(
                 new GoogleCustomerMailSendResultDto
@@ -398,7 +398,7 @@ namespace crm_api.Services
             var sortDirection = string.IsNullOrWhiteSpace(query.SortDirection) ? "desc" : query.SortDirection;
             mailLogQuery = mailLogQuery.ApplySorting(sortBy, sortDirection, LogColumnMapping);
 
-            var totalCount = await mailLogQuery.CountAsync(cancellationToken);
+            var totalCount = await mailLogQuery.CountAsync(cancellationToken).ConfigureAwait(false);
             var items = await mailLogQuery
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -431,7 +431,7 @@ namespace crm_api.Services
                     SentAt = x.SentAt,
                     CreatedDate = x.CreatedDate
                 })
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             return ApiResponse<PagedResponse<GoogleCustomerMailLogDto>>.SuccessResult(
                 new PagedResponse<GoogleCustomerMailLogDto>
@@ -492,8 +492,8 @@ namespace crm_api.Services
                 })
             };
 
-            await _uow.Repository<GoogleCustomerMailLog>().AddAsync(entity);
-            await _uow.SaveChangesAsync();
+            await _uow.Repository<GoogleCustomerMailLog>().AddAsync(entity).ConfigureAwait(false);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
             return entity;
         }
 
@@ -521,13 +521,13 @@ namespace crm_api.Services
                 Message = message,
                 ErrorCode = errorCode,
                 Metadata = metadata ?? new { customerId }
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<string?> ResolveSenderDisplayNameAsync(long userId, CancellationToken cancellationToken)
         {
             var user = await _uow.Users.Query(tracking: false)
-                .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -550,8 +550,8 @@ namespace crm_api.Services
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {

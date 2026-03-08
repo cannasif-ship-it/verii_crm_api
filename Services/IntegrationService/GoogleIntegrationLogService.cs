@@ -79,8 +79,8 @@ namespace crm_api.Services
                     IsDeleted = false,
                 };
 
-                await _uow.Repository<GoogleIntegrationLog>().AddAsync(entity);
-                await _uow.SaveChangesAsync();
+                await _uow.Repository<GoogleIntegrationLog>().AddAsync(entity).ConfigureAwait(false);
+                await _uow.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace crm_api.Services
             var sortDirection = string.IsNullOrWhiteSpace(request.SortDirection) ? "desc" : request.SortDirection;
             logQuery = logQuery.ApplySorting(sortBy, sortDirection, LogColumnMapping);
 
-            var totalCount = await logQuery.CountAsync(cancellationToken);
+            var totalCount = await logQuery.CountAsync(cancellationToken).ConfigureAwait(false);
             var items = await logQuery
                 .Skip((normalizedPageNumber - 1) * normalizedPageSize)
                 .Take(normalizedPageSize)
@@ -137,7 +137,7 @@ namespace crm_api.Services
                     MetadataJson = x.MetadataJson,
                     CreatedDate = x.CreatedDate,
                 })
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             return new PagedResponse<GoogleIntegrationLogDto>
             {

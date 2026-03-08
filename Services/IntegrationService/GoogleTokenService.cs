@@ -42,7 +42,7 @@ namespace crm_api.Services
             CancellationToken cancellationToken = default)
         {
             var now = DateTimeOffset.UtcNow;
-            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken).ConfigureAwait(false);
             if (account == null)
             {
                 account = new UserGoogleAccount
@@ -53,7 +53,7 @@ namespace crm_api.Services
                     CreatedAt = now,
                 };
 
-                await _dbContext.UserGoogleAccounts.AddAsync(account, cancellationToken);
+                await _dbContext.UserGoogleAccounts.AddAsync(account, cancellationToken).ConfigureAwait(false);
             }
 
             account.TenantId = tenantId;
@@ -72,13 +72,13 @@ namespace crm_api.Services
             account.IsConnected = true;
             account.UpdatedAt = now;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return account;
         }
 
         public async Task<string?> GetValidAccessTokenAsync(long userId, bool forceRefresh = false, CancellationToken cancellationToken = default)
         {
-            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken).ConfigureAwait(false);
             if (account == null || !account.IsConnected)
             {
                 return null;
@@ -99,7 +99,7 @@ namespace crm_api.Services
             var refreshToken = SafeDecrypt(account.RefreshTokenEncrypted);
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                await MarkDisconnectedAsync(account, cancellationToken);
+                await MarkDisconnectedAsync(account, cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
@@ -110,13 +110,13 @@ namespace crm_api.Services
             if (tenantId == Guid.Empty)
             {
                 _logger.LogWarning("Tenant context could not be resolved for Google token refresh. UserId: {UserId}", userId);
-                await MarkDisconnectedAsync(account, cancellationToken);
+                await MarkDisconnectedAsync(account, cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
             try
             {
-                var refreshed = await _googleOAuthService.RefreshAccessTokenAsync(refreshToken, tenantId, cancellationToken);
+                var refreshed = await _googleOAuthService.RefreshAccessTokenAsync(refreshToken, tenantId, cancellationToken).ConfigureAwait(false);
                 account.AccessTokenEncrypted = _encryptionService.Encrypt(refreshed.AccessToken);
                 if (!string.IsNullOrWhiteSpace(refreshed.RefreshToken))
                 {
@@ -132,26 +132,26 @@ namespace crm_api.Services
                 account.IsConnected = true;
                 account.UpdatedAt = DateTimeOffset.UtcNow;
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return refreshed.AccessToken;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Google access token refresh failed for user {UserId}", userId);
-                await MarkDisconnectedAsync(account, cancellationToken);
+                await MarkDisconnectedAsync(account, cancellationToken).ConfigureAwait(false);
                 return null;
             }
         }
 
         public async Task<bool> DisconnectAsync(long userId, CancellationToken cancellationToken = default)
         {
-            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+            var account = await _dbContext.UserGoogleAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken).ConfigureAwait(false);
             if (account == null)
             {
                 return false;
             }
 
-            await MarkDisconnectedAsync(account, cancellationToken);
+            await MarkDisconnectedAsync(account, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
@@ -182,7 +182,7 @@ namespace crm_api.Services
             account.Scopes = null;
             account.UpdatedAt = DateTimeOffset.UtcNow;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace crm_api.Services
 
         public async Task<string> CreateTestEventAsync(long userId, CancellationToken cancellationToken = default)
         {
-            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken);
+            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken).ConfigureAwait(false);
 
             var startUtc = DateTimeOffset.UtcNow.AddMinutes(30);
             var endUtc = startUtc.AddMinutes(30);
@@ -65,8 +65,8 @@ namespace crm_api.Services
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -97,14 +97,14 @@ namespace crm_api.Services
                 IsSuccess = true,
                 Message = "Google test event created.",
                 GoogleCalendarEventId = createdEventId,
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
             return createdEventId;
         }
 
         public async Task<string> CreateActivityEventAsync(long userId, Activity activity, CancellationToken cancellationToken = default)
         {
-            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken);
+            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken).ConfigureAwait(false);
             var requestBody = BuildActivityEventRequestBody(activity);
 
             var json = JsonSerializer.Serialize(requestBody);
@@ -115,8 +115,8 @@ namespace crm_api.Services
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -137,7 +137,7 @@ namespace crm_api.Services
                     ErrorCode = response.StatusCode.ToString(),
                     ActivityId = activity.Id,
                     Metadata = responseBody,
-                }, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
 
                 throw new InvalidOperationException(
                     _localizationService.GetLocalizedString("GoogleCalendarService.ActivityCreateRequestFailed"));
@@ -161,17 +161,17 @@ namespace crm_api.Services
                 Message = "Google activity event created.",
                 ActivityId = activity.Id,
                 GoogleCalendarEventId = createdEventId,
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
             return createdEventId;
         }
 
         public async Task<string> SyncActivityEventAsync(long userId, Activity activity, CancellationToken cancellationToken = default)
         {
-            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken);
+            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(activity.GoogleCalendarEventId))
             {
-                return await CreateActivityEventAsync(userId, activity, cancellationToken);
+                return await CreateActivityEventAsync(userId, activity, cancellationToken).ConfigureAwait(false);
             }
 
             var existingEventId = activity.GoogleCalendarEventId.Trim();
@@ -184,8 +184,8 @@ namespace crm_api.Services
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -208,7 +208,7 @@ namespace crm_api.Services
                     ActivityId = activity.Id,
                     GoogleCalendarEventId = existingEventId,
                     Metadata = responseBody,
-                }, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
 
                 throw new InvalidOperationException(
                     _localizationService.GetLocalizedString("GoogleCalendarService.ActivitySyncRequestFailed"));
@@ -222,7 +222,7 @@ namespace crm_api.Services
                 Message = "Google activity event updated.",
                 ActivityId = activity.Id,
                 GoogleCalendarEventId = existingEventId,
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
             return existingEventId;
         }
@@ -234,12 +234,12 @@ namespace crm_api.Services
                 return;
             }
 
-            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken);
+            var accessToken = await EnsureSyncReadyAndGetAccessTokenAsync(userId, cancellationToken).ConfigureAwait(false);
             var client = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Delete, $"{CalendarEventsEndpoint}/{Uri.EscapeDataString(calendarEventId.Trim())}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 await _googleIntegrationLogService.WriteAsync(new GoogleIntegrationLogWriteDto
@@ -251,12 +251,12 @@ namespace crm_api.Services
                         ? "Google activity event already deleted."
                         : "Google activity event deleted.",
                     GoogleCalendarEventId = calendarEventId,
-                }, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
 
                 return;
             }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             _logger.LogWarning(
                 "Google calendar activity event delete failed for user {UserId}, event {EventId}. StatusCode: {StatusCode}, Body: {Body}",
                 userId,
@@ -274,7 +274,7 @@ namespace crm_api.Services
                 ErrorCode = response.StatusCode.ToString(),
                 GoogleCalendarEventId = calendarEventId,
                 Metadata = responseBody,
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
             throw new InvalidOperationException(
                 _localizationService.GetLocalizedString("GoogleCalendarService.ActivityDeleteRequestFailed"));
@@ -354,21 +354,21 @@ namespace crm_api.Services
 
         private async Task<string> EnsureSyncReadyAndGetAccessTokenAsync(long userId, CancellationToken cancellationToken)
         {
-            var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(Guid.Empty, cancellationToken);
+            var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(Guid.Empty, cancellationToken).ConfigureAwait(false);
             if (oauthSettings == null || !oauthSettings.IsEnabled)
             {
                 throw new InvalidOperationException(
                     _localizationService.GetLocalizedString("GoogleCalendarService.OAuthDisabled"));
             }
 
-            var account = await _googleTokenService.GetAccountAsync(userId, cancellationToken);
+            var account = await _googleTokenService.GetAccountAsync(userId, cancellationToken).ConfigureAwait(false);
             if (account == null || !account.IsConnected)
             {
                 throw new InvalidOperationException(
                     _localizationService.GetLocalizedString("GoogleCalendarService.AccountNotConnected"));
             }
 
-            var accessToken = await _googleTokenService.GetValidAccessTokenAsync(userId, cancellationToken: cancellationToken);
+            var accessToken = await _googleTokenService.GetValidAccessTokenAsync(userId, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 throw new InvalidOperationException(

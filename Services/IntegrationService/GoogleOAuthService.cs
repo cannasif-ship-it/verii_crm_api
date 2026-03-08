@@ -52,7 +52,7 @@ namespace crm_api.Services
         public async Task<string> CreateAuthorizeUrlAsync(long userId, CancellationToken cancellationToken = default)
         {
             var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
-            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken);
+            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
 
             var randomState = WebEncoders.Base64UrlEncode(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
             var state = $"{userId}.{tenantId:D}.{randomState}";
@@ -112,7 +112,7 @@ namespace crm_api.Services
 
         public async Task<GoogleOAuthTokenResult> ExchangeCodeForTokensAsync(string code, Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken);
+            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
 
             var formData = new Dictionary<string, string>
             {
@@ -123,12 +123,12 @@ namespace crm_api.Services
                 ["redirect_uri"] = settings.RedirectUri,
             };
 
-            return await SendTokenRequestAsync(formData, cancellationToken);
+            return await SendTokenRequestAsync(formData, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<GoogleOAuthTokenResult> RefreshAccessTokenAsync(string refreshToken, Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken);
+            var settings = await GetValidatedSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
 
             var formData = new Dictionary<string, string>
             {
@@ -138,7 +138,7 @@ namespace crm_api.Services
                 ["client_secret"] = settings.ClientSecret,
             };
 
-            return await SendTokenRequestAsync(formData, cancellationToken);
+            return await SendTokenRequestAsync(formData, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<string?> GetGoogleEmailAsync(string accessToken, string? idToken, CancellationToken cancellationToken = default)
@@ -153,14 +153,14 @@ namespace crm_api.Services
             using var request = new HttpRequestMessage(HttpMethod.Get, UserInfoEndpoint);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await client.SendAsync(request, cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("Google userinfo request failed with status code {StatusCode}", response.StatusCode);
                 return null;
             }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var payload = JsonSerializer.Deserialize<GoogleUserInfoResponse>(responseBody, JsonOptions);
             return payload?.Email;
         }
@@ -181,7 +181,7 @@ namespace crm_api.Services
                 }),
             };
 
-            using var response = await client.SendAsync(request, cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("Google token revoke request failed with status code {StatusCode}", response.StatusCode);
@@ -198,8 +198,8 @@ namespace crm_api.Services
                 Content = new FormUrlEncodedContent(formData),
             };
 
-            using var response = await client.SendAsync(request, cancellationToken);
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -260,7 +260,7 @@ namespace crm_api.Services
 
         private async Task<TenantGoogleOAuthRuntimeSettings> GetValidatedSettingsAsync(Guid tenantId, CancellationToken cancellationToken)
         {
-            var settings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken);
+            var settings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
             if (settings == null || !settings.IsEnabled)
             {
                 throw new InvalidOperationException(
