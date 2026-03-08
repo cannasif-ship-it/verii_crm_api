@@ -24,6 +24,7 @@ namespace crm_api.Services
         private readonly ITenantGoogleOAuthSettingsService _tenantGoogleOAuthSettingsService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<GoogleOAuthService> _logger;
+        private readonly ILocalizationService _localizationService;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -36,7 +37,8 @@ namespace crm_api.Services
             IUserContextService userContextService,
             ITenantGoogleOAuthSettingsService tenantGoogleOAuthSettingsService,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<GoogleOAuthService> logger)
+            ILogger<GoogleOAuthService> logger,
+            ILocalizationService localizationService)
         {
             _httpClientFactory = httpClientFactory;
             _memoryCache = memoryCache;
@@ -44,6 +46,7 @@ namespace crm_api.Services
             _tenantGoogleOAuthSettingsService = tenantGoogleOAuthSettingsService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _localizationService = localizationService;
         }
 
         public async Task<string> CreateAuthorizeUrlAsync(long userId, CancellationToken cancellationToken = default)
@@ -226,7 +229,7 @@ namespace crm_api.Services
                     responseBody);
 
                 var providerMessage = string.IsNullOrWhiteSpace(providerError)
-                    ? "unknown_error"
+                    ? _localizationService.GetLocalizedString("GoogleOAuthService.UnknownError")
                     : providerError;
 
                 if (!string.IsNullOrWhiteSpace(providerErrorDescription))
@@ -234,13 +237,15 @@ namespace crm_api.Services
                     providerMessage = $"{providerMessage}: {providerErrorDescription}";
                 }
 
-                throw new InvalidOperationException($"Google token request failed: {providerMessage}");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("GoogleOAuthService.TokenRequestFailed", providerMessage));
             }
 
             var tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(responseBody, JsonOptions);
             if (tokenResponse == null || string.IsNullOrWhiteSpace(tokenResponse.AccessToken))
             {
-                throw new InvalidOperationException("Google token response is invalid.");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("GoogleOAuthService.TokenResponseInvalid"));
             }
 
             return new GoogleOAuthTokenResult
@@ -258,7 +263,8 @@ namespace crm_api.Services
             var settings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken);
             if (settings == null || !settings.IsEnabled)
             {
-                throw new InvalidOperationException("Google OAuth ayarları yapılandırılmamış.");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("GoogleOAuthService.OAuthSettingsNotConfigured"));
             }
 
             var missing = new List<string>();
@@ -279,13 +285,15 @@ namespace crm_api.Services
 
             if (missing.Count > 0)
             {
-                throw new InvalidOperationException($"Google OAuth ayarları yapılandırılmamış: {string.Join(", ", missing)}");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("GoogleOAuthService.OAuthSettingsMissingFields", string.Join(", ", missing)));
             }
 
             var resolvedRedirectUri = ResolveRedirectUri(settings.RedirectUri);
             if (string.IsNullOrWhiteSpace(resolvedRedirectUri))
             {
-                throw new InvalidOperationException("Google OAuth ayarları yapılandırılmamış: RedirectUri");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("GoogleOAuthService.OAuthRedirectUriInvalid"));
             }
 
             return new TenantGoogleOAuthRuntimeSettings

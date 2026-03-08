@@ -77,7 +77,9 @@ namespace crm_api.Services
                 }
 
                 var responseDto = MapToDto(entity?.TenantId ?? GlobalTenantId, entity);
-                return ApiResponse<TenantGoogleOAuthSettingsDto>.SuccessResult(responseDto, "Google OAuth settings retrieved.");
+                return ApiResponse<TenantGoogleOAuthSettingsDto>.SuccessResult(
+                    responseDto,
+                    _localizationService.GetLocalizedString("TenantGoogleOAuthSettingsService.GoogleOAuthSettingsRetrieved"));
             }
             catch (InvalidOperationException ex)
             {
@@ -103,7 +105,7 @@ namespace crm_api.Services
                 {
                     return ApiResponse<TenantGoogleOAuthSettingsDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        "ClientId is required.",
+                        _localizationService.GetLocalizedString("TenantGoogleOAuthSettingsService.ClientIdRequired"),
                         StatusCodes.Status400BadRequest);
                 }
 
@@ -119,7 +121,7 @@ namespace crm_api.Services
                     {
                         return ApiResponse<TenantGoogleOAuthSettingsDto>.ErrorResult(
                             _localizationService.GetLocalizedString("General.ValidationError"),
-                            "ClientSecretPlain is required for initial setup.",
+                            _localizationService.GetLocalizedString("TenantGoogleOAuthSettingsService.ClientSecretPlainRequiredForInitialSetup"),
                             StatusCodes.Status400BadRequest);
                     }
 
@@ -151,7 +153,7 @@ namespace crm_api.Services
                 {
                     return ApiResponse<TenantGoogleOAuthSettingsDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        "Client secret is not configured.",
+                        _localizationService.GetLocalizedString("TenantGoogleOAuthSettingsService.ClientSecretNotConfigured"),
                         StatusCodes.Status400BadRequest);
                 }
 
@@ -167,7 +169,9 @@ namespace crm_api.Services
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
                 var responseDto = MapToDto(entity.TenantId, entity);
-                return ApiResponse<TenantGoogleOAuthSettingsDto>.SuccessResult(responseDto, "Google OAuth settings updated.");
+                return ApiResponse<TenantGoogleOAuthSettingsDto>.SuccessResult(
+                    responseDto,
+                    _localizationService.GetLocalizedString("TenantGoogleOAuthSettingsService.GoogleOAuthSettingsUpdated"));
             }
             catch (InvalidOperationException ex)
             {

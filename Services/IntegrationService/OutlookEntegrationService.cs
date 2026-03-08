@@ -6,10 +6,14 @@ namespace crm_api.Services
     public class OutlookEntegrationService : IOutlookEntegrationService
     {
         private readonly ILogger<OutlookEntegrationService> _logger;
+        private readonly ILocalizationService _localizationService;
 
-        public OutlookEntegrationService(ILogger<OutlookEntegrationService> logger)
+        public OutlookEntegrationService(
+            ILogger<OutlookEntegrationService> logger,
+            ILocalizationService localizationService)
         {
             _logger = logger;
+            _localizationService = localizationService;
         }
 
         public Task<ApiResponse<OutlookEntegrationAuthorizeUrlDto>> CreateConnectUrlAsync(long userId, CancellationToken cancellationToken = default)
@@ -23,7 +27,7 @@ namespace crm_api.Services
 
             var response = ApiResponse<OutlookEntegrationAuthorizeUrlDto>.SuccessResult(
                 dto,
-                "Outlook connection URL placeholder created.");
+                _localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionUrlPlaceholderCreated"));
 
             return Task.FromResult(response);
         }
@@ -33,8 +37,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration HandleOAuthCallback called for UserId={UserId}", userId);
 
             return Task.FromResult(ApiResponse<bool>.ErrorResult(
-                "Outlook OAuth callback implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.OAuthCallbackPending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -53,7 +57,7 @@ namespace crm_api.Services
 
             return Task.FromResult(ApiResponse<OutlookEntegrationStatusDto>.SuccessResult(
                 dto,
-                "Outlook integration status placeholder."));
+                _localizationService.GetLocalizedString("OutlookEntegrationService.StatusPlaceholder")));
         }
 
         public Task<ApiResponse<bool>> DisconnectAsync(long userId, CancellationToken cancellationToken = default)
@@ -61,8 +65,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration Disconnect called for UserId={UserId}", userId);
 
             return Task.FromResult(ApiResponse<bool>.ErrorResult(
-                "Outlook disconnect implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.DisconnectPending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -71,8 +75,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration SendMail called for UserId={UserId}", userId);
 
             return Task.FromResult(ApiResponse<OutlookMailSendResultDto>.ErrorResult(
-                "Outlook mail send implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.MailSendPending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -81,8 +85,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration CreateCalendarEvent called for UserId={UserId}", userId);
 
             return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult(
-                "Outlook calendar create implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarCreatePending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -91,8 +95,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration UpdateCalendarEvent called for UserId={UserId}, EventId={EventId}", userId, eventId);
 
             return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult(
-                "Outlook calendar update implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarUpdatePending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -101,8 +105,8 @@ namespace crm_api.Services
             _logger.LogInformation("OutlookEntegration DeleteCalendarEvent called for UserId={UserId}, EventId={EventId}", userId, eventId);
 
             return Task.FromResult(ApiResponse<bool>.ErrorResult(
-                "Outlook calendar delete implementation is pending.",
-                "Not implemented yet.",
+                _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarDeletePending"),
+                _localizationService.GetLocalizedString("General.NotImplementedYet"),
                 StatusCodes.Status501NotImplemented));
         }
 
@@ -120,7 +124,7 @@ namespace crm_api.Services
 
             return Task.FromResult(ApiResponse<PagedResponse<OutlookEntegrationLogDto>>.SuccessResult(
                 paged,
-                "Outlook integration logs placeholder."));
+                _localizationService.GetLocalizedString("OutlookEntegrationService.LogsPlaceholder")));
         }
     }
 }

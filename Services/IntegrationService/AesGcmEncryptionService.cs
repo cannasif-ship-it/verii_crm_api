@@ -8,10 +8,15 @@ namespace crm_api.Services
     {
         private readonly byte[] _key;
         private readonly ILogger<AesGcmEncryptionService> _logger;
+        private readonly ILocalizationService _localizationService;
 
-        public AesGcmEncryptionService(IConfiguration configuration, ILogger<AesGcmEncryptionService> logger)
+        public AesGcmEncryptionService(
+            IConfiguration configuration,
+            ILogger<AesGcmEncryptionService> logger,
+            ILocalizationService localizationService)
         {
             _logger = logger;
+            _localizationService = localizationService;
             var configuredKey = configuration["Security:DataProtectionKey"];
             _key = NormalizeKey(configuredKey);
         }
@@ -50,13 +55,15 @@ namespace crm_api.Services
             var payload = Convert.FromBase64String(cipher);
             if (payload.Length < 29)
             {
-                throw new InvalidOperationException("Encrypted payload is invalid.");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("AesGcmEncryptionService.InvalidEncryptedPayload"));
             }
 
             var version = payload[0];
             if (version != 1)
             {
-                throw new InvalidOperationException("Encrypted payload version is not supported.");
+                throw new InvalidOperationException(
+                    _localizationService.GetLocalizedString("AesGcmEncryptionService.UnsupportedEncryptedPayloadVersion"));
             }
 
             var nonce = new byte[12];
