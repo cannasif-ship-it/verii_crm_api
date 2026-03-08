@@ -351,7 +351,9 @@ namespace crm_api.Services
             {
                 if (dtos == null || dtos.Count == 0)
                 {
-                    return ApiResponse<List<TempQuotattionLineGetDto>>.SuccessResult(new List<TempQuotattionLineGetDto>(), "No line to create");
+                    return ApiResponse<List<TempQuotattionLineGetDto>>.SuccessResult(
+                        new List<TempQuotattionLineGetDto>(),
+                        _localizationService.GetLocalizedString("TempQuotattionService.NoLineToCreate"));
                 }
 
                 var headerIds = dtos.Select(x => x.TempQuotattionId).Distinct().ToList();

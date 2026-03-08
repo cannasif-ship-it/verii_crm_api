@@ -52,7 +52,9 @@ namespace crm_api.Services
                     PageSize = request.PageSize
                 };
 
-                return ApiResponse<PagedResponse<QuotationNotesGetDto>>.SuccessResult(pagedResponse, "Quotation notes retrieved.");
+                return ApiResponse<PagedResponse<QuotationNotesGetDto>>.SuccessResult(
+                    pagedResponse,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -70,11 +72,16 @@ namespace crm_api.Services
                 var entity = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
                 if (entity == null || entity.IsDeleted)
                 {
-                    return ApiResponse<QuotationNotesGetDto>.ErrorResult("Quotation notes not found.", "Quotation notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var dto = _mapper.Map<QuotationNotesGetDto>(entity);
-                return ApiResponse<QuotationNotesGetDto>.SuccessResult(dto, "Quotation notes retrieved.");
+                return ApiResponse<QuotationNotesGetDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -94,7 +101,10 @@ namespace crm_api.Services
 
                 if (!quotationExists)
                 {
-                    return ApiResponse<QuotationNotesGetDto>.ErrorResult("Quotation not found.", "Quotation not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var entity = await _unitOfWork.QuotationNotes.Query()
@@ -104,11 +114,15 @@ namespace crm_api.Services
                 if (entity == null)
                 {
                     var empty = new QuotationNotesGetDto { QuotationId = quotationId };
-                    return ApiResponse<QuotationNotesGetDto>.SuccessResult(empty, "Quotation notes retrieved.");
+                    return ApiResponse<QuotationNotesGetDto>.SuccessResult(
+                        empty,
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesRetrieved"));
                 }
 
                 var dto = _mapper.Map<QuotationNotesGetDto>(entity);
-                return ApiResponse<QuotationNotesGetDto>.SuccessResult(dto, "Quotation notes retrieved.");
+                return ApiResponse<QuotationNotesGetDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesRetrieved"));
             }
             catch (Exception ex)
             {
@@ -133,7 +147,10 @@ namespace crm_api.Services
 
                 if (!quotationExists)
                 {
-                    return ApiResponse<QuotationNotesDto>.ErrorResult("Quotation not found.", "Quotation not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<QuotationNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var alreadyExists = await _unitOfWork.QuotationNotes.Query()
@@ -141,7 +158,10 @@ namespace crm_api.Services
 
                 if (alreadyExists)
                 {
-                    return ApiResponse<QuotationNotesDto>.ErrorResult("Quotation notes already exist for this quotation.", "Quotation notes already exist for this quotation.", StatusCodes.Status400BadRequest);
+                    return ApiResponse<QuotationNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesAlreadyExist"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesAlreadyExist"),
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var entity = _mapper.Map<QuotationNotes>(createQuotationNotesDto);
@@ -151,7 +171,9 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<QuotationNotesDto>(entity);
-                return ApiResponse<QuotationNotesDto>.SuccessResult(dto, "Quotation notes created.");
+                return ApiResponse<QuotationNotesDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesCreated"));
             }
             catch (Exception ex)
             {
@@ -169,7 +191,10 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<QuotationNotesDto>.ErrorResult("Quotation notes not found.", "Quotation notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<QuotationNotesDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 _mapper.Map(updateQuotationNotesDto, existing);
@@ -179,7 +204,9 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<QuotationNotesDto>(existing);
-                return ApiResponse<QuotationNotesDto>.SuccessResult(dto, "Quotation notes updated.");
+                return ApiResponse<QuotationNotesDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -199,26 +226,25 @@ namespace crm_api.Services
 
                 if (!quotationExists)
                 {
-                    return ApiResponse<QuotationNotesGetDto>.ErrorResult("Quotation not found.", "Quotation not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 var normalizedNotes = NormalizeNotes(request?.Notes);
 
                 if (normalizedNotes.Count > MaxNoteCount)
                 {
-                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(
-                        $"A maximum of {MaxNoteCount} notes is allowed.",
-                        $"A maximum of {MaxNoteCount} notes is allowed.",
-                        StatusCodes.Status400BadRequest);
+                    var maxCountMessage = _localizationService.GetLocalizedString("QuotationNotesService.MaxNoteCountExceeded", MaxNoteCount);
+                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(maxCountMessage, maxCountMessage, StatusCodes.Status400BadRequest);
                 }
 
                 var tooLong = normalizedNotes.FirstOrDefault(n => n.Length > MaxNoteLength);
                 if (tooLong != null)
                 {
-                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(
-                        $"Each note can be at most {MaxNoteLength} characters.",
-                        $"Each note can be at most {MaxNoteLength} characters.",
-                        StatusCodes.Status400BadRequest);
+                    var maxLengthMessage = _localizationService.GetLocalizedString("QuotationNotesService.MaxNoteLengthExceeded", MaxNoteLength);
+                    return ApiResponse<QuotationNotesGetDto>.ErrorResult(maxLengthMessage, maxLengthMessage, StatusCodes.Status400BadRequest);
                 }
 
                 var entity = await _unitOfWork.QuotationNotes.Query()
@@ -245,7 +271,9 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 var dto = _mapper.Map<QuotationNotesGetDto>(entity);
-                return ApiResponse<QuotationNotesGetDto>.SuccessResult(dto, "Quotation notes updated.");
+                return ApiResponse<QuotationNotesGetDto>.SuccessResult(
+                    dto,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesUpdated"));
             }
             catch (Exception ex)
             {
@@ -263,13 +291,18 @@ namespace crm_api.Services
                 var existing = await _unitOfWork.QuotationNotes.GetByIdAsync(id);
                 if (existing == null || existing.IsDeleted)
                 {
-                    return ApiResponse<object>.ErrorResult("Quotation notes not found.", "Quotation notes not found.", StatusCodes.Status404NotFound);
+                    return ApiResponse<object>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
                 await _unitOfWork.QuotationNotes.SoftDeleteAsync(id);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<object>.SuccessResult(null, "Quotation notes deleted.");
+                return ApiResponse<object>.SuccessResult(
+                    null,
+                    _localizationService.GetLocalizedString("QuotationNotesService.QuotationNotesDeleted"));
             }
             catch (Exception ex)
             {
