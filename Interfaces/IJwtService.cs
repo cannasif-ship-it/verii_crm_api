@@ -5,6 +5,6 @@ namespace crm_api.Interfaces
 {
     public interface IJwtService
     {
-        ApiResponse<string> GenerateToken(User user, Guid sessionId);
+        ApiResponse<string> GenerateToken(User user, Guid sessionId, DateTime issuedAtUtc);
     }
 }

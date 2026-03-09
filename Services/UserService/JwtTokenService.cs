@@ -20,7 +20,7 @@ namespace crm_api.Services
             _localizationService = localizationService;
         }
 
-        public ApiResponse<string> GenerateToken(User user, Guid sessionId)
+        public ApiResponse<string> GenerateToken(User user, Guid sessionId, DateTime issuedAtUtc)
         {
             try
             {
@@ -55,12 +55,14 @@ namespace crm_api.Services
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
                 var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(expiryMinutesStr));
+                var expires = issuedAtUtc.AddMinutes(Convert.ToDouble(expiryMinutesStr));
+                var notBefore = issuedAtUtc;
 
                 var token = new JwtSecurityToken(
                     issuer: issuer,
                     audience: audience,
                     claims: claims,
+                    notBefore: notBefore,
                     expires: expires,
                     signingCredentials: credentials
                 );

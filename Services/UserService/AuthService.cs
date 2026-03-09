@@ -21,6 +21,7 @@ namespace crm_api.Services
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IUserSessionCacheService _userSessionCacheService;
+        private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(30);
         public AuthService(
             IUnitOfWork unitOfWork,
             IJwtService jwtService,
@@ -146,18 +147,54 @@ namespace crm_api.Services
                     return ApiResponse<string>.ErrorResult(msg, msg, 401);
                 }
 
-                var activeSession = await _unitOfWork.UserSessions.Query(tracking: true).FirstOrDefaultAsync(s => s.UserId == user.Id && s.RevokedAt == null).ConfigureAwait(false);
+                var activeSession = await _unitOfWork.UserSessions.Query(tracking: true)
+                    .Where(s => s.UserId == user.Id && s.RevokedAt == null)
+                    .OrderByDescending(s => s.CreatedAt)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
                 if (activeSession != null)
                 {
+                    if (IsSessionTokenReusable(activeSession))
+                    {
+                        var hadRefreshToken = !string.IsNullOrWhiteSpace(user.RefreshToken) &&
+                            user.RefreshTokenExpiryTime.HasValue &&
+                            user.RefreshTokenExpiryTime.Value > DateTime.UtcNow;
+                        EnsureRefreshToken(user);
+                        if (!hadRefreshToken)
+                        {
+                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                        }
+
+                        var existingTokenResult = _jwtService.GenerateToken(user, activeSession.SessionId, activeSession.CreatedAt);
+                        if (!existingTokenResult.Success || string.IsNullOrWhiteSpace(existingTokenResult.Data))
+                        {
+                            return ApiResponse<string>.ErrorResult(
+                                _localizationService.GetLocalizedString("Error.User.LoginFailed"),
+                                existingTokenResult.ExceptionMessage ?? existingTokenResult.Message ?? string.Empty,
+                                500);
+                        }
+
+                        _userSessionCacheService.SetActiveSession(
+                            activeSession.SessionId,
+                            activeSession.UserId,
+                            GetSessionExpiryUtc(activeSession.CreatedAt));
+
+                        return ApiResponse<string>.SuccessResult(
+                            existingTokenResult.Data,
+                            _localizationService.GetLocalizedString("Success.User.LoginSuccessful"));
+                    }
+
                     activeSession.RevokedAt = DateTime.UtcNow;
+                    activeSession.UpdatedDate = DateTime.UtcNow;
                     await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     _userSessionCacheService.RemoveSession(activeSession.SessionId);
-                    await AuthHub.ForceLogoutUser(_hubContext, user.Id.ToString()).ConfigureAwait(false);
                 }
 
-                var sessionId = Guid.NewGuid();
+                EnsureRefreshToken(user);
 
-                var tokenResponse = _jwtService.GenerateToken(user, sessionId);
+                var sessionId = Guid.NewGuid();
+                var issuedAtUtc = DateTime.UtcNow;
+                var tokenResponse = _jwtService.GenerateToken(user, sessionId, issuedAtUtc);
                 if (!tokenResponse.Success)
                 {
                     return ApiResponse<string>.ErrorResult(_localizationService.GetLocalizedString("Error.User.LoginFailed"), tokenResponse.Message ?? string.Empty, 500);
@@ -168,14 +205,14 @@ namespace crm_api.Services
                 {
                     UserId = user.Id,
                     SessionId = sessionId,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = issuedAtUtc,
                     Token = ComputeSha256Hash(token),
                     IsDeleted = false,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = issuedAtUtc
                 };
                 await _unitOfWork.UserSessions.AddAsync(session).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, session.CreatedAt.AddDays(30));
+                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, GetSessionExpiryUtc(session.CreatedAt));
                 
                 return ApiResponse<string>.SuccessResult(token, _localizationService.GetLocalizedString("Success.User.LoginSuccessful"));
             }
@@ -244,12 +281,106 @@ namespace crm_api.Services
                 var response = new LoginWithSessionResponseDto
                 {
                     Token = loginResult.Data!,
+                    RefreshToken = user.RefreshToken ?? string.Empty,
+                    RefreshTokenExpiresAt = user.RefreshTokenExpiryTime,
                     UserId = user.Id,
                     SessionId = session.SessionId,
                     RememberMe = loginDto.RememberMe
                 };
 
                 return ApiResponse<LoginWithSessionResponseDto>.SuccessResult(response, loginResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("Error.User.LoginFailed"),
+                    ex.Message ?? string.Empty,
+                    500);
+            }
+        }
+
+        public async Task<ApiResponse<LoginWithSessionResponseDto>> RefreshTokenAsync(RefreshTokenDto request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.RefreshToken))
+                {
+                    var validationMessage = _localizationService.GetLocalizedString("General.ValidationError");
+                    return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(validationMessage, validationMessage, 400);
+                }
+
+                var now = DateTime.UtcNow;
+                var user = await _unitOfWork.Users.Query(tracking: true)
+                    .FirstOrDefaultAsync(u =>
+                        u.RefreshToken == request.RefreshToken &&
+                        u.RefreshTokenExpiryTime != null &&
+                        u.RefreshTokenExpiryTime > now &&
+                        u.IsActive)
+                    .ConfigureAwait(false);
+
+                if (user == null)
+                {
+                    var invalidMessage = _localizationService.GetLocalizedString("Error.User.InvalidCredentials");
+                    return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(invalidMessage, invalidMessage, 401);
+                }
+
+                var session = await _unitOfWork.UserSessions.Query(tracking: true)
+                    .Where(s => s.UserId == user.Id && s.RevokedAt == null)
+                    .OrderByDescending(s => s.CreatedAt)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+
+                var sessionId = session?.SessionId ?? Guid.NewGuid();
+                var issuedAtUtc = now;
+                var tokenResponse = _jwtService.GenerateToken(user, sessionId, issuedAtUtc);
+                if (!tokenResponse.Success || string.IsNullOrWhiteSpace(tokenResponse.Data))
+                {
+                    return ApiResponse<LoginWithSessionResponseDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("Error.User.LoginFailed"),
+                        tokenResponse.ExceptionMessage ?? tokenResponse.Message ?? string.Empty,
+                        500);
+                }
+
+                var accessToken = tokenResponse.Data!;
+                if (session == null)
+                {
+                    session = new UserSession
+                    {
+                        UserId = user.Id,
+                        SessionId = sessionId,
+                        CreatedAt = issuedAtUtc,
+                        Token = ComputeSha256Hash(accessToken),
+                        IsDeleted = false,
+                        CreatedDate = issuedAtUtc
+                    };
+
+                    await _unitOfWork.UserSessions.AddAsync(session).ConfigureAwait(false);
+                }
+                else
+                {
+                    session.CreatedAt = issuedAtUtc;
+                    session.Token = ComputeSha256Hash(accessToken);
+                    session.UpdatedDate = issuedAtUtc;
+                    await _unitOfWork.UserSessions.UpdateAsync(session).ConfigureAwait(false);
+                }
+
+                EnsureRefreshToken(user);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, GetSessionExpiryUtc(session.CreatedAt));
+
+                var response = new LoginWithSessionResponseDto
+                {
+                    Token = accessToken,
+                    RefreshToken = user.RefreshToken ?? string.Empty,
+                    RefreshTokenExpiresAt = user.RefreshTokenExpiryTime,
+                    UserId = user.Id,
+                    SessionId = session.SessionId,
+                    RememberMe = true
+                };
+
+                return ApiResponse<LoginWithSessionResponseDto>.SuccessResult(
+                    response,
+                    _localizationService.GetLocalizedString("Success.User.LoginSuccessful"));
             }
             catch (Exception ex)
             {
@@ -422,7 +553,8 @@ namespace crm_api.Services
                 await InvalidateUserSessionsAsync(user.Id).ConfigureAwait(false);
 
                 var sessionId = Guid.NewGuid();
-                var tokenResponse = _jwtService.GenerateToken(user, sessionId);
+                var issuedAtUtc = DateTime.UtcNow;
+                var tokenResponse = _jwtService.GenerateToken(user, sessionId, issuedAtUtc);
                 if (!tokenResponse.Success || string.IsNullOrWhiteSpace(tokenResponse.Data))
                 {
                     return ApiResponse<string>.ErrorResult(
@@ -436,14 +568,14 @@ namespace crm_api.Services
                 {
                     UserId = user.Id,
                     SessionId = sessionId,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = issuedAtUtc,
                     Token = ComputeSha256Hash(newToken),
                     IsDeleted = false,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = issuedAtUtc
                 };
                 await _unitOfWork.UserSessions.AddAsync(session).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, session.CreatedAt.AddDays(30));
+                _userSessionCacheService.SetActiveSession(session.SessionId, session.UserId, GetSessionExpiryUtc(session.CreatedAt));
 
                 var displayName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
                 if (string.IsNullOrWhiteSpace(displayName))
@@ -471,6 +603,47 @@ namespace crm_api.Services
                 builder.Append(bytes[i].ToString("x2"));
             }
             return builder.ToString();
+        }
+
+        private bool IsSessionTokenReusable(UserSession session)
+        {
+            return session.RevokedAt == null && GetSessionExpiryUtc(session.CreatedAt) > DateTime.UtcNow;
+        }
+
+        private DateTime GetSessionExpiryUtc(DateTime createdAtUtc)
+        {
+            return createdAtUtc.AddMinutes(GetJwtExpiryMinutes());
+        }
+
+        private void EnsureRefreshToken(User user)
+        {
+            if (!string.IsNullOrWhiteSpace(user.RefreshToken) &&
+                user.RefreshTokenExpiryTime.HasValue &&
+                user.RefreshTokenExpiryTime.Value > DateTime.UtcNow)
+            {
+                return;
+            }
+
+            user.RefreshToken = GenerateRefreshToken();
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.Add(RefreshTokenLifetime);
+            user.UpdatedDate = DateTime.UtcNow;
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .TrimEnd('=');
+        }
+
+        private double GetJwtExpiryMinutes()
+        {
+            var expiryValue = _configuration["JwtSettings:ExpiryMinutes"];
+            return double.TryParse(expiryValue, out var expiryMinutes) && expiryMinutes > 0
+                ? expiryMinutes
+                : 60;
         }
 
         private async Task InvalidateUserSessionsAsync(long userId)

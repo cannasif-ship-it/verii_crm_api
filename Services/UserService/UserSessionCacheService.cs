@@ -7,15 +7,15 @@ namespace crm_api.Services
 {
     public class UserSessionCacheService : IUserSessionCacheService
     {
-        private static readonly TimeSpan DefaultCacheLifetime = TimeSpan.FromDays(30);
-
         private readonly IMemoryCache _memoryCache;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly double _jwtExpiryMinutes;
 
-        public UserSessionCacheService(IMemoryCache memoryCache, IUnitOfWork unitOfWork)
+        public UserSessionCacheService(IMemoryCache memoryCache, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _memoryCache = memoryCache;
             _unitOfWork = unitOfWork;
+            _jwtExpiryMinutes = ResolveJwtExpiryMinutes(configuration);
         }
 
         public string GetCacheKey(Guid sessionId)
@@ -25,7 +25,7 @@ namespace crm_api.Services
 
         public void SetActiveSession(Guid sessionId, long userId, DateTime? absoluteExpirationUtc = null)
         {
-            var expiration = absoluteExpirationUtc.GetValueOrDefault(DateTime.UtcNow.Add(DefaultCacheLifetime));
+            var expiration = absoluteExpirationUtc.GetValueOrDefault(DateTime.UtcNow.AddMinutes(_jwtExpiryMinutes));
             if (expiration <= DateTime.UtcNow)
             {
                 expiration = DateTime.UtcNow.AddMinutes(1);
@@ -55,8 +55,22 @@ namespace crm_api.Services
                 return false;
             }
 
-            SetActiveSession(session.SessionId, session.UserId, session.CreatedAt.AddDays(30));
+            var expiresAtUtc = session.CreatedAt.AddMinutes(_jwtExpiryMinutes);
+            if (expiresAtUtc <= DateTime.UtcNow)
+            {
+                return false;
+            }
+
+            SetActiveSession(session.SessionId, session.UserId, expiresAtUtc);
             return true;
+        }
+
+        private static double ResolveJwtExpiryMinutes(IConfiguration configuration)
+        {
+            var expiryValue = configuration["JwtSettings:ExpiryMinutes"];
+            return double.TryParse(expiryValue, out var expiryMinutes) && expiryMinutes > 0
+                ? expiryMinutes
+                : 60;
         }
     }
 }

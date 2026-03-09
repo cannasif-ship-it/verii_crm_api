@@ -47,7 +47,6 @@ namespace crm_api.Controllers
 
             if (loginResult.Success && loginResult.Data != null)
             {
-                await AuthHub.ForceLogoutUser(_hubContext, loginResult.Data.UserId.ToString());
                 return StatusCode(loginResult.StatusCode, loginResult);
             }
 
@@ -103,6 +102,14 @@ namespace crm_api.Controllers
         public async Task<ActionResult<ApiResponse<string>>> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await _authService.ChangePasswordAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<ApiResponse<LoginWithSessionResponseDto>>> RefreshToken([FromBody] RefreshTokenDto request)
+        {
+            var result = await _authService.RefreshTokenAsync(request);
             return StatusCode(result.StatusCode, result);
         }
 
