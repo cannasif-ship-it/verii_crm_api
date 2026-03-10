@@ -7,6 +7,11 @@ namespace crm_api.Models
     {
         public long CustomerId { get; set; }
         public Customer? Customer { get; set; }
+        public long? RevisionId { get; set; }
+        public TempQuotattion? Revision { get; set; }
+        public long? QuotationId { get; set; }
+        public Quotation? Quotation { get; set; }
+        public string? QuotationNo { get; set; }
 
         public DateTime OfferDate { get; set; } = DateTime.UtcNow;
         public string CurrencyCode { get; set; } = string.Empty;
@@ -21,6 +26,7 @@ namespace crm_api.Models
 
         public string Description { get; set; } = string.Empty;
 
+        public ICollection<TempQuotattion> Revisions { get; set; } = new List<TempQuotattion>();
         public ICollection<TempQuotattionLine> Lines { get; set; } = new List<TempQuotattionLine>();
         public ICollection<TempQuotattionExchangeLine> ExchangeLines { get; set; } = new List<TempQuotattionExchangeLine>();
     }

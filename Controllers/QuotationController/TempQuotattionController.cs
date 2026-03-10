@@ -45,6 +45,20 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("{id}/revision")]
+        public async Task<IActionResult> CreateRevision(long id)
+        {
+            var result = await _tempQuotattionService.CreateRevisionAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("{id}/convert-to-quotation")]
+        public async Task<IActionResult> ConvertToQuotation(long id)
+        {
+            var result = await _tempQuotattionService.ConvertToQuotationAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpPost("{id}/set-approved")]
         public async Task<IActionResult> SetApproved(long id)
         {

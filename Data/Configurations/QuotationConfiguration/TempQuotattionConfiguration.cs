@@ -18,6 +18,26 @@ namespace crm_api.Data.Configurations
                 .HasForeignKey(e => e.CustomerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            builder.Property(e => e.RevisionId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.Revision)
+                .WithMany(e => e.Revisions)
+                .HasForeignKey(e => e.RevisionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.QuotationId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.Quotation)
+                .WithMany()
+                .HasForeignKey(e => e.QuotationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.QuotationNo)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
             builder.Property(e => e.OfferDate)
                 .IsRequired();
 
@@ -70,6 +90,8 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(e => e.CustomerId);
             builder.HasIndex(e => e.IsApproved);
             builder.HasIndex(e => e.CreatedDate);
+            builder.HasIndex(e => e.RevisionId);
+            builder.HasIndex(e => e.QuotationId);
         }
     }
 

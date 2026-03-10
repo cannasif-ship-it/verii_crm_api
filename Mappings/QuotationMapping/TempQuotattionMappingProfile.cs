@@ -17,6 +17,11 @@ namespace crm_api.Mappings
 
             CreateMap<TempQuotattionCreateDto, TempQuotattion>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.RevisionId, opt => opt.Ignore())
+                .ForMember(dest => dest.Revision, opt => opt.Ignore())
+                .ForMember(dest => dest.QuotationId, opt => opt.Ignore())
+                .ForMember(dest => dest.Quotation, opt => opt.Ignore())
+                .ForMember(dest => dest.QuotationNo, opt => opt.Ignore())
                 .ForMember(dest => dest.OfferDate, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.IsApproved, opt => opt.MapFrom(_ => false))
                 .ForMember(dest => dest.ApprovedDate, opt => opt.Ignore())
@@ -33,6 +38,11 @@ namespace crm_api.Mappings
 
             CreateMap<TempQuotattionUpdateDto, TempQuotattion>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.RevisionId, opt => opt.Ignore())
+                .ForMember(dest => dest.Revision, opt => opt.Ignore())
+                .ForMember(dest => dest.QuotationId, opt => opt.Ignore())
+                .ForMember(dest => dest.Quotation, opt => opt.Ignore())
+                .ForMember(dest => dest.QuotationNo, opt => opt.Ignore())
                 .ForMember(dest => dest.OfferDate, opt => opt.Ignore())
                 .ForMember(dest => dest.IsApproved, opt => opt.Ignore())
                 .ForMember(dest => dest.ApprovedDate, opt => opt.Ignore())

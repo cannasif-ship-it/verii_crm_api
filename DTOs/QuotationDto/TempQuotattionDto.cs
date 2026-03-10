@@ -7,6 +7,9 @@ namespace crm_api.DTOs
     {
         public long CustomerId { get; set; }
         public string? CustomerName { get; set; }
+        public long? RevisionId { get; set; }
+        public long? QuotationId { get; set; }
+        public string? QuotationNo { get; set; }
         public DateTime OfferDate { get; set; }
         public string CurrencyCode { get; set; } = string.Empty;
         public decimal ExchangeRate { get; set; }

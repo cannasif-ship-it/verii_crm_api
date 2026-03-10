@@ -8,6 +8,8 @@ namespace crm_api.Interfaces
         Task<ApiResponse<TempQuotattionGetDto>> GetByIdAsync(long id);
         Task<ApiResponse<TempQuotattionGetDto>> CreateAsync(TempQuotattionCreateDto dto);
         Task<ApiResponse<TempQuotattionGetDto>> UpdateAsync(long id, TempQuotattionUpdateDto dto);
+        Task<ApiResponse<TempQuotattionGetDto>> CreateRevisionAsync(long id);
+        Task<ApiResponse<long>> ConvertToQuotationAsync(long id);
         Task<ApiResponse<TempQuotattionGetDto>> SetApprovedAsync(long id);
         Task<ApiResponse<object>> DeleteAsync(long id);
 

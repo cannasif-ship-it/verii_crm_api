@@ -225,7 +225,7 @@ namespace crm_api.Services
             try
             {
                 var documentSerialTypeBaseQuery = _unitOfWork.DocumentSerialTypes.Query()
-                    .Where(x => !x.IsDeleted);
+                    .Where(x => !x.IsDeleted && x.RuleType == ruleType);
 
                 List<DocumentSerialType> documentSerialTypes = await documentSerialTypeBaseQuery
                     .Where(x => x.CustomerTypeId == customerTypeId && x.SalesRepId == salesRepId)

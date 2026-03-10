@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static crm_api.Models.SalesTypeEnum;
 
 namespace crm_api.Services
 {
@@ -17,15 +18,21 @@ namespace crm_api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
+        private readonly IUserService _userService;
+        private readonly IDocumentSerialTypeService _documentSerialTypeService;
 
         public TempQuotattionService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            IUserService userService,
+            IDocumentSerialTypeService documentSerialTypeService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
+            _userService = userService;
+            _documentSerialTypeService = documentSerialTypeService;
         }
 
         public async Task<ApiResponse<PagedResponse<TempQuotattionGetDto>>> GetAllAsync(PagedRequest request)
@@ -184,12 +191,17 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<TempQuotattionGetDto>> SetApprovedAsync(long id)
+        public async Task<ApiResponse<TempQuotattionGetDto>> CreateRevisionAsync(long id)
         {
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             try
             {
-                var entity = await _unitOfWork.TempQuotattions.GetByIdAsync(id).ConfigureAwait(false);
-                if (entity == null || entity.IsDeleted)
+                var source = await _unitOfWork.TempQuotattions.Query()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted)
+                    .ConfigureAwait(false);
+
+                if (source == null)
                 {
                     return ApiResponse<TempQuotattionGetDto>.ErrorResult(
                         _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionNotFound"),
@@ -197,32 +209,340 @@ namespace crm_api.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                entity.IsApproved = true;
-                entity.ApprovedDate = DateTime.UtcNow;
-                entity.UpdatedDate = DateTime.UtcNow;
+                var sourceLines = await _unitOfWork.TempQuotattionLines.Query()
+                    .AsNoTracking()
+                    .Where(x => x.TempQuotattionId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
-                await _unitOfWork.TempQuotattions.UpdateAsync(entity).ConfigureAwait(false);
+                var sourceExchangeLines = await _unitOfWork.TempQuotattionExchangeLines.Query()
+                    .AsNoTracking()
+                    .Where(x => x.TempQuotattionId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var revision = new TempQuotattion
+                {
+                    CustomerId = source.CustomerId,
+                    RevisionId = source.Id,
+                    OfferDate = DateTime.UtcNow,
+                    CurrencyCode = source.CurrencyCode,
+                    ExchangeRate = source.ExchangeRate,
+                    DiscountRate1 = source.DiscountRate1,
+                    DiscountRate2 = source.DiscountRate2,
+                    DiscountRate3 = source.DiscountRate3,
+                    Description = source.Description,
+                    IsApproved = false,
+                    ApprovedDate = null,
+                    QuotationId = null,
+                    QuotationNo = null,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.TempQuotattions.AddAsync(revision).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
-                var approved = await _unitOfWork.TempQuotattions.Query()
+                if (sourceLines.Any())
+                {
+                    var revisionLines = sourceLines.Select(line => new TempQuotattionLine
+                    {
+                        TempQuotattionId = revision.Id,
+                        ProductCode = line.ProductCode,
+                        ProductName = line.ProductName,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.UnitPrice,
+                        DiscountRate1 = line.DiscountRate1,
+                        DiscountAmount1 = line.DiscountAmount1,
+                        DiscountRate2 = line.DiscountRate2,
+                        DiscountAmount2 = line.DiscountAmount2,
+                        DiscountRate3 = line.DiscountRate3,
+                        DiscountAmount3 = line.DiscountAmount3,
+                        VatRate = line.VatRate,
+                        VatAmount = line.VatAmount,
+                        LineTotal = line.LineTotal,
+                        LineGrandTotal = line.LineGrandTotal,
+                        Description = line.Description,
+                        CreatedDate = DateTime.UtcNow
+                    }).ToList();
+
+                    await _unitOfWork.TempQuotattionLines.AddAllAsync(revisionLines).ConfigureAwait(false);
+                }
+
+                if (sourceExchangeLines.Any())
+                {
+                    var revisionExchangeLines = sourceExchangeLines.Select(line => new TempQuotattionExchangeLine
+                    {
+                        TempQuotattionId = revision.Id,
+                        Currency = line.Currency,
+                        ExchangeRate = line.ExchangeRate,
+                        ExchangeRateDate = line.ExchangeRateDate,
+                        IsManual = line.IsManual,
+                        CreatedDate = DateTime.UtcNow
+                    }).ToList();
+
+                    await _unitOfWork.TempQuotattionExchangeLines.AddAllAsync(revisionExchangeLines).ConfigureAwait(false);
+                }
+
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                var createdRevision = await _unitOfWork.TempQuotattions.Query()
                     .AsNoTracking()
                     .Include(x => x.Customer)
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
-                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted).ConfigureAwait(false);
+                    .FirstOrDefaultAsync(x => x.Id == revision.Id && !x.IsDeleted)
+                    .ConfigureAwait(false);
 
                 return ApiResponse<TempQuotattionGetDto>.SuccessResult(
-                    _mapper.Map<TempQuotattionGetDto>(approved ?? entity),
-                    _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionApproved"));
+                    _mapper.Map<TempQuotattionGetDto>(createdRevision ?? revision),
+                    "Temp teklif revizyonu oluşturuldu.");
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<TempQuotattionGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("TempQuotattionService.InternalServerError"),
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        public async Task<ApiResponse<long>> ConvertToQuotationAsync(long id)
+        {
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            try
+            {
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
+                if (!userIdResponse.Success)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                var userId = userIdResponse.Data;
+                var entity = await _unitOfWork.TempQuotattions.Query(tracking: true)
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted)
+                    .ConfigureAwait(false);
+
+                if (entity == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionNotFound"),
+                        _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                if (entity.QuotationId.HasValue)
+                {
+                    return ApiResponse<long>.SuccessResult(entity.QuotationId.Value, "Temp teklif zaten gerçek teklife dönüştürülmüş.");
+                }
+
+                var customer = await _unitOfWork.Customers.Query()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == entity.CustomerId && !x.IsDeleted)
+                    .ConfigureAwait(false);
+
+                if (customer == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        "Müşteri bulunamadı.",
+                        "Müşteri bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var lines = await _unitOfWork.TempQuotattionLines.Query()
+                    .AsNoTracking()
+                    .Where(x => x.TempQuotattionId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                if (!lines.Any())
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        "Temp teklif satırları bulunamadı.",
+                        "Temp teklif satırları bulunamadı.",
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var exchangeLines = await _unitOfWork.TempQuotattionExchangeLines.Query()
+                    .AsNoTracking()
+                    .Where(x => x.TempQuotattionId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                const string defaultOfferType = nameof(YURTICI);
+
+                var salesTypeDefinition = await _unitOfWork.SalesTypeDefinitions.Query()
+                    .AsNoTracking()
+                    .Where(x => !x.IsDeleted && x.SalesType == defaultOfferType)
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+
+                if (salesTypeDefinition == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        "YURTICI için uygun satış tipi bulunamadı.",
+                        "YURTICI için uygun satış tipi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var customerTypeId = customer.CustomerTypeId ?? 0;
+
+                var quotationDocumentSerialType = await _unitOfWork.DocumentSerialTypes.Query()
+                    .AsNoTracking()
+                    .Where(x => !x.IsDeleted && x.RuleType == PricingRuleType.Quotation)
+                    .Where(x => x.CustomerTypeId == customerTypeId && x.SalesRepId == userId)
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+
+                if (quotationDocumentSerialType == null)
+                {
+                    quotationDocumentSerialType = await _unitOfWork.DocumentSerialTypes.Query()
+                        .AsNoTracking()
+                        .Where(x => !x.IsDeleted && x.RuleType == PricingRuleType.Quotation)
+                        .Where(x => x.CustomerTypeId == customerTypeId && x.SalesRepId == null)
+                        .OrderBy(x => x.Id)
+                        .FirstOrDefaultAsync()
+                        .ConfigureAwait(false);
+                }
+
+                if (quotationDocumentSerialType == null)
+                {
+                    quotationDocumentSerialType = await _unitOfWork.DocumentSerialTypes.Query()
+                        .AsNoTracking()
+                        .Where(x => !x.IsDeleted && x.RuleType == PricingRuleType.Quotation)
+                        .Where(x => x.CustomerTypeId == null && x.SalesRepId == userId)
+                        .OrderBy(x => x.Id)
+                        .FirstOrDefaultAsync()
+                        .ConfigureAwait(false);
+                }
+
+                if (quotationDocumentSerialType == null)
+                {
+                    quotationDocumentSerialType = await _unitOfWork.DocumentSerialTypes.Query()
+                        .AsNoTracking()
+                        .Where(x => !x.IsDeleted && x.RuleType == PricingRuleType.Quotation)
+                        .Where(x => x.CustomerTypeId == null && x.SalesRepId == null)
+                        .OrderBy(x => x.Id)
+                        .FirstOrDefaultAsync()
+                        .ConfigureAwait(false);
+                }
+
+                if (quotationDocumentSerialType == null)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        "Koşullara uygun teklif belge seri tipi bulunamadı.",
+                        "Koşullara uygun teklif belge seri tipi bulunamadı.",
+                        StatusCodes.Status404NotFound);
+                }
+
+                var documentSerialResult = await _documentSerialTypeService.GenerateDocumentSerialAsync(quotationDocumentSerialType.Id).ConfigureAwait(false);
+                if (!documentSerialResult.Success)
+                {
+                    return ApiResponse<long>.ErrorResult(
+                        "Teklif numarası oluşturulamadı.",
+                        documentSerialResult.Message,
+                        StatusCodes.Status500InternalServerError);
+                }
+
+                var quotation = new Quotation
+                {
+                    PotentialCustomerId = entity.CustomerId,
+                    DocumentSerialTypeId = quotationDocumentSerialType.Id,
+                    OfferType = defaultOfferType,
+                    OfferDate = entity.OfferDate,
+                    OfferNo = documentSerialResult.Data,
+                    RevisionNo = documentSerialResult.Data,
+                    Currency = entity.CurrencyCode,
+                    Total = lines.Sum(x => x.LineTotal),
+                    GrandTotal = lines.Sum(x => x.LineGrandTotal),
+                    Description = entity.Description,
+                    SalesTypeDefinitionId = salesTypeDefinition.Id,
+                    Status = ApprovalStatus.HavenotStarted,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Quotations.AddAsync(quotation).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                var quotationLines = lines.Select(line => new QuotationLine
+                {
+                    QuotationId = quotation.Id,
+                    ProductCode = line.ProductCode,
+                    Quantity = line.Quantity,
+                    UnitPrice = line.UnitPrice,
+                    DiscountRate1 = line.DiscountRate1,
+                    DiscountRate2 = line.DiscountRate2,
+                    DiscountRate3 = line.DiscountRate3,
+                    DiscountAmount1 = line.DiscountAmount1,
+                    DiscountAmount2 = line.DiscountAmount2,
+                    DiscountAmount3 = line.DiscountAmount3,
+                    VatRate = line.VatRate,
+                    VatAmount = line.VatAmount,
+                    LineTotal = line.LineTotal,
+                    LineGrandTotal = line.LineGrandTotal,
+                    Description = line.Description
+                }).ToList();
+
+                await _unitOfWork.QuotationLines.AddAllAsync(quotationLines).ConfigureAwait(false);
+
+                if (exchangeLines.Any())
+                {
+                    var quotationExchangeRates = exchangeLines.Select(rate => new QuotationExchangeRate
+                    {
+                        QuotationId = quotation.Id,
+                        Currency = rate.Currency,
+                        ExchangeRate = rate.ExchangeRate,
+                        ExchangeRateDate = rate.ExchangeRateDate,
+                        IsOfficial = !rate.IsManual
+                    }).ToList();
+
+                    await _unitOfWork.QuotationExchangeRates.AddAllAsync(quotationExchangeRates).ConfigureAwait(false);
+                }
+
+                entity.IsApproved = true;
+                entity.ApprovedDate = DateTime.UtcNow;
+                entity.QuotationId = quotation.Id;
+                entity.QuotationNo = quotation.OfferNo;
+                entity.UpdatedDate = DateTime.UtcNow;
+                entity.UpdatedBy = userId;
+
+                await _unitOfWork.TempQuotattions.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                return ApiResponse<long>.SuccessResult(quotation.Id, "Temp teklif gerçek teklife dönüştürüldü.");
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                return ApiResponse<long>.ErrorResult(
+                    _localizationService.GetLocalizedString("TempQuotattionService.InternalServerError"),
+                    ex.Message,
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<TempQuotattionGetDto>> SetApprovedAsync(long id)
+        {
+            var convertResult = await ConvertToQuotationAsync(id).ConfigureAwait(false);
+            if (!convertResult.Success)
+            {
+                return ApiResponse<TempQuotattionGetDto>.ErrorResult(
+                    convertResult.Message,
+                    convertResult.ExceptionMessage,
+                    convertResult.StatusCode,
+                    convertResult.Errors);
+            }
+
+            return await GetByIdAsync(id).ConfigureAwait(false);
         }
 
         public async Task<ApiResponse<object>> DeleteAsync(long id)
