@@ -11,5 +11,7 @@ namespace crm_api.Infrastructure
         public string TenantId { get; set; } = string.Empty;
         public string ClientId { get; set; } = string.Empty;
         public string ClientSecret { get; set; } = string.Empty;
+        public string RedirectUri { get; set; } = string.Empty;
+        public string Scopes { get; set; } = "openid profile email offline_access User.Read Mail.Send Calendars.ReadWrite";
     }
 }
