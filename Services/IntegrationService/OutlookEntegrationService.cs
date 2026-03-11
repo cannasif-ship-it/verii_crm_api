@@ -73,6 +73,7 @@ namespace crm_api.Services
         private readonly IMemoryCache _memoryCache;
         private readonly AzureAdSettings _azureAdSettings;
         private readonly ILogger<OutlookEntegrationService> _logger;
+        private readonly ILocalizationService _localizationService;
 
         public OutlookEntegrationService(
             CmsDbContext dbContext,
@@ -82,7 +83,8 @@ namespace crm_api.Services
             IHttpContextAccessor httpContextAccessor,
             IMemoryCache memoryCache,
             IOptions<AzureAdSettings> azureAdOptions,
-            ILogger<OutlookEntegrationService> logger)
+            ILogger<OutlookEntegrationService> logger,
+            ILocalizationService localizationService)
         {
             _dbContext = dbContext;
             _encryptionService = encryptionService;
@@ -92,6 +94,7 @@ namespace crm_api.Services
             _memoryCache = memoryCache;
             _azureAdSettings = azureAdOptions.Value;
             _logger = logger;
+            _localizationService = localizationService;
         }
 
         public async Task<ApiResponse<OutlookEntegrationAuthorizeUrlDto>> CreateConnectUrlAsync(long userId, CancellationToken cancellationToken = default)
@@ -99,7 +102,7 @@ namespace crm_api.Services
             if (!TryGetSettings(out var settingsError))
             {
                 return ApiResponse<OutlookEntegrationAuthorizeUrlDto>.ErrorResult(
-                    "Outlook OAuth yapılandırılmamış.",
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.OAuthNotConfigured"),
                     settingsError,
                     StatusCodes.Status400BadRequest);
             }
@@ -107,10 +110,8 @@ namespace crm_api.Services
             var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
             if (tenantId == Guid.Empty)
             {
-                return ApiResponse<OutlookEntegrationAuthorizeUrlDto>.ErrorResult(
-                    "Tenant context is missing.",
-                    "Tenant context is missing.",
-                    StatusCodes.Status400BadRequest);
+                var tenantMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.TenantContextMissing");
+                return ApiResponse<OutlookEntegrationAuthorizeUrlDto>.ErrorResult(tenantMsg, tenantMsg, StatusCodes.Status400BadRequest);
             }
 
             var state = BuildState(userId, tenantId);
@@ -143,7 +144,7 @@ namespace crm_api.Services
 
             return ApiResponse<OutlookEntegrationAuthorizeUrlDto>.SuccessResult(
                 new OutlookEntegrationAuthorizeUrlDto { Url = url },
-                "Outlook authorize URL created.");
+                _localizationService.GetLocalizedString("OutlookEntegrationService.AuthorizeUrlCreated"));
         }
 
         public async Task<ApiResponse<bool>> HandleOAuthCallbackAsync(string? code, string? state, string? error, CancellationToken cancellationToken = default)
@@ -151,7 +152,7 @@ namespace crm_api.Services
             if (!string.IsNullOrWhiteSpace(error))
             {
                 return ApiResponse<bool>.ErrorResult(
-                    "Outlook connection failed.",
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionFailed"),
                     error,
                     StatusCodes.Status400BadRequest);
             }
@@ -159,7 +160,7 @@ namespace crm_api.Services
             if (!TryExtractStateContext(state, out var userId, out var tenantId))
             {
                 return ApiResponse<bool>.ErrorResult(
-                    "Outlook connection failed.",
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionFailed"),
                     "invalid_state",
                     StatusCodes.Status400BadRequest);
             }
@@ -167,7 +168,7 @@ namespace crm_api.Services
             if (!_memoryCache.TryGetValue(BuildStateCacheKey(userId, state!), out _))
             {
                 return ApiResponse<bool>.ErrorResult(
-                    "Outlook connection failed.",
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionFailed"),
                     "state_expired",
                     StatusCodes.Status400BadRequest);
             }
@@ -177,7 +178,7 @@ namespace crm_api.Services
             if (string.IsNullOrWhiteSpace(code))
             {
                 await WriteOperationalLogAsync(tenantId, userId, false, "Warning", "outlook.oauth.callback", "Outlook callback code was missing.", "missing_code", cancellationToken).ConfigureAwait(false);
-                return ApiResponse<bool>.ErrorResult("Outlook connection failed.", "missing_code", StatusCodes.Status400BadRequest);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionFailed"), "missing_code", StatusCodes.Status400BadRequest);
             }
 
             try
@@ -186,13 +187,13 @@ namespace crm_api.Services
                 var me = await GetOutlookProfileAsync(token.AccessToken, cancellationToken).ConfigureAwait(false);
                 await UpsertConnectionAsync(userId, tenantId, me?.Email, token.AccessToken, token.RefreshToken, token.Scope, token.ExpiresInSeconds, cancellationToken).ConfigureAwait(false);
                 await WriteOperationalLogAsync(tenantId, userId, true, "Info", "outlook.oauth.callback", "Outlook OAuth callback completed successfully.", null, cancellationToken).ConfigureAwait(false);
-                return ApiResponse<bool>.SuccessResult(true, "Outlook account connected.");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("OutlookEntegrationService.AccountConnected"));
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Outlook OAuth callback failed for user {UserId}", userId);
                 await WriteOperationalLogAsync(tenantId, userId, false, "Error", "outlook.oauth.callback", "Outlook OAuth callback failed.", "oauth_callback_failed", cancellationToken, ex.Message).ConfigureAwait(false);
-                return ApiResponse<bool>.ErrorResult("Outlook connection failed.", ex.Message, StatusCodes.Status400BadRequest);
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionFailed"), ex.Message, StatusCodes.Status400BadRequest);
             }
         }
 
@@ -208,7 +209,7 @@ namespace crm_api.Services
                 ExpiresAt = account?.ExpiresAt,
             };
 
-            return ApiResponse<OutlookEntegrationStatusDto>.SuccessResult(dto, "Outlook integration status retrieved.");
+            return ApiResponse<OutlookEntegrationStatusDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OutlookEntegrationService.StatusRetrieved"));
         }
 
         public async Task<ApiResponse<bool>> DisconnectAsync(long userId, CancellationToken cancellationToken = default)
@@ -216,7 +217,7 @@ namespace crm_api.Services
             var account = await _dbContext.UserOutlookAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken).ConfigureAwait(false);
             if (account == null)
             {
-                return ApiResponse<bool>.SuccessResult(true, "Outlook account already disconnected.");
+                return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("OutlookEntegrationService.AlreadyDisconnected"));
             }
 
             account.IsConnected = false;
@@ -228,7 +229,7 @@ namespace crm_api.Services
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             await WriteOperationalLogAsync(account.TenantId, userId, true, "Info", "outlook.oauth.disconnect", "Outlook connection removed.", null, cancellationToken).ConfigureAwait(false);
-            return ApiResponse<bool>.SuccessResult(true, "Outlook connection removed.");
+            return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("OutlookEntegrationService.ConnectionRemoved"));
         }
 
         public async Task<ApiResponse<OutlookMailSendResultDto>> SendMailAsync(long userId, SendOutlookMailDto dto, CancellationToken cancellationToken = default)
@@ -242,13 +243,15 @@ namespace crm_api.Services
             var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
             if (tenantId == Guid.Empty)
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Tenant context is missing.", "Tenant context is missing.", StatusCodes.Status400BadRequest);
+                var tenantMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.TenantContextMissing");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(tenantMsg, tenantMsg, StatusCodes.Status400BadRequest);
             }
 
             var customer = await _dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == dto.CustomerId!.Value && !x.IsDeleted, cancellationToken).ConfigureAwait(false);
             if (customer == null)
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Customer not found.", "Customer not found.", StatusCodes.Status404NotFound);
+                var custMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.CustomerNotFound");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(custMsg, custMsg, StatusCodes.Status404NotFound);
             }
 
             Contact? contact = null;
@@ -257,12 +260,14 @@ namespace crm_api.Services
                 contact = await _dbContext.Contacts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == dto.ContactId.Value && !x.IsDeleted, cancellationToken).ConfigureAwait(false);
                 if (contact == null)
                 {
-                    return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Contact not found.", "Contact not found.", StatusCodes.Status404NotFound);
+                    var contMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.ContactNotFound");
+                    return ApiResponse<OutlookMailSendResultDto>.ErrorResult(contMsg, contMsg, StatusCodes.Status404NotFound);
                 }
 
                 if (contact.CustomerId != customer.Id)
                 {
-                    return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Contact does not belong to the selected customer.", "Contact does not belong to the selected customer.", StatusCodes.Status400BadRequest);
+                    var belongMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.ContactNotBelongToCustomer");
+                    return ApiResponse<OutlookMailSendResultDto>.ErrorResult(belongMsg, belongMsg, StatusCodes.Status400BadRequest);
                 }
             }
 
@@ -281,7 +286,10 @@ namespace crm_api.Services
 
             if (toRecipients.Count == 0)
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Recipient email is required.", "No recipient email found on request/contact/customer.", StatusCodes.Status400BadRequest);
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.RecipientEmailRequired"),
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.NoRecipientEmailFound"),
+                    StatusCodes.Status400BadRequest);
             }
 
             var ccRecipients = ParseEmails(dto.Cc);
@@ -291,18 +299,21 @@ namespace crm_api.Services
             if (account == null || !account.IsConnected)
             {
                 await WriteOperationalLogAsync(tenantId, userId, false, "Warning", "outlook.mail.send", "Outlook account is not connected.", "account_not_connected", cancellationToken).ConfigureAwait(false);
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Outlook hesabınız bağlı değil.", "Outlook account is not connected.", StatusCodes.Status400BadRequest);
+                var notConnMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.AccountNotConnected");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(notConnMsg, notConnMsg, StatusCodes.Status400BadRequest);
             }
 
             if (!ScopeContains(NormalizeScopes(account.Scopes), MailSendScope))
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Outlook hesabınızda mail gönderme yetkisi yok. Lütfen yeniden bağlanın.", "Outlook scope does not contain Mail.Send.", StatusCodes.Status400BadRequest);
+                var scopeMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.MailSendScopeMissing");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(scopeMsg, scopeMsg, StatusCodes.Status400BadRequest);
             }
 
             var accessToken = await GetValidAccessTokenAsync(account, cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(accessToken))
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Outlook token geçersiz veya süresi dolmuş. Lütfen tekrar bağlanın.", "Outlook token invalid or expired.", StatusCodes.Status400BadRequest);
+                var tokenMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.TokenInvalidOrExpired");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(tokenMsg, tokenMsg, StatusCodes.Status400BadRequest);
             }
 
             var response = await SendViaGraphAsync(accessToken, dto, toRecipients, ccRecipients, bccRecipients, cancellationToken).ConfigureAwait(false);
@@ -310,7 +321,10 @@ namespace crm_api.Services
             {
                 var failedLog = await WriteCustomerMailLogAsync(tenantId, userId, customer, contact, account.OutlookEmail, toRecipients, ccRecipients, bccRecipients, dto, false, response.ErrorCode, response.ErrorMessage, response.MessageId, response.ConversationId, null, cancellationToken).ConfigureAwait(false);
                 await WriteOperationalLogAsync(tenantId, userId, false, "Error", "outlook.mail.send", "Outlook mail send failed.", response.ErrorCode, cancellationToken, new { customerId = dto.CustomerId, logId = failedLog.Id }).ConfigureAwait(false);
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Mail gönderilemedi.", response.ErrorMessage ?? "Outlook sendMail failed.", StatusCodes.Status400BadRequest);
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("OutlookEntegrationService.MailSendFailed"),
+                    response.ErrorMessage ?? _localizationService.GetLocalizedString("OutlookEntegrationService.MailSendFailed"),
+                    StatusCodes.Status400BadRequest);
             }
 
             var sentAt = DateTimeOffset.UtcNow;
@@ -326,7 +340,7 @@ namespace crm_api.Services
                     SentAt = sentAt,
                     LogId = successLog.Id
                 },
-                "Mail başarıyla gönderildi.");
+                _localizationService.GetLocalizedString("OutlookEntegrationService.MailSentSuccessfully"));
         }
 
         public async Task<ApiResponse<PagedResponse<OutlookCustomerMailLogDto>>> GetCustomerMailLogsAsync(long userId, OutlookCustomerMailLogQueryDto query, CancellationToken cancellationToken = default)
@@ -334,7 +348,8 @@ namespace crm_api.Services
             var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
             if (tenantId == Guid.Empty)
             {
-                return ApiResponse<PagedResponse<OutlookCustomerMailLogDto>>.ErrorResult("Tenant context is missing.", "Tenant context is missing.", StatusCodes.Status400BadRequest);
+                var tenantMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.TenantContextMissing");
+                return ApiResponse<PagedResponse<OutlookCustomerMailLogDto>>.ErrorResult(tenantMsg, tenantMsg, StatusCodes.Status400BadRequest);
             }
 
             var pageNumber = query.PageNumber < 1 ? 1 : query.PageNumber;
@@ -400,22 +415,25 @@ namespace crm_api.Services
                     PageNumber = pageNumber,
                     PageSize = pageSize
                 },
-                "Outlook customer mail logs retrieved.");
+                _localizationService.GetLocalizedString("OutlookEntegrationService.OutlookMailLogsRetrieved"));
         }
 
         public Task<ApiResponse<OutlookCalendarEventResultDto>> CreateCalendarEventAsync(long userId, CreateOutlookCalendarEventDto dto, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult("Outlook calendar sync henüz uygulanmadı.", "Not implemented yet.", StatusCodes.Status501NotImplemented));
+            var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarSyncNotImplemented");
+            return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult(msg, msg, StatusCodes.Status501NotImplemented));
         }
 
         public Task<ApiResponse<OutlookCalendarEventResultDto>> UpdateCalendarEventAsync(long userId, string eventId, UpdateOutlookCalendarEventDto dto, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult("Outlook calendar sync henüz uygulanmadı.", "Not implemented yet.", StatusCodes.Status501NotImplemented));
+            var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarSyncNotImplemented");
+            return Task.FromResult(ApiResponse<OutlookCalendarEventResultDto>.ErrorResult(msg, msg, StatusCodes.Status501NotImplemented));
         }
 
         public Task<ApiResponse<bool>> DeleteCalendarEventAsync(long userId, string eventId, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(ApiResponse<bool>.ErrorResult("Outlook calendar sync henüz uygulanmadı.", "Not implemented yet.", StatusCodes.Status501NotImplemented));
+            var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.CalendarSyncNotImplemented");
+            return Task.FromResult(ApiResponse<bool>.ErrorResult(msg, msg, StatusCodes.Status501NotImplemented));
         }
 
         public async Task<ApiResponse<PagedResponse<OutlookEntegrationLogDto>>> GetLogsAsync(long userId, OutlookEntegrationLogsQueryDto query, CancellationToken cancellationToken = default)
@@ -423,7 +441,8 @@ namespace crm_api.Services
             var tenantId = _userContextService.GetCurrentTenantId() ?? Guid.Empty;
             if (tenantId == Guid.Empty)
             {
-                return ApiResponse<PagedResponse<OutlookEntegrationLogDto>>.ErrorResult("Tenant context is missing.", "Tenant context is missing.", StatusCodes.Status400BadRequest);
+                var tenantMsg = _localizationService.GetLocalizedString("OutlookEntegrationService.TenantContextMissing");
+                return ApiResponse<PagedResponse<OutlookEntegrationLogDto>>.ErrorResult(tenantMsg, tenantMsg, StatusCodes.Status400BadRequest);
             }
 
             var pageNumber = query.PageNumber < 1 ? 1 : query.PageNumber;
@@ -464,24 +483,27 @@ namespace crm_api.Services
                     PageNumber = pageNumber,
                     PageSize = pageSize
                 },
-                "Outlook integration logs retrieved.");
+                _localizationService.GetLocalizedString("OutlookEntegrationService.IntegrationLogsRetrieved"));
         }
 
         private ApiResponse<OutlookMailSendResultDto>? ValidateSendRequest(SendOutlookMailDto dto)
         {
             if (!dto.CustomerId.HasValue || dto.CustomerId.Value <= 0)
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("CustomerId is required.", "CustomerId is required.", StatusCodes.Status400BadRequest);
+                var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.CustomerIdRequired");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(msg, msg, StatusCodes.Status400BadRequest);
             }
 
             if (string.IsNullOrWhiteSpace(dto.Subject))
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Mail subject is required.", "Mail subject is required.", StatusCodes.Status400BadRequest);
+                var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.MailSubjectRequired");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(msg, msg, StatusCodes.Status400BadRequest);
             }
 
             if (string.IsNullOrWhiteSpace(dto.Body))
             {
-                return ApiResponse<OutlookMailSendResultDto>.ErrorResult("Mail body is required.", "Mail body is required.", StatusCodes.Status400BadRequest);
+                var msg = _localizationService.GetLocalizedString("OutlookEntegrationService.MailBodyRequired");
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(msg, msg, StatusCodes.Status400BadRequest);
             }
 
             return null;
@@ -525,13 +547,13 @@ namespace crm_api.Services
             var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                throw new InvalidOperationException(string.IsNullOrWhiteSpace(body) ? "Outlook token request failed." : body);
+                throw new InvalidOperationException(string.IsNullOrWhiteSpace(body) ? _localizationService.GetLocalizedString("OutlookEntegrationService.TokenRequestFailed") : body);
             }
 
             var payload = JsonSerializer.Deserialize<OutlookTokenResponse>(body, JsonOptions);
             if (payload == null || string.IsNullOrWhiteSpace(payload.AccessToken))
             {
-                throw new InvalidOperationException("Outlook token response is invalid.");
+                throw new InvalidOperationException(_localizationService.GetLocalizedString("OutlookEntegrationService.TokenResponseInvalid"));
             }
 
             return new OutlookGraphTokenResult
@@ -778,7 +800,7 @@ namespace crm_api.Services
                 return $"{request.Scheme}://{request.Host}{request.PathBase}/api/integrations/outlook/callback";
             }
 
-            throw new InvalidOperationException("Outlook redirect URI could not be resolved.");
+            throw new InvalidOperationException(_localizationService.GetLocalizedString("OutlookEntegrationService.RedirectUriNotResolved"));
         }
 
         private static string BuildState(long userId, Guid tenantId)
