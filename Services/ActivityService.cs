@@ -155,7 +155,7 @@ namespace crm_api.Services
                     await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.EndDateBeforeStartDate"),
                         StatusCodes.Status400BadRequest);
                 }
 
@@ -195,9 +195,8 @@ namespace crm_api.Services
             catch (InvalidOperationException ex)
             {
                 await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
-
                 return ApiResponse<ActivityDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityService.ActivityCreateFailed"),
+                    ex.Message,
                     ex.Message,
                     StatusCodes.Status400BadRequest);
             }
@@ -255,7 +254,7 @@ namespace crm_api.Services
                     await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.EndDateBeforeStartDate"),
                         StatusCodes.Status400BadRequest);
                 }
 
@@ -310,9 +309,8 @@ namespace crm_api.Services
             catch (InvalidOperationException ex)
             {
                 await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
-
                 return ApiResponse<ActivityDto>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityService.ActivityUpdateFailed"),
+                    ex.Message,
                     ex.Message,
                     StatusCodes.Status400BadRequest);
             }
@@ -380,7 +378,7 @@ namespace crm_api.Services
             {
                 await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<object>.ErrorResult(
-                    _localizationService.GetLocalizedString("ActivityService.InternalServerError"),
+                    ex.Message,
                     ex.Message,
                     StatusCodes.Status400BadRequest);
             }
@@ -427,7 +425,7 @@ namespace crm_api.Services
             {
                 return ApiResponse<ActivityDto>.ErrorResult(
                     _localizationService.GetLocalizedString("General.ValidationError"),
-                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    _localizationService.GetLocalizedString("ActivityService.InvalidActivityType"),
                     StatusCodes.Status400BadRequest);
             }
 
@@ -437,7 +435,7 @@ namespace crm_api.Services
             {
                 return ApiResponse<ActivityDto>.ErrorResult(
                     _localizationService.GetLocalizedString("General.ValidationError"),
-                    _localizationService.GetLocalizedString("General.ValidationError"),
+                    _localizationService.GetLocalizedString("ActivityService.AssignedUserNotFound"),
                     StatusCodes.Status400BadRequest);
             }
 
@@ -449,7 +447,7 @@ namespace crm_api.Services
                 {
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.ContactNotFound"),
                         StatusCodes.Status400BadRequest);
                 }
             }
@@ -462,7 +460,7 @@ namespace crm_api.Services
                 {
                     return ApiResponse<ActivityDto>.ErrorResult(
                         _localizationService.GetLocalizedString("General.ValidationError"),
-                        _localizationService.GetLocalizedString("General.ValidationError"),
+                        _localizationService.GetLocalizedString("ActivityService.CustomerNotFound"),
                         StatusCodes.Status400BadRequest);
                 }
             }

@@ -769,6 +769,21 @@
   <data name="ActivityService.EndDateRequired" xml:space="preserve">
     <value>Bitiş tarihi zorunludur.</value>
   </data>
+  <data name="ActivityService.EndDateBeforeStartDate" xml:space="preserve">
+    <value>Bitiş tarihi başlangıç tarihinden önce olamaz.</value>
+  </data>
+  <data name="ActivityService.InvalidActivityType" xml:space="preserve">
+    <value>Seçilen aktivite tipi bulunamadı.</value>
+  </data>
+  <data name="ActivityService.AssignedUserNotFound" xml:space="preserve">
+    <value>Atanan kullanıcı bulunamadı.</value>
+  </data>
+  <data name="ActivityService.ContactNotFound" xml:space="preserve">
+    <value>Seçilen kişi bulunamadı.</value>
+  </data>
+  <data name="ActivityService.CustomerNotFound" xml:space="preserve">
+    <value>Seçilen cari bulunamadı.</value>
+  </data>
   <data name="ActivityService.UserSessionNotFound" xml:space="preserve">
     <value>Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.</value>
   </data>
@@ -815,7 +830,7 @@
     <value>Google OAuth etkin değil. Önce Google OAuth'u etkinleştirin.</value>
   </data>
   <data name="GoogleCalendarService.AccountNotConnected" xml:space="preserve">
-    <value>Google hesabı bağlı değil. Önce Google ile giriş yapın.</value>
+    <value>Google API aktif ve aktiviteler takvimle eşlenecektir. Lütfen Google API hesabınızı bağlayın.</value>
   </data>
   <data name="GoogleCalendarService.TokenInvalidOrExpired" xml:space="preserve">
     <value>Google oturumu geçersiz veya süresi dolmuş. Lütfen tekrar Google ile bağlanın.</value>

@@ -643,6 +643,21 @@
   <data name="ActivityService.EndDateRequired" xml:space="preserve">
     <value>End date is required.</value>
   </data>
+  <data name="ActivityService.EndDateBeforeStartDate" xml:space="preserve">
+    <value>End date cannot be earlier than start date.</value>
+  </data>
+  <data name="ActivityService.InvalidActivityType" xml:space="preserve">
+    <value>The selected activity type was not found.</value>
+  </data>
+  <data name="ActivityService.AssignedUserNotFound" xml:space="preserve">
+    <value>The assigned user was not found.</value>
+  </data>
+  <data name="ActivityService.ContactNotFound" xml:space="preserve">
+    <value>The selected contact was not found.</value>
+  </data>
+  <data name="ActivityService.CustomerNotFound" xml:space="preserve">
+    <value>The selected customer was not found.</value>
+  </data>
   <data name="ActivityService.UserSessionNotFound" xml:space="preserve">
     <value>User session not found. Please sign in again.</value>
   </data>
@@ -689,7 +704,7 @@
     <value>Google OAuth is disabled. Enable Google OAuth first.</value>
   </data>
   <data name="GoogleCalendarService.AccountNotConnected" xml:space="preserve">
-    <value>Google account is not connected. Connect with Google first.</value>
+    <value>Google API is active and activities will be synced with calendar. Please connect your Google API account.</value>
   </data>
   <data name="GoogleCalendarService.TokenInvalidOrExpired" xml:space="preserve">
     <value>Google session is invalid or expired. Please reconnect Google.</value>
