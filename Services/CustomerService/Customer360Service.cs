@@ -393,6 +393,143 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<Customer360QuickQuotationDto>>> GetQuickQuotationsAsync(long customerId)
+        {
+            try
+            {
+                var customerExists = await _unitOfWork.Customers.Query(tracking: false)
+                    .AnyAsync(c => c.Id == customerId && !c.IsDeleted).ConfigureAwait(false);
+
+                if (!customerExists)
+                {
+                    return ApiResponse<List<Customer360QuickQuotationDto>>.ErrorResult(
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                var tempHeaders = await _unitOfWork.TempQuotattions.Query(tracking: false)
+                    .Where(x => x.CustomerId == customerId && !x.IsDeleted)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.OfferDate,
+                        x.CurrencyCode,
+                        x.Description,
+                        x.IsApproved,
+                        x.ApprovedDate,
+                        x.QuotationId,
+                        x.QuotationNo
+                    })
+                    .OrderByDescending(x => x.OfferDate)
+                    .Take(100)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                if (tempHeaders.Count == 0)
+                {
+                    return ApiResponse<List<Customer360QuickQuotationDto>>.SuccessResult(
+                        new List<Customer360QuickQuotationDto>(),
+                        _localizationService.GetLocalizedString("General.OperationSuccessful"));
+                }
+
+                var tempIds = tempHeaders.Select(x => x.Id).ToList();
+                var tempTotals = await _unitOfWork.TempQuotattionLines.Query(tracking: false)
+                    .Where(x => tempIds.Contains(x.TempQuotattionId) && !x.IsDeleted)
+                    .GroupBy(x => x.TempQuotattionId)
+                    .Select(g => new
+                    {
+                        TempQuotationId = g.Key,
+                        TotalAmount = g.Sum(x => x.LineGrandTotal)
+                    })
+                    .ToDictionaryAsync(x => x.TempQuotationId, x => x.TotalAmount)
+                    .ConfigureAwait(false);
+
+                var quotationIds = tempHeaders
+                    .Where(x => x.QuotationId.HasValue)
+                    .Select(x => x.QuotationId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                var quotationInfo = quotationIds.Count == 0
+                    ? new Dictionary<long, (ApprovalStatus? Status, string? OfferNo)>()
+                    : await _unitOfWork.Quotations.Query(tracking: false)
+                        .Where(x => quotationIds.Contains(x.Id) && !x.IsDeleted)
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.Status,
+                            OfferNo = x.OfferNo ?? x.RevisionNo
+                        })
+                        .ToDictionaryAsync(
+                            x => x.Id,
+                            x => (x.Status, x.OfferNo))
+                        .ConfigureAwait(false);
+
+                var approvalInfo = quotationIds.Count == 0
+                    ? new Dictionary<long, (ApprovalStatus Status, int CurrentStep, string? FlowDescription)>()
+                    : await _unitOfWork.ApprovalRequests.Query(tracking: false)
+                        .Include(x => x.ApprovalFlow)
+                        .Where(x =>
+                            quotationIds.Contains(x.EntityId) &&
+                            x.DocumentType == PricingRuleType.Quotation &&
+                            !x.IsDeleted)
+                        .ToDictionaryAsync(
+                            x => x.EntityId,
+                            x => (
+                                Status: x.Status,
+                                CurrentStep: x.CurrentStep,
+                                FlowDescription: x.ApprovalFlow != null ? x.ApprovalFlow.Description : null))
+                        .ConfigureAwait(false);
+
+                var rows = tempHeaders.Select(x =>
+                {
+                    quotationInfo.TryGetValue(x.QuotationId ?? 0, out var quotation);
+                    approvalInfo.TryGetValue(x.QuotationId ?? 0, out var approval);
+
+                    return new Customer360QuickQuotationDto
+                    {
+                        Id = x.Id,
+                        OfferDate = x.OfferDate,
+                        CurrencyCode = x.CurrencyCode,
+                        TotalAmount = tempTotals.TryGetValue(x.Id, out var total) ? total : 0m,
+                        Description = x.Description,
+                        IsApproved = x.IsApproved,
+                        ApprovedDate = x.ApprovedDate,
+                        QuotationId = x.QuotationId,
+                        QuotationNo = x.QuotationNo ?? quotation.OfferNo,
+                        HasConvertedQuotation = x.QuotationId.HasValue,
+                        QuotationStatus = quotation.Status.HasValue ? (int)quotation.Status.Value : null,
+                        QuotationStatusName = quotation.Status.HasValue ? GetApprovalStatusName(quotation.Status.Value) : null,
+                        HasApprovalRequest = x.QuotationId.HasValue && approvalInfo.ContainsKey(x.QuotationId.Value),
+                        ApprovalStatus = x.QuotationId.HasValue && approvalInfo.ContainsKey(x.QuotationId.Value)
+                            ? (int)approval.Status
+                            : null,
+                        ApprovalStatusName = x.QuotationId.HasValue && approvalInfo.ContainsKey(x.QuotationId.Value)
+                            ? GetApprovalStatusName(approval.Status)
+                            : null,
+                        ApprovalCurrentStep = x.QuotationId.HasValue && approvalInfo.ContainsKey(x.QuotationId.Value)
+                            ? approval.CurrentStep
+                            : null,
+                        ApprovalFlowDescription = x.QuotationId.HasValue && approvalInfo.ContainsKey(x.QuotationId.Value)
+                            ? approval.FlowDescription
+                            : null
+                    };
+                }).ToList();
+
+                return ApiResponse<List<Customer360QuickQuotationDto>>.SuccessResult(
+                    rows,
+                    _localizationService.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<Customer360QuickQuotationDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
+                    _localizationService.GetLocalizedString("Customer360Service.ExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         public async Task<ApiResponse<ActivityDto>> ExecuteRecommendedActionAsync(long customerId, ExecuteRecommendedActionDto request)
         {
             try
@@ -974,6 +1111,19 @@ namespace crm_api.Services
                 "low" => ActivityPriority.Low,
                 "high" => ActivityPriority.High,
                 _ => ActivityPriority.Medium
+            };
+        }
+
+        private static string GetApprovalStatusName(ApprovalStatus status)
+        {
+            return status switch
+            {
+                ApprovalStatus.HavenotStarted => "Başlamadı",
+                ApprovalStatus.Waiting => "Beklemede",
+                ApprovalStatus.Approved => "Onaylandı",
+                ApprovalStatus.Rejected => "Reddedildi",
+                ApprovalStatus.Closed => "Kapandı",
+                _ => status.ToString()
             };
         }
     }
