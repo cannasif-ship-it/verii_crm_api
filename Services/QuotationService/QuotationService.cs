@@ -1844,7 +1844,7 @@ namespace crm_api.Services
                                     creatorFullName,
                                     rejectorFullName,
                                     quotationForMail.RevisionNo ?? "",
-                                    request.RejectReason ?? "Belirtilmedi",
+                                    request.RejectReason ?? _localizationService.GetLocalizedString("General.NotSpecified"),
                                     quotationLink,
                                     quotationForMail.Id
                                 ));

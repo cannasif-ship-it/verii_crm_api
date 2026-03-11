@@ -1631,7 +1631,7 @@ namespace crm_api.Services
                                     creatorFullName,
                                     rejectorFullName,
                                     orderForMail.OfferNo ?? "",
-                                    request.RejectReason ?? "Belirtilmedi",
+                                    request.RejectReason ?? _localizationService.GetLocalizedString("General.NotSpecified"),
                                     orderLink,
                                     orderForMail.Id
                                 ));
