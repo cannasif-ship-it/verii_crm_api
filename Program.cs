@@ -21,6 +21,8 @@ using crm_api.Hubs;
 using crm_api.Helpers;
 using System.Security.Claims;
 using System.IO;
+using System.Resources;
+using System.Reflection;
 using Microsoft.Extensions.FileProviders;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -348,7 +350,9 @@ builder.Services.AddAuthentication(options =>
     var jwtSecret = builder.Configuration["JwtSettings:SecretKey"];
     if (string.IsNullOrWhiteSpace(jwtSecret))
     {
-        throw new InvalidOperationException("General.JwtSecretRequired");
+        var rm = new ResourceManager("crm_api.Resources.Messages", Assembly.GetExecutingAssembly());
+        var msg = rm.GetString("General.JwtSecretRequired", new CultureInfo("tr-TR")) ?? "General.JwtSecretRequired";
+        throw new InvalidOperationException(msg);
     }
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -383,18 +387,19 @@ builder.Services.AddAuthentication(options =>
         },
         OnTokenValidated = async context =>
         {
+            var loc = context.HttpContext.RequestServices.GetRequiredService<ILocalizationService>();
             var claims = context.Principal?.Claims;
             var userIdClaim = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!long.TryParse(userIdClaim, out var userId))
             {
-                context.Fail("Token geçersiz: eksik kullanıcı ID");
+                context.Fail(loc.GetLocalizedString("Auth.TokenInvalidMissingUserId"));
                 return;
             }
             var sessionClaim = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value
                 ?? claims?.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
             if (!Guid.TryParse(sessionClaim, out var sessionId))
             {
-                context.Fail("Token gecersiz: eksik oturum ID");
+                context.Fail(loc.GetLocalizedString("Auth.TokenInvalidMissingSessionId"));
                 return;
             }
 
@@ -408,7 +413,7 @@ builder.Services.AddAuthentication(options =>
                 {
                     if (cachedUserId != userId)
                     {
-                        context.Fail("Session expired or invalid.");
+                        context.Fail(loc.GetLocalizedString("Auth.SessionExpiredOrInvalid"));
                     }
 
                     return;
@@ -417,12 +422,12 @@ builder.Services.AddAuthentication(options =>
                 var restored = await sessionCacheService.RestoreSessionAsync(sessionId, userId, context.HttpContext.RequestAborted);
                 if (!restored)
                 {
-                    context.Fail("Session expired or invalid.");
+                    context.Fail(loc.GetLocalizedString("Auth.SessionExpiredOrInvalid"));
                 }
             }
             catch (Exception ex)
             {
-                context.Fail($"Session validation failed: {ex.Message}");
+                context.Fail(loc.GetLocalizedString("Auth.SessionValidationFailed", ex.Message));
             }
         }
     };
@@ -566,7 +571,7 @@ app.UseExceptionHandler(errApp =>
     {
         var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
         var logger = ctx.RequestServices.GetService<ILogger<Program>>();
-        var localizationService = ctx.RequestServices.GetService<ILocalizationService>();
+        var localizationService = ctx.RequestServices.GetRequiredService<ILocalizationService>();
         if (ex != null)
             logger?.LogError(ex, "Unhandled exception: {Path}", ctx.Request.Path);
 
@@ -576,10 +581,8 @@ app.UseExceptionHandler(errApp =>
         {
             var isCountryPath = ctx.Request.Path.StartsWithSegments("/api/Country", StringComparison.OrdinalIgnoreCase);
             var localizedMessage = isCountryPath
-                ? (localizationService?.GetLocalizedString("CountryService.CountryNameAlreadyExists")
-                   ?? "Country already exists. Duplicate country entries are not allowed.")
-                : (localizationService?.GetLocalizedString("General.RecordAlreadyExists")
-                   ?? "This record already exists.");
+                ? localizationService.GetLocalizedString("CountryService.CountryNameAlreadyExists")
+                : localizationService.GetLocalizedString("General.RecordAlreadyExists");
 
             var response = crm_api.DTOs.ApiResponse<object>.ErrorResult(
                 localizedMessage,
@@ -622,8 +625,9 @@ app.UseExceptionHandler(errApp =>
                 ctx.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
             }
         }
-        var message = ex?.Message ?? "An error occurred.";
-        var json = System.Text.Json.JsonSerializer.Serialize(new { error = "An error occurred.", message });
+        var fallbackError = localizationService.GetLocalizedString("General.InternalServerError");
+        var message = ex?.Message ?? fallbackError;
+        var json = System.Text.Json.JsonSerializer.Serialize(new { error = fallbackError, message });
         await ctx.Response.WriteAsync(json);
     });
 });
