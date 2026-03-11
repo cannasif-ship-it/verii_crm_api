@@ -15,17 +15,20 @@ namespace crm_api.Controllers
         private readonly IReportingCatalogService _catalogService;
         private readonly IReportService _reportService;
         private readonly IReportPreviewService _previewService;
+        private readonly ILocalizationService _localizationService;
 
         public ReportBuilderController(
             IReportingConnectionService connectionService,
             IReportingCatalogService catalogService,
             IReportService reportService,
-            IReportPreviewService previewService)
+            IReportPreviewService previewService,
+            ILocalizationService localizationService)
         {
             _connectionService = connectionService;
             _catalogService = catalogService;
             _reportService = reportService;
             _previewService = previewService;
+            _localizationService = localizationService;
         }
 
         // GET /api/reportbuilder/connections
@@ -47,8 +50,8 @@ namespace crm_api.Controllers
             {
                 Exists = result.Success && result.Data != null && result.Data.Count > 0,
                 Message = result.Success
-                    ? (result.Data?.Count > 0 ? "OK" : "Object not found or has no columns.")
-                    : (result.Message ?? "Error"),
+                    ? (result.Data?.Count > 0 ? _localizationService.GetLocalizedString("ReportBuilderController.Ok") : _localizationService.GetLocalizedString("ReportBuilderController.ObjectNotFoundOrNoColumns"))
+                    : (result.Message ?? _localizationService.GetLocalizedString("ReportBuilderController.Error")),
                 Schema = result.Data ?? new List<FieldSchemaDto>()
             };
 
