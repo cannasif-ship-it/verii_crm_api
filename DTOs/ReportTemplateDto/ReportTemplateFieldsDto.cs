@@ -73,7 +73,8 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Revizyon No", Path = "RevisionNo", DataType = "string", ExampleValue = "REV-001" },
                     
                     // Müşteri Bilgileri
-                    new FieldDefinition { Label = "Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Müşteri Adı", Path = "CustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Potansiyel Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
                     new FieldDefinition { Label = "Müşteri Kodu (ERP)", Path = "ErpCustomerCode", DataType = "string", ExampleValue = "CUST001" },
                     
                     // Teslimat Bilgileri
@@ -166,7 +167,8 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Revizyon No", Path = "RevisionNo", DataType = "string", ExampleValue = "REV-001" },
                     
                     // Müşteri Bilgileri
-                    new FieldDefinition { Label = "Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Müşteri Adı", Path = "CustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Potansiyel Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
                     new FieldDefinition { Label = "Müşteri Kodu (ERP)", Path = "ErpCustomerCode", DataType = "string", ExampleValue = "CUST001" },
                     
                     // Teslimat Bilgileri
@@ -259,7 +261,8 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Revizyon No", Path = "RevisionNo", DataType = "string", ExampleValue = "REV-001" },
                     
                     // Müşteri Bilgileri
-                    new FieldDefinition { Label = "Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Müşteri Adı", Path = "CustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Potansiyel Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
                     new FieldDefinition { Label = "Müşteri Kodu (ERP)", Path = "ErpCustomerCode", DataType = "string", ExampleValue = "CUST001" },
                     
                     // Teslimat Bilgileri

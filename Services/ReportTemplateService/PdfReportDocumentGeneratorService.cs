@@ -94,15 +94,21 @@ namespace crm_api.Services
                                 var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
                                 var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
 
-                                layers.Layer()
+                                var layer = layers.Layer()
                                     .TranslateX(xPt)
                                     .TranslateY(yPt)
-                                    .Width(wPt)
-                                    .Height(hPt)
-                                    .Element(c => WrapElementWithStyle(c, element, inner =>
-                                    {
-                                        RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
-                                    }));
+                                    .Width(wPt);
+
+                                // Tables frequently need more vertical space than their design-time placeholder.
+                                // Keeping them at a fixed height causes QuestPDF layout exceptions on multi-row data.
+                                layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
+                                    ? layer.MinHeight(hPt)
+                                    : layer.Height(hPt);
+
+                                layer.Element(c => WrapElementWithStyle(c, element, inner =>
+                                {
+                                    RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
+                                }));
                             }
                         });
                     });
@@ -594,6 +600,7 @@ namespace crm_api.Services
                         d.OfferDate,
                         d.OfferType,
                         d.RevisionNo,
+                        CustomerName = d.PotentialCustomer != null ? d.PotentialCustomer.CustomerName : (d.ErpCustomerCode ?? ""),
                         PotentialCustomerName = d.PotentialCustomer != null ? d.PotentialCustomer.CustomerName : "",
                         d.ErpCustomerCode,
                         d.DeliveryDate,
@@ -685,6 +692,7 @@ namespace crm_api.Services
                         q.OfferDate,
                         q.OfferType,
                         q.RevisionNo,
+                        CustomerName = q.PotentialCustomer != null ? q.PotentialCustomer.CustomerName : (q.ErpCustomerCode ?? ""),
                         PotentialCustomerName = q.PotentialCustomer != null ? q.PotentialCustomer.CustomerName : "",
                         q.ErpCustomerCode,
                         q.DeliveryDate,
@@ -776,6 +784,7 @@ namespace crm_api.Services
                         o.OfferDate,
                         o.OfferType,
                         o.RevisionNo,
+                        CustomerName = o.PotentialCustomer != null ? o.PotentialCustomer.CustomerName : (o.ErpCustomerCode ?? ""),
                         PotentialCustomerName = o.PotentialCustomer != null ? o.PotentialCustomer.CustomerName : "",
                         o.ErpCustomerCode,
                         o.DeliveryDate,
