@@ -146,11 +146,17 @@ namespace crm_api.Services
                     var others = await _unitOfWork.Repository<ReportTemplate>().Query()
                         .Where(rt => rt.RuleType == dto.RuleType && !rt.IsDeleted)
                         .ToListAsync().ConfigureAwait(false);
+                    var changed = false;
                     foreach (var o in others)
                     {
+                        if (!o.Default)
+                            continue;
                         o.Default = false;
                         await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o).ConfigureAwait(false);
+                        changed = true;
                     }
+                    if (changed)
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 }
 
                 var template = new ReportTemplate
@@ -224,10 +230,30 @@ namespace crm_api.Services
                         404);
                 }
 
-                // Capture current default state BEFORE updating template (default bug fix)
+                // Capture current state before mutating, because default reassignment depends on the old rule type.
                 var currentWasDefault = template.Default;
+                var originalRuleType = template.RuleType;
 
                 var templateJson = JsonSerializer.Serialize(dto.TemplateData, PdfReportTemplateJsonOptions.CamelCase);
+
+                if (dto.Default)
+                {
+                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
+                        .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
+                        .ToListAsync().ConfigureAwait(false);
+                    var changed = false;
+                    foreach (var o in others)
+                    {
+                        if (!o.Default)
+                            continue;
+                        o.Default = false;
+                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o).ConfigureAwait(false);
+                        changed = true;
+                    }
+                    if (changed)
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+
                 template.RuleType = dto.RuleType;
                 template.Title = dto.Title;
                 template.TemplateJson = templateJson;
@@ -236,33 +262,23 @@ namespace crm_api.Services
                 template.UpdatedByUserId = userId;
                 template.UpdatedDate = DateTime.UtcNow;
 
-                if (dto.Default)
+                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                if (currentWasDefault && (!dto.Default || originalRuleType != dto.RuleType))
                 {
-                    var others = await _unitOfWork.Repository<ReportTemplate>().Query()
-                        .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
-                        .ToListAsync().ConfigureAwait(false);
-                    foreach (var o in others)
-                    {
-                        o.Default = false;
-                        await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(o).ConfigureAwait(false);
-                    }
-                }
-                else if (currentWasDefault)
-                {
-                    // Current template was default and is being unset; assign another as default (smallest Id)
+                    // If the previous default is being unset or moved away, keep the old rule type with a fallback default.
                     var newDefault = await _unitOfWork.Repository<ReportTemplate>().Query()
-                        .Where(rt => rt.RuleType == dto.RuleType && rt.Id != id && !rt.IsDeleted)
+                        .Where(rt => rt.RuleType == originalRuleType && rt.Id != id && !rt.IsDeleted)
                         .OrderBy(rt => rt.Id)
                         .FirstOrDefaultAsync().ConfigureAwait(false);
                     if (newDefault != null)
                     {
                         newDefault.Default = true;
                         await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(newDefault).ConfigureAwait(false);
+                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
-
-                await _unitOfWork.Repository<ReportTemplate>().UpdateAsync(template).ConfigureAwait(false);
-                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var templateDto = new PdfReportTemplateDto
                 {
