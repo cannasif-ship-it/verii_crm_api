@@ -116,14 +116,101 @@ namespace crm_api.Tests
         }
 
         [Fact]
+        public void GetPlacementWarnings_DifferentPages_DoesNotWarn()
+        {
+            var data = new ReportTemplateData
+            {
+                Page = new PageConfig { Width = 100, Height = 100, PageCount = 3 },
+                Elements = new List<ReportElement>
+                {
+                    new() { Id = "cover-1", Type = "image", X = 0, Y = 0, Width = 100, Height = 100, PageNumbers = new List<int> { 1 } },
+                    new() { Id = "cover-2", Type = "image", X = 0, Y = 0, Width = 100, Height = 100, PageNumbers = new List<int> { 2 } }
+                }
+            };
+
+            var warnings = _validator.GetPlacementWarnings(data);
+
+            Assert.Empty(warnings);
+        }
+
+        [Fact]
+        public void ValidateTemplateData_RejectsPageNumbersOutsideConfiguredPageCount()
+        {
+            var data = new ReportTemplateData
+            {
+                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px", PageCount = 3 },
+                Elements = new List<ReportElement>
+                {
+                    new() { Id = "e1", Type = "image", X = 10, Y = 20, Width = 100, Height = 100, PageNumbers = new List<int> { 4 } }
+                }
+            };
+
+            var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);
+
+            Assert.Contains(errors, error => error.Contains("pageNumbers must be between 1 and 3", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void ValidateTemplateData_RejectsDuplicatePageNumbers()
+        {
+            var data = new ReportTemplateData
+            {
+                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px", PageCount = 3 },
+                Elements = new List<ReportElement>
+                {
+                    new() { Id = "e1", Type = "image", X = 10, Y = 20, Width = 100, Height = 100, PageNumbers = new List<int> { 1, 1 } }
+                }
+            };
+
+            var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);
+
+            Assert.Contains(errors, error => error.Contains("duplicate page number", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void ValidateTemplateData_RejectsPageCountAboveLimit()
+        {
+            var data = new ReportTemplateData
+            {
+                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px", PageCount = 21 },
+                Elements = new List<ReportElement>
+                {
+                    new() { Id = "e1", Type = "text", X = 10, Y = 20, Width = 100, Height = 24, Text = "Hello" }
+                }
+            };
+
+            var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);
+
+            Assert.Contains(errors, error => error.Contains("Page count must be between 1 and 20", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
         public void ValidateTemplateData_AcceptsValidData()
         {
             var data = new ReportTemplateData
             {
-                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px" },
+                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px", PageCount = 3 },
                 Elements = new List<ReportElement>
                 {
-                    new() { Id = "e1", Type = "text", X = 10, Y = 20, Width = 100, Height = 24, Text = "Hello" }
+                    new() { Id = "cover-1", Type = "image", X = 0, Y = 0, Width = 794, Height = 1123, PageNumbers = new List<int> { 1 } },
+                    new() { Id = "cover-2", Type = "image", X = 0, Y = 0, Width = 794, Height = 1123, PageNumbers = new List<int> { 2 } },
+                    new() { Id = "title", Type = "field", X = 10, Y = 20, Width = 100, Height = 24, Path = "CustomerName", Value = "Müşteri" },
+                    new()
+                    {
+                        Id = "lines",
+                        Type = "table",
+                        X = 10,
+                        Y = 120,
+                        Width = 700,
+                        Height = 240,
+                        PageNumbers = new List<int> { 3 },
+                        Columns = new List<TableColumn>
+                        {
+                            new() { Label = "Ürün Kodu", Path = "Lines.ProductCode" },
+                            new() { Label = "Ürün Adı", Path = "Lines.ProductName" },
+                            new() { Label = "Birim Fiyat", Path = "Lines.UnitPrice" }
+                        }
+                    }
                 }
             };
             var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);

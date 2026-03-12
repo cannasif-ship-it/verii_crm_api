@@ -21,6 +21,7 @@ namespace crm_api.Services
         private const decimal OpacityMax = 1;
         private const decimal RotationMin = -360;
         private const decimal RotationMax = 360;
+        private const int MaxPageCount = 20;
         private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase) { "text", "field", "image", "table" };
         private static readonly Regex PathSegmentRegex = new(@"^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
 
@@ -45,6 +46,8 @@ namespace crm_api.Services
                     errors.Add("Page width and height must be positive.");
                 if (string.IsNullOrWhiteSpace(data.Page.Unit))
                     errors.Add("Page unit is required.");
+                if (data.Page.PageCount < 1 || data.Page.PageCount > MaxPageCount)
+                    errors.Add($"Page count must be between 1 and {MaxPageCount}.");
             }
 
             // Elements
@@ -81,6 +84,25 @@ namespace crm_api.Services
                     errors.Add($"{prefix}: X and Y must be non-negative.");
                 if (el.Width < 0 || el.Height < 0)
                     errors.Add($"{prefix}: Width and Height must be non-negative.");
+                if (el.PageNumbers != null)
+                {
+                    if (el.PageNumbers.Count == 0)
+                    {
+                        errors.Add($"{prefix}: pageNumbers cannot be empty when provided.");
+                    }
+                    else
+                    {
+                        var seenPages = new HashSet<int>();
+                        var pageCount = Math.Max(1, data.Page?.PageCount ?? 1);
+                        foreach (var pageNumber in el.PageNumbers)
+                        {
+                            if (pageNumber < 1 || pageNumber > pageCount)
+                                errors.Add($"{prefix}: pageNumbers must be between 1 and {pageCount}.");
+                            if (!seenPages.Add(pageNumber))
+                                errors.Add($"{prefix}: duplicate page number '{pageNumber}'.");
+                        }
+                    }
+                }
 
                 if (el.Type.Equals("field", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(el.Path))
                 {
@@ -136,6 +158,7 @@ namespace crm_api.Services
             var warnings = new List<string>();
             if (data?.Elements == null || data.Elements.Count < 2) return warnings;
 
+            var totalPages = Math.Max(1, data.Page?.PageCount ?? 1);
             var elements = data.Elements.Where(e => e.Width > 0 && e.Height > 0).ToList();
             for (var i = 0; i < elements.Count; i++)
             {
@@ -143,6 +166,9 @@ namespace crm_api.Services
                 {
                     var a = elements[i];
                     var b = elements[j];
+                    if (!SharesAtLeastOnePage(a, b, totalPages))
+                        continue;
+
                     if (Overlaps(a.X, a.Y, a.Width, a.Height, b.X, b.Y, b.Width, b.Height))
                         warnings.Add($"Elements '{a.Id}' and '{b.Id}' may overlap (layout warning).");
                 }
@@ -153,6 +179,24 @@ namespace crm_api.Services
         private static bool Overlaps(decimal ax, decimal ay, decimal aw, decimal ah, decimal bx, decimal by, decimal bw, decimal bh)
         {
             return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+        }
+
+        private static bool SharesAtLeastOnePage(ReportElement left, ReportElement right, int totalPages)
+        {
+            var leftPages = ExpandPages(left.PageNumbers, totalPages);
+            var rightPages = ExpandPages(right.PageNumbers, totalPages);
+
+            return leftPages.Overlaps(rightPages);
+        }
+
+        private static HashSet<int> ExpandPages(List<int>? pageNumbers, int totalPages)
+        {
+            if (pageNumbers == null || pageNumbers.Count == 0)
+                return Enumerable.Range(1, totalPages).ToHashSet();
+
+            return pageNumbers
+                .Where(pageNumber => pageNumber >= 1 && pageNumber <= totalPages)
+                .ToHashSet();
         }
 
         public IReadOnlyList<string> ValidateForGenerate(ReportTemplateData? data)

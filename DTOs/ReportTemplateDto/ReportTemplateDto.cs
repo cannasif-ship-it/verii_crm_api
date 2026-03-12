@@ -90,6 +90,9 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("unit")]
         public string Unit { get; set; } = "px";
+
+        [JsonPropertyName("pageCount")]
+        public int PageCount { get; set; } = 1;
     }
 
     /// <summary>
@@ -126,6 +129,9 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("style")]
         public ElementStyle? Style { get; set; }
+
+        [JsonPropertyName("pageNumbers")]
+        public List<int>? PageNumbers { get; set; }
 
         [JsonPropertyName("binding")]
         public string? Binding { get; set; }

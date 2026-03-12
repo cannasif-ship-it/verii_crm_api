@@ -77,41 +77,46 @@ namespace crm_api.Services
                     .ThenBy(e => e.X)
                     .ToList();
 
+                var totalPages = Math.Max(1, page.PageCount);
                 var document = Document.Create(container =>
                 {
-                    container.Page(p =>
+                    for (var pageNumber = 1; pageNumber <= totalPages; pageNumber++)
                     {
-                        p.Size(new PageSize(pageWidthPt, pageHeightPt));
-                        p.Margin(0);
-
-                        p.Content().Layers(layers =>
+                        var currentPage = pageNumber;
+                        container.Page(p =>
                         {
-                            layers.PrimaryLayer().Width(pageWidthPt).Height(pageHeightPt).Background(Colors.Transparent);
-                            foreach (var element in orderedElements)
+                            p.Size(new PageSize(pageWidthPt, pageHeightPt));
+                            p.Margin(0);
+
+                            p.Content().Layers(layers =>
                             {
-                                var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
-                                var yPt = PdfUnitConversion.ToPointsFloat(element.Y, unit);
-                                var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
-                                var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
-
-                                var layer = layers.Layer()
-                                    .TranslateX(xPt)
-                                    .TranslateY(yPt)
-                                    .Width(wPt);
-
-                                // Tables frequently need more vertical space than their design-time placeholder.
-                                // Keeping them at a fixed height causes QuestPDF layout exceptions on multi-row data.
-                                layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
-                                    ? layer.MinHeight(hPt)
-                                    : layer.Height(hPt);
-
-                                layer.Element(c => WrapElementWithStyle(c, element, inner =>
+                                layers.PrimaryLayer().Width(pageWidthPt).Height(pageHeightPt).Background(Colors.Transparent);
+                                foreach (var element in orderedElements.Where(element => ShouldRenderOnPage(element, currentPage)))
                                 {
-                                    RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
-                                }));
-                            }
+                                    var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
+                                    var yPt = PdfUnitConversion.ToPointsFloat(element.Y, unit);
+                                    var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
+                                    var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
+
+                                    var layer = layers.Layer()
+                                        .TranslateX(xPt)
+                                        .TranslateY(yPt)
+                                        .Width(wPt);
+
+                                    // Tables frequently need more vertical space than their design-time placeholder.
+                                    // Keeping them at a fixed height causes QuestPDF layout exceptions on multi-row data.
+                                    layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
+                                        ? layer.MinHeight(hPt)
+                                        : layer.Height(hPt);
+
+                                    layer.Element(c => WrapElementWithStyle(c, element, inner =>
+                                    {
+                                        RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
+                                    }));
+                                }
+                            });
                         });
-                    });
+                    }
                 });
 
                 var pdfBytes = document.GeneratePdf();
@@ -158,6 +163,14 @@ namespace crm_api.Services
             }
 
             c.Element(inner => renderContent(inner));
+        }
+
+        private static bool ShouldRenderOnPage(ReportElement element, int pageNumber)
+        {
+            if (element.PageNumbers == null || element.PageNumbers.Count == 0)
+                return true;
+
+            return element.PageNumbers.Contains(pageNumber);
         }
 
         private static float ClampRotation(decimal v)
