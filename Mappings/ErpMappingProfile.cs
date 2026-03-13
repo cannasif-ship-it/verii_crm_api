@@ -44,6 +44,12 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.TarihSiraliDovizBakiye, opt => opt.MapFrom(src => src.TARIH_SIRALI_DOVIZ_BAKIYE ?? 0m))
                 .ForMember(dest => dest.VadeSiraliDovizBakiye, opt => opt.MapFrom(src => src.VADE_SIRALI_DOVIZ_BAKIYE ?? 0m));
 
+            CreateMap<RII_FN_CARIBAKIYE, ErpCariBalanceDto>()
+                .ForMember(dest => dest.CariKod, opt => opt.MapFrom(src => src.CARI_KOD))
+                .ForMember(dest => dest.NetBakiye, opt => opt.MapFrom(src => src.NET_BAKIYE ?? 0m))
+                .ForMember(dest => dest.BakiyeDurumu, opt => opt.MapFrom(src => src.BAKIYE_DURUMU ?? string.Empty))
+                .ForMember(dest => dest.BakiyeTutari, opt => opt.MapFrom(src => src.BAKIYE_TUTARI ?? 0m));
+
             // Stok mappings
             CreateMap<RII_VW_STOK, StokDto>()
                 .ForMember(dest => dest.StokKodu, opt => opt.MapFrom(src => src.STOK_KODU))

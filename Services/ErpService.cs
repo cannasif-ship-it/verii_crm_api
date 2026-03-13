@@ -243,6 +243,37 @@ namespace crm_api.Services
                     StatusCodes.Status500InternalServerError);
             }
         }
+
+        public async Task<ApiResponse<List<ErpCariBalanceDto>>> GetCariBalancesAsync(string customerCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(customerCode))
+                {
+                    return ApiResponse<List<ErpCariBalanceDto>>.SuccessResult(
+                        new List<ErpCariBalanceDto>(),
+                        _localizationService.GetLocalizedString("ErpService.CariRecordsRetrieved"));
+                }
+
+                var result = await _cmsContext.Set<RII_FN_CARIBAKIYE>()
+                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_CARIBAKIYE({0})", customerCode.Trim())
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var mappedResult = _mapper.Map<List<ErpCariBalanceDto>>(result);
+                return ApiResponse<List<ErpCariBalanceDto>>.SuccessResult(
+                    mappedResult,
+                    _localizationService.GetLocalizedString("ErpService.CariRecordsRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<ErpCariBalanceDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                    _localizationService.GetLocalizedString("ErpService.GetAllCariExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
     
         public async Task<ApiResponse<List<ErpShippingAddressDto>>> GetErpShippingAddressAsync(string customerCode)
         {

@@ -604,34 +604,53 @@ namespace crm_api.Services
         {
             try
             {
-                var movementsResult = await GetErpMovementsAsync(customerId).ConfigureAwait(false);
-                if (!movementsResult.Success || movementsResult.Data == null)
+                var customer = await _unitOfWork.Customers.Query(tracking: false)
+                    .Where(c => c.Id == customerId && !c.IsDeleted)
+                    .Select(c => new { c.CustomerCode })
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+
+                if (customer == null)
                 {
                     return ApiResponse<Customer360ErpBalanceDto>.ErrorResult(
-                        movementsResult.Message ?? _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
-                        movementsResult.ExceptionMessage ?? movementsResult.Message ?? _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
-                        movementsResult.StatusCode);
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        _localizationService.GetLocalizedString("Customer360Service.CustomerNotFound"),
+                        StatusCodes.Status404NotFound);
                 }
 
-                var movements = movementsResult.Data;
-                var totalBorc = movements.Sum(x => x.Borc);
-                var totalAlacak = movements.Sum(x => x.Alacak);
-                var lastBalance = movements
-                    .OrderByDescending(x => x.Tarih ?? DateTime.MinValue)
-                    .ThenByDescending(x => x.VadeTarihi ?? DateTime.MinValue)
-                    .Select(x => x.TarihSiraliTlBakiye)
-                    .FirstOrDefault();
-                var netBakiye = movements.Count > 0 ? lastBalance : totalBorc - totalAlacak;
-                var bakiyeDurumu = netBakiye > 0 ? "Borç" : netBakiye < 0 ? "Alacak" : "Kapalı";
+                if (string.IsNullOrWhiteSpace(customer.CustomerCode))
+                {
+                    return ApiResponse<Customer360ErpBalanceDto>.SuccessResult(
+                        new Customer360ErpBalanceDto(),
+                        _localizationService.GetLocalizedString("Customer360Service.OverviewRetrieved"));
+                }
+
+                var balanceResult = await _erpService.GetCariBalancesAsync(customer.CustomerCode).ConfigureAwait(false);
+                if (!balanceResult.Success || balanceResult.Data == null)
+                {
+                    return ApiResponse<Customer360ErpBalanceDto>.ErrorResult(
+                        balanceResult.Message ?? _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
+                        balanceResult.ExceptionMessage ?? balanceResult.Message ?? _localizationService.GetLocalizedString("Customer360Service.InternalServerError"),
+                        balanceResult.StatusCode);
+                }
+
+                var balanceRow = balanceResult.Data.FirstOrDefault();
+                if (balanceRow == null)
+                {
+                    return ApiResponse<Customer360ErpBalanceDto>.SuccessResult(
+                        new Customer360ErpBalanceDto
+                        {
+                            CariKod = customer.CustomerCode,
+                        },
+                        _localizationService.GetLocalizedString("Customer360Service.OverviewRetrieved"));
+                }
 
                 var summary = new Customer360ErpBalanceDto
                 {
-                    CariKod = movements.FirstOrDefault()?.CariKod ?? string.Empty,
-                    NetBakiye = netBakiye,
-                    BakiyeDurumu = bakiyeDurumu,
-                    BakiyeTutari = Math.Abs(netBakiye),
-                    ToplamBorc = totalBorc,
-                    ToplamAlacak = totalAlacak
+                    CariKod = balanceRow.CariKod,
+                    NetBakiye = balanceRow.NetBakiye,
+                    BakiyeDurumu = balanceRow.BakiyeDurumu,
+                    BakiyeTutari = balanceRow.BakiyeTutari
                 };
 
                 return ApiResponse<Customer360ErpBalanceDto>.SuccessResult(
