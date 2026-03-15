@@ -163,6 +163,9 @@ namespace crm_api.Data.Configurations
             builder.HasIndex(e => e.TempQuotattionId);
             builder.HasIndex(e => e.Currency);
             builder.HasIndex(e => e.IsDeleted);
+            builder.HasIndex(e => new { e.TempQuotattionId, e.Currency })
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
         }
     }
 }

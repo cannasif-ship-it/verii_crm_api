@@ -139,6 +139,9 @@ namespace crm_api.Services
 
                 await _unitOfWork.TempQuotattions.AddAsync(entity).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await UpsertHeaderExchangeLineAsync(entity.Id, dto.CurrencyCode, dto.ExchangeRate, entity.OfferDate, isManual: false)
+                    .ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var created = await _unitOfWork.TempQuotattions.Query()
                     .AsNoTracking()
@@ -188,6 +191,9 @@ namespace crm_api.Services
                 entity.UpdatedDate = DateTimeProvider.Now;
 
                 await _unitOfWork.TempQuotattions.UpdateAsync(entity).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await UpsertHeaderExchangeLineAsync(entity.Id, dto.CurrencyCode, dto.ExchangeRate, entity.OfferDate, isManual: false)
+                    .ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var updated = await _unitOfWork.TempQuotattions.Query()
@@ -509,17 +515,43 @@ namespace crm_api.Services
 
                 await _unitOfWork.QuotationLines.AddAllAsync(quotationLines).ConfigureAwait(false);
 
-                if (exchangeLines.Any())
-                {
-                    var quotationExchangeRates = exchangeLines.Select(rate => new QuotationExchangeRate
+                var quotationExchangeRates = exchangeLines
+                    .Where(rate => !string.IsNullOrWhiteSpace(rate.Currency) && rate.ExchangeRate > 0)
+                    .Select(rate => new QuotationExchangeRate
                     {
                         QuotationId = quotation.Id,
-                        Currency = rate.Currency,
+                        Currency = rate.Currency.Trim(),
                         ExchangeRate = rate.ExchangeRate,
                         ExchangeRateDate = rate.ExchangeRateDate,
-                        IsOfficial = !rate.IsManual
-                    }).ToList();
+                        IsOfficial = !rate.IsManual,
+                        CreatedBy = userId,
+                        CreatedDate = DateTimeProvider.Now
+                    })
+                    .ToList();
 
+                var normalizedHeaderCurrency = entity.CurrencyCode?.Trim();
+                var hasHeaderCurrencyRate = !string.IsNullOrWhiteSpace(normalizedHeaderCurrency)
+                    && quotationExchangeRates.Any(rate =>
+                        string.Equals(rate.Currency, normalizedHeaderCurrency, StringComparison.OrdinalIgnoreCase));
+
+                if (!hasHeaderCurrencyRate
+                    && !string.IsNullOrWhiteSpace(normalizedHeaderCurrency)
+                    && entity.ExchangeRate > 0)
+                {
+                    quotationExchangeRates.Add(new QuotationExchangeRate
+                    {
+                        QuotationId = quotation.Id,
+                        Currency = normalizedHeaderCurrency,
+                        ExchangeRate = entity.ExchangeRate,
+                        ExchangeRateDate = entity.OfferDate,
+                        IsOfficial = false,
+                        CreatedBy = userId,
+                        CreatedDate = DateTimeProvider.Now
+                    });
+                }
+
+                if (quotationExchangeRates.Count > 0)
+                {
                     await _unitOfWork.QuotationExchangeRates.AddAllAsync(quotationExchangeRates).ConfigureAwait(false);
                 }
 
@@ -864,14 +896,6 @@ namespace crm_api.Services
 
                 if (existingLine != null)
                 {
-                    if (!existingLine.IsDeleted)
-                    {
-                        return ApiResponse<TempQuotattionExchangeLineGetDto>.ErrorResult(
-                            _localizationService.GetLocalizedString("TempQuotattionService.ExchangeLineAlreadyExists"),
-                            _localizationService.GetLocalizedString("TempQuotattionService.ExchangeLineAlreadyExists"),
-                            StatusCodes.Status400BadRequest);
-                    }
-
                     existingLine.IsDeleted = false;
                     existingLine.DeletedDate = null;
                     existingLine.DeletedBy = null;
@@ -950,6 +974,50 @@ namespace crm_api.Services
                     ex.Message,
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private async Task UpsertHeaderExchangeLineAsync(
+            long tempQuotationId,
+            string? currency,
+            decimal exchangeRate,
+            DateTime exchangeRateDate,
+            bool isManual)
+        {
+            var normalizedCurrency = currency?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedCurrency) || exchangeRate <= 0)
+            {
+                return;
+            }
+
+            var existingLine = await _unitOfWork.TempQuotattionExchangeLines.Query()
+                .FirstOrDefaultAsync(x => x.TempQuotattionId == tempQuotationId && x.Currency == normalizedCurrency)
+                .ConfigureAwait(false);
+
+            if (existingLine == null)
+            {
+                await _unitOfWork.TempQuotattionExchangeLines.AddAsync(new TempQuotattionExchangeLine
+                {
+                    TempQuotattionId = tempQuotationId,
+                    Currency = normalizedCurrency,
+                    ExchangeRate = exchangeRate,
+                    ExchangeRateDate = exchangeRateDate,
+                    IsManual = isManual,
+                    CreatedDate = DateTimeProvider.Now
+                }).ConfigureAwait(false);
+
+                return;
+            }
+
+            existingLine.IsDeleted = false;
+            existingLine.DeletedDate = null;
+            existingLine.DeletedBy = null;
+            existingLine.Currency = normalizedCurrency;
+            existingLine.ExchangeRate = exchangeRate;
+            existingLine.ExchangeRateDate = exchangeRateDate;
+            existingLine.IsManual = isManual;
+            existingLine.UpdatedDate = DateTimeProvider.Now;
+
+            await _unitOfWork.TempQuotattionExchangeLines.UpdateAsync(existingLine).ConfigureAwait(false);
         }
 
         public async Task<ApiResponse<object>> DeleteExchangeLineAsync(long exchangeLineId)
