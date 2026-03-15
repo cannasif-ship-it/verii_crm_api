@@ -373,103 +373,6 @@ namespace crm_api.Services
         {
             try
             {
-                string? normalizeNullable(string? value)
-                {
-                    return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-                }
-
-                string normalizeTitleDisplay(string? value)
-                {
-                    if (string.IsNullOrWhiteSpace(value))
-                        return string.Empty;
-
-                    var parts = value
-                        .Trim()
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                    return string.Join(" ", parts);
-                }
-
-                string normalizeTitleKey(string? value)
-                {
-                    if (string.IsNullOrWhiteSpace(value))
-                        return string.Empty;
-
-                    return normalizeTitleDisplay(value)
-                        .ToUpperInvariant();
-                }
-
-                string normalizeCompanyKey(string? value)
-                {
-                    var normalized = normalizeNullable(value);
-                    if (string.IsNullOrWhiteSpace(normalized))
-                        return string.Empty;
-
-                    return new string(normalized
-                        .ToUpperInvariant()
-                        .Where(char.IsLetterOrDigit)
-                        .ToArray());
-                }
-
-                bool isMobile(string? value)
-                {
-                    var digits = NormalizeDigits(value);
-                    if (string.IsNullOrWhiteSpace(digits)) return false;
-                    if (digits.Length == 12 && digits.StartsWith("90")) return digits.Substring(2).StartsWith("5");
-                    if (digits.Length == 11 && digits.StartsWith("0")) return digits.Substring(1).StartsWith("5");
-                    if (digits.Length == 10) return digits.StartsWith("5");
-                    return false;
-                }
-
-                string? selectMobile(string? phone1, string? phone2)
-                {
-                    var candidate1 = normalizeNullable(phone1);
-                    var candidate2 = normalizeNullable(phone2);
-                    if (isMobile(candidate1)) return candidate1;
-                    if (isMobile(candidate2)) return candidate2;
-                    return null;
-                }
-
-                string? selectLandline(string? phone1, string? phone2)
-                {
-                    var candidate1 = normalizeNullable(phone1);
-                    var candidate2 = normalizeNullable(phone2);
-                    if (!string.IsNullOrWhiteSpace(candidate1) && !isMobile(candidate1)) return candidate1;
-                    if (!string.IsNullOrWhiteSpace(candidate2) && !isMobile(candidate2)) return candidate2;
-                    return null;
-                }
-
-                (string? FirstName, string? MiddleName, string? LastName) resolveContactNames(CustomerCreateFromMobileDto dto)
-                {
-                    var firstName = normalizeNullable(dto.ContactFirstName);
-                    var middleName = normalizeNullable(dto.ContactMiddleName);
-                    var lastName = normalizeNullable(dto.ContactLastName);
-
-                    if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
-                        return (firstName, middleName, lastName);
-
-                    var fullName = normalizeNullable(dto.ContactName);
-                    if (string.IsNullOrWhiteSpace(fullName))
-                        return (firstName, middleName, lastName);
-
-                    var tokens = fullName
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                        .ToList();
-
-                    if (tokens.Count == 0)
-                        return (firstName, middleName, lastName);
-
-                    if (tokens.Count == 1)
-                        return (tokens[0], null, tokens[0]);
-
-                    var fallbackFirstName = tokens.First();
-                    var fallbackLastName = tokens.Last();
-                    var middleTokens = tokens.Skip(1).Take(tokens.Count - 2).ToList();
-                    var fallbackMiddleName = middleTokens.Count > 0 ? string.Join(" ", middleTokens) : null;
-
-                    return (fallbackFirstName, fallbackMiddleName, fallbackLastName);
-                }
-
                 if (request == null || string.IsNullOrWhiteSpace(request.Name))
                 {
                     return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
@@ -486,405 +389,62 @@ namespace crm_api.Services
                         StatusCodes.Status400BadRequest);
                 }
 
-                var requestEmail = request.Email;
-                var requestPhone = request.Phone;
-                var requestPhone2 = request.Phone2;
-                var normalizedRequestCompanyKey = normalizeCompanyKey(request.Name);
-
-                var customerQuery = _unitOfWork.Customers
-                    .Query(tracking: false, ignoreQueryFilters: true);
-
-                if (request.BranchCode.HasValue)
-                {
-                    customerQuery = customerQuery.Where(c => c.BranchCode == request.BranchCode.Value);
-                }
-
-                var emailMatchedIds = new HashSet<long>();
-                if (!string.IsNullOrWhiteSpace(requestEmail))
-                {
-                    var ids = await customerQuery
-                        .Where(c => c.Email == requestEmail)
-                        .Select(c => c.Id)
-                        .ToListAsync().ConfigureAwait(false);
-                    foreach (var id in ids)
-                        emailMatchedIds.Add(id);
-                }
-
-                var phoneMatchedIds = new HashSet<long>();
-                if (!string.IsNullOrWhiteSpace(requestPhone) || !string.IsNullOrWhiteSpace(requestPhone2))
-                {
-                    var ids = await customerQuery
-                        .Where(c =>
-                            (!string.IsNullOrWhiteSpace(requestPhone) && (c.Phone1 == requestPhone || c.Phone2 == requestPhone)) ||
-                            (!string.IsNullOrWhiteSpace(requestPhone2) && (c.Phone1 == requestPhone2 || c.Phone2 == requestPhone2)))
-                        .Select(c => c.Id)
-                        .ToListAsync().ConfigureAwait(false);
-                    foreach (var id in ids)
-                        phoneMatchedIds.Add(id);
-                }
-
-                var matchedIds = new HashSet<long>();
-                if (emailMatchedIds.Count > 0) foreach (var id in emailMatchedIds) matchedIds.Add(id);
-                if (phoneMatchedIds.Count > 0) foreach (var id in phoneMatchedIds) matchedIds.Add(id);
-
-                var matchedCustomers = matchedIds.Count == 0
-                    ? new List<Customer>()
-                    : await customerQuery
-                        .Where(c => matchedIds.Contains(c.Id))
-                        .ToListAsync().ConfigureAwait(false);
-
-                var companyMatchedCustomers = string.IsNullOrWhiteSpace(normalizedRequestCompanyKey)
-                    ? matchedCustomers
-                    : matchedCustomers
-                        .Where(c => string.Equals(normalizeCompanyKey(c.CustomerName), normalizedRequestCompanyKey, StringComparison.Ordinal))
-                        .ToList();
-
-                if (matchedCustomers.Count > 1 && companyMatchedCustomers.Count != 1)
-                {
-                    var matchedDetails = new List<string>();
-                    if (emailMatchedIds.Count > 0)
-                        matchedDetails.Add($"email=>[{string.Join(", ", emailMatchedIds.OrderBy(x => x))}]");
-                    if (phoneMatchedIds.Count > 0)
-                        matchedDetails.Add($"telefon=>[{string.Join(", ", phoneMatchedIds.OrderBy(x => x))}]");
-                    matchedDetails.Add(companyMatchedCustomers.Count == 0
-                        ? "sirket-adi=>eslesme-yok"
-                        : $"sirket-adi=>[{string.Join(", ", companyMatchedCustomers.Select(x => x.Id).OrderBy(x => x))}]");
-
-                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("CustomerService.ConflictingCustomerMatches"),
-                        _localizationService.GetLocalizedString("CustomerService.ConflictingCustomerMatchesDetail", string.Join(" | ", matchedDetails)),
-                        StatusCodes.Status409Conflict);
-                }
-
-                if (matchedCustomers.Count == 1 && companyMatchedCustomers.Count == 0 && !string.IsNullOrWhiteSpace(normalizedRequestCompanyKey))
-                {
-                    var matchedCustomer = matchedCustomers[0];
-                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
-                        _localizationService.GetLocalizedString("CustomerService.ConflictingCustomerMatches"),
-                        _localizationService.GetLocalizedString(
-                            "CustomerService.ConflictingCustomerMatchesDetail",
-                            $"musteriId=>[{matchedCustomer.Id}] | sirket-adi=>[{matchedCustomer.CustomerName}] | beklenen=>[{request.Name}]"),
-                        StatusCodes.Status409Conflict);
-                }
-
-                var existingCustomerId = companyMatchedCustomers.Count == 1
-                    ? companyMatchedCustomers[0].Id
-                    : matchedCustomers.FirstOrDefault()?.Id ?? 0;
-
+                BusinessCardOcrProcessingState processingState;
+                Customer customer;
+                var shouldRefreshCoordinates = false;
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                 try
                 {
-                    Customer customer;
-                    var customerCreated = false;
+                    (customer, var customerAction, shouldRefreshCoordinates) = await ResolveBusinessCardCustomerAsync(request).ConfigureAwait(false);
+                    var titleResolution = await ResolveBusinessCardTitleAsync(request.Title).ConfigureAwait(false);
+                    var contactResolution = await ResolveBusinessCardContactAsync(request, customer.Id, titleResolution.Title.Id).ConfigureAwait(false);
 
-                    if (existingCustomerId > 0)
+                    processingState = new BusinessCardOcrProcessingState
                     {
-                        var existingCustomer = await _unitOfWork.Customers
-                            .Query(tracking: true, ignoreQueryFilters: true)
-                            .FirstOrDefaultAsync(c => c.Id == existingCustomerId).ConfigureAwait(false);
-
-                        if (existingCustomer == null)
-                        {
-                            return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
-                                _localizationService.GetLocalizedString("CustomerService.CustomerNotFound"),
-                                _localizationService.GetLocalizedString("CustomerService.CustomerNotFound"),
-                                StatusCodes.Status404NotFound);
-                        }
-
-                        if (existingCustomer.IsDeleted)
-                        {
-                            existingCustomer.IsDeleted = false;
-                            existingCustomer.DeletedDate = null;
-                            existingCustomer.DeletedBy = null;
-                        }
-
-                        existingCustomer.CustomerName = request.Name.Trim();
-                        existingCustomer.Email = normalizeNullable(request.Email);
-                        existingCustomer.Phone1 = normalizeNullable(request.Phone);
-                        existingCustomer.Phone2 = normalizeNullable(request.Phone2);
-                        existingCustomer.Address = normalizeNullable(request.Address);
-                        existingCustomer.Website = normalizeNullable(request.Website);
-                        existingCustomer.Notes = normalizeNullable(request.Notes);
-                        existingCustomer.CountryId = request.CountryId;
-                        existingCustomer.CityId = request.CityId;
-                        existingCustomer.DistrictId = request.DistrictId;
-                        existingCustomer.CustomerTypeId = request.CustomerTypeId;
-                        existingCustomer.SalesRepCode = normalizeNullable(request.SalesRepCode);
-                        existingCustomer.GroupCode = normalizeNullable(request.GroupCode);
-                        existingCustomer.CreditLimit = request.CreditLimit;
-                        existingCustomer.BranchCode = request.BranchCode ?? existingCustomer.BranchCode;
-                        existingCustomer.BusinessUnitCode = request.BusinessUnitCode ?? existingCustomer.BusinessUnitCode;
-
-                        await _unitOfWork.Customers.UpdateAsync(existingCustomer).ConfigureAwait(false);
-                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-                        customer = existingCustomer;
-                    }
-                    else
-                    {
-                        // Geocoding transaction dışında yapılır; ağ gecikmesi DB lock süresini uzatmasın.
-                        var mobileFullAddress = await BuildFullAddressAsync(request.Address, request.CountryId, request.CityId, request.DistrictId).ConfigureAwait(false);
-                        var mobileCoords = !string.IsNullOrWhiteSpace(mobileFullAddress)
-                            ? await _geocodingService.GeocodeAsync(mobileFullAddress).ConfigureAwait(false)
-                            : null;
-
-                        customer = new Customer
-                        {
-                            CustomerName = request.Name.Trim(),
-                            Email = normalizeNullable(request.Email),
-                            Phone1 = normalizeNullable(request.Phone),
-                            Phone2 = normalizeNullable(request.Phone2),
-                            Address = normalizeNullable(request.Address),
-                            Website = normalizeNullable(request.Website),
-                            Notes = normalizeNullable(request.Notes),
-                            CountryId = request.CountryId,
-                            CityId = request.CityId,
-                            DistrictId = request.DistrictId,
-                            CustomerTypeId = request.CustomerTypeId,
-                            SalesRepCode = normalizeNullable(request.SalesRepCode),
-                            GroupCode = normalizeNullable(request.GroupCode),
-                            CreditLimit = request.CreditLimit,
-                            BranchCode = request.BranchCode ?? 1,
-                            BusinessUnitCode = request.BusinessUnitCode ?? 1,
-                            Latitude = mobileCoords?.Latitude,
-                            Longitude = mobileCoords?.Longitude
-                        };
-
-                        await _unitOfWork.Customers.AddAsync(customer).ConfigureAwait(false);
-                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                        customerCreated = true;
-                    }
-
-                    var imageUploaded = false;
-                    string? imageUploadError = null;
-
-                    if (request.ImageFile != null && request.ImageFile.Length > 0)
-                    {
-                        var uploadResult = await _fileUploadService.UploadCustomerImageAsync(request.ImageFile, customer.Id).ConfigureAwait(false);
-                        if (uploadResult.Success && !string.IsNullOrWhiteSpace(uploadResult.Data))
-                        {
-                            var customerImage = new CustomerImage
-                            {
-                                CustomerId = customer.Id,
-                                ImageUrl = uploadResult.Data,
-                                ImageDescription = normalizeNullable(request.ImageDescription)
-                            };
-                            await _unitOfWork.CustomerImages.AddAsync(customerImage).ConfigureAwait(false);
-                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                            imageUploaded = true;
-                        }
-                        else
-                        {
-                            imageUploadError = uploadResult.Message ?? uploadResult.ExceptionMessage ?? _localizationService.GetLocalizedString("CustomerService.ImageUploadFailed");
-                            _logger.LogWarning("mobileCreate: customer {CustomerId} created but image upload failed. Error: {Error}", customer.Id, imageUploadError);
-                        }
-                    }
-
-                    var fallbackUnknownTitleName = _localizationService.GetLocalizedString("General.Unknown");
-                    long? titleId = null;
-                    var titleCreated = false;
-                    var (contactFirstName, contactMiddleName, contactLastName) = resolveContactNames(request);
-                    var hasContact = !string.IsNullOrWhiteSpace(contactFirstName) && !string.IsNullOrWhiteSpace(contactLastName);
-                    var requestedTitle = normalizeTitleDisplay(request.Title);
-                    var resolvedTitleName = string.IsNullOrWhiteSpace(requestedTitle)
-                        ? fallbackUnknownTitleName
-                        : requestedTitle;
-                    var resolvedTitleKey = normalizeTitleKey(resolvedTitleName);
-
-                    var existingTitle = await _unitOfWork.Titles
-                        .Query(tracking: true, ignoreQueryFilters: true)
-                        .ToListAsync().ConfigureAwait(false);
-
-                    var matchedTitle = existingTitle.FirstOrDefault(t => normalizeTitleKey(t.TitleName) == resolvedTitleKey);
-
-                    if (matchedTitle == null)
-                    {
-                        matchedTitle = new Title
-                        {
-                            TitleName = resolvedTitleName
-                        };
-                        await _unitOfWork.Titles.AddAsync(matchedTitle).ConfigureAwait(false);
-                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                        titleCreated = true;
-                    }
-                    else
-                    {
-                        if (matchedTitle.IsDeleted)
-                        {
-                            matchedTitle.IsDeleted = false;
-                            matchedTitle.DeletedDate = null;
-                            matchedTitle.DeletedBy = null;
-                        }
-
-                        if (!string.Equals(normalizeTitleDisplay(matchedTitle.TitleName), resolvedTitleName, StringComparison.Ordinal))
-                        {
-                            matchedTitle.TitleName = resolvedTitleName;
-                        }
-
-                        await _unitOfWork.Titles.UpdateAsync(matchedTitle).ConfigureAwait(false);
-                        await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                    }
-
-                    titleId = matchedTitle.Id;
-
-                    long? contactId = null;
-                    var contactCreated = false;
-                    if (hasContact)
-                    {
-                        var contactPhone = selectLandline(request.Phone, request.Phone2);
-                        var contactMobile = selectMobile(request.Phone, request.Phone2);
-                        var fullName = string.Join(" ", new[] { contactFirstName, contactMiddleName, contactLastName }
-                            .Where(x => !string.IsNullOrWhiteSpace(x)))
-                            .Trim();
-                        var normalizedContactFullName = normalizeNullable(fullName)?.ToUpperInvariant();
-                        var normalizedContactEmail = normalizeNullable(request.Email)?.ToUpperInvariant();
-                        var normalizedContactPhone = NormalizeDigits(contactPhone);
-                        var normalizedContactMobile = NormalizeDigits(contactMobile);
-                        var normalizedContactNumbers = new HashSet<string>(
-                            new[] { normalizedContactPhone, normalizedContactMobile }
-                                .Where(x => !string.IsNullOrWhiteSpace(x))!
-                        );
-                        var hasComparableIdentifier =
-                            !string.IsNullOrWhiteSpace(normalizedContactFullName) ||
-                            !string.IsNullOrWhiteSpace(normalizedContactEmail) ||
-                            normalizedContactNumbers.Count > 0;
-
-                        var candidateContacts = await _unitOfWork.Contacts
-                            .Query(tracking: true, ignoreQueryFilters: true)
-                            .Where(c =>
-                                (!string.IsNullOrWhiteSpace(normalizedContactFullName) && !string.IsNullOrWhiteSpace(c.FullName)) ||
-                                (!string.IsNullOrWhiteSpace(normalizedContactEmail) && !string.IsNullOrWhiteSpace(c.Email)) ||
-                                normalizedContactNumbers.Count > 0)
-                            .ToListAsync().ConfigureAwait(false);
-
-                        bool isSameContact(Contact c)
-                        {
-                            if (!hasComparableIdentifier)
-                                return false;
-
-                            var fullNameMatched =
-                                !string.IsNullOrWhiteSpace(normalizedContactFullName) &&
-                                string.Equals(
-                                    normalizeNullable(c.FullName)?.ToUpperInvariant(),
-                                    normalizedContactFullName,
-                                    StringComparison.Ordinal);
-
-                            var emailMatched =
-                                !string.IsNullOrWhiteSpace(normalizedContactEmail) &&
-                                string.Equals(
-                                    normalizeNullable(c.Email)?.ToUpperInvariant(),
-                                    normalizedContactEmail,
-                                    StringComparison.Ordinal);
-
-                            var phoneMatched = normalizedContactNumbers.Count > 0 &&
-                                               (
-                                                   normalizedContactNumbers.Contains(NormalizeDigits(c.Phone)) ||
-                                                   normalizedContactNumbers.Contains(NormalizeDigits(c.Mobile))
-                                               );
-
-                            return fullNameMatched || emailMatched || phoneMatched;
-                        }
-
-                        var matchedExistingSameCustomerContact = candidateContacts.FirstOrDefault(c => c.CustomerId == customer.Id && !c.IsDeleted && isSameContact(c));
-                        if (matchedExistingSameCustomerContact != null)
-                        {
-                            matchedExistingSameCustomerContact.Salutation = SalutationType.None;
-                            matchedExistingSameCustomerContact.FirstName = contactFirstName!;
-                            matchedExistingSameCustomerContact.MiddleName = contactMiddleName;
-                            matchedExistingSameCustomerContact.LastName = contactLastName!;
-                            matchedExistingSameCustomerContact.FullName = fullName;
-                            matchedExistingSameCustomerContact.Email = normalizeNullable(request.Email);
-                            matchedExistingSameCustomerContact.Phone = normalizeNullable(contactPhone);
-                            matchedExistingSameCustomerContact.Mobile = normalizeNullable(contactMobile);
-                            matchedExistingSameCustomerContact.Notes = normalizeNullable(request.Notes);
-                            matchedExistingSameCustomerContact.TitleId = titleId;
-
-                            await _unitOfWork.Contacts.UpdateAsync(matchedExistingSameCustomerContact).ConfigureAwait(false);
-                            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                            contactId = matchedExistingSameCustomerContact.Id;
-                        }
-                        else
-                        {
-                            var matchedExistingOtherCustomerContact = candidateContacts.FirstOrDefault(c => c.CustomerId != customer.Id && !c.IsDeleted && isSameContact(c));
-                            if (matchedExistingOtherCustomerContact != null)
-                            {
-                                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
-                                var duplicateContactMessage = _localizationService.GetLocalizedString("CustomerService.MobileOcrDuplicateContact");
-                                return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
-                                    duplicateContactMessage,
-                                    duplicateContactMessage,
-                                    StatusCodes.Status409Conflict);
-                            }
-
-                            var matchedDeletedSameCustomerContact = candidateContacts.FirstOrDefault(c => c.CustomerId == customer.Id && c.IsDeleted && isSameContact(c));
-                            var matchedDeletedOtherCustomerContact = candidateContacts.FirstOrDefault(c => c.CustomerId != customer.Id && c.IsDeleted && isSameContact(c));
-                            var matchedDeletedContact = matchedDeletedSameCustomerContact ?? matchedDeletedOtherCustomerContact;
-
-                            if (matchedDeletedContact != null)
-                            {
-                                matchedDeletedContact.IsDeleted = false;
-                                matchedDeletedContact.DeletedDate = null;
-                                matchedDeletedContact.DeletedBy = null;
-                                matchedDeletedContact.Salutation = SalutationType.None;
-                                matchedDeletedContact.FirstName = contactFirstName!;
-                                matchedDeletedContact.MiddleName = contactMiddleName;
-                                matchedDeletedContact.LastName = contactLastName!;
-                                matchedDeletedContact.FullName = fullName;
-                                matchedDeletedContact.Email = normalizeNullable(request.Email);
-                                matchedDeletedContact.Phone = normalizeNullable(contactPhone);
-                                matchedDeletedContact.Mobile = normalizeNullable(contactMobile);
-                                matchedDeletedContact.Notes = normalizeNullable(request.Notes);
-                                matchedDeletedContact.CustomerId = customer.Id;
-                                matchedDeletedContact.TitleId = titleId;
-
-                                await _unitOfWork.Contacts.UpdateAsync(matchedDeletedContact).ConfigureAwait(false);
-                                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                                contactId = matchedDeletedContact.Id;
-                            }
-                            else
-                            {
-                                var contact = new Contact
-                                {
-                                    Salutation = SalutationType.None,
-                                    FirstName = contactFirstName!,
-                                    MiddleName = contactMiddleName,
-                                    LastName = contactLastName!,
-                                    FullName = fullName,
-                                    Email = normalizeNullable(request.Email),
-                                    Phone = normalizeNullable(contactPhone),
-                                    Mobile = normalizeNullable(contactMobile),
-                                    Notes = normalizeNullable(request.Notes),
-                                    CustomerId = customer.Id,
-                                    TitleId = titleId
-                                };
-
-                                await _unitOfWork.Contacts.AddAsync(contact).ConfigureAwait(false);
-                                contactCreated = true;
-
-                                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                                contactId = contact.Id;
-                            }
-                        }
-                    }
+                        CustomerId = customer.Id,
+                        CustomerAction = customerAction,
+                        ContactId = contactResolution.Contact?.Id,
+                        ContactAction = contactResolution.Action,
+                        TitleId = titleResolution.Title.Id,
+                        TitleAction = titleResolution.Action,
+                        ResolvedTitleName = titleResolution.Title.TitleName,
+                        UsedFallbackTitle = titleResolution.UsedFallbackTitle
+                    };
 
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                    var imageUpload = await TryUploadBusinessCardImageAsync(customer.Id, request).ConfigureAwait(false);
+                    await TryRefreshBusinessCardCoordinatesAsync(customer, request, shouldRefreshCoordinates).ConfigureAwait(false);
+
                     var response = new CustomerCreateFromMobileResultDto
                     {
-                        CustomerId = customer.Id,
-                        CustomerCreated = customerCreated,
-                        ContactId = contactId,
-                        ContactCreated = contactCreated,
-                        TitleId = titleId,
-                        TitleCreated = titleCreated,
-                        ImageUploaded = imageUploaded,
-                        ImageUploadError = imageUploadError
+                        CustomerId = processingState.CustomerId,
+                        CustomerCreated = string.Equals(processingState.CustomerAction, BusinessCardOcrActions.Created, StringComparison.Ordinal),
+                        CustomerAction = processingState.CustomerAction,
+                        ContactId = processingState.ContactId,
+                        ContactCreated = string.Equals(processingState.ContactAction, BusinessCardOcrActions.Created, StringComparison.Ordinal),
+                        ContactAction = processingState.ContactAction,
+                        TitleId = processingState.TitleId,
+                        TitleCreated = string.Equals(processingState.TitleAction, BusinessCardOcrActions.Created, StringComparison.Ordinal),
+                        TitleAction = processingState.TitleAction,
+                        ResolvedTitleName = processingState.ResolvedTitleName,
+                        UsedFallbackTitle = processingState.UsedFallbackTitle,
+                        ImageUploaded = imageUpload.ImageUploaded,
+                        ImageUploadError = imageUpload.ImageUploadError
                     };
 
                     return ApiResponse<CustomerCreateFromMobileResultDto>.SuccessResult(
                         response,
                         _localizationService.GetLocalizedString("CustomerService.CustomerCreated"));
+                }
+                catch (BusinessCardOcrConflictException ex)
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<CustomerCreateFromMobileResultDto>.ErrorResult(
+                        ex.MessageText,
+                        ex.Detail,
+                        StatusCodes.Status409Conflict);
                 }
                 catch
                 {
@@ -1536,6 +1096,484 @@ namespace crm_api.Services
             if (!string.IsNullOrWhiteSpace(first))
                 return first;
             return string.IsNullOrWhiteSpace(second) ? null : second;
+        }
+
+        private async Task<(Customer Customer, string Action, bool ShouldRefreshCoordinates)> ResolveBusinessCardCustomerAsync(CustomerCreateFromMobileDto request)
+        {
+            var normalizedCompanyKey = BusinessCardOcrNormalizer.NormalizeCompanyKey(request.Name);
+            var requestedCompanyName = BusinessCardOcrNormalizer.CollapseWhitespace(request.Name);
+
+            IQueryable<Customer> query = _unitOfWork.Customers.Query(tracking: true, ignoreQueryFilters: true);
+            if (request.BranchCode.HasValue)
+            {
+                query = query.Where(c => c.BranchCode == request.BranchCode.Value);
+            }
+
+            var prefilterTokens = requestedCompanyName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(token => token.Length >= 3)
+                .OrderByDescending(token => token.Length)
+                .Take(3)
+                .ToList();
+
+            if (prefilterTokens.Count > 0)
+            {
+                var primaryToken = prefilterTokens[0];
+                query = query.Where(c => c.CustomerName.Contains(primaryToken));
+            }
+
+            var companyCandidates = await query
+                .Where(c => !string.IsNullOrWhiteSpace(c.CustomerName))
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var exactCompanyMatches = companyCandidates
+                .Where(c => BusinessCardOcrNormalizer.NormalizeCompanyKey(c.CustomerName) == normalizedCompanyKey)
+                .OrderBy(c => c.Id)
+                .ToList();
+
+            var activeMatches = exactCompanyMatches.Where(c => !c.IsDeleted).ToList();
+            var deletedMatches = exactCompanyMatches.Where(c => c.IsDeleted).ToList();
+
+            if (activeMatches.Count > 1 || (!activeMatches.Any() && deletedMatches.Count > 1))
+            {
+                var detail = $"sirket-adi=>[{string.Join(", ", exactCompanyMatches.Select(x => x.Id))}] | beklenen=>[{requestedCompanyName}]";
+                throw new BusinessCardOcrConflictException(
+                    _localizationService.GetLocalizedString("CustomerService.ConflictingCustomerMatches"),
+                    _localizationService.GetLocalizedString("CustomerService.ConflictingCustomerMatchesDetail", detail));
+            }
+
+            if (activeMatches.Count == 1)
+            {
+                var existingCustomer = activeMatches[0];
+                var shouldRefreshCoordinates = MergeBusinessCardCustomer(existingCustomer, request, overwriteExistingFields: false);
+                await _unitOfWork.Customers.UpdateAsync(existingCustomer).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                _logger.LogInformation("Business card OCR reused company {CustomerId} for normalized name {CompanyKey}.", existingCustomer.Id, normalizedCompanyKey);
+                return (existingCustomer, BusinessCardOcrActions.Reused, shouldRefreshCoordinates);
+            }
+
+            if (deletedMatches.Count == 1)
+            {
+                var deletedCustomer = deletedMatches[0];
+                deletedCustomer.IsDeleted = false;
+                deletedCustomer.DeletedDate = null;
+                deletedCustomer.DeletedBy = null;
+                var shouldRefreshCoordinates = MergeBusinessCardCustomer(deletedCustomer, request, overwriteExistingFields: true);
+                await _unitOfWork.Customers.UpdateAsync(deletedCustomer).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                _logger.LogInformation("Business card OCR reactivated company {CustomerId} for normalized name {CompanyKey}.", deletedCustomer.Id, normalizedCompanyKey);
+                return (deletedCustomer, BusinessCardOcrActions.Reactivated, shouldRefreshCoordinates);
+            }
+
+            var customer = new Customer();
+            MergeBusinessCardCustomer(customer, request, overwriteExistingFields: true);
+            await _unitOfWork.Customers.AddAsync(customer).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            _logger.LogInformation("Business card OCR created company {CustomerId} for normalized name {CompanyKey}.", customer.Id, normalizedCompanyKey);
+            return (customer, BusinessCardOcrActions.Created, true);
+        }
+
+        private async Task<(Title Title, string Action, bool UsedFallbackTitle)> ResolveBusinessCardTitleAsync(string? requestedTitle)
+        {
+            var localizedUnknownTitle = _localizationService.GetLocalizedString(BusinessCardOcrDefaults.UnknownTitleLocalizationKey);
+            var unknownTitleName = string.IsNullOrWhiteSpace(localizedUnknownTitle) ||
+                                   string.Equals(localizedUnknownTitle, BusinessCardOcrDefaults.UnknownTitleLocalizationKey, StringComparison.Ordinal)
+                ? BusinessCardOcrDefaults.UnknownTitleFallback
+                : localizedUnknownTitle;
+
+            var requestedTitleDisplay = BusinessCardOcrNormalizer.NormalizeNullable(requestedTitle);
+            var requestedTitleKey = BusinessCardOcrNormalizer.NormalizeTitleKey(requestedTitleDisplay);
+            var unknownTitleKey = BusinessCardOcrNormalizer.NormalizeTitleKey(unknownTitleName);
+
+            var titles = await _unitOfWork.Titles
+                .Query(tracking: true, ignoreQueryFilters: true)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(requestedTitleKey))
+            {
+                var matchingRequestedTitle = titles.FirstOrDefault(t => BusinessCardOcrNormalizer.NormalizeTitleKey(t.TitleName) == requestedTitleKey);
+                if (matchingRequestedTitle != null)
+                {
+                    var action = matchingRequestedTitle.IsDeleted ? BusinessCardOcrActions.Reactivated : BusinessCardOcrActions.Reused;
+                    if (matchingRequestedTitle.IsDeleted)
+                    {
+                        matchingRequestedTitle.IsDeleted = false;
+                        matchingRequestedTitle.DeletedDate = null;
+                        matchingRequestedTitle.DeletedBy = null;
+                    }
+
+                    matchingRequestedTitle.TitleName = requestedTitleDisplay!;
+                    await _unitOfWork.Titles.UpdateAsync(matchingRequestedTitle).ConfigureAwait(false);
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                    _logger.LogInformation("Business card OCR {Action} title {TitleId} using OCR title '{TitleName}'.", action, matchingRequestedTitle.Id, matchingRequestedTitle.TitleName);
+                    return (matchingRequestedTitle, action, false);
+                }
+            }
+
+            var unknownTitle = titles.FirstOrDefault(t => BusinessCardOcrNormalizer.NormalizeTitleKey(t.TitleName) == unknownTitleKey);
+            if (unknownTitle != null)
+            {
+                var action = unknownTitle.IsDeleted ? BusinessCardOcrActions.Reactivated : BusinessCardOcrActions.Reused;
+                if (unknownTitle.IsDeleted)
+                {
+                    unknownTitle.IsDeleted = false;
+                    unknownTitle.DeletedDate = null;
+                    unknownTitle.DeletedBy = null;
+                }
+
+                unknownTitle.TitleName = unknownTitleName;
+                await _unitOfWork.Titles.UpdateAsync(unknownTitle).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                _logger.LogInformation("Business card OCR {Action} fallback title {TitleId} as '{TitleName}'.", action, unknownTitle.Id, unknownTitle.TitleName);
+                return (unknownTitle, action, true);
+            }
+
+            var createdUnknownTitle = new Title
+            {
+                TitleName = unknownTitleName
+            };
+            await _unitOfWork.Titles.AddAsync(createdUnknownTitle).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            _logger.LogInformation("Business card OCR created fallback title {TitleId} as '{TitleName}'.", createdUnknownTitle.Id, createdUnknownTitle.TitleName);
+            return (createdUnknownTitle, BusinessCardOcrActions.Created, true);
+        }
+
+        private async Task<(Contact? Contact, string? Action)> ResolveBusinessCardContactAsync(CustomerCreateFromMobileDto request, long customerId, long titleId)
+        {
+            var (firstName, middleName, lastName) = ResolveBusinessCardContactNames(request);
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                return (null, null);
+            }
+
+            var fullName = string.Join(" ", new[] { firstName, middleName, lastName }
+                .Where(x => !string.IsNullOrWhiteSpace(x)));
+
+            var normalizedEmail = BusinessCardOcrNormalizer.NormalizeEmail(request.Email);
+            var mobile = SelectMobilePhone(request.Phone, request.Phone2);
+            var landline = SelectLandlinePhone(request.Phone, request.Phone2);
+            var normalizedMobile = BusinessCardOcrNormalizer.NormalizePhone(mobile);
+            var normalizedLandline = BusinessCardOcrNormalizer.NormalizePhone(landline);
+            var normalizedFullName = BusinessCardOcrNormalizer.NormalizePersonName(fullName);
+
+            var contacts = await _unitOfWork.Contacts
+                .Query(tracking: true, ignoreQueryFilters: true)
+                .Where(c => c.CustomerId == customerId &&
+                    (
+                        (!string.IsNullOrWhiteSpace(normalizedEmail) && !string.IsNullOrWhiteSpace(c.Email)) ||
+                        ((!string.IsNullOrWhiteSpace(normalizedMobile) || !string.IsNullOrWhiteSpace(normalizedLandline)) &&
+                            (!string.IsNullOrWhiteSpace(c.Mobile) || !string.IsNullOrWhiteSpace(c.Phone))) ||
+                        (!string.IsNullOrWhiteSpace(normalizedFullName) && !string.IsNullOrWhiteSpace(c.FullName))
+                    ))
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            Contact? matchedContact = null;
+            if (!string.IsNullOrWhiteSpace(normalizedEmail))
+            {
+                matchedContact = contacts.FirstOrDefault(c => BusinessCardOcrNormalizer.NormalizeEmail(c.Email) == normalizedEmail);
+            }
+
+            if (matchedContact == null && !string.IsNullOrWhiteSpace(normalizedMobile))
+            {
+                matchedContact = contacts.FirstOrDefault(c => BusinessCardOcrNormalizer.NormalizePhone(c.Mobile) == normalizedMobile);
+            }
+
+            if (matchedContact == null && !string.IsNullOrWhiteSpace(normalizedLandline))
+            {
+                matchedContact = contacts.FirstOrDefault(c =>
+                {
+                    var phoneMatched =
+                        BusinessCardOcrNormalizer.NormalizePhone(c.Phone) == normalizedLandline ||
+                        BusinessCardOcrNormalizer.NormalizePhone(c.Mobile) == normalizedLandline;
+
+                    if (!phoneMatched)
+                    {
+                        return false;
+                    }
+
+                    return string.IsNullOrWhiteSpace(normalizedFullName) ||
+                           BusinessCardOcrNormalizer.NormalizePersonName(c.FullName) == normalizedFullName;
+                });
+            }
+
+            if (matchedContact == null && !string.IsNullOrWhiteSpace(normalizedFullName))
+            {
+                matchedContact = contacts.FirstOrDefault(c => BusinessCardOcrNormalizer.NormalizePersonName(c.FullName) == normalizedFullName);
+            }
+
+            if (matchedContact != null)
+            {
+                var action = matchedContact.IsDeleted ? BusinessCardOcrActions.Reactivated : BusinessCardOcrActions.Reused;
+                if (matchedContact.IsDeleted)
+                {
+                    matchedContact.IsDeleted = false;
+                    matchedContact.DeletedDate = null;
+                    matchedContact.DeletedBy = null;
+                }
+
+                MapBusinessCardContactFields(matchedContact, firstName, middleName, lastName, fullName, request, landline, mobile, titleId);
+                await _unitOfWork.Contacts.UpdateAsync(matchedContact).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                _logger.LogInformation("Business card OCR {Action} contact {ContactId} under company {CustomerId}.", action, matchedContact.Id, customerId);
+                return (matchedContact, action);
+            }
+
+            var contact = new Contact();
+            MapBusinessCardContactFields(contact, firstName, middleName, lastName, fullName, request, landline, mobile, titleId);
+            contact.CustomerId = customerId;
+
+            await _unitOfWork.Contacts.AddAsync(contact).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            _logger.LogInformation("Business card OCR created contact {ContactId} under company {CustomerId}.", contact.Id, customerId);
+            return (contact, BusinessCardOcrActions.Created);
+        }
+
+        private bool MergeBusinessCardCustomer(Customer customer, CustomerCreateFromMobileDto request, bool overwriteExistingFields)
+        {
+            var normalizedAddress = BusinessCardOcrNormalizer.NormalizeNullable(request.Address);
+            var normalizedWebsite = BusinessCardOcrNormalizer.NormalizeNullable(request.Website);
+            var normalizedNotes = BusinessCardOcrNormalizer.NormalizeNullable(request.Notes);
+            var normalizedPhone = BusinessCardOcrNormalizer.NormalizeNullable(request.Phone);
+            var normalizedPhone2 = BusinessCardOcrNormalizer.NormalizeNullable(request.Phone2);
+            var normalizedEmail = BusinessCardOcrNormalizer.NormalizeNullable(request.Email);
+            var normalizedSalesRepCode = BusinessCardOcrNormalizer.NormalizeNullable(request.SalesRepCode);
+            var normalizedGroupCode = BusinessCardOcrNormalizer.NormalizeNullable(request.GroupCode);
+            var requestedCompanyName = BusinessCardOcrNormalizer.CollapseWhitespace(request.Name);
+
+            var shouldRefreshCoordinates =
+                customer.Address != normalizedAddress ||
+                customer.CountryId != request.CountryId ||
+                customer.CityId != request.CityId ||
+                customer.DistrictId != request.DistrictId ||
+                !customer.Latitude.HasValue ||
+                !customer.Longitude.HasValue;
+
+            customer.CustomerName = string.IsNullOrWhiteSpace(customer.CustomerName) ? requestedCompanyName : customer.CustomerName;
+
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Address))
+                customer.Address = normalizedAddress;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Website))
+                customer.Website = normalizedWebsite;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Notes))
+                customer.Notes = normalizedNotes;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Phone1))
+                customer.Phone1 = normalizedPhone;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Phone2))
+                customer.Phone2 = normalizedPhone2;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.Email))
+                customer.Email = normalizedEmail;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.SalesRepCode))
+                customer.SalesRepCode = normalizedSalesRepCode;
+            if (overwriteExistingFields || string.IsNullOrWhiteSpace(customer.GroupCode))
+                customer.GroupCode = normalizedGroupCode;
+            if (overwriteExistingFields || !customer.CreditLimit.HasValue)
+                customer.CreditLimit = request.CreditLimit;
+            if (overwriteExistingFields || !customer.CountryId.HasValue)
+                customer.CountryId = request.CountryId;
+            if (overwriteExistingFields || !customer.CityId.HasValue)
+                customer.CityId = request.CityId;
+            if (overwriteExistingFields || !customer.DistrictId.HasValue)
+                customer.DistrictId = request.DistrictId;
+            if (overwriteExistingFields || !customer.CustomerTypeId.HasValue)
+                customer.CustomerTypeId = request.CustomerTypeId;
+
+            if (request.BranchCode.HasValue)
+            {
+                customer.BranchCode = request.BranchCode.Value;
+            }
+            else if (customer.BranchCode == 0)
+            {
+                customer.BranchCode = 1;
+            }
+
+            if (request.BusinessUnitCode.HasValue)
+            {
+                customer.BusinessUnitCode = request.BusinessUnitCode.Value;
+            }
+            else if (customer.BusinessUnitCode == 0)
+            {
+                customer.BusinessUnitCode = 1;
+            }
+
+            return shouldRefreshCoordinates;
+        }
+
+        private async Task TryRefreshBusinessCardCoordinatesAsync(Customer customer, CustomerCreateFromMobileDto request, bool shouldRefreshCoordinates)
+        {
+            if (!shouldRefreshCoordinates)
+            {
+                return;
+            }
+
+            try
+            {
+                var trackedCustomer = await _unitOfWork.Customers.GetByIdForUpdateAsync(customer.Id).ConfigureAwait(false);
+                if (trackedCustomer == null)
+                {
+                    return;
+                }
+
+                trackedCustomer.Address = trackedCustomer.Address ?? BusinessCardOcrNormalizer.NormalizeNullable(request.Address);
+                trackedCustomer.CountryId ??= request.CountryId;
+                trackedCustomer.CityId ??= request.CityId;
+                trackedCustomer.DistrictId ??= request.DistrictId;
+
+                await TryFillCoordinatesFromAddressAsync(trackedCustomer, allowOverwriteExistingCoords: true).ConfigureAwait(false);
+                await _unitOfWork.Customers.UpdateAsync(trackedCustomer).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Business card OCR could not refresh coordinates for customer {CustomerId}.", customer.Id);
+            }
+        }
+
+        private async Task<(bool ImageUploaded, string? ImageUploadError)> TryUploadBusinessCardImageAsync(long customerId, CustomerCreateFromMobileDto request)
+        {
+            if (request.ImageFile == null || request.ImageFile.Length <= 0)
+            {
+                return (false, null);
+            }
+
+            try
+            {
+                var uploadResult = await _fileUploadService.UploadCustomerImageAsync(request.ImageFile, customerId).ConfigureAwait(false);
+                if (!uploadResult.Success || string.IsNullOrWhiteSpace(uploadResult.Data))
+                {
+                    var uploadError = uploadResult.Message ??
+                                      uploadResult.ExceptionMessage ??
+                                      _localizationService.GetLocalizedString("CustomerService.ImageUploadFailed");
+                    _logger.LogWarning("Business card OCR created customer {CustomerId} but image upload failed. Error: {Error}", customerId, uploadError);
+                    return (false, uploadError);
+                }
+
+                var customerImage = new CustomerImage
+                {
+                    CustomerId = customerId,
+                    ImageUrl = uploadResult.Data,
+                    ImageDescription = BusinessCardOcrNormalizer.NormalizeNullable(request.ImageDescription)
+                };
+
+                await _unitOfWork.CustomerImages.AddAsync(customerImage).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Business card OCR image upload failed for customer {CustomerId}.", customerId);
+                return (false, _localizationService.GetLocalizedString("CustomerService.ImageUploadFailed"));
+            }
+        }
+
+        private static (string? FirstName, string? MiddleName, string? LastName) ResolveBusinessCardContactNames(CustomerCreateFromMobileDto dto)
+        {
+            var firstName = BusinessCardOcrNormalizer.NormalizeNullable(dto.ContactFirstName);
+            var middleName = BusinessCardOcrNormalizer.NormalizeNullable(dto.ContactMiddleName);
+            var lastName = BusinessCardOcrNormalizer.NormalizeNullable(dto.ContactLastName);
+
+            if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
+            {
+                return (firstName, middleName, lastName);
+            }
+
+            var fullName = BusinessCardOcrNormalizer.NormalizeNullable(dto.ContactName);
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                return (firstName, middleName, lastName);
+            }
+
+            var tokens = fullName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+
+            if (tokens.Count == 0)
+            {
+                return (firstName, middleName, lastName);
+            }
+
+            if (tokens.Count == 1)
+            {
+                return (tokens[0], null, tokens[0]);
+            }
+
+            return (
+                tokens.First(),
+                tokens.Count > 2 ? string.Join(" ", tokens.Skip(1).Take(tokens.Count - 2)) : null,
+                tokens.Last());
+        }
+
+        private static bool IsMobilePhone(string? value)
+        {
+            var normalized = BusinessCardOcrNormalizer.NormalizePhone(value);
+            return normalized.Length == 10 && normalized.StartsWith("5", StringComparison.Ordinal);
+        }
+
+        private static string? SelectMobilePhone(string? phone1, string? phone2)
+        {
+            var candidate1 = BusinessCardOcrNormalizer.NormalizeNullable(phone1);
+            var candidate2 = BusinessCardOcrNormalizer.NormalizeNullable(phone2);
+            if (IsMobilePhone(candidate1))
+            {
+                return candidate1;
+            }
+
+            if (IsMobilePhone(candidate2))
+            {
+                return candidate2;
+            }
+
+            return null;
+        }
+
+        private static string? SelectLandlinePhone(string? phone1, string? phone2)
+        {
+            var candidate1 = BusinessCardOcrNormalizer.NormalizeNullable(phone1);
+            var candidate2 = BusinessCardOcrNormalizer.NormalizeNullable(phone2);
+            if (!string.IsNullOrWhiteSpace(candidate1) && !IsMobilePhone(candidate1))
+            {
+                return candidate1;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate2) && !IsMobilePhone(candidate2))
+            {
+                return candidate2;
+            }
+
+            return null;
+        }
+
+        private static void MapBusinessCardContactFields(
+            Contact contact,
+            string firstName,
+            string? middleName,
+            string lastName,
+            string fullName,
+            CustomerCreateFromMobileDto request,
+            string? landline,
+            string? mobile,
+            long titleId)
+        {
+            contact.Salutation = SalutationType.None;
+            contact.FirstName = firstName;
+            contact.MiddleName = middleName;
+            contact.LastName = lastName;
+            contact.FullName = fullName;
+            contact.Email = BusinessCardOcrNormalizer.NormalizeNullable(request.Email);
+            contact.Phone = BusinessCardOcrNormalizer.NormalizeNullable(landline);
+            contact.Mobile = BusinessCardOcrNormalizer.NormalizeNullable(mobile);
+            contact.Notes = BusinessCardOcrNormalizer.NormalizeNullable(request.Notes);
+            contact.TitleId = titleId;
         }
 
         private static string NormalizeText(string? value)

@@ -68,10 +68,15 @@ namespace crm_api.DTOs
     {
         public long CustomerId { get; set; }
         public bool CustomerCreated { get; set; }
+        public string CustomerAction { get; set; } = string.Empty;
         public long? ContactId { get; set; }
         public bool ContactCreated { get; set; }
+        public string? ContactAction { get; set; }
         public long? TitleId { get; set; }
         public bool TitleCreated { get; set; }
+        public string TitleAction { get; set; } = string.Empty;
+        public string? ResolvedTitleName { get; set; }
+        public bool UsedFallbackTitle { get; set; }
         public bool ImageUploaded { get; set; }
         public string? ImageUploadError { get; set; }
     }
