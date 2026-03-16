@@ -26,6 +26,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] PagedRequest request)
+        {
+            var result = await _stockService.GetAllStocksAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("withImages")]
         public async Task<IActionResult> GetWithImages([FromQuery] PagedRequest request)
         {
