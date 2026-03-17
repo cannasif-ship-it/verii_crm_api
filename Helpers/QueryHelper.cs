@@ -9,6 +9,72 @@ namespace crm_api.Helpers
 {
     public static class QueryHelper
     {
+        public static IQueryable<T> ApplySearch<T>(this IQueryable<T> query, string? search, params string[] searchableColumns)
+        {
+            if (string.IsNullOrWhiteSpace(search) || searchableColumns.Length == 0)
+            {
+                return query;
+            }
+
+            var terms = search
+                .Trim()
+                .ToLowerInvariant()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (terms.Length == 0)
+            {
+                return query;
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? searchPredicate = null;
+
+            foreach (var term in terms)
+            {
+                Expression? termPredicate = null;
+                var searchValue = Expression.Constant(term);
+
+                foreach (var column in searchableColumns)
+                {
+                    var resolved = ResolvePropertyPath(parameter, typeof(T), column);
+                    if (resolved == null || resolved.Value.property.PropertyType != typeof(string))
+                    {
+                        continue;
+                    }
+
+                    var member = resolved.Value.expression;
+                    var notNull = Expression.NotEqual(member, Expression.Constant(null, typeof(string)));
+                    var toLower = Expression.Call(member, typeof(string).GetMethod(nameof(string.ToLower), Type.EmptyTypes)!);
+                    var contains = Expression.Call(
+                        toLower,
+                        typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!,
+                        searchValue);
+                    var currentPredicate = Expression.AndAlso(notNull, contains);
+
+                    termPredicate = termPredicate == null
+                        ? currentPredicate
+                        : Expression.OrElse(termPredicate, currentPredicate);
+                }
+
+                if (termPredicate == null)
+                {
+                    continue;
+                }
+
+                searchPredicate = searchPredicate == null
+                    ? termPredicate
+                    : Expression.AndAlso(searchPredicate, termPredicate);
+            }
+
+            if (searchPredicate == null)
+            {
+                return query;
+            }
+
+            var lambda = Expression.Lambda<Func<T, bool>>(searchPredicate, parameter);
+            return query.Where(lambda);
+        }
+
         /// <summary>
         /// Resolves a property path (possibly dot-notation like "Country.Name")
         /// to a chain of Expression.Property calls.
@@ -264,6 +330,7 @@ namespace crm_api.Helpers
         {
             if (request == null) return query;
 
+            query = query.ApplySearch(request.Search);
             query = query.ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
             query = query.ApplySorting(request.SortBy, request.SortDirection, columnMapping);
             query = query.ApplyPagination(request.PageNumber, request.PageSize);
