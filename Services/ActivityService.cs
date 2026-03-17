@@ -10,6 +10,23 @@ namespace crm_api.Services
 {
     public class ActivityService : IActivityService
     {
+        private static readonly string[] SearchableColumns =
+        [
+            nameof(Activity.Subject),
+            nameof(Activity.Description),
+            nameof(Activity.ErpCustomerCode),
+            "ActivityType.Name",
+            "PotentialCustomer.CustomerCode",
+            "PotentialCustomer.CustomerName",
+            "Contact.FirstName",
+            "Contact.LastName",
+            "Contact.FullName",
+            "AssignedUser.Username",
+            "AssignedUser.Email",
+            "AssignedUser.FirstName",
+            "AssignedUser.LastName"
+        ];
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
@@ -52,6 +69,7 @@ namespace crm_api.Services
                     .Include(a => a.CreatedByUser)
                     .Include(a => a.UpdatedByUser)
                     .Include(a => a.DeletedByUser)
+                    .ApplySearch(request.Search, SearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(Activity.Id);
