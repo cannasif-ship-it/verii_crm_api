@@ -20,6 +20,16 @@ namespace crm_api.Services
 {
     public class DemandService : IDemandService
     {
+        private static readonly string[] SearchableColumns =
+        [
+            nameof(Demand.OfferNo),
+            nameof(Demand.Currency),
+            "PotentialCustomer.CustomerName",
+            "Representative.FirstName",
+            "Representative.LastName",
+            "DocumentSerialType.SerialPrefix"
+        ];
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
@@ -79,8 +89,11 @@ namespace crm_api.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
+                    .Include(q => q.PotentialCustomer)
+                    .Include(q => q.Representative)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
+                    .ApplySearch(request.Search, SearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
@@ -1720,8 +1733,11 @@ namespace crm_api.Services
                     .Include(q => q.CreatedByUser)
                     .Include(q => q.UpdatedByUser)
                     .Include(q => q.DeletedByUser)
+                    .Include(q => q.PotentialCustomer)
+                    .Include(q => q.Representative)
                     .Include(q => q.DocumentSerialType)
                     .Include(q => q.SalesTypeDefinition)
+                    .ApplySearch(request.Search, SearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping2);
 
                 var sortBy = request.SortBy ?? nameof(Demand.Id);
