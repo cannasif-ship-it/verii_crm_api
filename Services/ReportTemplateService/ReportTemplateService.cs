@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using crm_api.DTOs;
+using crm_api.Helpers;
 using crm_api.Interfaces;
 using crm_api.Models;
 using crm_api.UnitOfWork;
@@ -47,6 +48,7 @@ namespace crm_api.Services
             {
                 var query = _unitOfWork.Repository<ReportTemplate>().Query()
                     .Where(rt => !rt.IsDeleted)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .AsQueryable();
 
                 // Apply filters

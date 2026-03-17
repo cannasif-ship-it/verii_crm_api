@@ -51,6 +51,7 @@ namespace crm_api.Services
                     .Include(afs => afs.DeletedByUser)
                     .Include(afs => afs.ApprovalFlow)
                     .Include(afs => afs.ApprovalRoleGroup)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalFlowStep.Id);

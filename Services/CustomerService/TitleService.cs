@@ -42,6 +42,7 @@ namespace crm_api.Services
                     .Include(t => t.CreatedByUser)
                     .Include(t => t.UpdatedByUser)
                     .Include(t => t.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? "Id";

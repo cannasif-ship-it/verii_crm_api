@@ -32,6 +32,7 @@ namespace crm_api.Services
                 var query = _unitOfWork.QuotationLines.Query()
                     .AsNoTracking()
                     .Where(ql => !ql.IsDeleted)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(QuotationLine.Id);

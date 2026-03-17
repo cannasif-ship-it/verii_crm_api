@@ -46,6 +46,7 @@ namespace crm_api.Services
                     .Include(e => e.CreatedByUser)
                     .Include(e => e.UpdatedByUser)
                     .Include(e => e.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(DemandExchangeRate.Id);

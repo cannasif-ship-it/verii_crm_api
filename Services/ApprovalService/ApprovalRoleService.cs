@@ -49,6 +49,7 @@ namespace crm_api.Services
                     .Include(ar => ar.UpdatedByUser)
                     .Include(ar => ar.DeletedByUser)
                     .Include(ar => ar.ApprovalRoleGroup)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalRole.Id);

@@ -44,6 +44,7 @@ namespace crm_api.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(UserDiscountLimit.Id);

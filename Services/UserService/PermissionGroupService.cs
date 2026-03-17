@@ -32,6 +32,7 @@ namespace crm_api.Services
                     .Include(x => x.DeletedByUser)
                     .Include(x => x.GroupPermissions.Where(gp => !gp.IsDeleted))
                     .ThenInclude(x => x.PermissionDefinition)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic)
                     .ApplySorting(request.SortBy ?? nameof(PermissionGroup.Id), request.SortDirection);
 

@@ -58,6 +58,7 @@ namespace crm_api.Services
                     .Include(d => d.UpdatedByUser)
                     .Include(d => d.DeletedByUser)
                     .Include(d => d.City)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(District.Id);

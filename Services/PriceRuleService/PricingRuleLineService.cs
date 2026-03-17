@@ -42,6 +42,7 @@ namespace crm_api.Services
                     .Include(l => l.CreatedByUser)
                     .Include(l => l.UpdatedByUser)
                     .Include(l => l.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(PricingRuleLine.Id);

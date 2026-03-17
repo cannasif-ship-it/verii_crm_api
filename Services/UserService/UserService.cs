@@ -82,7 +82,8 @@ namespace crm_api.Services
                     .Include(u => u.RoleNavigation)
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
-                    .Include(u => u.DeletedByUser);
+                    .Include(u => u.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns);
 
                 var fullNameFilters = request.Filters
                     .Where(f => string.Equals(f.Column, "fullName", StringComparison.OrdinalIgnoreCase)

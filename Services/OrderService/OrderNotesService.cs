@@ -35,6 +35,7 @@ namespace crm_api.Services
                 var query = _unitOfWork.OrderNotes.Query()
                     .AsNoTracking()
                     .Where(x => !x.IsDeleted)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic)
                     .ApplySorting(request.SortBy ?? nameof(OrderNotes.Id), request.SortDirection);
 

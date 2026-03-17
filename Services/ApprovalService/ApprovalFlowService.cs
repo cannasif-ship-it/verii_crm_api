@@ -43,6 +43,7 @@ namespace crm_api.Services
                     .Include(af => af.CreatedByUser)
                     .Include(af => af.UpdatedByUser)
                     .Include(af => af.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalFlow.Id);

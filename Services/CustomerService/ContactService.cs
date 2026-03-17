@@ -53,6 +53,7 @@ namespace crm_api.Services
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
                     .Include(c => c.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(Contact.Id);

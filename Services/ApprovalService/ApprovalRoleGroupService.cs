@@ -43,6 +43,7 @@ namespace crm_api.Services
                     .Include(arg => arg.CreatedByUser)
                     .Include(arg => arg.UpdatedByUser)
                     .Include(arg => arg.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalRoleGroup.Id);

@@ -39,6 +39,7 @@ namespace crm_api.Services
                     .Include(x => x.CreatedByUser)
                     .Include(x => x.UpdatedByUser)
                     .Include(x => x.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(PowerBIGroup.Id);

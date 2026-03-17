@@ -50,6 +50,7 @@ namespace crm_api.Services
                     .Include(aur => aur.DeletedByUser)
                     .Include(aur => aur.User)
                     .Include(aur => aur.ApprovalRole)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ApprovalUserRole.Id);

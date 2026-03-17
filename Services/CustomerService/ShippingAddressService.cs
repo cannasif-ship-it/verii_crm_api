@@ -57,6 +57,7 @@ namespace crm_api.Services
                     .Include(sa => sa.CreatedByUser)
                     .Include(sa => sa.UpdatedByUser)
                     .Include(sa => sa.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(ShippingAddress.Id);

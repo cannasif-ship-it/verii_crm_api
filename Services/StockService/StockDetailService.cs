@@ -47,6 +47,7 @@ namespace crm_api.Services
                     .Include(sd => sd.CreatedByUser)
                     .Include(sd => sd.UpdatedByUser)
                     .Include(sd => sd.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
                 var sortBy = request.SortBy ?? nameof(StockDetail.Id);

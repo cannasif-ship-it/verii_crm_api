@@ -43,6 +43,7 @@ namespace crm_api.Services
                     .Include(pt => pt.CreatedByUser)
                     .Include(pt => pt.UpdatedByUser)
                     .Include(pt => pt.DeletedByUser)
+                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic);
 
                 var sortBy = request.SortBy ?? nameof(PaymentType.Id);
