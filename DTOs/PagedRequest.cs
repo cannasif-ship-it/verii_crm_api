@@ -16,6 +16,7 @@ namespace crm_api.DTOs
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
+        public string? Search { get; set; }
         public string? SortBy { get; set; } = "Id";
         public string? SortDirection { get; set; } = "desc";
         public List<Filter>? Filters { get; set; } = new();

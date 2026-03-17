@@ -16,6 +16,7 @@ namespace crm_api.Infrastructure.ModelBinding
             var request = CreateRequestInstance(bindingContext);
             request.PageNumber = ParseInt(query, new[] { "pageNumber", "PageNumber" }, 1);
             request.PageSize = ParseInt(query, new[] { "pageSize", "PageSize" }, 20);
+            request.Search = ParseString(query, new[] { "search", "Search" });
             request.SortBy = ParseString(query, new[] { "sortBy", "SortBy" }) ?? "Id";
             request.SortDirection = ParseString(query, new[] { "sortDirection", "SortDirection" }) ?? "desc";
 
