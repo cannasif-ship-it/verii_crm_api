@@ -85,6 +85,10 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Satış Temsilcisi", Path = "RepresentativeName", DataType = "string", ExampleValue = "Ahmet Yılmaz" },
                     new FieldDefinition { Label = "Ödeme Tipi", Path = "PaymentTypeName", DataType = "string", ExampleValue = "Vadeli" },
                     new FieldDefinition { Label = "Para Birimi", Path = "Currency", DataType = "string", ExampleValue = "TRY" },
+                    new FieldDefinition { Label = "Genel İndirim Oranı", Path = "GeneralDiscountRate", DataType = "number", ExampleValue = "5" },
+                    new FieldDefinition { Label = "Genel İndirim Tutarı", Path = "GeneralDiscountAmount", DataType = "number", ExampleValue = "250.00" },
+                    new FieldDefinition { Label = "Net Toplam", Path = "Total", DataType = "number", ExampleValue = "4750.00" },
+                    new FieldDefinition { Label = "Genel Toplam", Path = "GrandTotal", DataType = "number", ExampleValue = "5605.00" },
                     new FieldDefinition { Label = "Açıklama", Path = "Description", DataType = "string", ExampleValue = "Acil talep" },
                     new FieldDefinition { Label = "Belge Seri Tipi", Path = "DocumentSerialTypeName", DataType = "string", ExampleValue = "A Serisi" },
                     
@@ -179,6 +183,10 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Satış Temsilcisi", Path = "RepresentativeName", DataType = "string", ExampleValue = "Ahmet Yılmaz" },
                     new FieldDefinition { Label = "Ödeme Tipi", Path = "PaymentTypeName", DataType = "string", ExampleValue = "Vadeli" },
                     new FieldDefinition { Label = "Para Birimi", Path = "Currency", DataType = "string", ExampleValue = "TRY" },
+                    new FieldDefinition { Label = "Genel İndirim Oranı", Path = "GeneralDiscountRate", DataType = "number", ExampleValue = "5" },
+                    new FieldDefinition { Label = "Genel İndirim Tutarı", Path = "GeneralDiscountAmount", DataType = "number", ExampleValue = "250.00" },
+                    new FieldDefinition { Label = "Net Toplam", Path = "Total", DataType = "number", ExampleValue = "4750.00" },
+                    new FieldDefinition { Label = "Genel Toplam", Path = "GrandTotal", DataType = "number", ExampleValue = "5605.00" },
                     new FieldDefinition { Label = "Açıklama", Path = "Description", DataType = "string", ExampleValue = "Özel teklif" },
                     new FieldDefinition { Label = "Belge Seri Tipi", Path = "DocumentSerialTypeName", DataType = "string", ExampleValue = "A Serisi" },
                     
@@ -273,6 +281,10 @@ namespace crm_api.DTOs
                     new FieldDefinition { Label = "Satış Temsilcisi", Path = "RepresentativeName", DataType = "string", ExampleValue = "Ahmet Yılmaz" },
                     new FieldDefinition { Label = "Ödeme Tipi", Path = "PaymentTypeName", DataType = "string", ExampleValue = "Vadeli" },
                     new FieldDefinition { Label = "Para Birimi", Path = "Currency", DataType = "string", ExampleValue = "TRY" },
+                    new FieldDefinition { Label = "Genel İndirim Oranı", Path = "GeneralDiscountRate", DataType = "number", ExampleValue = "5" },
+                    new FieldDefinition { Label = "Genel İndirim Tutarı", Path = "GeneralDiscountAmount", DataType = "number", ExampleValue = "250.00" },
+                    new FieldDefinition { Label = "Net Toplam", Path = "Total", DataType = "number", ExampleValue = "4750.00" },
+                    new FieldDefinition { Label = "Genel Toplam", Path = "GrandTotal", DataType = "number", ExampleValue = "5605.00" },
                     new FieldDefinition { Label = "Açıklama", Path = "Description", DataType = "string", ExampleValue = "Acil sipariş" },
                     new FieldDefinition { Label = "Belge Seri Tipi", Path = "DocumentSerialTypeName", DataType = "string", ExampleValue = "A Serisi" },
                     

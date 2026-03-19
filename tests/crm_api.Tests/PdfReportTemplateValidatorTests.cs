@@ -216,5 +216,44 @@ namespace crm_api.Tests
             var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);
             Assert.Empty(errors);
         }
+
+        [Fact]
+        public void ValidateTemplateData_AcceptsQuotationTotalsElement()
+        {
+            var data = new ReportTemplateData
+            {
+                Page = new PageConfig { Width = 794, Height = 1123, Unit = "px", PageCount = 1 },
+                Elements = new List<ReportElement>
+                {
+                    new()
+                    {
+                        Id = "totals",
+                        Type = "quotationTotals",
+                        Section = "content",
+                        X = 480,
+                        Y = 860,
+                        Width = 240,
+                        Height = 160,
+                        Text = "Teklif Toplamlari",
+                        QuotationTotalsOptions = new QuotationTotalsOptions
+                        {
+                            GrossLabel = "Brut Toplam",
+                            DiscountLabel = "Iskonto",
+                            NetLabel = "Net Toplam",
+                            VatLabel = "KDV",
+                            GrandLabel = "Genel Toplam",
+                            ShowGross = true,
+                            ShowDiscount = true,
+                            ShowVat = true,
+                            EmphasizeGrandTotal = true
+                        }
+                    }
+                }
+            };
+
+            var errors = _validator.ValidateTemplateData(data, DocumentRuleType.Quotation);
+
+            Assert.Empty(errors);
+        }
     }
 }

@@ -70,6 +70,12 @@ namespace crm_api.DTOs
         [JsonPropertyName("schemaVersion")]
         public int SchemaVersion { get; set; } = 1;
 
+        [JsonPropertyName("layoutKey")]
+        public string? LayoutKey { get; set; }
+
+        [JsonPropertyName("layoutOptions")]
+        public Dictionary<string, string>? LayoutOptions { get; set; }
+
         [JsonPropertyName("page")]
         public PageConfig Page { get; set; } = new PageConfig();
 
@@ -83,13 +89,13 @@ namespace crm_api.DTOs
     public class PageConfig
     {
         [JsonPropertyName("width")]
-        public decimal Width { get; set; } = 794;
+        public decimal Width { get; set; } = 210;
 
         [JsonPropertyName("height")]
-        public decimal Height { get; set; } = 1123;
+        public decimal Height { get; set; } = 297;
 
         [JsonPropertyName("unit")]
-        public string Unit { get; set; } = "px";
+        public string Unit { get; set; } = "mm";
 
         [JsonPropertyName("pageCount")]
         public int PageCount { get; set; } = 1;
@@ -104,7 +110,7 @@ namespace crm_api.DTOs
         public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("type")]
-        public string Type { get; set; } = string.Empty; // "text" | "field" | "image" | "table"
+        public string Type { get; set; } = string.Empty; // "text" | "field" | "image" | "table" | "shape" | "container" | "note" | "summary" | "quotationTotals"
 
         [JsonPropertyName("section")]
         public string Section { get; set; } = string.Empty; // "header" | "content" | "footer"
@@ -132,6 +138,9 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("pageNumbers")]
         public List<int>? PageNumbers { get; set; }
+
+        [JsonPropertyName("parentId")]
+        public string? ParentId { get; set; }
 
         [JsonPropertyName("binding")]
         public string? Binding { get; set; }
@@ -179,6 +188,66 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("tableOptions")]
         public TableOptions? TableOptions { get; set; }
+
+        [JsonPropertyName("summaryItems")]
+        public List<SummaryItem>? SummaryItems { get; set; }
+
+        [JsonPropertyName("quotationTotalsOptions")]
+        public QuotationTotalsOptions? QuotationTotalsOptions { get; set; }
+    }
+
+    public class QuotationTotalsOptions
+    {
+        [JsonPropertyName("layout")]
+        public string? Layout { get; set; }
+
+        [JsonPropertyName("currencyMode")]
+        public string? CurrencyMode { get; set; }
+
+        [JsonPropertyName("currencyPath")]
+        public string? CurrencyPath { get; set; }
+
+        [JsonPropertyName("grossLabel")]
+        public string? GrossLabel { get; set; }
+
+        [JsonPropertyName("discountLabel")]
+        public string? DiscountLabel { get; set; }
+
+        [JsonPropertyName("netLabel")]
+        public string? NetLabel { get; set; }
+
+        [JsonPropertyName("vatLabel")]
+        public string? VatLabel { get; set; }
+
+        [JsonPropertyName("grandLabel")]
+        public string? GrandLabel { get; set; }
+
+        [JsonPropertyName("showGross")]
+        public bool? ShowGross { get; set; }
+
+        [JsonPropertyName("showDiscount")]
+        public bool? ShowDiscount { get; set; }
+
+        [JsonPropertyName("showVat")]
+        public bool? ShowVat { get; set; }
+
+        [JsonPropertyName("emphasizeGrandTotal")]
+        public bool? EmphasizeGrandTotal { get; set; }
+
+        [JsonPropertyName("noteTitle")]
+        public string? NoteTitle { get; set; }
+
+        [JsonPropertyName("notePath")]
+        public string? NotePath { get; set; }
+
+        [JsonPropertyName("noteText")]
+        public string? NoteText { get; set; }
+
+        [JsonPropertyName("showNote")]
+        public bool? ShowNote { get; set; }
+
+        [JsonPropertyName("hideEmptyNote")]
+        public bool? HideEmptyNote { get; set; }
     }
 
     /// <summary>
@@ -216,8 +285,18 @@ namespace crm_api.DTOs
         [JsonPropertyName("border")]
         public string? Border { get; set; }
 
+        [JsonPropertyName("radius")]
+        public decimal? Radius
+        {
+            get => BorderRadius;
+            set => BorderRadius = value;
+        }
+
         [JsonPropertyName("borderRadius")]
         public decimal? BorderRadius { get; set; }
+
+        [JsonPropertyName("imageFit")]
+        public string? ImageFit { get; set; }
 
         [JsonPropertyName("padding")]
         public decimal? Padding { get; set; }
@@ -251,6 +330,63 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("pageBreak")]
         public string? PageBreak { get; set; } // "auto" | "avoid" | "always"
+
+        [JsonPropertyName("reportRegionMode")]
+        public string? ReportRegionMode { get; set; } // "flow"
+
+        [JsonPropertyName("dense")]
+        public bool Dense { get; set; }
+
+        [JsonPropertyName("showBorders")]
+        public bool ShowBorders { get; set; } = true;
+
+        [JsonPropertyName("presetName")]
+        public string? PresetName { get; set; }
+
+        [JsonPropertyName("groupByPath")]
+        public string? GroupByPath { get; set; }
+
+        [JsonPropertyName("groupHeaderLabel")]
+        public string? GroupHeaderLabel { get; set; }
+
+        [JsonPropertyName("showGroupFooter")]
+        public bool ShowGroupFooter { get; set; }
+
+        [JsonPropertyName("groupFooterLabel")]
+        public string? GroupFooterLabel { get; set; }
+
+        [JsonPropertyName("groupFooterValuePath")]
+        public string? GroupFooterValuePath { get; set; }
+
+        [JsonPropertyName("detailColumnPath")]
+        public string? DetailColumnPath { get; set; }
+
+        [JsonPropertyName("detailPaths")]
+        public List<string>? DetailPaths { get; set; }
+
+        [JsonPropertyName("detailLineFontSize")]
+        public decimal? DetailLineFontSize { get; set; }
+
+        [JsonPropertyName("detailLineColor")]
+        public string? DetailLineColor { get; set; }
+
+        [JsonPropertyName("continuationElementIds")]
+        public List<string>? ContinuationElementIds { get; set; }
+
+        [JsonPropertyName("flowElementIds")]
+        public List<string>? FlowElementIds { get; set; }
+
+        [JsonPropertyName("repeatedElementIds")]
+        public List<string>? RepeatedElementIds { get; set; }
+
+        [JsonPropertyName("firstPageBudget")]
+        public decimal? FirstPageBudget { get; set; }
+
+        [JsonPropertyName("continuationPageBudget")]
+        public decimal? ContinuationPageBudget { get; set; }
+
+        [JsonPropertyName("lastPageBudget")]
+        public decimal? LastPageBudget { get; set; }
     }
 
     /// <summary>
@@ -263,6 +399,27 @@ namespace crm_api.DTOs
 
         [JsonPropertyName("path")]
         public string Path { get; set; } = string.Empty;
+
+        [JsonPropertyName("width")]
+        public decimal? Width { get; set; }
+
+        [JsonPropertyName("align")]
+        public string? Align { get; set; }
+
+        [JsonPropertyName("format")]
+        public string? Format { get; set; }
+    }
+
+    public class SummaryItem
+    {
+        [JsonPropertyName("label")]
+        public string Label { get; set; } = string.Empty;
+
+        [JsonPropertyName("path")]
+        public string Path { get; set; } = string.Empty;
+
+        [JsonPropertyName("format")]
+        public string? Format { get; set; }
     }
 
     /// <summary>
@@ -289,6 +446,69 @@ namespace crm_api.DTOs
         public int PageSize { get; set; } = 10;
         public DocumentRuleType? RuleType { get; set; }
         public bool? IsActive { get; set; }
+    }
+
+    public class PdfTablePresetListRequest
+    {
+        public string? Search { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        public DocumentRuleType? RuleType { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    public class PdfTablePresetDto : BaseEntityDto
+    {
+        public DocumentRuleType RuleType { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Key { get; set; } = string.Empty;
+        public List<TableColumn> Columns { get; set; } = new();
+        public TableOptions? TableOptions { get; set; }
+        public bool IsActive { get; set; }
+        public long? CreatedByUserId { get; set; }
+        public long? UpdatedByUserId { get; set; }
+    }
+
+    public class CreatePdfTablePresetDto
+    {
+        [Required]
+        public DocumentRuleType RuleType { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(120)]
+        public string Key { get; set; } = string.Empty;
+
+        [Required]
+        public List<TableColumn> Columns { get; set; } = new();
+
+        public TableOptions? TableOptions { get; set; }
+
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class UpdatePdfTablePresetDto
+    {
+        [Required]
+        public DocumentRuleType RuleType { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(120)]
+        public string Key { get; set; } = string.Empty;
+
+        [Required]
+        public List<TableColumn> Columns { get; set; } = new();
+
+        public TableOptions? TableOptions { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 
     /// <summary>

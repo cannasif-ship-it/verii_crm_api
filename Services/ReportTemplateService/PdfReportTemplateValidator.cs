@@ -22,7 +22,7 @@ namespace crm_api.Services
         private const decimal RotationMin = -360;
         private const decimal RotationMax = 360;
         private const int MaxPageCount = 20;
-        private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase) { "text", "field", "image", "table" };
+        private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase) { "text", "field", "image", "table", "shape", "container", "note", "summary", "quotationTotals" };
         private static readonly Regex PathSegmentRegex = new(@"^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
 
         public IReadOnlyList<string> ValidateTemplateData(ReportTemplateData? data, DocumentRuleType ruleType)
@@ -51,6 +51,8 @@ namespace crm_api.Services
             }
 
             // Elements
+            var requiresCanvasElements = string.IsNullOrWhiteSpace(data.LayoutKey);
+
             if (data.Elements == null)
             {
                 errors.Add("TemplateData.Elements is required.");
@@ -59,6 +61,9 @@ namespace crm_api.Services
 
             if (data.Elements.Count > MaxElements)
                 errors.Add($"Elements count must not exceed {MaxElements}.");
+
+            if (requiresCanvasElements && data.Elements.Count == 0)
+                errors.Add("TemplateData must have at least one element for canvas-based layouts.");
 
             var seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             for (var i = 0; i < data.Elements.Count; i++)
@@ -78,7 +83,7 @@ namespace crm_api.Services
                 if (string.IsNullOrWhiteSpace(el.Type))
                     errors.Add($"{prefix}: Type is required.");
                 else if (!AllowedTypes.Contains(el.Type))
-                    errors.Add($"{prefix}: Unknown type '{el.Type}'. Allowed: text, field, image, table.");
+                    errors.Add($"{prefix}: Unknown type '{el.Type}'. Allowed: text, field, image, table, shape, container, note, summary, quotationTotals.");
 
                 if (el.X < 0 || el.Y < 0)
                     errors.Add($"{prefix}: X and Y must be non-negative.");
@@ -110,6 +115,14 @@ namespace crm_api.Services
                         errors.Add($"{prefix}: Path - {pathError}");
                 }
 
+                if (el.ParentId != null)
+                {
+                    if (string.Equals(el.ParentId, el.Id, StringComparison.OrdinalIgnoreCase))
+                        errors.Add($"{prefix}: parentId cannot reference the element itself.");
+                    else if (!data.Elements.Any(candidate => string.Equals(candidate.Id, el.ParentId, StringComparison.OrdinalIgnoreCase)))
+                        errors.Add($"{prefix}: parentId '{el.ParentId}' must reference an existing element.");
+                }
+
                 if (el.Type.Equals("table", StringComparison.OrdinalIgnoreCase))
                 {
                     if (el.Columns == null || el.Columns.Count == 0)
@@ -122,6 +135,8 @@ namespace crm_api.Services
                                 errors.Add($"{prefix}: Table column Path is required.");
                             else if (!ValidatePathFormat(col.Path, out var colPathError))
                                 errors.Add($"{prefix}: Column path - {colPathError}");
+                            if (col.Width.HasValue && (col.Width < MinColumnWidth || col.Width > MaxColumnWidth))
+                                errors.Add($"{prefix}: Column width must be between {MinColumnWidth} and {MaxColumnWidth}.");
                         }
                         if (el.ColumnWidths != null && el.ColumnWidths.Count != el.Columns.Count)
                             errors.Add($"{prefix}: columnWidths length must match columns count.");
@@ -133,6 +148,24 @@ namespace crm_api.Services
                                 if (cw < MinColumnWidth || cw > MaxColumnWidth)
                                     errors.Add($"{prefix}: columnWidths[{ci}] must be between {MinColumnWidth} and {MaxColumnWidth}.");
                             }
+                        }
+                    }
+                }
+
+                if (el.Type.Equals("summary", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (el.SummaryItems == null || el.SummaryItems.Count == 0)
+                        errors.Add($"{prefix}: Summary must have at least one summary item.");
+                    else
+                    {
+                        foreach (var item in el.SummaryItems)
+                        {
+                            if (string.IsNullOrWhiteSpace(item.Label))
+                                errors.Add($"{prefix}: Summary item label is required.");
+                            if (string.IsNullOrWhiteSpace(item.Path))
+                                errors.Add($"{prefix}: Summary item path is required.");
+                            else if (!ValidatePathFormat(item.Path, out var summaryPathError))
+                                errors.Add($"{prefix}: Summary item path - {summaryPathError}");
                         }
                     }
                 }
@@ -209,7 +242,7 @@ namespace crm_api.Services
             }
             if (data.Page == null)
                 errors.Add("Template data must have a valid page configuration.");
-            if (data.Elements == null || data.Elements.Count == 0)
+            if (string.IsNullOrWhiteSpace(data.LayoutKey) && (data.Elements == null || data.Elements.Count == 0))
                 errors.Add("Template data must have at least one element.");
             return errors;
         }

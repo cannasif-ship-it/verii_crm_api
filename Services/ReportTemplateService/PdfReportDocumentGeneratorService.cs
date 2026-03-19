@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,6 +28,8 @@ namespace crm_api.Services
     /// </summary>
     public class PdfReportDocumentGeneratorService : IPdfReportDocumentGeneratorService
     {
+        private static readonly QuotationTotalsLayoutSpec QuotationTotalsSpec = LoadQuotationTotalsLayoutSpec();
+        private static readonly ReportRegionPaginationSpec ReportRegionSpec = LoadReportRegionPaginationSpec();
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PdfReportDocumentGeneratorService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -59,67 +63,16 @@ namespace crm_api.Services
                 if (entityData == null)
                     throw new InvalidOperationException($"Entity with ID {entityId} not found for rule type {ruleType}");
 
-                // Pre-fetch all images async (avoids sync-over-async in render)
-                var imageCache = await PreFetchImagesAsync(templateData.Elements ?? new List<ReportElement>(), entityData, (reason) =>
+                if (WindoQuotationDocumentRenderer.CanRender(ruleType, templateData))
                 {
-                    _logger.LogWarning("PdfReportDocumentGenerator SSRF reject: {Reason}", reason);
-                    warningCount++;
-                }).ConfigureAwait(false);
-
-                var page = templateData.Page ?? new PageConfig();
-                var unit = page.Unit ?? "px";
-                var pageWidthPt = PdfUnitConversion.ToPointsFloat(page.Width, unit);
-                var pageHeightPt = PdfUnitConversion.ToPointsFloat(page.Height, unit);
-
-                var orderedElements = (templateData.Elements ?? new List<ReportElement>())
-                    .OrderBy(e => e.ZIndex)
-                    .ThenBy(e => e.Y)
-                    .ThenBy(e => e.X)
-                    .ToList();
-
-                var totalPages = Math.Max(1, page.PageCount);
-                var document = Document.Create(container =>
-                {
-                    for (var pageNumber = 1; pageNumber <= totalPages; pageNumber++)
-                    {
-                        var currentPage = pageNumber;
-                        container.Page(p =>
-                        {
-                            p.Size(new PageSize(pageWidthPt, pageHeightPt));
-                            p.Margin(0);
-
-                            p.Content().Layers(layers =>
-                            {
-                                layers.PrimaryLayer().Width(pageWidthPt).Height(pageHeightPt).Background(Colors.Transparent);
-                                foreach (var element in orderedElements.Where(element => ShouldRenderOnPage(element, currentPage)))
-                                {
-                                    var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
-                                    var yPt = PdfUnitConversion.ToPointsFloat(element.Y, unit);
-                                    var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
-                                    var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
-
-                                    var layer = layers.Layer()
-                                        .TranslateX(xPt)
-                                        .TranslateY(yPt)
-                                        .Width(wPt);
-
-                                    // Tables frequently need more vertical space than their design-time placeholder.
-                                    // Keeping them at a fixed height causes QuestPDF layout exceptions on multi-row data.
-                                    layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
-                                        ? layer.MinHeight(hPt)
-                                        : layer.Height(hPt);
-
-                                    layer.Element(c => WrapElementWithStyle(c, element, inner =>
-                                    {
-                                        RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
-                                    }));
-                                }
-                            });
-                        });
-                    }
-                });
-
-                var pdfBytes = document.GeneratePdf();
+                    var specializedPdf = WindoQuotationDocumentRenderer.GeneratePdf(entityData, templateData);
+                    sw.Stop();
+                    _logger.LogInformation(
+                        "PdfReportDocumentGenerator completed with specialized renderer: RuleType={RuleType}, EntityId={EntityId}, LayoutKey={LayoutKey}, DurationMs={DurationMs}",
+                        ruleType, entityId, templateData.LayoutKey, sw.ElapsedMilliseconds);
+                    return specializedPdf;
+                }
+                var pdfBytes = await GeneratePdfForEntityDataAsync(templateData, entityData).ConfigureAwait(false);
                 sw.Stop();
 
                 _logger.LogInformation(
@@ -136,6 +89,79 @@ namespace crm_api.Services
                     ruleType, entityId, elementCount, sw.ElapsedMilliseconds);
                 throw;
             }
+        }
+
+        public async Task<byte[]> GeneratePdfForEntityDataAsync(ReportTemplateData templateData, object entityData)
+        {
+            if (templateData == null)
+                throw new ArgumentNullException(nameof(templateData));
+            if (entityData == null)
+                throw new ArgumentNullException(nameof(entityData));
+
+            var warningCount = 0;
+
+            var imageCache = await PreFetchImagesAsync(templateData.Elements ?? new List<ReportElement>(), entityData, (reason) =>
+            {
+                _logger.LogWarning("PdfReportDocumentGenerator SSRF reject: {Reason}", reason);
+                warningCount++;
+            }).ConfigureAwait(false);
+
+            var page = templateData.Page ?? new PageConfig();
+            var unit = page.Unit ?? "px";
+            var pageWidthPt = PdfUnitConversion.ToPointsFloat(page.Width, unit);
+            var pageHeightPt = PdfUnitConversion.ToPointsFloat(page.Height, unit);
+
+            var orderedElements = ResolveLayoutElements(templateData.Elements ?? new List<ReportElement>())
+                .OrderBy(e => e.ZIndex)
+                .ThenBy(e => e.Y)
+                .ThenBy(e => e.X)
+                .ToList();
+
+            var flowRegionPdf = TryGenerateFlowRegionPdf(orderedElements, entityData, unit, imageCache, pageWidthPt, pageHeightPt, () => warningCount++);
+            if (flowRegionPdf != null)
+                return flowRegionPdf;
+
+            var totalPages = Math.Max(1, page.PageCount);
+            var document = Document.Create(container =>
+            {
+                for (var pageNumber = 1; pageNumber <= totalPages; pageNumber++)
+                {
+                    var currentPage = pageNumber;
+                    container.Page(p =>
+                    {
+                        p.Size(new PageSize(pageWidthPt, pageHeightPt));
+                        p.Margin(0);
+
+                        p.Content().Layers(layers =>
+                        {
+                            layers.PrimaryLayer().Width(pageWidthPt).Height(pageHeightPt).Background(Colors.Transparent);
+                            foreach (var element in orderedElements.Where(element => ShouldRenderOnPage(element, currentPage)))
+                            {
+                                var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
+                                var yPt = PdfUnitConversion.ToPointsFloat(element.Y, unit);
+                                var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
+                                var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
+
+                                var layer = layers.Layer()
+                                    .TranslateX(xPt)
+                                    .TranslateY(yPt)
+                                    .Width(wPt);
+
+                                layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
+                                    ? layer.MinHeight(hPt)
+                                    : layer.Height(hPt);
+
+                                layer.Element(c => WrapElementWithStyle(c, element, inner =>
+                                {
+                                    RenderElement(inner, element, entityData, unit, imageCache, () => warningCount++);
+                                }));
+                            }
+                        });
+                    });
+                }
+            });
+
+            return document.GeneratePdf();
         }
 
         private void WrapElementWithStyle(IContainer container, ReportElement element, Action<IContainer> renderContent)
@@ -158,7 +184,14 @@ namespace crm_api.Services
             }
             if (!string.IsNullOrEmpty(border))
             {
-                try { c = c.Border(1).BorderColor(border); }
+                try
+                {
+                    var (borderWidth, borderColor) = ParseBorderSpec(border, "px");
+                    if (borderWidth > 0)
+                        c = c.Border(borderWidth);
+                    if (!string.IsNullOrWhiteSpace(borderColor))
+                        c = c.BorderColor(borderColor);
+                }
                 catch (Exception ex) { _logger.LogDebug(ex, "PdfReportDocumentGenerator style apply failed: Border={Border}", border); }
             }
 
@@ -407,10 +440,1016 @@ namespace crm_api.Services
                 case "table":
                     RenderTable(container, element, entityData, unit);
                     break;
+                case "note":
+                    RenderNote(container, element, entityData);
+                    break;
+                case "summary":
+                    RenderSummary(container, element, entityData);
+                    break;
+                case "quotationtotals":
+                    RenderQuotationTotals(container, element, entityData);
+                    break;
+                case "shape":
+                case "container":
+                    RenderShape(container, element);
+                    break;
                 default:
                     onWarning();
                     break;
             }
+        }
+
+        private void RenderShape(IContainer container, ReportElement element)
+        {
+            // Shape primitives are rendered by the wrapper style/background/border layer.
+            container.MinHeight(1);
+        }
+
+        private byte[]? TryGenerateFlowRegionPdf(
+            List<ReportElement> orderedElements,
+            object entityData,
+            string unit,
+            Dictionary<string, byte[]> imageCache,
+            float pageWidthPt,
+            float pageHeightPt,
+            Action onWarning)
+        {
+            var regionTable = orderedElements.FirstOrDefault(element =>
+                string.Equals(element.Type, "table", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(element.TableOptions?.ReportRegionMode, "flow", StringComparison.OrdinalIgnoreCase));
+
+            if (regionTable == null || regionTable.Columns == null || regionTable.Columns.Count == 0)
+                return null;
+
+            var rows = GetTableRows(regionTable, entityData);
+            if (rows.Count == 0)
+                return null;
+
+            var flowIds = new HashSet<string>((regionTable.TableOptions?.FlowElementIds ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id)), StringComparer.OrdinalIgnoreCase);
+            var continuationIds = new HashSet<string>((regionTable.TableOptions?.ContinuationElementIds ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id)), StringComparer.OrdinalIgnoreCase);
+            var repeatedIds = new HashSet<string>((regionTable.TableOptions?.RepeatedElementIds ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id)), StringComparer.OrdinalIgnoreCase);
+
+            var flowElements = orderedElements.Where(element => flowIds.Contains(element.Id)).ToList();
+            var continuationElements = orderedElements.Where(element => continuationIds.Contains(element.Id)).ToList();
+            var repeatedElements = orderedElements.Where(element => repeatedIds.Contains(element.Id)).ToList();
+
+            var excludedIds = new HashSet<string>(flowIds, StringComparer.OrdinalIgnoreCase);
+            excludedIds.UnionWith(continuationIds);
+            excludedIds.UnionWith(repeatedIds);
+            excludedIds.Add(regionTable.Id);
+
+            var firstPageElements = orderedElements.Where(element => !excludedIds.Contains(element.Id)).ToList();
+            var pageRowChunks = PaginateTableRows(regionTable, rows);
+            if (pageRowChunks.Count == 0)
+                pageRowChunks.Add(rows);
+
+            var document = Document.Create(container =>
+            {
+                for (var pageIndex = 0; pageIndex < pageRowChunks.Count; pageIndex++)
+                {
+                    var isFirstPage = pageIndex == 0;
+                    var isLastPage = pageIndex == pageRowChunks.Count - 1;
+                    var currentRows = pageRowChunks[pageIndex];
+
+                    container.Page(page =>
+                    {
+                        page.Size(new PageSize(pageWidthPt, pageHeightPt));
+                        page.Margin(0);
+                        page.Content().Layers(layers =>
+                        {
+                            layers.PrimaryLayer().Width(pageWidthPt).Height(pageHeightPt).Background(Colors.Transparent);
+
+                            foreach (var element in repeatedElements)
+                                RenderLayeredElement(layers, element, entityData, unit, imageCache, onWarning);
+
+                            if (isFirstPage)
+                            {
+                                foreach (var element in firstPageElements)
+                                    RenderLayeredElement(layers, element, entityData, unit, imageCache, onWarning);
+                            }
+                            else if (continuationElements.Count > 0)
+                            {
+                                RenderContinuationHeaderRegion(layers, continuationElements, unit);
+                            }
+
+                            var tableY = isFirstPage ? regionTable.Y : GetFlowContinuationTableTop(unit);
+                            RenderLayeredTablePage(layers, regionTable, currentRows, entityData, unit, tableY);
+
+                            if (isLastPage)
+                            {
+                                if (flowElements.Count > 0)
+                                    RenderFlowFooterRegion(layers, flowElements, entityData, unit, imageCache, onWarning);
+                            }
+                        });
+                    });
+                }
+            });
+
+            return document.GeneratePdf();
+        }
+
+        private void RenderLayeredElement(
+            LayersDescriptor layers,
+            ReportElement element,
+            object entityData,
+            string unit,
+            Dictionary<string, byte[]> imageCache,
+            Action onWarning)
+        {
+            var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
+            var yPt = PdfUnitConversion.ToPointsFloat(element.Y, unit);
+            var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
+            var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
+
+            var layer = layers.Layer()
+                .TranslateX(xPt)
+                .TranslateY(yPt)
+                .Width(wPt);
+
+            layer = element.Type?.Equals("table", StringComparison.OrdinalIgnoreCase) == true
+                ? layer.MinHeight(hPt)
+                : layer.Height(hPt);
+
+            layer.Element(c => WrapElementWithStyle(c, element, inner =>
+            {
+                RenderElement(inner, element, entityData, unit, imageCache, onWarning);
+            }));
+        }
+
+        private void RenderLayeredTablePage(
+            LayersDescriptor layers,
+            ReportElement element,
+            List<object> rows,
+            object entityData,
+            string unit,
+            decimal yOverride)
+        {
+            var xPt = PdfUnitConversion.ToPointsFloat(element.X, unit);
+            var yPt = PdfUnitConversion.ToPointsFloat(yOverride, unit);
+            var wPt = PdfUnitConversion.ToPointsFloat(element.Width > 0 ? element.Width : 200, unit);
+            var hPt = PdfUnitConversion.ToPointsFloat(element.Height > 0 ? element.Height : 50, unit);
+
+            layers.Layer()
+                .TranslateX(xPt)
+                .TranslateY(yPt)
+                .Width(wPt)
+                .MinHeight(hPt)
+                .Element(c => WrapElementWithStyle(c, element, inner =>
+                {
+                    RenderTable(inner, element, entityData, unit, rows);
+                }));
+        }
+
+        private static decimal GetFlowContinuationTableTop(string unit)
+        {
+            if (string.Equals(unit, "mm", StringComparison.OrdinalIgnoreCase))
+                return 8m;
+
+            return 30m;
+        }
+
+        private void RenderContinuationHeaderRegion(
+            LayersDescriptor layers,
+            List<ReportElement> continuationElements,
+            string unit)
+        {
+            var strip = continuationElements.FirstOrDefault(element => string.Equals(element.Type, "shape", StringComparison.OrdinalIgnoreCase));
+            if (strip != null)
+            {
+                RenderLayeredElement(
+                    layers,
+                    new ReportElement
+                    {
+                        Id = strip.Id,
+                        Type = "shape",
+                        X = 0,
+                        Y = 0,
+                        Width = strip.Width,
+                        Height = strip.Height,
+                        Style = strip.Style,
+                    },
+                    new object(),
+                    unit,
+                    new Dictionary<string, byte[]>(),
+                    () => { });
+            }
+        }
+
+        private void RenderFlowFooterRegion(
+            LayersDescriptor layers,
+            List<ReportElement> flowElements,
+            object entityData,
+            string unit,
+            Dictionary<string, byte[]> imageCache,
+            Action onWarning)
+        {
+            var grossAmount = ToDecimal(ResolvePropertyPath(entityData, "Total")) + ToDecimal(ResolvePropertyPath(entityData, "GeneralDiscountAmount"));
+            var discountAmount = ToDecimal(ResolvePropertyPath(entityData, "GeneralDiscountAmount"));
+            var netAmount = ToDecimal(ResolvePropertyPath(entityData, "Total"));
+            var grandAmount = ToDecimal(ResolvePropertyPath(entityData, "GrandTotal"));
+            var vatAmount = grandAmount - netAmount;
+            var currencyCode = ResolvePropertyPath(entityData, "Currency")?.ToString();
+            var vatRate = ResolveFirstLineVatRate(entityData);
+            var footerTitle = flowElements.FirstOrDefault(element => element.Id.Equals("footer-title", StringComparison.OrdinalIgnoreCase))?.Text
+                ?? "TEKLİF ŞARTLARI VE ÖNEMLİ NOTLAR";
+            var refsTitle = flowElements.FirstOrDefault(element => element.Id.Equals("refs-title", StringComparison.OrdinalIgnoreCase))?.Text
+                ?? "SAHA VE KEŞİF GÖRSELLERİ (REFERANS)";
+            var refsCopy = flowElements.FirstOrDefault(element => element.Id.Equals("refs-copy", StringComparison.OrdinalIgnoreCase))?.Text
+                ?? "Bu görseller, teklifin montaj ve proje süreçlerine ait örnek başlıklardır. Referans niteliğiyle eklenmiştir.";
+            var delivery = ResolvePropertyPath(entityData, "SalesTypeDefinitionName")?.ToString() ?? "Belirtilecektir";
+            var noteLines = BuildFlowNoteLines(entityData);
+            var pageScaleX = GetReferencePageScaleX(unit);
+            var pageScaleY = GetReferencePageScaleY(unit);
+
+            decimal X(decimal mm) => ToReferenceUnit(mm, pageScaleX);
+            decimal Y(decimal mm) => ToReferenceUnit(mm, pageScaleY);
+            decimal W(decimal mm) => ToReferenceUnit(mm, pageScaleX);
+            decimal H(decimal mm) => ToReferenceUnit(mm, pageScaleY);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-approval-box",
+                Type = "shape",
+                X = X(12m),
+                Y = Y(160m),
+                Width = W(72m),
+                Height = H(22m),
+                Style = new ElementStyle { Background = "#ffffff", Border = "1px solid #c7d0dc", Radius = 6 },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-approval-title",
+                Type = "text",
+                X = X(16m),
+                Y = Y(166m),
+                Width = W(36m),
+                Height = H(4m),
+                Text = "MUSTERI ONAYI",
+                FontSize = 7,
+                Color = "#7b8494",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-approval-line",
+                Type = "shape",
+                X = X(18m),
+                Y = Y(175m),
+                Width = W(58m),
+                Height = 1,
+                Style = new ElementStyle { Background = "#d2d8e2" },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-approval-sign",
+                Type = "text",
+                X = X(32m),
+                Y = Y(180m),
+                Width = W(32m),
+                Height = H(4m),
+                Text = "Kase ve imza",
+                FontSize = 6.5m,
+                Color = "#94a3b8",
+                FontFamily = "Arial",
+                Style = new ElementStyle { TextAlign = "center" },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-summary-box",
+                Type = "shape",
+                X = X(134m),
+                Y = Y(160m),
+                Width = W(64m),
+                Height = H(32m),
+                Style = new ElementStyle { Background = "#ffffff", Border = "1px solid #c7d0dc", Radius = 6 },
+            }, entityData, unit, imageCache, onWarning);
+
+            var summaryRows = new (string Label, decimal Value)[]
+            {
+                ("Brut Toplam", grossAmount),
+                ("Iskonto Toplam", discountAmount),
+                ("Net Ara Toplam", netAmount),
+                ($"KDV (%{vatRate})", vatAmount),
+            };
+
+            for (var index = 0; index < summaryRows.Length; index++)
+            {
+                var row = summaryRows[index];
+                var y = Y(167m + (index * 5.5m));
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-summary-label-{index}",
+                    Type = "text",
+                    X = X(138m),
+                    Y = y,
+                    Width = W(28m),
+                    Height = H(4m),
+                    Text = row.Label,
+                    FontSize = 7m,
+                    Color = "#7b8494",
+                    FontFamily = "Arial",
+                }, entityData, unit, imageCache, onWarning);
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-summary-value-{index}",
+                    Type = "text",
+                    X = X(170m),
+                    Y = y,
+                    Width = W(24m),
+                    Height = H(4m),
+                    Text = FormatCurrencyValue(row.Value, currencyCode),
+                    FontSize = 7m,
+                    Color = "#0f172a",
+                    FontFamily = "Arial",
+                    Style = new ElementStyle { TextAlign = "right" },
+                }, entityData, unit, imageCache, onWarning);
+            }
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-grand-label",
+                Type = "text",
+                X = X(138m),
+                Y = Y(188m),
+                Width = W(28m),
+                Height = H(5m),
+                Text = "Genel Toplam:",
+                FontSize = 11,
+                Color = "#345A99",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-grand-value",
+                Type = "text",
+                X = X(170m),
+                Y = Y(188m),
+                Width = W(24m),
+                Height = H(5m),
+                Text = FormatCurrencyValue(grandAmount, currencyCode),
+                FontSize = 11,
+                Color = "#345A99",
+                FontFamily = "Arial",
+                Style = new ElementStyle { TextAlign = "right" },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-footer-bg",
+                Type = "shape",
+                X = 0,
+                Y = Y(202m),
+                Width = 794,
+                Height = H(44m),
+                Style = new ElementStyle { Background = "#f8fafc" },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-notes-strip",
+                Type = "shape",
+                X = X(12m),
+                Y = Y(206m),
+                Width = 4,
+                Height = H(30m),
+                Style = new ElementStyle { Background = "#345A99" },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-footer-title",
+                Type = "text",
+                X = X(16m),
+                Y = Y(210m),
+                Width = W(98m),
+                Height = H(5m),
+                Text = footerTitle,
+                FontSize = 9,
+                Color = "#345A99",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-delivery-badge",
+                Type = "shape",
+                X = X(16m),
+                Y = Y(214m),
+                Width = W(88m),
+                Height = H(8m),
+                Style = new ElementStyle { Background = "#f8fafc", Border = "1px solid #b6bfce", Radius = 4 },
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-delivery-text",
+                Type = "text",
+                X = X(18m),
+                Y = Y(218m),
+                Width = W(92m),
+                Height = H(4m),
+                Text = $"TESLİM ŞEKLİ (DELIVERY TERMS): {delivery}",
+                FontSize = 7,
+                Color = "#505a6e",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+
+            var noteXPositions = new[] { X(16m), X(109m) };
+            for (var index = 0; index < noteLines.Count && index < 6; index++)
+            {
+                var columnIndex = index < 3 ? 0 : 1;
+                var rowIndex = index % 3;
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-note-{index}",
+                    Type = "text",
+                    X = noteXPositions[columnIndex],
+                    Y = Y(227m + (rowIndex * 5.8m)),
+                    Width = W(84m),
+                    Height = H(4.2m),
+                    Text = $"• {noteLines[index]}",
+                    FontSize = 6.6m,
+                    Color = "#505a6e",
+                    FontFamily = "Arial",
+                }, entityData, unit, imageCache, onWarning);
+            }
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-refs-title",
+                Type = "text",
+                X = X(16m),
+                Y = Y(246m),
+                Width = W(90m),
+                Height = H(4m),
+                Text = refsTitle,
+                FontSize = 9,
+                Color = "#345A99",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+
+            RenderLayeredElement(layers, new ReportElement
+            {
+                Id = "flow-refs-copy",
+                Type = "text",
+                X = X(16m),
+                Y = Y(251m),
+                Width = W(150m),
+                Height = H(4m),
+                Text = refsCopy,
+                FontSize = 6.8m,
+                Color = "#7e8695",
+                FontFamily = "Arial",
+            }, entityData, unit, imageCache, onWarning);
+
+            var imageElements = flowElements
+                .Where(element => string.Equals(element.Type, "image", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(element => element.X)
+                .ToList();
+
+            var imageX = new[] { X(16m), X(74m), X(132m) };
+            for (var index = 0; index < Math.Min(3, imageElements.Count); index++)
+            {
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-ref-box-{index}",
+                    Type = "shape",
+                    X = imageX[index],
+                    Y = Y(255m),
+                    Width = W(46m),
+                    Height = H(24m),
+                    Style = new ElementStyle { Background = "#ffffff", Border = "1px solid #c4ccd8", Radius = 6 },
+                }, entityData, unit, imageCache, onWarning);
+
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-ref-image-{index}",
+                    Type = "image",
+                    X = imageX[index] + W(1.5m),
+                    Y = Y(256.5m),
+                    Width = W(43m),
+                    Height = H(17m),
+                    Value = imageElements[index].Value,
+                    Path = imageElements[index].Path,
+                    Style = new ElementStyle { ImageFit = "contain" },
+                }, entityData, unit, imageCache, onWarning);
+
+                RenderLayeredElement(layers, new ReportElement
+                {
+                    Id = $"flow-ref-label-{index}",
+                    Type = "text",
+                    X = imageX[index],
+                    Y = Y(276.5m),
+                    Width = W(46m),
+                    Height = H(4m),
+                    Text = $"Referans {index + 1}",
+                    FontSize = 6.2m,
+                    Color = "#5a6274",
+                    FontFamily = "Arial",
+                    Style = new ElementStyle { TextAlign = "center" },
+                }, entityData, unit, imageCache, onWarning);
+            }
+        }
+
+        private static decimal ToReferenceUnit(decimal millimeters, decimal scale)
+            => millimeters * scale;
+
+        private static decimal GetReferencePageScaleX(string unit)
+        {
+            if (string.Equals(unit, "mm", StringComparison.OrdinalIgnoreCase))
+                return 1m;
+
+            return 794m / 210m;
+        }
+
+        private static decimal GetReferencePageScaleY(string unit)
+        {
+            if (string.Equals(unit, "mm", StringComparison.OrdinalIgnoreCase))
+                return 1m;
+
+            return 1123m / 297m;
+        }
+
+        private static List<string> BuildFlowNoteLines(object entityData)
+        {
+            var lines = new List<string>();
+            var serial = ResolvePropertyPathStatic(entityData, "DocumentSerialTypeName")?.ToString();
+            if (!string.IsNullOrWhiteSpace(serial))
+                lines.Add($"Seri No: {serial}");
+
+            var description = ResolvePropertyPathStatic(entityData, "Description")?.ToString();
+            if (!string.IsNullOrWhiteSpace(description))
+                lines.Add(description.Trim());
+
+            for (var index = 1; index <= 6; index++)
+            {
+                var value = ResolvePropertyPathStatic(entityData, $"Note{index}")?.ToString();
+                if (!string.IsNullOrWhiteSpace(value))
+                    lines.Add(value);
+            }
+
+            if (lines.Count == 0)
+                lines.Add("Not belirtilmedi.");
+
+            return lines
+                .Select(line => StripHtml(line).Trim())
+                .Where(line => line.Length > 0)
+                .Take(6)
+                .ToList();
+        }
+
+        private static int ResolveFirstLineVatRate(object entityData)
+        {
+            var lines = ResolvePropertyPathStatic(entityData, "Lines") as System.Collections.IEnumerable;
+            if (lines == null)
+                return 20;
+
+            foreach (var line in lines)
+            {
+                var raw = ResolvePropertyPathStatic(line!, "VatRate");
+                if (raw == null)
+                    continue;
+                if (int.TryParse(raw.ToString(), out var parsed))
+                    return parsed;
+            }
+
+            return 20;
+        }
+
+        private List<List<object>> PaginateTableRows(ReportElement element, List<object> rows)
+        {
+            if (rows.Count == 0)
+                return new List<List<object>>();
+
+            var options = element.TableOptions;
+            var firstPageBudget = options?.FirstPageBudget.HasValue == true
+                ? (float)options.FirstPageBudget.Value
+                : ReportRegionSpec.FirstPageBudget;
+            var continuationBudget = options?.ContinuationPageBudget.HasValue == true
+                ? (float)options.ContinuationPageBudget.Value
+                : ReportRegionSpec.ContinuationBudget;
+            var lastPageBudget = options?.LastPageBudget.HasValue == true
+                ? (float)options.LastPageBudget.Value
+                : ReportRegionSpec.LastPageBudget;
+
+            var heights = rows.Select(row => EstimateTableRowHeight(element, row)).ToList();
+            var lastPageStartIndex = rows.Count;
+            var lastPageUsed = 0f;
+
+            for (var index = rows.Count - 1; index >= 0; index--)
+            {
+                var nextHeight = heights[index];
+                if (lastPageUsed + nextHeight > lastPageBudget && index < rows.Count - 1)
+                    break;
+
+                lastPageUsed += nextHeight;
+                lastPageStartIndex = index;
+            }
+
+            var chunks = new List<List<object>>();
+            var currentChunk = new List<object>();
+            var currentBudget = firstPageBudget;
+            var currentHeight = 0f;
+            var forwardRows = rows.Take(lastPageStartIndex).ToList();
+
+            for (var index = 0; index < forwardRows.Count; index++)
+            {
+                var row = forwardRows[index];
+                var rowHeight = heights[index];
+                if (currentChunk.Count > 0 && currentHeight + rowHeight > currentBudget)
+                {
+                    chunks.Add(currentChunk);
+                    currentChunk = new List<object>();
+                    currentHeight = 0f;
+                    currentBudget = continuationBudget;
+                }
+
+                currentChunk.Add(row);
+                currentHeight += rowHeight;
+            }
+
+            if (currentChunk.Count > 0)
+                chunks.Add(currentChunk);
+
+            var lastChunkRows = rows.Skip(lastPageStartIndex).ToList();
+            if (lastChunkRows.Count > 0)
+                chunks.Add(lastChunkRows);
+
+            return chunks;
+        }
+
+        private float EstimateTableRowHeight(ReportElement element, object row)
+        {
+            var detailPaths = element.TableOptions?.DetailPaths ?? new List<string>();
+            var detailColumnPath = element.TableOptions?.DetailColumnPath;
+            var lineCount = 0;
+
+            if (!string.IsNullOrWhiteSpace(detailColumnPath))
+            {
+                var normalizedPath = detailColumnPath.Contains('.') ? detailColumnPath.Split('.', 2)[1] : detailColumnPath;
+                var primaryText = ResolvePropertyPath(row, normalizedPath)?.ToString() ?? string.Empty;
+                lineCount += EstimateWrappedLineCount(primaryText, ReportRegionSpec.DescriptionMaxCharacters);
+            }
+
+            var combinedDetails = BuildCombinedDetailText(row, detailPaths);
+            lineCount += EstimateWrappedLineCount(combinedDetails, ReportRegionSpec.DescriptionMaxCharacters);
+
+            var baseHeight = ReportRegionSpec.RowBaseHeight;
+            return baseHeight + (Math.Max(0, lineCount - 1) * ReportRegionSpec.RowLineHeight);
+        }
+
+        private static int EstimateWrappedLineCount(string? text, int maxCharacters)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return 0;
+
+            var normalized = StripHtml(text).Trim();
+            if (normalized.Length == 0)
+                return 0;
+
+            var lines = normalized
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(line => Math.Max(1, (int)Math.Ceiling(line.Length / (double)Math.Max(1, maxCharacters))))
+                .ToList();
+
+            return Math.Max(1, lines.Sum());
+        }
+
+        private static string BuildCombinedDetailText(object row, IReadOnlyCollection<string> detailPaths)
+        {
+            if (detailPaths.Count == 0)
+                return string.Empty;
+
+            var parts = new List<string>();
+            foreach (var detailPath in detailPaths)
+            {
+                if (string.IsNullOrWhiteSpace(detailPath))
+                    continue;
+
+                var detailValue = ResolvePropertyPathStatic(row, detailPath)?.ToString();
+                if (string.IsNullOrWhiteSpace(detailValue))
+                    continue;
+
+                var normalized = StripHtml(detailValue).Trim();
+                if (normalized.Length == 0)
+                    continue;
+
+                parts.Add(normalized);
+            }
+
+            return string.Join(" • ", parts);
+        }
+
+        private List<object> GetTableRows(ReportElement element, object entityData)
+        {
+            if (element.Columns == null || !element.Columns.Any())
+                return new List<object>();
+
+            var firstPath = element.Columns[0].Path;
+            if (string.IsNullOrEmpty(firstPath))
+                return new List<object>();
+
+            var collectionName = firstPath.Contains('.') ? firstPath.Split('.')[0] : firstPath;
+            var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
+            return collection?.ToList() ?? new List<object>();
+        }
+
+        private void RenderNote(IContainer container, ReportElement element, object entityData)
+        {
+            var title = !string.IsNullOrWhiteSpace(element.Text) ? element.Text : "Note";
+            var body = !string.IsNullOrWhiteSpace(element.Value)
+                ? element.Value
+                : (!string.IsNullOrWhiteSpace(element.Path) ? ResolvePropertyPath(entityData, element.Path)?.ToString() ?? string.Empty : string.Empty);
+
+            container.Column(column =>
+            {
+                column.Item().Text(title).Bold().FontSize((float)(element.FontSize ?? 12));
+                if (!string.IsNullOrWhiteSpace(body))
+                    column.Item().PaddingTop(6).Text(body);
+            });
+        }
+
+        private void RenderSummary(IContainer container, ReportElement element, object entityData)
+        {
+            var items = element.SummaryItems ?? new List<SummaryItem>();
+            if (items.Count == 0)
+                return;
+
+            container.Column(column =>
+            {
+                if (!string.IsNullOrWhiteSpace(element.Text))
+                    column.Item().Text(element.Text).Bold().FontSize((float)(element.FontSize ?? 12));
+
+                foreach (var item in items)
+                {
+                    var rawValue = ResolvePropertyPath(entityData, item.Path);
+                    var displayValue = FormatTableCellValue(rawValue, item.Format);
+                    column.Item().PaddingTop(4).Row(row =>
+                    {
+                        row.RelativeItem().Text(item.Label);
+                        row.ConstantItem(140).AlignRight().Text(displayValue).Bold();
+                    });
+                }
+            });
+        }
+
+        private void RenderQuotationTotals(IContainer container, ReportElement element, object entityData)
+        {
+            var options = element.QuotationTotalsOptions ?? new QuotationTotalsOptions();
+            var grossAmount = ToDecimal(ResolvePropertyPath(entityData, "Total")) + ToDecimal(ResolvePropertyPath(entityData, "GeneralDiscountAmount"));
+            var discountAmount = ToDecimal(ResolvePropertyPath(entityData, "GeneralDiscountAmount"));
+            var netAmount = ToDecimal(ResolvePropertyPath(entityData, "Total"));
+            var grandAmount = ToDecimal(ResolvePropertyPath(entityData, "GrandTotal"));
+            var vatAmount = grandAmount - netAmount;
+            var currencyCode = ResolveCurrencyCode(entityData, options);
+            var noteValue = !string.IsNullOrWhiteSpace(options.NoteText)
+                ? options.NoteText
+                : (!string.IsNullOrWhiteSpace(options.NotePath) ? ResolvePropertyPath(entityData, options.NotePath)?.ToString() ?? string.Empty : string.Empty);
+
+            var rows = new List<(string Label, decimal Value, bool Emphasize)>();
+
+            if (options.ShowGross != false)
+                rows.Add((string.IsNullOrWhiteSpace(options.GrossLabel) ? "Brut Toplam" : options.GrossLabel!, grossAmount, false));
+            if (options.ShowDiscount != false)
+                rows.Add((string.IsNullOrWhiteSpace(options.DiscountLabel) ? "Iskonto" : options.DiscountLabel!, discountAmount, false));
+
+            rows.Add((string.IsNullOrWhiteSpace(options.NetLabel) ? "Net Toplam" : options.NetLabel!, netAmount, false));
+
+            if (options.ShowVat != false)
+                rows.Add((string.IsNullOrWhiteSpace(options.VatLabel) ? "KDV" : options.VatLabel!, vatAmount, false));
+
+            rows.Add((
+                string.IsNullOrWhiteSpace(options.GrandLabel) ? "Genel Toplam" : options.GrandLabel!,
+                grandAmount,
+                options.EmphasizeGrandTotal != false));
+
+            var spec = QuotationTotalsSpec;
+
+            container.PaddingLeft(spec.OuterPaddingX).PaddingRight(spec.OuterPaddingX).PaddingTop(spec.OuterPaddingTop).Column(column =>
+            {
+                if (!string.IsNullOrWhiteSpace(element.Text))
+                    column.Item().Text(element.Text).SemiBold().FontSize(spec.TitleFontSize).FontColor(spec.TitleColor);
+
+                void RenderRowList(IContainer rowContainer, IReadOnlyList<(string Label, decimal Value, bool Emphasize)> rowItems)
+                {
+                    rowContainer.Column(listColumn =>
+                    {
+                        foreach (var row in rowItems)
+                        {
+                            listColumn.Item().PaddingTop(spec.RowGap).Element(item =>
+                            {
+                                var target = item
+                                    .MinHeight(spec.RowHeight)
+                                    .Border(1)
+                                    .BorderColor(row.Emphasize ? spec.RowEmphasisFill : spec.RowBorderColor)
+                                    .PaddingLeft(spec.RowPaddingX)
+                                    .PaddingRight(spec.RowPaddingX)
+                                    .PaddingTop(spec.RowPaddingTop)
+                                    .PaddingBottom(spec.RowPaddingBottom);
+
+                                if (row.Emphasize)
+                                    target = target.Background(spec.RowEmphasisFill);
+
+                                target.Row(inner =>
+                                {
+                                    var labelText = inner.RelativeItem().Text(row.Label).FontSize(spec.RowLabelFontSize);
+                                    var valueText = inner.AutoItem().AlignRight().Text(FormatCurrencyValue(row.Value, currencyCode)).FontSize(spec.RowValueFontSize);
+
+                                    if (row.Emphasize)
+                                    {
+                                        labelText.FontColor(spec.RowLabelEmphasisColor);
+                                        valueText.FontColor(spec.RowValueEmphasisColor).Bold();
+                                    }
+                                    else
+                                    {
+                                        labelText.FontColor(spec.RowLabelColor);
+                                        valueText.FontColor(spec.RowValueColor).Bold();
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+
+                if (string.Equals(options.Layout, "two-column", StringComparison.OrdinalIgnoreCase) && rows.Count > 1)
+                {
+                    var leftRows = rows.Where((_, index) => index % 2 == 0).ToList();
+                    var rightRows = rows.Where((_, index) => index % 2 == 1).ToList();
+                    column.Item().PaddingTop(spec.TitleBottomGap).Row(row =>
+                    {
+                        row.RelativeItem().Element(c => RenderRowList(c, leftRows));
+                        row.RelativeItem().PaddingLeft(spec.ColumnGap).Element(c => RenderRowList(c, rightRows));
+                    });
+                }
+                else
+                {
+                    column.Item().PaddingTop(spec.TitleBottomGap).Element(c => RenderRowList(c, rows));
+                }
+
+                var shouldShowNote = options.ShowNote == true &&
+                    !(options.HideEmptyNote != false && string.IsNullOrWhiteSpace(noteValue));
+
+                if (shouldShowNote)
+                {
+                    column.Item().PaddingTop(spec.NoteTopGap).Border(1).BorderColor(spec.RowBorderColor).Background("#f8fafc").PaddingLeft(spec.NotePaddingX).PaddingRight(spec.NotePaddingX).PaddingTop(spec.NotePaddingTop).PaddingBottom(spec.NotePaddingBottom).Column(noteColumn =>
+                    {
+                        noteColumn.Item().Text(string.IsNullOrWhiteSpace(options.NoteTitle) ? "Not" : options.NoteTitle!).FontSize(spec.NoteTitleFontSize).SemiBold().FontColor(spec.TitleColor);
+                        noteColumn.Item().PaddingTop(8).DefaultTextStyle(s => s.FontSize(spec.NoteTextFontSize).FontColor("#475569").LineHeight(spec.NoteTextLineHeight)).Text(noteValue);
+                    });
+                }
+            });
+        }
+
+        private sealed class QuotationTotalsLayoutSpec
+        {
+            public float OuterPaddingX { get; init; } = 14;
+            public float OuterPaddingTop { get; init; } = 12;
+            public float TitleFontSize { get; init; } = 13;
+            public string TitleColor { get; init; } = "#64748b";
+            public float TitleBottomGap { get; init; } = 10;
+            public float RowHeight { get; init; } = 26;
+            public float RowGap { get; init; } = 6;
+            public float ColumnGap { get; init; } = 8;
+            public float RowPaddingX { get; init; } = 10;
+            public float RowPaddingTop { get; init; } = 7;
+            public float RowPaddingBottom { get; init; } = 7;
+            public float RowLabelFontSize { get; init; } = 11;
+            public float RowValueFontSize { get; init; } = 11;
+            public string RowLabelColor { get; init; } = "#64748b";
+            public string RowLabelEmphasisColor { get; init; } = "#cbd5e1";
+            public string RowValueColor { get; init; } = "#0f172a";
+            public string RowValueEmphasisColor { get; init; } = "#ffffff";
+            public string RowBorderColor { get; init; } = "#e2e8f0";
+            public string RowEmphasisFill { get; init; } = "#0f172a";
+            public float NoteTopGap { get; init; } = 10;
+            public float NotePaddingX { get; init; } = 10;
+            public float NotePaddingTop { get; init; } = 10;
+            public float NotePaddingBottom { get; init; } = 10;
+            public float NoteTitleFontSize { get; init; } = 10;
+            public float NoteTextFontSize { get; init; } = 10;
+            public float NoteTextLineHeight { get; init; } = 1.35f;
+        }
+
+        private sealed class ReportRegionPaginationSpec
+        {
+            public float FirstPageBudget { get; init; } = 360;
+            public float ContinuationBudget { get; init; } = 460;
+            public float LastPageBudget { get; init; } = 110;
+            public float RowBaseHeight { get; init; } = 18;
+            public float RowLineHeight { get; init; } = 6;
+            public int DescriptionMaxCharacters { get; init; } = 52;
+        }
+
+        private static QuotationTotalsLayoutSpec LoadQuotationTotalsLayoutSpec()
+        {
+            try
+            {
+                var current = new DirectoryInfo(AppContext.BaseDirectory);
+                while (current != null)
+                {
+                    var candidate = Path.Combine(current.FullName, "pdf-samples", "quotation-totals-layout-spec.json");
+                    if (File.Exists(candidate))
+                    {
+                        using var doc = JsonDocument.Parse(File.ReadAllText(candidate));
+                        if (!doc.RootElement.TryGetProperty("quotationTotals", out var node))
+                            break;
+
+                        return new QuotationTotalsLayoutSpec
+                        {
+                            OuterPaddingX = ReadFloat(node, "outerPaddingX", 14),
+                            OuterPaddingTop = ReadFloat(node, "outerPaddingTop", 12),
+                            TitleFontSize = ReadFloat(node, "titleFontSize", 13),
+                            TitleColor = ReadString(node, "titleColor", "#64748b"),
+                            TitleBottomGap = ReadFloat(node, "titleBottomGap", 10),
+                            RowHeight = ReadFloat(node, "rowHeight", 26),
+                            RowGap = ReadFloat(node, "rowGap", 6),
+                            ColumnGap = ReadFloat(node, "columnGap", 8),
+                            RowPaddingX = ReadFloat(node, "rowPaddingX", 10),
+                            RowPaddingTop = ReadFloat(node, "rowPaddingTop", 7),
+                            RowPaddingBottom = ReadFloat(node, "rowPaddingBottom", 7),
+                            RowLabelFontSize = ReadFloat(node, "rowLabelFontSize", 11),
+                            RowValueFontSize = ReadFloat(node, "rowValueFontSize", 11),
+                            RowLabelColor = ReadString(node, "rowLabelColor", "#64748b"),
+                            RowLabelEmphasisColor = ReadString(node, "rowLabelEmphasisColor", "#cbd5e1"),
+                            RowValueColor = ReadString(node, "rowValueColor", "#0f172a"),
+                            RowValueEmphasisColor = ReadString(node, "rowValueEmphasisColor", "#ffffff"),
+                            RowBorderColor = ReadString(node, "rowBorderColor", "#e2e8f0"),
+                            RowEmphasisFill = ReadString(node, "rowEmphasisFill", "#0f172a"),
+                            NoteTopGap = ReadFloat(node, "noteTopGap", 10),
+                            NotePaddingX = ReadFloat(node, "notePaddingX", 10),
+                            NotePaddingTop = ReadFloat(node, "notePaddingTop", 10),
+                            NotePaddingBottom = ReadFloat(node, "notePaddingBottom", 10),
+                            NoteTitleFontSize = ReadFloat(node, "noteTitleFontSize", 10),
+                            NoteTextFontSize = ReadFloat(node, "noteTextFontSize", 10),
+                            NoteTextLineHeight = ReadFloat(node, "noteTextLineHeight", 1.35f),
+                        };
+                    }
+
+                    current = current.Parent;
+                }
+            }
+            catch
+            {
+            }
+
+            return new QuotationTotalsLayoutSpec();
+        }
+
+        private static float ReadFloat(JsonElement element, string name, float fallback)
+            => element.TryGetProperty(name, out var property) && property.TryGetSingle(out var value) ? value : fallback;
+
+        private static string ReadString(JsonElement element, string name, string fallback)
+            => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? fallback : fallback;
+
+        private static ReportRegionPaginationSpec LoadReportRegionPaginationSpec()
+        {
+            try
+            {
+                var current = new DirectoryInfo(AppContext.BaseDirectory);
+                while (current != null)
+                {
+                    var candidate = Path.Combine(current.FullName, "pdf-samples", "windo-quotation-layout-spec.json");
+                    if (File.Exists(candidate))
+                    {
+                        using var doc = JsonDocument.Parse(File.ReadAllText(candidate));
+                        if (!doc.RootElement.TryGetProperty("pagination", out var node))
+                            break;
+
+                        var firstPageBudget = ReadFloat(node, "firstPageBudget", 520);
+                        var continuationBudget = ReadFloat(node, "continuationBudget", 900);
+                        var rowBaseHeight = ReadFloat(node, "rowBaseHeight", 18);
+                        var rowLineHeight = ReadFloat(node, "rowLineHeight", 6);
+                        var descriptionMaxCharacters = node.TryGetProperty("descriptionMaxCharacters", out var charsNode) &&
+                            charsNode.TryGetInt32(out var maxChars)
+                            ? maxChars
+                            : 52;
+
+                        return new ReportRegionPaginationSpec
+                        {
+                            FirstPageBudget = Math.Max(200, firstPageBudget * 0.68f),
+                            ContinuationBudget = Math.Max(240, continuationBudget * 0.50f),
+                            LastPageBudget = Math.Max(80, continuationBudget * 0.12f),
+                            RowBaseHeight = rowBaseHeight,
+                            RowLineHeight = rowLineHeight,
+                            DescriptionMaxCharacters = descriptionMaxCharacters,
+                        };
+                    }
+
+                    current = current.Parent;
+                }
+            }
+            catch
+            {
+            }
+
+            return new ReportRegionPaginationSpec();
         }
 
         private void ApplyTextStyle(IContainer container, ReportElement element, string content)
@@ -455,6 +1494,13 @@ namespace crm_api.Services
             if (string.IsNullOrEmpty(element.Path)) return;
             var value = ResolvePropertyPath(entityData, element.Path);
             var displayValue = value?.ToString() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(displayValue) &&
+                (element.Path.Contains("Date", StringComparison.OrdinalIgnoreCase) ||
+                 element.Path.Contains("Until", StringComparison.OrdinalIgnoreCase)) &&
+                DateTime.TryParse(displayValue, out var parsedDate))
+            {
+                displayValue = parsedDate.ToString("dd.MM.yyyy");
+            }
             if (displayValue.IndexOf('<') >= 0)
                 displayValue = StripHtml(displayValue);
             ApplyTextStyle(container, element, displayValue);
@@ -465,6 +1511,132 @@ namespace crm_api.Services
             if (string.IsNullOrEmpty(html)) return html;
             var stripped = Regex.Replace(html, @"<[^>]+>", " ");
             return Regex.Replace(stripped, @"\s+", " ").Trim();
+        }
+
+        private static decimal ToDecimal(object? value)
+        {
+            if (value == null)
+                return 0m;
+
+            return value switch
+            {
+                decimal decimalValue => decimalValue,
+                int intValue => intValue,
+                long longValue => longValue,
+                float floatValue => (decimal)floatValue,
+                double doubleValue => (decimal)doubleValue,
+                _ when decimal.TryParse(value.ToString(), out var parsed) => parsed,
+                _ => 0m,
+            };
+        }
+
+        private static string? ResolveCurrencyCode(object entityData, QuotationTotalsOptions options)
+        {
+            if (!string.Equals(options.CurrencyMode, "code", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var path = string.IsNullOrWhiteSpace(options.CurrencyPath) ? "Currency" : options.CurrencyPath!;
+            return ResolvePropertyPathStatic(entityData, path)?.ToString();
+        }
+
+        private static string FormatCurrencyValue(decimal value, string? currencyCode)
+        {
+            var formatted = FormatTableCellValue(value, "currency");
+            return string.IsNullOrWhiteSpace(currencyCode) ? formatted : $"{formatted} {currencyCode}";
+        }
+
+        private static object? ResolvePropertyPathStatic(object obj, string path)
+        {
+            if (obj == null || string.IsNullOrWhiteSpace(path))
+                return null;
+
+            object? current = obj;
+            foreach (var segment in path.Split('.', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (current == null)
+                    return null;
+
+                var type = current.GetType();
+                var property = type.GetProperty(segment, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (property == null)
+                    return null;
+                current = property.GetValue(current);
+            }
+
+            return current;
+        }
+
+        private static List<ReportElement> ResolveLayoutElements(List<ReportElement> elements)
+        {
+            var elementMap = elements.ToDictionary(element => element.Id, StringComparer.OrdinalIgnoreCase);
+            var resolved = new Dictionary<string, ReportElement>(StringComparer.OrdinalIgnoreCase);
+            var resolving = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            ReportElement Resolve(ReportElement element)
+            {
+                if (resolved.TryGetValue(element.Id, out var cached))
+                    return cached;
+
+                if (!string.IsNullOrWhiteSpace(element.ParentId) &&
+                    elementMap.TryGetValue(element.ParentId, out var parent))
+                {
+                    if (resolving.Contains(element.Id))
+                        return element;
+
+                    resolving.Add(element.Id);
+                    var resolvedParent = Resolve(parent);
+                    resolving.Remove(element.Id);
+                    var parentPadding = resolvedParent.Style?.Padding ?? 0;
+
+                    cached = CloneElement(element);
+                    cached.X += resolvedParent.X + parentPadding;
+                    cached.Y += resolvedParent.Y + parentPadding;
+                    cached.Section = string.IsNullOrWhiteSpace(cached.Section) ? resolvedParent.Section : cached.Section;
+                    cached.PageNumbers ??= resolvedParent.PageNumbers != null ? new List<int>(resolvedParent.PageNumbers) : null;
+                    resolved[element.Id] = cached;
+                    return cached;
+                }
+
+                cached = CloneElement(element);
+                resolved[element.Id] = cached;
+                return cached;
+            }
+
+            return elements.Select(Resolve).ToList();
+        }
+
+        private static ReportElement CloneElement(ReportElement source)
+        {
+            return new ReportElement
+            {
+                Id = source.Id,
+                Type = source.Type,
+                Section = source.Section,
+                X = source.X,
+                Y = source.Y,
+                Width = source.Width,
+                Height = source.Height,
+                ZIndex = source.ZIndex,
+                Rotation = source.Rotation,
+                Style = source.Style,
+                PageNumbers = source.PageNumbers != null ? new List<int>(source.PageNumbers) : null,
+                ParentId = source.ParentId,
+                Binding = source.Binding,
+                Text = source.Text,
+                Value = source.Value,
+                Path = source.Path,
+                FontSize = source.FontSize,
+                FontFamily = source.FontFamily,
+                Color = source.Color,
+                TextOverflow = source.TextOverflow,
+                Columns = source.Columns,
+                HeaderStyle = source.HeaderStyle,
+                RowStyle = source.RowStyle,
+                AlternateRowStyle = source.AlternateRowStyle,
+                ColumnWidths = source.ColumnWidths,
+                TableOptions = source.TableOptions,
+                SummaryItems = source.SummaryItems,
+            };
         }
 
         private void RenderImage(IContainer container, ReportElement element, object entityData,
@@ -482,34 +1654,68 @@ namespace crm_api.Services
                 onWarning();
                 return;
             }
+            var imageFit = element.Style?.ImageFit?.Trim().ToLowerInvariant();
+            if (imageFit == "cover")
+            {
+                container.Image(imageBytes).FitUnproportionally();
+                return;
+            }
+
             container.Image(imageBytes).FitArea();
         }
 
-        private int GetTableRowCount(ReportElement element, object entityData)
+        private static (float borderWidth, string? borderColor) ParseBorderSpec(string border, string unit)
         {
-            if (element.Columns == null || !element.Columns.Any()) return 0;
-            var firstPath = element.Columns[0].Path;
-            if (string.IsNullOrEmpty(firstPath)) return 0;
-            var collectionName = firstPath.Contains('.') ? firstPath.Split('.')[0] : firstPath;
-            var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
-            return collection?.Count() ?? 0;
+            if (string.IsNullOrWhiteSpace(border))
+                return (0, null);
+
+            var trimmed = border.Trim();
+            var simpleColor = trimmed.StartsWith("#", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("rgb", StringComparison.OrdinalIgnoreCase);
+            if (simpleColor)
+                return (1, trimmed);
+
+            var match = Regex.Match(trimmed, @"(?<width>\d+(\.\d+)?)px\s+\w+\s+(?<color>.+)$", RegexOptions.IgnoreCase);
+            if (!match.Success)
+                return (1, trimmed);
+
+            var width = decimal.TryParse(match.Groups["width"].Value, out var parsedWidth)
+                ? PdfUnitConversion.ToPointsFloat(parsedWidth, unit)
+                : 1;
+            var color = match.Groups["color"].Value.Trim();
+
+            return (Math.Max(0, width), string.IsNullOrWhiteSpace(color) ? null : color);
         }
+
+        private int GetTableRowCount(ReportElement element, object entityData)
+            => GetTableRows(element, entityData).Count;
 
         private void RenderTable(IContainer container, ReportElement element, object entityData, string unit)
         {
-            if (element.Columns == null || !element.Columns.Any()) return;
+            var rows = GetTableRows(element, entityData);
+            RenderTable(container, element, entityData, unit, rows);
+        }
 
-            var firstPath = element.Columns[0].Path;
-            if (string.IsNullOrEmpty(firstPath)) return;
-            var collectionName = firstPath.Contains('.') ? firstPath.Split('.')[0] : firstPath;
-            var collection = ResolvePropertyPath(entityData, collectionName) as IEnumerable<object>;
-            if (collection == null) return;
+        private void RenderTable(IContainer container, ReportElement element, object entityData, string unit, List<object> rows)
+        {
+            if (element.Columns == null || !element.Columns.Any() || rows.Count == 0)
+                return;
 
-            var rows = collection.ToList();
             var headerStyle = element.HeaderStyle;
             var rowStyle = element.RowStyle;
             var altStyle = element.AlternateRowStyle;
             var repeatHeader = element.TableOptions?.RepeatHeader ?? true;
+            var showBorders = element.TableOptions?.ShowBorders ?? true;
+            var dense = element.TableOptions?.Dense ?? false;
+            var cellPadding = dense ? 3 : 5;
+            var detailColumnPath = element.TableOptions?.DetailColumnPath;
+            var detailPaths = element.TableOptions?.DetailPaths ?? new List<string>();
+            var detailLineFontSize = (float)(element.TableOptions?.DetailLineFontSize ?? Math.Max(8, (rowStyle?.FontSize ?? 9) - 1));
+            var detailLineColor = element.TableOptions?.DetailLineColor ?? "#64748b";
+            var groupByPath = element.TableOptions?.GroupByPath;
+            var groupHeaderLabel = element.TableOptions?.GroupHeaderLabel ?? "Group";
+            var showGroupFooter = element.TableOptions?.ShowGroupFooter;
+            var groupFooterLabel = element.TableOptions?.GroupFooterLabel ?? "Toplam";
+            var groupFooterValuePath = element.TableOptions?.GroupFooterValuePath;
 
             container.Table(table =>
             {
@@ -522,8 +1728,13 @@ namespace crm_api.Services
                     }
                     else
                     {
-                        foreach (var _ in element.Columns)
-                            columns.RelativeColumn();
+                        foreach (var col in element.Columns)
+                        {
+                            if (col.Width.HasValue)
+                                columns.ConstantColumn(PdfUnitConversion.ToPointsFloat(col.Width.Value, unit));
+                            else
+                                columns.RelativeColumn();
+                        }
                     }
                 });
 
@@ -533,7 +1744,18 @@ namespace crm_api.Services
                     {
                         foreach (var col in element.Columns)
                         {
-                            var cell = header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(col.Label).Bold();
+                            IContainer headerCell = header.Cell().Background(Colors.Grey.Lighten2);
+                            if (showBorders)
+                                headerCell = headerCell.Border(1);
+                            IContainer headerContent = headerCell.Padding(cellPadding);
+                            headerContent = (col.Align ?? "left").ToLowerInvariant() switch
+                            {
+                                "center" => headerContent.AlignCenter(),
+                                "right" => headerContent.AlignRight(),
+                                _ => headerContent.AlignLeft()
+                            };
+
+                            var cell = headerContent.Text(col.Label).Bold();
                             if (headerStyle?.FontSize.HasValue == true)
                                 cell = cell.FontSize((float)headerStyle.FontSize.Value);
                             if (!string.IsNullOrEmpty(headerStyle?.Color))
@@ -545,7 +1767,18 @@ namespace crm_api.Services
                 {
                     foreach (var col in element.Columns)
                     {
-                        var cell = table.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(col.Label).Bold();
+                        IContainer headerCell = table.Cell().Background(Colors.Grey.Lighten2);
+                        if (showBorders)
+                            headerCell = headerCell.Border(1);
+                        IContainer headerContent = headerCell.Padding(cellPadding);
+                        headerContent = (col.Align ?? "left").ToLowerInvariant() switch
+                        {
+                            "center" => headerContent.AlignCenter(),
+                            "right" => headerContent.AlignRight(),
+                            _ => headerContent.AlignLeft()
+                        };
+
+                        var cell = headerContent.Text(col.Label).Bold();
                         if (headerStyle?.FontSize.HasValue == true)
                             cell = cell.FontSize((float)headerStyle.FontSize.Value);
                         if (!string.IsNullOrEmpty(headerStyle?.Color))
@@ -554,29 +1787,152 @@ namespace crm_api.Services
                 }
 
                 var rowIndex = 0;
-                foreach (var row in rows)
+                var groupedRows = BuildTableGroups(rows, groupByPath);
+                foreach (var group in groupedRows)
                 {
-                    foreach (var col in element.Columns)
+                    if (!string.IsNullOrWhiteSpace(group.Key))
                     {
-                        if (string.IsNullOrEmpty(col.Path))
-                        {
-                            table.Cell().Border(1).Padding(5).Text(string.Empty);
-                            continue;
-                        }
-                        var propertyPath = col.Path.Contains('.') ? col.Path.Split('.', 2)[1] : col.Path;
-                        var cellValue = ResolvePropertyPath(row, propertyPath)?.ToString() ?? string.Empty;
-                        if (cellValue.IndexOf('<') >= 0) cellValue = StripHtml(cellValue);
-
-                        var style = (rowIndex % 2 == 1 && altStyle != null) ? altStyle : rowStyle;
-                        var textBlock = !string.IsNullOrEmpty(style?.BackgroundColor)
-                            ? table.Cell().Background(style.BackgroundColor).Border(1).Padding(5).Text(cellValue)
-                            : table.Cell().Border(1).Padding(5).Text(cellValue);
-                        if (style?.FontSize.HasValue == true) textBlock = textBlock.FontSize((float)style.FontSize.Value);
-                        if (!string.IsNullOrEmpty(style?.Color)) textBlock = textBlock.FontColor(style.Color);
+                        IContainer groupCell = table.Cell().ColumnSpan((uint)element.Columns.Count);
+                        if (showBorders)
+                            groupCell = groupCell.Border(1);
+                        groupCell.Background("#eff6ff").Padding(cellPadding)
+                            .Text($"{groupHeaderLabel}: {group.Key}")
+                            .SemiBold();
                     }
-                    rowIndex++;
+
+                    foreach (var row in group.Rows)
+                    {
+                        foreach (var col in element.Columns)
+                        {
+                            if (string.IsNullOrEmpty(col.Path))
+                            {
+                                IContainer emptyCell = table.Cell();
+                                if (showBorders)
+                                    emptyCell = emptyCell.Border(1);
+                                emptyCell.Padding(cellPadding).Text(string.Empty);
+                                continue;
+                            }
+                            var propertyPath = col.Path.Contains('.') ? col.Path.Split('.', 2)[1] : col.Path;
+                            var rawValue = ResolvePropertyPath(row, propertyPath);
+                            var cellValue = FormatTableCellValue(rawValue, col.Format);
+                            if (cellValue.IndexOf('<') >= 0) cellValue = StripHtml(cellValue);
+                            var isDetailColumn = !string.IsNullOrWhiteSpace(detailColumnPath) &&
+                                string.Equals(col.Path, detailColumnPath, StringComparison.OrdinalIgnoreCase);
+
+                            var style = (rowIndex % 2 == 1 && altStyle != null) ? altStyle : rowStyle;
+                            IContainer tableCell = table.Cell();
+                            if (!string.IsNullOrEmpty(style?.BackgroundColor))
+                                tableCell = tableCell.Background(style.BackgroundColor);
+                            if (showBorders)
+                                tableCell = tableCell.Border(1);
+
+                            IContainer contentContainer = tableCell.Padding(cellPadding);
+                            contentContainer = (col.Align ?? "left").ToLowerInvariant() switch
+                            {
+                                "center" => contentContainer.AlignCenter(),
+                                "right" => contentContainer.AlignRight(),
+                                _ => contentContainer.AlignLeft()
+                            };
+
+                            if (isDetailColumn && detailPaths.Count > 0)
+                            {
+                                var combinedDetailText = BuildCombinedDetailText(row, detailPaths);
+                                contentContainer.Column(detailColumn =>
+                                {
+                                    var primary = detailColumn.Item().Text(cellValue);
+                                    if (style?.FontSize.HasValue == true) primary = primary.FontSize((float)style.FontSize.Value);
+                                    if (!string.IsNullOrEmpty(style?.Color)) primary = primary.FontColor(style.Color);
+
+                                    if (!string.IsNullOrWhiteSpace(combinedDetailText))
+                                    {
+                                        detailColumn.Item()
+                                            .PaddingTop(1)
+                                            .DefaultTextStyle(textStyle => textStyle.FontSize(detailLineFontSize).FontColor(detailLineColor).LineHeight(1.2f))
+                                            .Text(combinedDetailText);
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                var textBlock = contentContainer.Text(cellValue);
+                                if (style?.FontSize.HasValue == true) textBlock = textBlock.FontSize((float)style.FontSize.Value);
+                                if (!string.IsNullOrEmpty(style?.Color)) textBlock = textBlock.FontColor(style.Color);
+                            }
+                        }
+                        rowIndex++;
+                    }
+
+                    if (showGroupFooter == true && !string.IsNullOrWhiteSpace(groupFooterValuePath))
+                    {
+                        IContainer footerLabelCell = table.Cell().ColumnSpan((uint)Math.Max(1, element.Columns.Count - 1));
+                        if (showBorders)
+                            footerLabelCell = footerLabelCell.Border(1);
+                        footerLabelCell.Background("#f8fafc").Padding(cellPadding).AlignRight().Text(groupFooterLabel).SemiBold();
+
+                        IContainer footerValueCell = table.Cell();
+                        if (showBorders)
+                            footerValueCell = footerValueCell.Border(1);
+                        footerValueCell.Background("#f8fafc").Padding(cellPadding).AlignRight().Text(
+                            FormatTableCellValue(SumGroupValues(group.Rows, groupFooterValuePath!), "currency")).SemiBold();
+                    }
                 }
             });
+        }
+
+        private static List<TableGroup> BuildTableGroups(List<object> rows, string? groupByPath)
+        {
+            if (string.IsNullOrWhiteSpace(groupByPath))
+                return new List<TableGroup> { new() { Key = null, Rows = rows } };
+
+            var normalizedPath = groupByPath.Contains('.') ? groupByPath.Split('.', 2)[1] : groupByPath;
+            return rows
+                .GroupBy(row => ResolvePropertyPathStatic(row, normalizedPath)?.ToString() ?? string.Empty)
+                .Select(group => new TableGroup
+                {
+                    Key = string.IsNullOrWhiteSpace(group.Key) ? null : group.Key,
+                    Rows = group.Cast<object>().ToList(),
+                })
+                .ToList();
+        }
+
+        private static decimal SumGroupValues(IEnumerable<object> rows, string groupFooterValuePath)
+        {
+            var normalizedPath = groupFooterValuePath.Contains('.') ? groupFooterValuePath.Split('.', 2)[1] : groupFooterValuePath;
+            return rows.Sum(row => ToDecimal(ResolvePropertyPathStatic(row, normalizedPath)));
+        }
+
+        private sealed class TableGroup
+        {
+            public string? Key { get; init; }
+            public List<object> Rows { get; init; } = new();
+        }
+
+        private static string FormatTableCellValue(object? rawValue, string? format)
+        {
+            if (rawValue == null)
+                return string.Empty;
+
+            var normalizedFormat = format?.Trim().ToLowerInvariant();
+            if (string.IsNullOrEmpty(normalizedFormat) || normalizedFormat == "text" || normalizedFormat == "image")
+                return rawValue.ToString() ?? string.Empty;
+
+            if (normalizedFormat == "date")
+            {
+                if (rawValue is DateTime dateTime)
+                    return dateTime.ToString("dd.MM.yyyy");
+                if (DateTime.TryParse(rawValue.ToString(), out var parsedDate))
+                    return parsedDate.ToString("dd.MM.yyyy");
+            }
+
+            if (normalizedFormat == "number" || normalizedFormat == "currency")
+            {
+                if (decimal.TryParse(rawValue.ToString(), out var parsedDecimal))
+                    return normalizedFormat == "currency"
+                        ? parsedDecimal.ToString("N2")
+                        : parsedDecimal.ToString("N0");
+            }
+
+            return rawValue.ToString() ?? string.Empty;
         }
 
         private object? ResolvePropertyPath(object obj, string path)
@@ -705,16 +2061,38 @@ namespace crm_api.Services
                         q.OfferDate,
                         q.OfferType,
                         q.RevisionNo,
+                        q.ValidUntil,
                         CustomerName = q.PotentialCustomer != null ? q.PotentialCustomer.CustomerName : (q.ErpCustomerCode ?? ""),
                         PotentialCustomerName = q.PotentialCustomer != null ? q.PotentialCustomer.CustomerName : "",
                         q.ErpCustomerCode,
                         q.DeliveryDate,
                         ShippingAddressText = q.ShippingAddress != null ? q.ShippingAddress.Address : "",
                         RepresentativeName = q.Representative != null ? q.Representative.FullName : "",
+                        SalesTypeDefinitionName = q.SalesTypeDefinition != null ? q.SalesTypeDefinition.Name : "",
                         q.Description,
                         PaymentTypeName = q.PaymentType != null ? q.PaymentType.Name : "",
                         DocumentSerialTypeName = q.DocumentSerialType != null ? q.DocumentSerialType.SerialPrefix : "",
                         q.Currency,
+                        q.GeneralDiscountRate,
+                        q.GeneralDiscountAmount,
+                        q.Total,
+                        q.GrandTotal,
+                        q.ErpProjectCode,
+                        Note1 = q.QuotationNotes != null ? q.QuotationNotes.Note1 : null,
+                        Note2 = q.QuotationNotes != null ? q.QuotationNotes.Note2 : null,
+                        Note3 = q.QuotationNotes != null ? q.QuotationNotes.Note3 : null,
+                        Note4 = q.QuotationNotes != null ? q.QuotationNotes.Note4 : null,
+                        Note5 = q.QuotationNotes != null ? q.QuotationNotes.Note5 : null,
+                        Note6 = q.QuotationNotes != null ? q.QuotationNotes.Note6 : null,
+                        Note7 = q.QuotationNotes != null ? q.QuotationNotes.Note7 : null,
+                        Note8 = q.QuotationNotes != null ? q.QuotationNotes.Note8 : null,
+                        Note9 = q.QuotationNotes != null ? q.QuotationNotes.Note9 : null,
+                        Note10 = q.QuotationNotes != null ? q.QuotationNotes.Note10 : null,
+                        Note11 = q.QuotationNotes != null ? q.QuotationNotes.Note11 : null,
+                        Note12 = q.QuotationNotes != null ? q.QuotationNotes.Note12 : null,
+                        Note13 = q.QuotationNotes != null ? q.QuotationNotes.Note13 : null,
+                        Note14 = q.QuotationNotes != null ? q.QuotationNotes.Note14 : null,
+                        Note15 = q.QuotationNotes != null ? q.QuotationNotes.Note15 : null,
                         q.CreatedBy,
                         q.UpdatedBy,
                         ExchangeRates = (from er in _unitOfWork.QuotationExchangeRates.Query(false, false)
@@ -779,6 +2157,10 @@ namespace crm_api.Services
                                     ql.LineTotal,
                                     ql.LineGrandTotal,
                                     ql.Description,
+                                    ql.Description1,
+                                    ql.Description2,
+                                    ql.Description3,
+                                    ql.ErpProjectCode,
                                     HtmlDescription = stockData != null && stockData.Id.HasValue
                                         ? (_unitOfWork.StockDetails.Query(false, false).Where(sd => sd.StockId == stockData.Id.Value && !sd.IsDeleted).Select(sd => sd.HtmlDescription).FirstOrDefault() ?? "")
                                         : "",

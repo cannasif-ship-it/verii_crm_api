@@ -71,6 +71,7 @@ namespace crm_api.Data
         public DbSet<ApprovalUserRole> ApprovalUserRoles { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
+        public DbSet<PdfTablePreset> PdfTablePresets { get; set; }
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<RII_FN_CAHAR> RII_FN_CAHAR { get; set; }
