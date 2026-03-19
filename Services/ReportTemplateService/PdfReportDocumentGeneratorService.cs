@@ -63,15 +63,6 @@ namespace crm_api.Services
                 if (entityData == null)
                     throw new InvalidOperationException($"Entity with ID {entityId} not found for rule type {ruleType}");
 
-                if (WindoQuotationDocumentRenderer.CanRender(ruleType, templateData))
-                {
-                    var specializedPdf = WindoQuotationDocumentRenderer.GeneratePdf(entityData, templateData);
-                    sw.Stop();
-                    _logger.LogInformation(
-                        "PdfReportDocumentGenerator completed with specialized renderer: RuleType={RuleType}, EntityId={EntityId}, LayoutKey={LayoutKey}, DurationMs={DurationMs}",
-                        ruleType, entityId, templateData.LayoutKey, sw.ElapsedMilliseconds);
-                    return specializedPdf;
-                }
                 var pdfBytes = await GeneratePdfForEntityDataAsync(templateData, entityData).ConfigureAwait(false);
                 sw.Stop();
 

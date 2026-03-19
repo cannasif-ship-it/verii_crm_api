@@ -457,6 +457,15 @@ namespace crm_api.DTOs
         public bool? IsActive { get; set; }
     }
 
+    public class PdfTemplateAssetDto : BaseEntityDto
+    {
+        public string OriginalFileName { get; set; } = string.Empty;
+        public string StoredFileName { get; set; } = string.Empty;
+        public string RelativeUrl { get; set; } = string.Empty;
+        public string ContentType { get; set; } = string.Empty;
+        public long SizeBytes { get; set; }
+    }
+
     public class PdfTablePresetDto : BaseEntityDto
     {
         public DocumentRuleType RuleType { get; set; }

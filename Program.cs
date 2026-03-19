@@ -271,14 +271,19 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 // PDF Report Template (report-builder discipline)
 builder.Services.Configure<crm_api.Infrastructure.PdfBuilderOptions>(
     builder.Configuration.GetSection(crm_api.Infrastructure.PdfBuilderOptions.SectionName));
+builder.Services.PostConfigure<crm_api.Infrastructure.PdfBuilderOptions>(options =>
+{
+    if (string.IsNullOrWhiteSpace(options.LocalImageBasePath))
+        options.LocalImageBasePath = builder.Environment.ContentRootPath;
+});
 builder.Services.AddScoped<crm_api.Interfaces.IPdfReportTemplateValidator, crm_api.Services.PdfReportTemplateValidator>();
 builder.Services.AddScoped<crm_api.Interfaces.IPdfReportDocumentGeneratorService, crm_api.Services.PdfReportDocumentGeneratorService>();
 builder.Services.AddScoped<crm_api.Interfaces.IPdfReportTemplateService, crm_api.Services.PdfReportTemplateService>();
+builder.Services.AddScoped<crm_api.Interfaces.IPdfTemplateAssetService, crm_api.Services.PdfTemplateAssetService>();
 builder.Services.AddScoped<crm_api.Interfaces.IPdfTablePresetService, crm_api.Services.PdfTablePresetService>();
 // Legacy Report Template (backward compatibility; delegates to PDF generator)
 builder.Services.AddScoped<IReportTemplateService, ReportTemplateService>();
 builder.Services.AddScoped<IReportPdfGeneratorService, ReportPdfGeneratorService>();
-builder.Services.AddHostedService<crm_api.Infrastructure.Startup.PdfTemplateBootstrapHostedService>();
 
 // Report Builder (no allowlist; connection + datasource check + preview + CRUD)
 builder.Services.AddScoped<IReportingConnectionService, crm_api.Services.ReportBuilderService.ReportingConnectionService>();

@@ -2,29 +2,17 @@
 
   <ItemGroup>
     <Compile Remove="tests/**" />
-    <Compile Remove="scripts/WindoPdfSampleRunner/**" />
     <Compile Remove="scripts/PdfRegressionSampleRunner/**" />
-    <Compile Remove="scripts/WindoBuilderSampleRunner/**" />
     <Compile Remove="scripts/VisualBrochureRunner/**" />
-    <Compile Remove="scripts/WindoTemplateUpsertRunner/**" />
     <Content Remove="tests/**" />
-    <Content Remove="scripts/WindoPdfSampleRunner/**" />
     <Content Remove="scripts/PdfRegressionSampleRunner/**" />
-    <Content Remove="scripts/WindoBuilderSampleRunner/**" />
     <Content Remove="scripts/VisualBrochureRunner/**" />
-    <Content Remove="scripts/WindoTemplateUpsertRunner/**" />
     <EmbeddedResource Remove="tests/**" />
-    <EmbeddedResource Remove="scripts/WindoPdfSampleRunner/**" />
     <EmbeddedResource Remove="scripts/PdfRegressionSampleRunner/**" />
-    <EmbeddedResource Remove="scripts/WindoBuilderSampleRunner/**" />
     <EmbeddedResource Remove="scripts/VisualBrochureRunner/**" />
-    <EmbeddedResource Remove="scripts/WindoTemplateUpsertRunner/**" />
     <None Remove="tests/**" />
-    <None Remove="scripts/WindoPdfSampleRunner/**" />
     <None Remove="scripts/PdfRegressionSampleRunner/**" />
-    <None Remove="scripts/WindoBuilderSampleRunner/**" />
     <None Remove="scripts/VisualBrochureRunner/**" />
-    <None Remove="scripts/WindoTemplateUpsertRunner/**" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using crm_api.DTOs;
 using crm_api.Interfaces;
@@ -17,13 +18,16 @@ namespace crm_api.Controllers
     public class PdfReportTemplateController : ControllerBase
     {
         private readonly IPdfReportTemplateService _pdfReportTemplateService;
+        private readonly IPdfTemplateAssetService _pdfTemplateAssetService;
         private readonly ILocalizationService _localizationService;
 
         public PdfReportTemplateController(
             IPdfReportTemplateService pdfReportTemplateService,
+            IPdfTemplateAssetService pdfTemplateAssetService,
             ILocalizationService localizationService)
         {
             _pdfReportTemplateService = pdfReportTemplateService;
+            _pdfTemplateAssetService = pdfTemplateAssetService;
             _localizationService = localizationService;
         }
 
@@ -74,6 +78,22 @@ namespace crm_api.Controllers
             if (!result.Success)
                 return StatusCode(result.StatusCode, result);
             return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result);
+        }
+
+        [HttpPost("assets/upload")]
+        [RequestSizeLimit(10 * 1024 * 1024)]
+        public async Task<IActionResult> UploadAsset([FromForm] IFormFile file)
+        {
+            if (!long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
+                return Unauthorized(ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("ReportTemplateService.UnauthorizedGenerate"),
+                    "Invalid or missing user claim",
+                    401));
+
+            var result = await _pdfTemplateAssetService.UploadAsync(file, userId);
+            if (!result.Success)
+                return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
 
         /// <summary>Update an existing PDF report template.</summary>
