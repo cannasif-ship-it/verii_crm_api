@@ -3119,6 +3119,12 @@
   <data name="ReportService.ReportConfigInvalidAggregation" xml:space="preserve">
     <value>Geçersiz aggregation; none, sum, count, avg, min, max kullanılmalıdır.</value>
   </data>
+  <data name="ReportService.ReportAccessDenied" xml:space="preserve">
+    <value>Bu raporu görüntüleme yetkiniz yok.</value>
+  </data>
+  <data name="ReportService.ReportManageDenied" xml:space="preserve">
+    <value>Bu raporu güncelleme veya silme yetkiniz yok.</value>
+  </data>
   <data name="ReportPreviewService.InvalidConnection" xml:space="preserve">
     <value>Geçersiz bağlantı.</value>
   </data>

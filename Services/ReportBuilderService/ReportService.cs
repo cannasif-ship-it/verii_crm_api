@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AutoMapper;
 using crm_api.DTOs;
 using crm_api.DTOs.ReportBuilderDto;
@@ -40,7 +41,7 @@ namespace crm_api.Services.ReportBuilderService
             _logger = logger;
         }
 
-        public async Task<ApiResponse<ReportDetailDto>> GetByIdAsync(long id)
+        public async Task<ApiResponse<ReportDetailDto>> GetByIdAsync(long id, long userId, string? email)
         {
             try
             {
@@ -49,7 +50,14 @@ namespace crm_api.Services.ReportBuilderService
                     .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted).ConfigureAwait(false);
                 if (entity == null)
                     return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
+
+                var access = GetAccessDecision(entity, userId, email);
+                if (!access.CanRead)
+                    return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportAccessDenied"), null, 403);
+
                 var dto = _mapper.Map<ReportDetailDto>(entity);
+                dto.CanManage = access.CanManage;
+                dto.AccessLevel = access.AccessLevel;
                 return ApiResponse<ReportDetailDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ReportService.ReportRetrieved"));
             }
             catch (Exception ex)
@@ -59,7 +67,7 @@ namespace crm_api.Services.ReportBuilderService
             }
         }
 
-        public async Task<ApiResponse<PagedResponse<ReportListItemDto>>> ListAsync(string? search, int pageNumber = 1, int pageSize = 20)
+        public async Task<ApiResponse<PagedResponse<ReportListItemDto>>> ListAsync(string? search, long userId, string? email, int pageNumber = 1, int pageSize = 20)
         {
             try
             {
@@ -69,13 +77,28 @@ namespace crm_api.Services.ReportBuilderService
                     var term = search.Trim();
                     query = query.Where(r => r.Name.Contains(term) || (r.Description != null && r.Description.Contains(term)));
                 }
-                var total = await query.CountAsync().ConfigureAwait(false);
-                var list = await query
+                var visible = await query
                     .OrderByDescending(r => r.UpdatedDate ?? r.CreatedDate)
+                    .ToListAsync().ConfigureAwait(false);
+
+                var accessible = visible
+                    .Select(r => new { Entity = r, Access = GetAccessDecision(r, userId, email) })
+                    .Where(item => item.Access.CanRead)
+                    .ToList();
+
+                var total = accessible.Count;
+                var list = accessible
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .ToListAsync().ConfigureAwait(false);
-                var items = _mapper.Map<List<ReportListItemDto>>(list);
+                    .ToList();
+
+                var items = list.Select(item =>
+                {
+                    var dto = _mapper.Map<ReportListItemDto>(item.Entity);
+                    dto.CanManage = item.Access.CanManage;
+                    dto.AccessLevel = item.Access.AccessLevel;
+                    return dto;
+                }).ToList();
                 var paged = new PagedResponse<ReportListItemDto> { Items = items, TotalCount = total, PageNumber = pageNumber, PageSize = pageSize };
                 return ApiResponse<PagedResponse<ReportListItemDto>>.SuccessResult(paged, _localizationService.GetLocalizedString("ReportService.ReportListRetrieved"));
             }
@@ -112,7 +135,7 @@ namespace crm_api.Services.ReportBuilderService
             }
         }
 
-        public async Task<ApiResponse<ReportDetailDto>> UpdateAsync(long id, ReportUpdateDto dto, long userId)
+        public async Task<ApiResponse<ReportDetailDto>> UpdateAsync(long id, ReportUpdateDto dto, long userId, string? email)
         {
             var validation = await ValidateForSaveAsync(dto.ConnectionKey, dto.DataSourceType, dto.DataSourceName, dto.ConfigJson).ConfigureAwait(false);
             if (!validation.Success)
@@ -122,6 +145,10 @@ namespace crm_api.Services.ReportBuilderService
             var entity = await repo.GetByIdForUpdateAsync(id).ConfigureAwait(false);
             if (entity == null)
                 return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
+
+            var access = GetAccessDecision(entity, userId, email);
+            if (!access.CanManage)
+                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportManageDenied"), null, 403);
 
             try
             {
@@ -146,14 +173,84 @@ namespace crm_api.Services.ReportBuilderService
             }
         }
 
-        public async Task<ApiResponse<bool>> SoftDeleteAsync(long id)
+        public async Task<ApiResponse<bool>> SoftDeleteAsync(long id, long userId, string? email)
         {
             var repo = _unitOfWork.Repository<ReportDefinition>();
-            var ok = await repo.SoftDeleteAsync(id).ConfigureAwait(false);
-            if (!ok)
+            var entity = await repo.GetByIdForUpdateAsync(id).ConfigureAwait(false);
+            if (entity == null)
                 return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
+
+            var access = GetAccessDecision(entity, userId, email);
+            if (!access.CanManage)
+                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportManageDenied"), null, 403);
+
+            entity.IsDeleted = true;
+            entity.DeletedDate = DateTimeProvider.Now;
+            entity.DeletedBy = userId;
+
+            await repo.UpdateAsync(entity).ConfigureAwait(false);
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("ReportService.ReportDeleted"));
+        }
+
+        private ReportAccessDecision GetAccessDecision(ReportDefinition entity, long userId, string? email)
+        {
+            if (entity.CreatedBy == userId)
+                return ReportAccessDecision.Owner;
+
+            var access = ExtractAccessMetadata(entity.ConfigJson);
+
+            if (access.IsOrganizationWide)
+                return ReportAccessDecision.Organization;
+
+            if (!string.IsNullOrWhiteSpace(email) && access.SharedWithEmails.Contains(email.Trim(), StringComparer.OrdinalIgnoreCase))
+                return ReportAccessDecision.Shared;
+
+            return ReportAccessDecision.None;
+        }
+
+        private static ReportAccessMetadata ExtractAccessMetadata(string configJson)
+        {
+            if (string.IsNullOrWhiteSpace(configJson))
+                return ReportAccessMetadata.Empty;
+
+            try
+            {
+                var root = JsonNode.Parse(configJson)?.AsObject();
+                var governance = root?["governance"]?.AsObject();
+                if (governance == null)
+                    return ReportAccessMetadata.Empty;
+
+                var audience = governance["audience"]?.GetValue<string>();
+                var sharedWith = governance["sharedWith"] as JsonArray;
+                var emails = sharedWith?
+                    .Select(node => node?.GetValue<string>()?.Trim())
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .Select(value => value!)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList() ?? new List<string>();
+
+                return new ReportAccessMetadata(
+                    string.Equals(audience, "organization", StringComparison.OrdinalIgnoreCase),
+                    emails);
+            }
+            catch (JsonException)
+            {
+                return ReportAccessMetadata.Empty;
+            }
+        }
+
+        private sealed record ReportAccessMetadata(bool IsOrganizationWide, IReadOnlyCollection<string> SharedWithEmails)
+        {
+            public static ReportAccessMetadata Empty { get; } = new(false, Array.Empty<string>());
+        }
+
+        private sealed record ReportAccessDecision(bool CanRead, bool CanManage, string AccessLevel)
+        {
+            public static ReportAccessDecision None { get; } = new(false, false, "none");
+            public static ReportAccessDecision Owner { get; } = new(true, true, "owner");
+            public static ReportAccessDecision Shared { get; } = new(true, false, "shared");
+            public static ReportAccessDecision Organization { get; } = new(true, false, "organization");
         }
 
         private async Task<ApiResponse<object>> ValidateForSaveAsync(string connectionKey, string dataSourceType, string dataSourceName, string configJson)

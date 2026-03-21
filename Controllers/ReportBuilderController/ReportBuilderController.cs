@@ -31,6 +31,18 @@ namespace crm_api.Controllers
             _localizationService = localizationService;
         }
 
+        private bool TryGetCurrentUser(out long userId, out string? email)
+        {
+            userId = 0;
+            email = User.FindFirst(ClaimTypes.Email)?.Value
+                ?? User.FindFirst("email")?.Value;
+
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("UserId")?.Value;
+
+            return !string.IsNullOrEmpty(userIdStr) && long.TryParse(userIdStr, out userId);
+        }
+
         // GET /api/reportbuilder/connections
         [HttpGet("connections")]
         public IActionResult GetConnections()
@@ -70,10 +82,7 @@ namespace crm_api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ReportCreateDto dto)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                            ?? User.FindFirst("UserId")?.Value;
-
-            if (string.IsNullOrEmpty(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            if (!TryGetCurrentUser(out var userId, out _))
                 return Unauthorized();
 
             var result = await _reportService.CreateAsync(dto, userId);
@@ -84,7 +93,10 @@ namespace crm_api.Controllers
         [HttpGet]
         public async Task<IActionResult> List([FromQuery] string? search = null, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
-            var result = await _reportService.ListAsync(search, pageNumber, pageSize);
+            if (!TryGetCurrentUser(out var userId, out var email))
+                return Unauthorized();
+
+            var result = await _reportService.ListAsync(search, userId, email, pageNumber, pageSize);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -92,7 +104,10 @@ namespace crm_api.Controllers
         [HttpGet("{id:long}")]
         public async Task<IActionResult> GetById(long id)
         {
-            var result = await _reportService.GetByIdAsync(id);
+            if (!TryGetCurrentUser(out var userId, out var email))
+                return Unauthorized();
+
+            var result = await _reportService.GetByIdAsync(id, userId, email);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -100,13 +115,10 @@ namespace crm_api.Controllers
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] ReportUpdateDto dto)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                            ?? User.FindFirst("UserId")?.Value;
-
-            if (string.IsNullOrEmpty(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            if (!TryGetCurrentUser(out var userId, out var email))
                 return Unauthorized();
 
-            var result = await _reportService.UpdateAsync(id, dto, userId);
+            var result = await _reportService.UpdateAsync(id, dto, userId, email);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -114,7 +126,10 @@ namespace crm_api.Controllers
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var result = await _reportService.SoftDeleteAsync(id);
+            if (!TryGetCurrentUser(out var userId, out var email))
+                return Unauthorized();
+
+            var result = await _reportService.SoftDeleteAsync(id, userId, email);
             return StatusCode(result.StatusCode, result);
         }
 

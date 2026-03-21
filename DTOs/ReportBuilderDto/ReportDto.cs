@@ -60,6 +60,8 @@ namespace crm_api.DTOs.ReportBuilderDto
         public string DataSourceType { get; set; } = string.Empty;
         public string DataSourceName { get; set; } = string.Empty;
         public DateTime? UpdatedDate { get; set; }
+        public bool CanManage { get; set; }
+        public string AccessLevel { get; set; } = "owner";
     }
 
     public class ReportDetailDto
@@ -73,5 +75,7 @@ namespace crm_api.DTOs.ReportBuilderDto
         public string ConfigJson { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public bool CanManage { get; set; }
+        public string AccessLevel { get; set; } = "owner";
     }
 }
