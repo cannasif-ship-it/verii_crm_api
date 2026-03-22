@@ -89,6 +89,7 @@ namespace crm_api.DTOs
         public decimal LineTotal { get; set; }
         public decimal LineGrandTotal { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
     }
 
     public class TempQuotattionLineCreateDto
@@ -119,6 +120,9 @@ namespace crm_api.DTOs
 
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string ImagePath { get; set; } = string.Empty;
     }
 
     public class TempQuotattionLineUpdateDto
@@ -146,6 +150,9 @@ namespace crm_api.DTOs
 
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string ImagePath { get; set; } = string.Empty;
     }
 
     public class TempQuotattionExchangeLineGetDto : BaseEntityDto

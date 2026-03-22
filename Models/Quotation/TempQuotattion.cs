@@ -56,6 +56,7 @@ namespace crm_api.Models
         public decimal LineGrandTotal { get; set; } = 0m;
 
         public string Description { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
     }
 
     public class TempQuotattionExchangeLine : BaseEntity

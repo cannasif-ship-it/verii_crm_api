@@ -159,6 +159,7 @@ namespace crm_api.Controllers
                 DocumentRuleType.Demand => DemandFields.GetFields(),
                 DocumentRuleType.Quotation => QuotationFields.GetFields(),
                 DocumentRuleType.Order => OrderFields.GetFields(),
+                DocumentRuleType.FastQuotation => FastQuotationFields.GetFields(),
                 _ => new ReportTemplateFieldsDto()
             };
 

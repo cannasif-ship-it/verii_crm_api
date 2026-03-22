@@ -117,6 +117,11 @@ namespace crm_api.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(string.Empty);
 
+            builder.Property(e => e.ImagePath)
+                .HasMaxLength(500)
+                .IsRequired()
+                .HasDefaultValue(string.Empty);
+
             builder.Property(e => e.Quantity).HasColumnType("decimal(18,6)");
             builder.Property(e => e.UnitPrice).HasColumnType("decimal(18,6)");
             builder.Property(e => e.DiscountRate1).HasColumnType("decimal(18,6)");

@@ -7,7 +7,7 @@ namespace crm_api.Models
     public class ReportTemplate : BaseEntity
     {
         /// <summary>
-        /// Document type: 0=Demand/Talep, 1=Quotation/Teklif, 2=Order/Sipariş
+        /// Document type: 0=Demand/Talep, 1=Quotation/Teklif, 2=Order/Sipariş, 3=FastQuotation/Hızlı Teklif
         /// </summary>
         public DocumentRuleType RuleType { get; set; }
 
@@ -60,6 +60,11 @@ namespace crm_api.Models
         /// <summary>
         /// Order/Sipariş
         /// </summary>
-        Order = 2
+        Order = 2,
+
+        /// <summary>
+        /// Fast quotation / hızlı teklif
+        /// </summary>
+        FastQuotation = 3
     }
 }

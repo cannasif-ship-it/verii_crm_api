@@ -348,4 +348,65 @@ namespace crm_api.DTOs
             };
         }
     }
+
+    /// <summary>
+    /// Fast quotation / hızlı teklif için field'lar
+    /// </summary>
+    public static class FastQuotationFields
+    {
+        public static ReportTemplateFieldsDto GetFields()
+        {
+            return new ReportTemplateFieldsDto
+            {
+                HeaderFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Hızlı Teklif No", Path = "OfferNo", DataType = "string", ExampleValue = "HT-42" },
+                    new FieldDefinition { Label = "Bağlı Teklif No", Path = "QuotationNo", DataType = "string", ExampleValue = "TKL-2024-001" },
+                    new FieldDefinition { Label = "Teklif Tarihi", Path = "OfferDate", DataType = "date", ExampleValue = "2024-01-15" },
+                    new FieldDefinition { Label = "Teklif Tipi", Path = "OfferType", DataType = "string", ExampleValue = "Hızlı Teklif" },
+                    new FieldDefinition { Label = "Revizyon", Path = "RevisionId", DataType = "number", ExampleValue = "3" },
+                    new FieldDefinition { Label = "Revizyon No", Path = "RevisionNo", DataType = "string", ExampleValue = "REV-3" },
+                    new FieldDefinition { Label = "Müşteri Adı", Path = "CustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Potansiyel Müşteri Adı", Path = "PotentialCustomerName", DataType = "string", ExampleValue = "ABC Şirketi" },
+                    new FieldDefinition { Label = "Para Birimi", Path = "Currency", DataType = "string", ExampleValue = "TRY" },
+                    new FieldDefinition { Label = "Kur", Path = "ExchangeRate", DataType = "number", ExampleValue = "1.00" },
+                    new FieldDefinition { Label = "İndirim Oranı 1 (%)", Path = "DiscountRate1", DataType = "number", ExampleValue = "5" },
+                    new FieldDefinition { Label = "İndirim Oranı 2 (%)", Path = "DiscountRate2", DataType = "number", ExampleValue = "0" },
+                    new FieldDefinition { Label = "İndirim Oranı 3 (%)", Path = "DiscountRate3", DataType = "number", ExampleValue = "0" },
+                    new FieldDefinition { Label = "Genel İndirim Tutarı", Path = "GeneralDiscountAmount", DataType = "number", ExampleValue = "125.00" },
+                    new FieldDefinition { Label = "Net Toplam", Path = "Total", DataType = "number", ExampleValue = "875.00" },
+                    new FieldDefinition { Label = "Genel Toplam", Path = "GrandTotal", DataType = "number", ExampleValue = "1032.50" },
+                    new FieldDefinition { Label = "Onaylandı", Path = "IsApproved", DataType = "boolean", ExampleValue = "false" },
+                    new FieldDefinition { Label = "Onay Tarihi", Path = "ApprovedDate", DataType = "date", ExampleValue = "2024-01-16" },
+                    new FieldDefinition { Label = "Açıklama", Path = "Description", DataType = "string", ExampleValue = "Hızlı teklif açıklaması" },
+                },
+                LineFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Kalem Görseli", Path = "Lines.ImagePath", DataType = "string", Description = "Hızlı teklif kalemine eklenen görsel yolu", ExampleValue = "/uploads/pdf-template-assets/1/line-image.jpg" },
+                    new FieldDefinition { Label = "Ürün Kodu", Path = "Lines.ProductCode", DataType = "string", ExampleValue = "PRD-001" },
+                    new FieldDefinition { Label = "Ürün Adı", Path = "Lines.ProductName", DataType = "string", ExampleValue = "Laptop" },
+                    new FieldDefinition { Label = "Miktar", Path = "Lines.Quantity", DataType = "number", ExampleValue = "10" },
+                    new FieldDefinition { Label = "Birim Fiyat", Path = "Lines.UnitPrice", DataType = "number", ExampleValue = "5000.00" },
+                    new FieldDefinition { Label = "İndirim Oranı 1 (%)", Path = "Lines.DiscountRate1", DataType = "number", ExampleValue = "10" },
+                    new FieldDefinition { Label = "İndirim Tutarı 1", Path = "Lines.DiscountAmount1", DataType = "number", ExampleValue = "500.00" },
+                    new FieldDefinition { Label = "İndirim Oranı 2 (%)", Path = "Lines.DiscountRate2", DataType = "number", ExampleValue = "5" },
+                    new FieldDefinition { Label = "İndirim Tutarı 2", Path = "Lines.DiscountAmount2", DataType = "number", ExampleValue = "250.00" },
+                    new FieldDefinition { Label = "İndirim Oranı 3 (%)", Path = "Lines.DiscountRate3", DataType = "number", ExampleValue = "2" },
+                    new FieldDefinition { Label = "İndirim Tutarı 3", Path = "Lines.DiscountAmount3", DataType = "number", ExampleValue = "100.00" },
+                    new FieldDefinition { Label = "KDV Oranı (%)", Path = "Lines.VatRate", DataType = "number", ExampleValue = "20" },
+                    new FieldDefinition { Label = "KDV Tutarı", Path = "Lines.VatAmount", DataType = "number", ExampleValue = "900.00" },
+                    new FieldDefinition { Label = "Satır Toplamı (KDV Hariç)", Path = "Lines.LineTotal", DataType = "number", ExampleValue = "45000.00" },
+                    new FieldDefinition { Label = "Satır Genel Toplamı (KDV Dahil)", Path = "Lines.LineGrandTotal", DataType = "number", ExampleValue = "53100.00" },
+                    new FieldDefinition { Label = "Açıklama", Path = "Lines.Description", DataType = "string", ExampleValue = "Özel not" },
+                },
+                ExchangeRateFields = new List<FieldDefinition>
+                {
+                    new FieldDefinition { Label = "Para Birimi", Path = "ExchangeRates.Currency", DataType = "string", ExampleValue = "USD" },
+                    new FieldDefinition { Label = "Kur", Path = "ExchangeRates.ExchangeRate", DataType = "number", ExampleValue = "34.50" },
+                    new FieldDefinition { Label = "Kur Tarihi", Path = "ExchangeRates.ExchangeRateDate", DataType = "date", ExampleValue = "2024-01-15" },
+                    new FieldDefinition { Label = "Manuel Kur", Path = "ExchangeRates.IsManual", DataType = "boolean", ExampleValue = "true" },
+                }
+            };
+        }
+    }
 }

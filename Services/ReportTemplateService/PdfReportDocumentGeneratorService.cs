@@ -1809,6 +1809,8 @@ namespace crm_api.Services
                             if (cellValue.IndexOf('<') >= 0) cellValue = StripHtml(cellValue);
                             var isDetailColumn = !string.IsNullOrWhiteSpace(detailColumnPath) &&
                                 string.Equals(col.Path, detailColumnPath, StringComparison.OrdinalIgnoreCase);
+                            var isLineImageColumn = string.Equals(col.Path, "Lines.ImagePath", StringComparison.OrdinalIgnoreCase);
+                            var thumbImagePath = ResolvePropertyPath(row, "ImagePath")?.ToString();
 
                             var style = (rowIndex % 2 == 1 && altStyle != null) ? altStyle : rowStyle;
                             IContainer tableCell = table.Cell();
@@ -1825,14 +1827,16 @@ namespace crm_api.Services
                                 _ => contentContainer.AlignLeft()
                             };
 
-                            if (isDetailColumn && detailPaths.Count > 0)
+                            if (isLineImageColumn)
+                            {
+                                RenderTableImageCell(contentContainer, thumbImagePath);
+                            }
+                            else if (isDetailColumn && detailPaths.Count > 0)
                             {
                                 var combinedDetailText = BuildCombinedDetailText(row, detailPaths);
                                 contentContainer.Column(detailColumn =>
                                 {
-                                    var primary = detailColumn.Item().Text(cellValue);
-                                    if (style?.FontSize.HasValue == true) primary = primary.FontSize((float)style.FontSize.Value);
-                                    if (!string.IsNullOrEmpty(style?.Color)) primary = primary.FontColor(style.Color);
+                                    RenderTablePrimaryCell(detailColumn.Item(), cellValue, style);
 
                                     if (!string.IsNullOrWhiteSpace(combinedDetailText))
                                     {
@@ -1845,9 +1849,7 @@ namespace crm_api.Services
                             }
                             else
                             {
-                                var textBlock = contentContainer.Text(cellValue);
-                                if (style?.FontSize.HasValue == true) textBlock = textBlock.FontSize((float)style.FontSize.Value);
-                                if (!string.IsNullOrEmpty(style?.Color)) textBlock = textBlock.FontColor(style.Color);
+                                RenderTablePrimaryCell(contentContainer, cellValue, style);
                             }
                         }
                         rowIndex++;
@@ -1884,6 +1886,66 @@ namespace crm_api.Services
                     Rows = group.Cast<object>().ToList(),
                 })
                 .ToList();
+        }
+
+        private void RenderTablePrimaryCell(
+            IContainer container,
+            string cellValue,
+            TableStyle? style)
+        {
+            var textBlock = container.Text(cellValue);
+            if (style?.FontSize.HasValue == true) textBlock = textBlock.FontSize((float)style.FontSize.Value);
+            if (!string.IsNullOrEmpty(style?.Color)) textBlock = textBlock.FontColor(style.Color);
+        }
+
+        private void RenderTableImageCell(IContainer container, string? imagePath)
+        {
+            var imageBytes = TryLoadInlineTableImage(imagePath);
+            if (imageBytes == null || imageBytes.Length == 0)
+            {
+                container.Text(string.Empty);
+                return;
+            }
+
+            container.AlignCenter().Height(28).Image(imageBytes).FitArea();
+        }
+
+        private byte[]? TryLoadInlineTableImage(string? source)
+        {
+            if (string.IsNullOrWhiteSpace(source))
+                return null;
+
+            try
+            {
+                var key = source.Trim();
+                if (key.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var comma = key.IndexOf(',');
+                    if (comma > 0)
+                        return Convert.FromBase64String(key[(comma + 1)..]);
+                }
+
+                if (key.StartsWith("/"))
+                {
+                    if (string.IsNullOrEmpty(_options.LocalImageBasePath))
+                        return null;
+
+                    var sanitized = key.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    var baseFull = Path.GetFullPath(_options.LocalImageBasePath);
+                    var fullPath = Path.GetFullPath(Path.Combine(_options.LocalImageBasePath, sanitized));
+
+                    if (!fullPath.StartsWith(baseFull, StringComparison.OrdinalIgnoreCase) || !File.Exists(fullPath))
+                        return null;
+
+                    return File.ReadAllBytes(fullPath);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
         }
 
         private static decimal SumGroupValues(IEnumerable<object> rows, string groupFooterValuePath)
@@ -2159,6 +2221,96 @@ namespace crm_api.Services
                                         ? (_unitOfWork.Repository<StockImage>().Query(false, false).Where(si => si.StockId == stockData.Id.Value && !si.IsDeleted).OrderByDescending(si => si.IsPrimary).ThenBy(si => si.SortOrder).Select(si => si.FilePath).FirstOrDefault() ?? "")
                                         : ""
                                 }).ToList()
+                    }).FirstOrDefaultAsync().ConfigureAwait(false),
+
+                DocumentRuleType.FastQuotation => await (from tq in _unitOfWork.TempQuotattions.Query(false, false)
+                    where tq.Id == entityId && !tq.IsDeleted
+                    select new
+                    {
+                        tq.Id,
+                        OfferNo = !string.IsNullOrWhiteSpace(tq.QuotationNo) ? tq.QuotationNo : ("HT-" + tq.Id),
+                        tq.QuotationNo,
+                        tq.OfferDate,
+                        OfferType = "FastQuotation",
+                        tq.RevisionId,
+                        RevisionNo = tq.RevisionId.HasValue ? ("REV-" + tq.RevisionId.Value) : "",
+                        CustomerName = tq.Customer != null ? tq.Customer.CustomerName : "",
+                        PotentialCustomerName = tq.Customer != null ? tq.Customer.CustomerName : "",
+                        ErpCustomerCode = "",
+                        DeliveryDate = (DateTime?)null,
+                        ShippingAddressText = "",
+                        RepresentativeName = "",
+                        tq.Description,
+                        PaymentTypeName = "",
+                        DocumentSerialTypeName = "",
+                        Currency = tq.CurrencyCode,
+                        tq.ExchangeRate,
+                        tq.DiscountRate1,
+                        tq.DiscountRate2,
+                        tq.DiscountRate3,
+                        GeneralDiscountAmount = (from tl in _unitOfWork.TempQuotattionLines.Query(false, false)
+                                                 where tl.TempQuotattionId == tq.Id && !tl.IsDeleted
+                                                 select (decimal?)(tl.DiscountAmount1 + tl.DiscountAmount2 + tl.DiscountAmount3))
+                                                .Sum() ?? 0m,
+                        Total = (from tl in _unitOfWork.TempQuotattionLines.Query(false, false)
+                                 where tl.TempQuotattionId == tq.Id && !tl.IsDeleted
+                                 select (decimal?)tl.LineTotal)
+                                .Sum() ?? 0m,
+                        GrandTotal = (from tl in _unitOfWork.TempQuotattionLines.Query(false, false)
+                                      where tl.TempQuotattionId == tq.Id && !tl.IsDeleted
+                                      select (decimal?)tl.LineGrandTotal)
+                                     .Sum() ?? 0m,
+                        tq.IsApproved,
+                        tq.ApprovedDate,
+                        tq.CreatedBy,
+                        tq.UpdatedBy,
+                        ExchangeRates = (from er in _unitOfWork.TempQuotattionExchangeLines.Query(false, false)
+                                         where er.TempQuotattionId == tq.Id && !er.IsDeleted
+                                         select new
+                                         {
+                                             er.Currency,
+                                             er.ExchangeRate,
+                                             er.ExchangeRateDate,
+                                             er.IsManual
+                                         }).ToList(),
+                        Lines = (from tl in _unitOfWork.TempQuotattionLines.Query(false, false)
+                                 where tl.TempQuotattionId == tq.Id && !tl.IsDeleted
+                                 select new
+                                 {
+                                     ImagePath = tl.ImagePath,
+                                     tl.ProductCode,
+                                     tl.ProductName,
+                                     GroupCode = "",
+                                     StockCode = tl.ProductCode,
+                                     StockUnit = "",
+                                     StockManufacturerCode = "",
+                                     StockGroupName = "",
+                                     StockCode1 = "",
+                                     StockCode1Name = "",
+                                     StockCode2 = "",
+                                     StockCode2Name = "",
+                                     StockCode3 = "",
+                                     StockCode3Name = "",
+                                     StockCode4 = "",
+                                     StockCode4Name = "",
+                                     StockCode5 = "",
+                                     StockCode5Name = "",
+                                     tl.Quantity,
+                                     tl.UnitPrice,
+                                     tl.DiscountRate1,
+                                     tl.DiscountAmount1,
+                                     tl.DiscountRate2,
+                                     tl.DiscountAmount2,
+                                     tl.DiscountRate3,
+                                     tl.DiscountAmount3,
+                                     tl.VatRate,
+                                     tl.VatAmount,
+                                     tl.LineTotal,
+                                     tl.LineGrandTotal,
+                                     tl.Description,
+                                     HtmlDescription = "",
+                                     DefaultImagePath = ""
+                                 }).ToList()
                     }).FirstOrDefaultAsync().ConfigureAwait(false),
 
                 DocumentRuleType.Order => await (from o in _unitOfWork.Orders.Query(false, false)
