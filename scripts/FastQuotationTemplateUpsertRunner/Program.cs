@@ -1,97 +1,287 @@
+using System.Text.Json;
 using crm_api.Data;
+using crm_api.DTOs;
+using crm_api.Helpers;
+using crm_api.Infrastructure;
+using crm_api.Interfaces;
 using crm_api.Models;
+using crm_api.Services;
+using crm_api.UnitOfWork;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace FastQuotationTemplateUpsertRunner;
 
 public static class Program
 {
+    private const string SourceTemplateTitle = "Windo hızlı teklif v4";
+    private const string TargetTemplateTitle = "Windo hızlı teklif v5";
+
     public static async Task Main(string[] args)
     {
-        var root = ResolveApiRoot();
-        var configuration = BuildConfiguration(root);
+        var apiRoot = ResolveApiRoot();
+        var root = Directory.GetParent(apiRoot)!.FullName;
+        var configuration = BuildConfiguration(apiRoot);
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("DefaultConnection could not be resolved.");
 
-        var sourceTitle = args.Length > 0 ? args[0] : "Windo teklif v4";
-        var targetTitle = args.Length > 1 ? args[1] : "Windo hızlı teklif v4";
+        var brochureImages = new[]
+        {
+            args.Length > 0 ? Path.GetFullPath(args[0]) : Path.Combine(root, "WhatsApp Image 2026-03-18 at 11.56.07.jpeg"),
+            args.Length > 1 ? Path.GetFullPath(args[1]) : Path.Combine(root, "WhatsApp Image 2026-03-18 at 11.56.08.jpeg"),
+            args.Length > 2 ? Path.GetFullPath(args[2]) : Path.Combine(root, "WhatsApp Image 2026-03-18 at 11.56.08 (1).jpeg"),
+        };
+        var outputPdf = args.Length > 3
+            ? Path.GetFullPath(args[3])
+            : Path.Combine(root, "pdf-samples", "fast-quotation-v5-proof.pdf");
 
-        var options = new DbContextOptionsBuilder<CmsDbContext>()
+        foreach (var image in brochureImages)
+        {
+            if (!File.Exists(image))
+                throw new FileNotFoundException("Brochure image not found.", image);
+        }
+
+        var dbOptions = new DbContextOptionsBuilder<CmsDbContext>()
             .UseSqlServer(connectionString)
             .Options;
 
-        await using var db = new CmsDbContext(options);
+        var fakeLocalization = new FakeLocalizationService();
+        var httpAccessor = new HttpContextAccessor();
 
+        await using var db = new CmsDbContext(dbOptions);
+        using var uow = new UnitOfWork(db, httpAccessor, fakeLocalization);
+
+        var template = await UpsertTemplateAsync(db, apiRoot, brochureImages).ConfigureAwait(false);
+        var lineImagePath = await EnsureTemplateAssetAsync(db, apiRoot, template.Id, brochureImages[0], "fast-quotation-v5-line").ConfigureAwait(false);
+        var fastQuotation = await CreateProofFastQuotationAsync(db, lineImagePath).ConfigureAwait(false);
+
+        var templateData = JsonSerializer.Deserialize<ReportTemplateData>(template.TemplateJson, SerializerOptions)
+            ?? throw new InvalidOperationException("Template JSON could not be deserialized.");
+
+        var generator = new PdfReportDocumentGeneratorService(
+            uow,
+            NullLogger<PdfReportDocumentGeneratorService>.Instance,
+            null!,
+            Options.Create(new PdfBuilderOptions
+            {
+                LocalImageBasePath = apiRoot,
+            }));
+
+        var bytes = await generator.GeneratePdfAsync(DocumentRuleType.FastQuotation, fastQuotation.Id, templateData).ConfigureAwait(false);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdf)!);
+        await File.WriteAllBytesAsync(outputPdf, bytes).ConfigureAwait(false);
+
+        Console.WriteLine($"template:{template.Id}|{template.Title}");
+        Console.WriteLine($"fastQuotation:{fastQuotation.Id}|{fastQuotation.QuotationNo}");
+        Console.WriteLine($"pdf:{outputPdf}");
+    }
+
+    private static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
+    private static async Task<ReportTemplate> UpsertTemplateAsync(CmsDbContext db, string apiRoot, IReadOnlyList<string> brochureImages)
+    {
         var sourceTemplate = await db.ReportTemplates
-            .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.Quotation)
+            .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.FastQuotation)
             .OrderByDescending(x => x.Default)
             .ThenByDescending(x => x.Id)
-            .FirstOrDefaultAsync(x => x.Title == sourceTitle);
+            .FirstOrDefaultAsync(x => x.Title == SourceTemplateTitle)
+            .ConfigureAwait(false);
 
-        if (sourceTemplate == null)
-        {
-            sourceTemplate = await db.ReportTemplates
-                .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.Quotation)
-                .OrderByDescending(x => x.Default)
-                .ThenByDescending(x => x.Id)
-                .FirstOrDefaultAsync();
-        }
+        sourceTemplate ??= await db.ReportTemplates
+            .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.FastQuotation)
+            .OrderByDescending(x => x.Default)
+            .ThenByDescending(x => x.Id)
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException("No FastQuotation template found.");
 
-        if (sourceTemplate == null)
-            throw new InvalidOperationException("No quotation template was found to clone.");
+        var templateData = JsonSerializer.Deserialize<ReportTemplateData>(sourceTemplate.TemplateJson, SerializerOptions)
+            ?? throw new InvalidOperationException("Source template JSON could not be deserialized.");
 
         var targetTemplate = await db.ReportTemplates
             .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.FastQuotation)
-            .FirstOrDefaultAsync(x => x.Title == targetTitle);
-
-        if (sourceTemplate.Default)
-        {
-            var otherDefaults = await db.ReportTemplates
-                .Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.FastQuotation && x.Default)
-                .ToListAsync();
-
-            foreach (var item in otherDefaults)
-            {
-                if (targetTemplate != null && item.Id == targetTemplate.Id)
-                    continue;
-
-                item.Default = false;
-                item.UpdatedDate = DateTime.UtcNow;
-                item.UpdatedBy = sourceTemplate.UpdatedBy ?? sourceTemplate.CreatedBy;
-            }
-        }
+            .FirstOrDefaultAsync(x => x.Title == TargetTemplateTitle)
+            .ConfigureAwait(false);
 
         if (targetTemplate == null)
         {
             targetTemplate = new ReportTemplate
             {
                 RuleType = DocumentRuleType.FastQuotation,
-                Title = targetTitle,
+                Title = TargetTemplateTitle,
                 TemplateJson = sourceTemplate.TemplateJson,
-                IsActive = sourceTemplate.IsActive,
-                Default = sourceTemplate.Default,
-                CreatedBy = sourceTemplate.CreatedBy,
-                UpdatedBy = sourceTemplate.UpdatedBy,
-                CreatedByUserId = sourceTemplate.CreatedByUserId,
-                UpdatedByUserId = sourceTemplate.UpdatedByUserId,
+                IsActive = true,
+                Default = false,
+                CreatedBy = 1,
+                CreatedDate = DateTime.UtcNow,
             };
-
             db.ReportTemplates.Add(targetTemplate);
+            await db.SaveChangesAsync().ConfigureAwait(false);
         }
-        else
+
+        var brochurePaths = new List<string>();
+        for (var index = 0; index < brochureImages.Count; index++)
         {
-            targetTemplate.TemplateJson = sourceTemplate.TemplateJson;
-            targetTemplate.IsActive = sourceTemplate.IsActive;
-            targetTemplate.Default = sourceTemplate.Default;
-            targetTemplate.UpdatedDate = DateTime.UtcNow;
-            targetTemplate.UpdatedBy = sourceTemplate.UpdatedBy ?? sourceTemplate.CreatedBy;
-            targetTemplate.UpdatedByUserId = sourceTemplate.UpdatedByUserId ?? sourceTemplate.CreatedByUserId;
+            brochurePaths.Add(
+                await EnsureTemplateAssetAsync(
+                    db,
+                    apiRoot,
+                    targetTemplate.Id,
+                    brochureImages[index],
+                    $"fast-quotation-v5-brochure-{index + 1}").ConfigureAwait(false));
         }
 
-        await db.SaveChangesAsync();
+        templateData.Page.PageCount = Math.Max(templateData.Page.PageCount, 4);
+        templateData.Elements = templateData.Elements
+            .Where(element => !IsAssignedToBrochurePages(element))
+            .ToList();
 
-        Console.WriteLine($"{targetTemplate.Id}|{targetTemplate.Title}|source:{sourceTemplate.Id}|{sourceTemplate.Title}");
+        for (var index = 0; index < brochurePaths.Count; index++)
+        {
+            templateData.Elements.Add(new ReportElement
+            {
+                Id = $"fast-quotation-v5-brochure-{index + 1}",
+                Type = "image",
+                Section = "page",
+                X = 0,
+                Y = 0,
+                Width = 210,
+                Height = 297,
+                ZIndex = -100 + index,
+                PageNumbers = new List<int> { index + 1 },
+                Value = brochurePaths[index],
+                Style = new ElementStyle
+                {
+                    ImageFit = "cover",
+                },
+            });
+        }
+
+        foreach (var table in templateData.Elements.Where(x => string.Equals(x.Type, "table", StringComparison.OrdinalIgnoreCase) && x.Columns != null))
+        {
+            table.Columns = new List<TableColumn>
+            {
+                new() { Label = "Gorsel", Path = "Lines.ImagePath", Align = "center" },
+                new() { Label = "Stok Kodu", Path = "Lines.ProductCode" },
+                new() { Label = "Stok Bilgisi", Path = "Lines.ProductName" },
+                new() { Label = "Miktar", Path = "Lines.Quantity", Align = "right" },
+                new() { Label = "Birim Fiyat", Path = "Lines.UnitPrice", Align = "right", Format = "currency" },
+                new() { Label = "Toplam", Path = "Lines.LineGrandTotal", Align = "right", Format = "currency" },
+            };
+            table.ColumnWidths = new List<decimal> { 16m, 28m, 72m, 18m, 24m, 28m };
+            table.TableOptions ??= new TableOptions();
+            table.TableOptions.DetailColumnPath = null;
+            table.TableOptions.DetailPaths = new List<string>();
+            table.TableOptions.RepeatHeader = true;
+        }
+
+        foreach (var template in db.ReportTemplates.Where(x => !x.IsDeleted && x.RuleType == DocumentRuleType.FastQuotation))
+        {
+            template.Default = template.Id == targetTemplate.Id;
+        }
+
+        targetTemplate.Title = TargetTemplateTitle;
+        targetTemplate.TemplateJson = JsonSerializer.Serialize(templateData);
+        targetTemplate.IsActive = true;
+        targetTemplate.Default = true;
+        targetTemplate.UpdatedBy = 1;
+        targetTemplate.UpdatedDate = DateTime.UtcNow;
+
+        await db.SaveChangesAsync().ConfigureAwait(false);
+        return targetTemplate;
+    }
+
+    private static bool IsAssignedToBrochurePages(ReportElement element)
+    {
+        if (element.PageNumbers == null || element.PageNumbers.Count == 0)
+            return false;
+
+        return element.PageNumbers.Any(page => page is >= 1 and <= 3);
+    }
+
+    private static async Task<string> EnsureTemplateAssetAsync(
+        CmsDbContext db,
+        string apiRoot,
+        long templateId,
+        string sourceImage,
+        string slug)
+    {
+        var extension = Path.GetExtension(sourceImage).ToLowerInvariant();
+        var storedFileName = $"{slug}-{Guid.NewGuid():N}{extension}";
+        var relativeUrl = $"/uploads/pdf-template-assets/templates/{templateId}/{storedFileName}";
+        var fullPath = Path.Combine(apiRoot, "uploads", "pdf-template-assets", "templates", templateId.ToString(), storedFileName);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+        await using (var source = File.OpenRead(sourceImage))
+        await using (var target = File.Create(fullPath))
+        {
+            await source.CopyToAsync(target).ConfigureAwait(false);
+        }
+
+        var asset = new PdfTemplateAsset
+        {
+            OriginalFileName = Path.GetFileName(sourceImage),
+            StoredFileName = storedFileName,
+            RelativeUrl = relativeUrl,
+            ContentType = extension is ".jpg" or ".jpeg" ? "image/jpeg" : "image/png",
+            SizeBytes = new FileInfo(sourceImage).Length,
+            CreatedBy = 1,
+            CreatedDate = DateTime.UtcNow,
+        };
+
+        db.Set<PdfTemplateAsset>().Add(asset);
+        await db.SaveChangesAsync().ConfigureAwait(false);
+        return relativeUrl;
+    }
+
+    private static async Task<TempQuotattion> CreateProofFastQuotationAsync(CmsDbContext db, string lineImagePath)
+    {
+        var customer = await db.Customers.Where(x => !x.IsDeleted).OrderBy(x => x.Id).FirstOrDefaultAsync().ConfigureAwait(false)
+            ?? throw new InvalidOperationException("No customer found for proof fast quotation.");
+
+        var header = new TempQuotattion
+        {
+            CustomerId = customer.Id,
+            QuotationNo = $"HT-V5-{DateTime.UtcNow:yyyyMMddHHmmss}",
+            OfferDate = DateTime.UtcNow,
+            CurrencyCode = "TRY",
+            ExchangeRate = 1m,
+            Description = "V5 brochure + line image proof",
+            IsApproved = false,
+        };
+
+        db.TempQuotattions.Add(header);
+        await db.SaveChangesAsync().ConfigureAwait(false);
+
+        db.TempQuotattionLines.Add(new TempQuotattionLine
+        {
+            TempQuotattionId = header.Id,
+            ProductCode = "IMG-001",
+            ProductName = "Gorselli Hizli Teklif Kalemi",
+            ImagePath = lineImagePath,
+            Quantity = 1m,
+            UnitPrice = 1250m,
+            DiscountRate1 = 0m,
+            DiscountAmount1 = 0m,
+            DiscountRate2 = 0m,
+            DiscountAmount2 = 0m,
+            DiscountRate3 = 0m,
+            DiscountAmount3 = 0m,
+            VatRate = 20m,
+            VatAmount = 250m,
+            LineTotal = 1250m,
+            LineGrandTotal = 1500m,
+            Description = "Bu satir gorsel test icin olusturuldu.",
+        });
+
+        await db.SaveChangesAsync().ConfigureAwait(false);
+        return header;
     }
 
     private static IConfigurationRoot BuildConfiguration(string apiRoot)
@@ -116,5 +306,11 @@ public static class Program
         }
 
         throw new DirectoryNotFoundException("API root could not be resolved.");
+    }
+
+    private sealed class FakeLocalizationService : ILocalizationService
+    {
+        public string GetLocalizedString(string key) => key;
+        public string GetLocalizedString(string key, params object[] arguments) => string.Format(key, arguments);
     }
 }

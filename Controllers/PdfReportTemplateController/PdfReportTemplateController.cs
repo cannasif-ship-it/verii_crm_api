@@ -82,7 +82,7 @@ namespace crm_api.Controllers
 
         [HttpPost("assets/upload")]
         [RequestSizeLimit(10 * 1024 * 1024)]
-        public async Task<IActionResult> UploadAsset([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadAsset([FromForm] IFormFile file, [FromForm] long? templateId = null)
         {
             if (!long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
                 return Unauthorized(ApiResponse<object>.ErrorResult(
@@ -90,7 +90,7 @@ namespace crm_api.Controllers
                     "Invalid or missing user claim",
                     401));
 
-            var result = await _pdfTemplateAssetService.UploadAsync(file, userId);
+            var result = await _pdfTemplateAssetService.UploadAsync(file, userId, templateId);
             if (!result.Success)
                 return StatusCode(result.StatusCode, result);
             return Ok(result);

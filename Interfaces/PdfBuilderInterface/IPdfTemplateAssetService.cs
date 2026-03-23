@@ -6,6 +6,6 @@ namespace crm_api.Interfaces
 {
     public interface IPdfTemplateAssetService
     {
-        Task<ApiResponse<PdfTemplateAssetDto>> UploadAsync(IFormFile file, long userId);
+        Task<ApiResponse<PdfTemplateAssetDto>> UploadAsync(IFormFile file, long userId, long? templateId = null);
     }
 }

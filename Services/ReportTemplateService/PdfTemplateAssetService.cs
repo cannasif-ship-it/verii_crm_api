@@ -33,7 +33,7 @@ namespace crm_api.Services
             _logger = logger;
         }
 
-        public async Task<ApiResponse<PdfTemplateAssetDto>> UploadAsync(IFormFile file, long userId)
+        public async Task<ApiResponse<PdfTemplateAssetDto>> UploadAsync(IFormFile file, long userId, long? templateId = null)
         {
             try
             {
@@ -64,14 +64,17 @@ namespace crm_api.Services
 
                 var uploadsBasePath = Path.Combine(_environment.ContentRootPath, "uploads");
                 var assetsPath = Path.Combine(uploadsBasePath, "pdf-template-assets");
-                var userPath = Path.Combine(assetsPath, userId.ToString());
+                var ownerFolder = templateId.HasValue && templateId.Value > 0
+                    ? Path.Combine("templates", templateId.Value.ToString())
+                    : userId.ToString();
+                var assetPath = Path.Combine(assetsPath, ownerFolder);
 
                 Directory.CreateDirectory(uploadsBasePath);
                 Directory.CreateDirectory(assetsPath);
-                Directory.CreateDirectory(userPath);
+                Directory.CreateDirectory(assetPath);
 
                 var storedFileName = $"{Guid.NewGuid():N}{extension}";
-                var fullPath = Path.Combine(userPath, storedFileName);
+                var fullPath = Path.Combine(assetPath, storedFileName);
 
                 await using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
                 {
@@ -79,7 +82,9 @@ namespace crm_api.Services
                     await fileStream.FlushAsync().ConfigureAwait(false);
                 }
 
-                var relativeUrl = $"/uploads/pdf-template-assets/{userId}/{storedFileName}";
+                var relativeUrl = templateId.HasValue && templateId.Value > 0
+                    ? $"/uploads/pdf-template-assets/templates/{templateId.Value}/{storedFileName}"
+                    : $"/uploads/pdf-template-assets/{userId}/{storedFileName}";
                 var entity = new PdfTemplateAsset
                 {
                     OriginalFileName = Path.GetFileName(file.FileName),
