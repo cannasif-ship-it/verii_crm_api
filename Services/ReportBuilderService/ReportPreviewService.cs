@@ -40,7 +40,7 @@ namespace crm_api.Services.ReportBuilderService
             _logger = logger;
         }
 
-        public async Task<ApiResponse<PreviewResponseDto>> PreviewAsync(PreviewRequestDto request)
+        public async Task<ApiResponse<PreviewResponseDto>> PreviewAsync(PreviewRequestDto request, long? currentUserId = null, string? currentUserEmail = null)
         {
             var connResp = _connectionService.ResolveConnectionString(request.ConnectionKey);
             if (!connResp.Success || string.IsNullOrEmpty(connResp.Data))
@@ -51,6 +51,8 @@ namespace crm_api.Services.ReportBuilderService
                 return ApiResponse<PreviewResponseDto>.ErrorResult(schemaResp.Message ?? _localizationService.GetLocalizedString("ReportPreviewService.SchemaNotFound"), schemaResp.ExceptionMessage, schemaResp.StatusCode);
             if (schemaResp.Data.Count == 0)
                 return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.DatasourceNotFoundOrEmpty"), null, 400);
+            var parameterResp = await _catalogService.GetParametersAsync(request.ConnectionKey, request.DataSourceType, request.DataSourceName).ConfigureAwait(false);
+            var parameterDefs = parameterResp.Success && parameterResp.Data != null ? parameterResp.Data : new List<DataSourceParameterDto>();
 
             var schemaDict = schemaResp.Data.ToDictionary(s => s.Name, StringComparer.OrdinalIgnoreCase);
 
@@ -64,15 +66,32 @@ namespace crm_api.Services.ReportBuilderService
                 return ApiResponse<PreviewResponseDto>.ErrorResult(_localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), _localizationService.GetLocalizedString("ReportPreviewService.InvalidConfigJson"), 400);
             }
 
-            var err = ValidateConfigAgainstSchema(config, schemaDict);
+            var err = ValidateConfigAgainstSchema(config, schemaDict, parameterDefs);
             if (!string.IsNullOrEmpty(err))
                 return ApiResponse<PreviewResponseDto>.ErrorResult(err, null, 400);
 
             var (schemaName, objectName) = ParseSchemaAndObject(request.DataSourceName.Trim());
             var typeNorm = request.DataSourceType.Trim().ToLowerInvariant();
-            var fromClause = typeNorm == "function"
-                ? $"[{Escape(schemaName)}].[{Escape(objectName)}]()"
-                : $"[{Escape(schemaName)}].[{Escape(objectName)}]";
+            var datasetParameters = new List<ParamInfo>();
+            string fromClause;
+            if (typeNorm == "function")
+            {
+                var functionArguments = new List<string>();
+                foreach (var parameterDef in parameterDefs)
+                {
+                    var binding = config.DatasetParameters?.FirstOrDefault(item => string.Equals(item.Name?.Trim(), parameterDef.Name, StringComparison.OrdinalIgnoreCase));
+                    var resolvedValue = ResolveDatasetParameterValue(binding, currentUserId, currentUserEmail);
+                    var parameterName = $"@ds{datasetParameters.Count}";
+                    datasetParameters.Add(new ParamInfo { Name = parameterName, Value = resolvedValue });
+                    functionArguments.Add(parameterName);
+                }
+
+                fromClause = $"[{Escape(schemaName)}].[{Escape(objectName)}]({string.Join(", ", functionArguments)})";
+            }
+            else
+            {
+                fromClause = $"[{Escape(schemaName)}].[{Escape(objectName)}]";
+            }
 
             var chartType = (config.ChartType ?? "table").Trim().ToLowerInvariant();
             if (chartType != "table" && chartType != "bar" && chartType != "stackedbar" && chartType != "line" && chartType != "pie" && chartType != "donut" && chartType != "kpi" && chartType != "matrix")
@@ -162,7 +181,7 @@ namespace crm_api.Services.ReportBuilderService
             }
 
             var whereClause = "";
-            var parameters = new List<ParamInfo>();
+            var parameters = new List<ParamInfo>(datasetParameters);
             if (config.Filters != null && config.Filters.Count > 0)
             {
                 var conds = new List<string>();
@@ -280,7 +299,7 @@ namespace crm_api.Services.ReportBuilderService
             return name.Replace("]", "]]");
         }
 
-        private string? ValidateConfigAgainstSchema(ReportConfig config, Dictionary<string, FieldSchemaDto> schemaDict)
+        private string? ValidateConfigAgainstSchema(ReportConfig config, Dictionary<string, FieldSchemaDto> schemaDict, List<DataSourceParameterDto> parameterDefs)
         {
             var allFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (config.Axis?.Field != null) allFields.Add(config.Axis.Field.Trim());
@@ -308,7 +327,38 @@ namespace crm_api.Services.ReportBuilderService
                         return "Calculated field references a field outside schema.";
                 }
             }
+
+            if (parameterDefs.Count > 0)
+            {
+                foreach (var parameterDef in parameterDefs)
+                {
+                    var binding = config.DatasetParameters?.FirstOrDefault(item => string.Equals(item.Name?.Trim(), parameterDef.Name, StringComparison.OrdinalIgnoreCase));
+                    if (binding == null)
+                        return $"Datasource parameter '{parameterDef.Name}' is required.";
+                    var source = (binding.Source ?? string.Empty).Trim().ToLowerInvariant();
+                    if (source is not ("literal" or "currentuserid" or "currentuseremail" or "today" or "now"))
+                        return $"Datasource parameter '{parameterDef.Name}' has an invalid source.";
+                    if (source == "literal" && string.IsNullOrWhiteSpace(binding.Value))
+                        return $"Datasource parameter '{parameterDef.Name}' requires a value.";
+                }
+            }
             return null;
+        }
+
+        private static object? ResolveDatasetParameterValue(DataSourceParameterBindingConfig? binding, long? currentUserId, string? currentUserEmail)
+        {
+            if (binding == null)
+                return DBNull.Value;
+
+            var source = (binding.Source ?? "literal").Trim().ToLowerInvariant();
+            return source switch
+            {
+                "currentuserid" => currentUserId,
+                "currentuseremail" => currentUserEmail,
+                "today" => DateTime.Today,
+                "now" => DateTime.Now,
+                _ => string.IsNullOrWhiteSpace(binding.Value) ? DBNull.Value : binding.Value
+            };
         }
 
         private static Dictionary<string, string> BuildCalculatedFieldMap(ReportConfig config, Dictionary<string, FieldSchemaDto> schemaDict)

@@ -5,6 +5,6 @@ namespace crm_api.Interfaces
 {
     public interface IReportPreviewService
     {
-        Task<ApiResponse<PreviewResponseDto>> PreviewAsync(PreviewRequestDto request);
+        Task<ApiResponse<PreviewResponseDto>> PreviewAsync(PreviewRequestDto request, long? currentUserId = null, string? currentUserEmail = null);
     }
 }

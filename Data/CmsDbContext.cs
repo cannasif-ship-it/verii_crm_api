@@ -74,6 +74,7 @@ namespace crm_api.Data
         public DbSet<PdfTemplateAsset> PdfTemplateAssets { get; set; }
         public DbSet<PdfTablePreset> PdfTablePresets { get; set; }
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
+        public DbSet<ReportAssignment> ReportAssignments { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<RII_FN_CAHAR> RII_FN_CAHAR { get; set; }
         public DbSet<RII_FN_CARIBAKIYE> RII_FN_CARIBAKIYE { get; set; }

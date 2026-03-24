@@ -22,5 +22,6 @@ namespace crm_api.DTOs.ReportBuilderDto
         public bool Exists { get; set; }
         public string Message { get; set; } = string.Empty;
         public List<FieldSchemaDto> Schema { get; set; } = new();
+        public List<DataSourceParameterDto> Parameters { get; set; } = new();
     }
 }

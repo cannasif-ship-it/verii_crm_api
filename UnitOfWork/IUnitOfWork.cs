@@ -64,6 +64,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<ApprovalUserRole> ApprovalUserRoles { get; }
         IGenericRepository<crm_api.Models.Notification.Notification> Notifications { get; }
         IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions { get; }
+        IGenericRepository<crm_api.Models.ReportBuilder.ReportAssignment> ReportAssignments { get; }
         IGenericRepository<SmtpSetting> SmtpSettings { get; }
         IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions { get; }
         IGenericRepository<PowerBIGroup> PowerBIGroups { get; }

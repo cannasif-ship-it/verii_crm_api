@@ -25,6 +25,8 @@ namespace crm_api.DTOs.ReportBuilderDto
 
         [Required]
         public string ConfigJson { get; set; } = string.Empty;
+
+        public List<long> AssignedUserIds { get; set; } = new();
     }
 
     public class ReportUpdateDto
@@ -50,6 +52,8 @@ namespace crm_api.DTOs.ReportBuilderDto
 
         [Required]
         public string ConfigJson { get; set; } = string.Empty;
+
+        public List<long> AssignedUserIds { get; set; } = new();
     }
 
     public class ReportListItemDto
@@ -62,6 +66,7 @@ namespace crm_api.DTOs.ReportBuilderDto
         public DateTime? UpdatedDate { get; set; }
         public bool CanManage { get; set; }
         public string AccessLevel { get; set; } = "owner";
+        public int AssignedUserCount { get; set; }
     }
 
     public class ReportDetailDto
@@ -77,5 +82,6 @@ namespace crm_api.DTOs.ReportBuilderDto
         public DateTime? UpdatedDate { get; set; }
         public bool CanManage { get; set; }
         public string AccessLevel { get; set; } = "owner";
+        public List<long> AssignedUserIds { get; set; } = new();
     }
 }

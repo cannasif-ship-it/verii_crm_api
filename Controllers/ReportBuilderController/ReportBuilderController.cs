@@ -57,6 +57,7 @@ namespace crm_api.Controllers
         public async Task<IActionResult> CheckDataSource([FromBody] DataSourceCheckRequestDto request)
         {
             var result = await _catalogService.CheckAndGetSchemaAsync(request.ConnectionKey, request.Type, request.Name);
+            var parameterResult = await _catalogService.GetParametersAsync(request.ConnectionKey, request.Type, request.Name);
 
             var response = new DataSourceCheckResponseDto
             {
@@ -64,7 +65,8 @@ namespace crm_api.Controllers
                 Message = result.Success
                     ? (result.Data?.Count > 0 ? _localizationService.GetLocalizedString("ReportBuilderController.Ok") : _localizationService.GetLocalizedString("ReportBuilderController.ObjectNotFoundOrNoColumns"))
                     : (result.Message ?? _localizationService.GetLocalizedString("ReportBuilderController.Error")),
-                Schema = result.Data ?? new List<FieldSchemaDto>()
+                Schema = result.Data ?? new List<FieldSchemaDto>(),
+                Parameters = parameterResult.Success && parameterResult.Data != null ? parameterResult.Data : new List<DataSourceParameterDto>()
             };
 
             return Ok(response);
@@ -91,12 +93,12 @@ namespace crm_api.Controllers
 
         // GET /api/reportbuilder?search=&pageNumber=1&pageSize=20   (List)
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] string? search = null, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> List([FromQuery] string? search = null, [FromQuery] string scope = "all", [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             if (!TryGetCurrentUser(out var userId, out var email))
                 return Unauthorized();
 
-            var result = await _reportService.ListAsync(search, userId, email, pageNumber, pageSize);
+            var result = await _reportService.ListAsync(search, userId, email, scope, pageNumber, pageSize);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -137,7 +139,8 @@ namespace crm_api.Controllers
         [HttpPost("preview")]
         public async Task<IActionResult> Preview([FromBody] PreviewRequestDto request)
         {
-            var result = await _previewService.PreviewAsync(request);
+            TryGetCurrentUser(out var userId, out var email);
+            var result = await _previewService.PreviewAsync(request, userId, email);
             return StatusCode(result.StatusCode, result);
         }
     }

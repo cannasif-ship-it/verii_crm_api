@@ -75,6 +75,7 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<ApprovalUserRole>? _approvalUserRoles;
         private IGenericRepository<crm_api.Models.Notification.Notification>? _notifications;
         private IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>? _reportDefinitions;
+        private IGenericRepository<crm_api.Models.ReportBuilder.ReportAssignment>? _reportAssignments;
         private IGenericRepository<SmtpSetting>? _smtpSettings;
         private IGenericRepository<PowerBIReportDefinition>? _powerBIReportDefinitions;
         private IGenericRepository<PowerBIGroup>? _powerBIGroups;
@@ -152,6 +153,7 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<ApprovalUserRole> ApprovalUserRoles{get{_approvalUserRoles ??= new GenericRepository<ApprovalUserRole>(_context, _httpContextAccessor);return _approvalUserRoles;}}
         public IGenericRepository<crm_api.Models.Notification.Notification> Notifications{get{_notifications ??= new GenericRepository<crm_api.Models.Notification.Notification>(_context, _httpContextAccessor);return _notifications;}}
         public IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions{get{_reportDefinitions ??= new GenericRepository<crm_api.Models.ReportBuilder.ReportDefinition>(_context, _httpContextAccessor);return _reportDefinitions;}}
+        public IGenericRepository<crm_api.Models.ReportBuilder.ReportAssignment> ReportAssignments{get{_reportAssignments ??= new GenericRepository<crm_api.Models.ReportBuilder.ReportAssignment>(_context, _httpContextAccessor);return _reportAssignments;}}
         public IGenericRepository<SmtpSetting> SmtpSettings{get{_smtpSettings ??= new GenericRepository<SmtpSetting>(_context, _httpContextAccessor);return _smtpSettings;}}
         public IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions{get{_powerBIReportDefinitions ??= new GenericRepository<PowerBIReportDefinition>(_context, _httpContextAccessor);return _powerBIReportDefinitions;}}
         public IGenericRepository<PowerBIGroup> PowerBIGroups{get{_powerBIGroups ??= new GenericRepository<PowerBIGroup>(_context, _httpContextAccessor);return _powerBIGroups;}}

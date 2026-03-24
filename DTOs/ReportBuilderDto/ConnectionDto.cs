@@ -17,6 +17,16 @@ namespace crm_api.DTOs.ReportBuilderDto
         public bool IsNullable { get; set; }
     }
 
+    public class DataSourceParameterDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string SemanticType { get; set; } = string.Empty;
+        public string SqlType { get; set; } = string.Empty;
+        public string DotNetType { get; set; } = string.Empty;
+        public bool IsNullable { get; set; }
+    }
+
     public class DataSourceCatalogItemDto
     {
         public string SchemaName { get; set; } = string.Empty;

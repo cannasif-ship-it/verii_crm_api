@@ -192,6 +192,78 @@ ORDER BY s.name, o.name";
             }
         }
 
+        public async Task<ApiResponse<List<DataSourceParameterDto>>> GetParametersAsync(string connectionKey, string type, string name)
+        {
+            var connResp = _connectionService.ResolveConnectionString(connectionKey);
+            if (!connResp.Success || string.IsNullOrEmpty(connResp.Data))
+                return ApiResponse<List<DataSourceParameterDto>>.ErrorResult(
+                    connResp.Message ?? _localizationService.GetLocalizedString("ReportingCatalogService.InvalidConnection"),
+                    null,
+                    connResp.StatusCode);
+
+            var typeNorm = type?.Trim().ToLowerInvariant() ?? "";
+            if (typeNorm != "function")
+                return ApiResponse<List<DataSourceParameterDto>>.SuccessResult(new List<DataSourceParameterDto>(), _localizationService.GetLocalizedString("General.OperationSuccessful"));
+
+            var nameTrim = name?.Trim() ?? "";
+            if (!NameRegex.IsMatch(nameTrim))
+                return ApiResponse<List<DataSourceParameterDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ReportingCatalogService.InvalidDatasourceNameFormat"),
+                    null,
+                    400);
+
+            var (schemaName, objectName) = ParseSchemaAndObject(nameTrim);
+
+            try
+            {
+                await using var conn = new SqlConnection(connResp.Data);
+                await conn.OpenAsync().ConfigureAwait(false);
+
+                const string sql = @"
+SELECT p.name AS ParameterName, t.name AS SqlTypeName, CAST(p.is_nullable AS BIT) AS IsNullable
+FROM sys.objects o
+INNER JOIN sys.schemas s ON o.schema_id = s.schema_id
+INNER JOIN sys.parameters p ON p.object_id = o.object_id
+INNER JOIN sys.types t ON p.user_type_id = t.user_type_id
+WHERE s.name = @schemaName
+  AND o.name = @objectName
+  AND o.type IN ('TF','IF')
+  AND p.parameter_id > 0
+ORDER BY p.parameter_id";
+
+                var items = new List<DataSourceParameterDto>();
+                await using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@schemaName", schemaName);
+                cmd.Parameters.AddWithValue("@objectName", objectName);
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                {
+                    var rawName = reader.GetString(0);
+                    var normalizedName = rawName.TrimStart('@');
+                    var sqlType = reader.GetString(1);
+                    items.Add(new DataSourceParameterDto
+                    {
+                        Name = normalizedName,
+                        DisplayName = ToDisplayName(normalizedName),
+                        SemanticType = GetSemanticType(sqlType),
+                        SqlType = sqlType,
+                        DotNetType = MapSqlTypeToDotNet(sqlType),
+                        IsNullable = reader.GetBoolean(2)
+                    });
+                }
+
+                return ApiResponse<List<DataSourceParameterDto>>.SuccessResult(items, _localizationService.GetLocalizedString("General.OperationSuccessful"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetParameters {Key} {Type} {Name}", connectionKey, type, name);
+                return ApiResponse<List<DataSourceParameterDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ReportingCatalogService.CatalogReadError"),
+                    ex.Message,
+                    500);
+            }
+        }
+
         private static (string SchemaName, string ObjectName) ParseSchemaAndObject(string name)
         {
             var parts = name.Split('.');

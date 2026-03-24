@@ -22,6 +22,9 @@ namespace crm_api.DTOs.ReportBuilderDto
         [JsonPropertyName("filters")]
         public List<FilterRule> Filters { get; set; } = new();
 
+        [JsonPropertyName("datasetParameters")]
+        public List<DataSourceParameterBindingConfig> DatasetParameters { get; set; } = new();
+
         [JsonPropertyName("calculatedFields")]
         public List<CalculatedFieldConfig> CalculatedFields { get; set; } = new();
     }
@@ -99,5 +102,17 @@ namespace crm_api.DTOs.ReportBuilderDto
 
         [JsonPropertyName("operation")]
         public string Operation { get; set; } = "add";
+    }
+
+    public class DataSourceParameterBindingConfig
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("source")]
+        public string Source { get; set; } = "literal";
+
+        [JsonPropertyName("value")]
+        public string? Value { get; set; }
     }
 }
