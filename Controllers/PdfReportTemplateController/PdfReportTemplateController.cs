@@ -81,8 +81,9 @@ namespace crm_api.Controllers
         }
 
         [HttpPost("assets/upload")]
+        [Consumes("multipart/form-data")]
         [RequestSizeLimit(10 * 1024 * 1024)]
-        public async Task<IActionResult> UploadAsset([FromForm] IFormFile file, [FromForm] long? templateId = null)
+        public async Task<IActionResult> UploadAsset(IFormFile file, [FromForm] long? templateId = null)
         {
             if (!long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
                 return Unauthorized(ApiResponse<object>.ErrorResult(
