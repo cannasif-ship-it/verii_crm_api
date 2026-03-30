@@ -16,6 +16,26 @@ namespace crm_api.DTOs
         public string? TemplateKey { get; set; }
         public string? TemplateName { get; set; }
         public string? TemplateVersion { get; set; }
+
+        public string? ModuleKey { get; set; }
+        public long? RecordId { get; set; }
+        public string? RecordNo { get; set; }
+        public string? RevisionNo { get; set; }
+        public string? CustomerCode { get; set; }
+        public string? TotalAmountDisplay { get; set; }
+        public string? ValidUntil { get; set; }
+        public string? RecordOwnerName { get; set; }
+        public string? ContextTitle { get; set; }
+        public bool CreateActivityLog { get; set; } = true;
+
+        public List<GoogleCustomerMailAttachmentDto> Attachments { get; set; } = new();
+    }
+
+    public class GoogleCustomerMailAttachmentDto
+    {
+        public string FileName { get; set; } = string.Empty;
+        public string? ContentType { get; set; }
+        public string Base64Content { get; set; } = string.Empty;
     }
 
     public class GoogleCustomerMailSendResultDto
@@ -25,6 +45,7 @@ namespace crm_api.DTOs
         public string? GoogleMessageId { get; set; }
         public string? GoogleThreadId { get; set; }
         public DateTimeOffset? SentAt { get; set; }
+        public long? ActivityId { get; set; }
     }
 
     public class GoogleCustomerMailLogDto

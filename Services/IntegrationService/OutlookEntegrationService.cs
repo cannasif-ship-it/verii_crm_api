@@ -272,19 +272,19 @@ namespace crm_api.Services
             }
 
             var toRecipients = ParseEmails(dto.To);
-            if (toRecipients.Count == 0)
+            if (toRecipients.Valid.Count == 0)
             {
                 if (!string.IsNullOrWhiteSpace(contact?.Email))
                 {
-                    toRecipients.Add(contact.Email.Trim());
+                    toRecipients.Valid.Add(contact.Email.Trim());
                 }
                 else if (!string.IsNullOrWhiteSpace(customer.Email))
                 {
-                    toRecipients.Add(customer.Email.Trim());
+                    toRecipients.Valid.Add(customer.Email.Trim());
                 }
             }
 
-            if (toRecipients.Count == 0)
+            if (toRecipients.Valid.Count == 0)
             {
                 return ApiResponse<OutlookMailSendResultDto>.ErrorResult(
                     _localizationService.GetLocalizedString("OutlookEntegrationService.RecipientEmailRequired"),
@@ -294,6 +294,20 @@ namespace crm_api.Services
 
             var ccRecipients = ParseEmails(dto.Cc);
             var bccRecipients = ParseEmails(dto.Bcc);
+            var invalidRecipients = toRecipients.Invalid
+                .Concat(ccRecipients.Invalid)
+                .Concat(bccRecipients.Invalid)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (invalidRecipients.Count > 0)
+            {
+                var invalidMessage = $"Geçersiz e-posta adresleri: {string.Join(", ", invalidRecipients)}";
+                return ApiResponse<OutlookMailSendResultDto>.ErrorResult(
+                    invalidMessage,
+                    invalidMessage,
+                    StatusCodes.Status400BadRequest);
+            }
             var account = await _dbContext.UserOutlookAccounts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken).ConfigureAwait(false);
 
             if (account == null || !account.IsConnected)
@@ -316,10 +330,10 @@ namespace crm_api.Services
                 return ApiResponse<OutlookMailSendResultDto>.ErrorResult(tokenMsg, tokenMsg, StatusCodes.Status400BadRequest);
             }
 
-            var response = await SendViaGraphAsync(accessToken, dto, toRecipients, ccRecipients, bccRecipients, cancellationToken).ConfigureAwait(false);
+            var response = await SendViaGraphAsync(accessToken, dto, toRecipients.Valid, ccRecipients.Valid, bccRecipients.Valid, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccess)
             {
-                var failedLog = await WriteCustomerMailLogAsync(tenantId, userId, customer, contact, account.OutlookEmail, toRecipients, ccRecipients, bccRecipients, dto, false, response.ErrorCode, response.ErrorMessage, response.MessageId, response.ConversationId, null, cancellationToken).ConfigureAwait(false);
+                var failedLog = await WriteCustomerMailLogAsync(tenantId, userId, customer, contact, account.OutlookEmail, toRecipients.Valid, ccRecipients.Valid, bccRecipients.Valid, dto, false, response.ErrorCode, response.ErrorMessage, response.MessageId, response.ConversationId, null, cancellationToken).ConfigureAwait(false);
                 await WriteOperationalLogAsync(tenantId, userId, false, "Error", "outlook.mail.send", "Outlook mail send failed.", response.ErrorCode, cancellationToken, new { customerId = dto.CustomerId, logId = failedLog.Id }).ConfigureAwait(false);
                 return ApiResponse<OutlookMailSendResultDto>.ErrorResult(
                     _localizationService.GetLocalizedString("OutlookEntegrationService.MailSendFailed"),
@@ -328,7 +342,22 @@ namespace crm_api.Services
             }
 
             var sentAt = DateTimeOffset.UtcNow;
-            var successLog = await WriteCustomerMailLogAsync(tenantId, userId, customer, contact, account.OutlookEmail, toRecipients, ccRecipients, bccRecipients, dto, true, null, null, response.MessageId, response.ConversationId, sentAt, cancellationToken).ConfigureAwait(false);
+            var successLog = await WriteCustomerMailLogAsync(tenantId, userId, customer, contact, account.OutlookEmail, toRecipients.Valid, ccRecipients.Valid, bccRecipients.Valid, dto, true, null, null, response.MessageId, response.ConversationId, sentAt, cancellationToken).ConfigureAwait(false);
+            long? activityId = null;
+            if (dto.CreateActivityLog)
+            {
+                activityId = await CreateCustomerMailActivityAsync(
+                    userId,
+                    customer,
+                    contact,
+                    dto,
+                    toRecipients.Valid,
+                    ccRecipients.Valid,
+                    bccRecipients.Valid,
+                    successLog.Id,
+                    sentAt,
+                    cancellationToken).ConfigureAwait(false);
+            }
             await WriteOperationalLogAsync(tenantId, userId, true, "Info", "outlook.mail.send", "Outlook mail sent.", null, cancellationToken, new { customerId = dto.CustomerId, logId = successLog.Id }).ConfigureAwait(false);
 
             return ApiResponse<OutlookMailSendResultDto>.SuccessResult(
@@ -338,7 +367,8 @@ namespace crm_api.Services
                     MessageId = response.MessageId,
                     ConversationId = response.ConversationId,
                     SentAt = sentAt,
-                    LogId = successLog.Id
+                    LogId = successLog.Id,
+                    ActivityId = activityId
                 },
                 _localizationService.GetLocalizedString("OutlookEntegrationService.MailSentSuccessfully"));
         }
@@ -661,6 +691,11 @@ namespace crm_api.Services
 
         private async Task<GraphSendMailResult> SendViaGraphAsync(string accessToken, SendOutlookMailDto dto, IReadOnlyList<string> toRecipients, IReadOnlyList<string> ccRecipients, IReadOnlyList<string> bccRecipients, CancellationToken cancellationToken)
         {
+            var validAttachments = (dto.Attachments ?? [])
+                .Where(x => !string.IsNullOrWhiteSpace(x.FileName) && !string.IsNullOrWhiteSpace(x.Base64Content))
+                .Select(CreateAttachment)
+                .ToArray();
+
             var payload = new
             {
                 message = new
@@ -673,7 +708,8 @@ namespace crm_api.Services
                     },
                     toRecipients = toRecipients.Select(CreateRecipient).ToArray(),
                     ccRecipients = ccRecipients.Select(CreateRecipient).ToArray(),
-                    bccRecipients = bccRecipients.Select(CreateRecipient).ToArray()
+                    bccRecipients = bccRecipients.Select(CreateRecipient).ToArray(),
+                    attachments = validAttachments
                 },
                 saveToSentItems = true
             };
@@ -735,7 +771,19 @@ namespace crm_api.Services
                 MetadataJson = JsonSerializer.Serialize(new
                 {
                     customerName = customer.CustomerName,
-                    contactName = contact?.FullName
+                    contactName = contact?.FullName,
+                    moduleKey = dto.ModuleKey,
+                    recordId = dto.RecordId,
+                    recordNo = dto.RecordNo,
+                    revisionNo = dto.RevisionNo,
+                    customerCode = dto.CustomerCode,
+                    totalAmountDisplay = dto.TotalAmountDisplay,
+                    validUntil = dto.ValidUntil,
+                    recordOwnerName = dto.RecordOwnerName,
+                    contextTitle = dto.ContextTitle,
+                    attachments = dto.Attachments
+                        .Where(x => !string.IsNullOrWhiteSpace(x.FileName))
+                        .Select(x => new { x.FileName, x.ContentType })
                 })
             };
 
@@ -869,31 +917,171 @@ namespace crm_api.Services
                 : string.Join(' ', scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.OrdinalIgnoreCase));
         }
 
-        private static List<string> ParseEmails(string? raw)
+        private async Task<long?> CreateCustomerMailActivityAsync(
+            long userId,
+            Customer customer,
+            Contact? contact,
+            SendOutlookMailDto dto,
+            IReadOnlyList<string> toRecipients,
+            IReadOnlyList<string> ccRecipients,
+            IReadOnlyList<string> bccRecipients,
+            long mailLogId,
+            DateTimeOffset sentAt,
+            CancellationToken cancellationToken)
+        {
+            var activityTypeId = await ResolveMailActivityTypeIdAsync(cancellationToken).ConfigureAwait(false);
+            if (!activityTypeId.HasValue)
+            {
+                return null;
+            }
+
+            var moduleLabel = dto.ModuleKey?.Trim().ToLowerInvariant() switch
+            {
+                "quotation" => "Teklif",
+                "demand" => "Talep",
+                "order" => "Sipariş",
+                "activity" => "Aktivite",
+                _ => "Kayıt"
+            };
+
+            var subjectSuffix = !string.IsNullOrWhiteSpace(dto.RecordNo)
+                ? dto.RecordNo!.Trim()
+                : dto.RecordId.HasValue && dto.RecordId.Value > 0
+                    ? $"#{dto.RecordId.Value}"
+                    : customer.CustomerName;
+
+            var activity = new Activity
+            {
+                Subject = $"{moduleLabel} e-postası gönderildi - {subjectSuffix}",
+                Description = BuildActivityDescription(customer, contact, dto, toRecipients, ccRecipients, bccRecipients, mailLogId, sentAt),
+                ActivityTypeId = activityTypeId.Value,
+                StartDateTime = sentAt.LocalDateTime,
+                EndDateTime = sentAt.LocalDateTime,
+                IsAllDay = false,
+                Status = ActivityStatus.Completed,
+                Priority = ActivityPriority.Medium,
+                AssignedUserId = userId,
+                ContactId = contact?.Id,
+                PotentialCustomerId = customer.Id,
+                ErpCustomerCode = TrimOrNull(dto.CustomerCode, 50) ?? TrimOrNull(customer.CustomerCode, 50),
+            };
+
+            await _dbContext.Activities.AddAsync(activity, cancellationToken).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return activity.Id;
+        }
+
+        private async Task<long?> ResolveMailActivityTypeIdAsync(CancellationToken cancellationToken)
+        {
+            var activityType = await _dbContext.ActivityTypes.AsNoTracking()
+                .Where(x => !x.IsDeleted)
+                .OrderByDescending(x =>
+                    x.Name.Contains("mail") ||
+                    x.Name.Contains("Mail") ||
+                    x.Name.Contains("email") ||
+                    x.Name.Contains("Email") ||
+                    x.Name.Contains("posta") ||
+                    x.Name.Contains("Posta"))
+                .ThenBy(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return activityType?.Id;
+        }
+
+        private static string BuildActivityDescription(
+            Customer customer,
+            Contact? contact,
+            SendOutlookMailDto dto,
+            IReadOnlyList<string> toRecipients,
+            IReadOnlyList<string> ccRecipients,
+            IReadOnlyList<string> bccRecipients,
+            long mailLogId,
+            DateTimeOffset sentAt)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Outlook e-posta gönderim kaydı");
+            sb.AppendLine($"Gönderim zamanı: {sentAt.LocalDateTime:dd.MM.yyyy HH:mm}");
+            sb.AppendLine($"Müşteri: {customer.CustomerName}");
+
+            if (!string.IsNullOrWhiteSpace(dto.CustomerCode) || !string.IsNullOrWhiteSpace(customer.CustomerCode))
+            {
+                sb.AppendLine($"Cari kodu: {dto.CustomerCode ?? customer.CustomerCode}");
+            }
+
+            if (contact != null)
+            {
+                sb.AppendLine($"Kontak: {contact.FullName}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.RecordNo))
+            {
+                sb.AppendLine($"Belge no: {dto.RecordNo}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.RevisionNo))
+            {
+                sb.AppendLine($"Revize no: {dto.RevisionNo}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.TotalAmountDisplay))
+            {
+                sb.AppendLine($"Toplam: {dto.TotalAmountDisplay}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.ValidUntil))
+            {
+                sb.AppendLine($"Geçerlilik: {dto.ValidUntil}");
+            }
+
+            sb.AppendLine($"Konu: {dto.Subject}");
+            sb.AppendLine($"Alıcılar: {string.Join("; ", toRecipients)}");
+
+            if (ccRecipients.Count > 0)
+            {
+                sb.AppendLine($"CC: {string.Join("; ", ccRecipients)}");
+            }
+
+            if (bccRecipients.Count > 0)
+            {
+                sb.AppendLine($"BCC: {string.Join("; ", bccRecipients)}");
+            }
+
+            if (dto.Attachments.Count > 0)
+            {
+                sb.AppendLine($"Ekler: {string.Join(", ", dto.Attachments.Where(x => !string.IsNullOrWhiteSpace(x.FileName)).Select(x => x.FileName))}");
+            }
+
+            sb.AppendLine($"Mail log id: {mailLogId}");
+            return sb.ToString().Trim();
+        }
+
+        private static EmailParseResult ParseEmails(string? raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
             {
-                return new List<string>();
+                return new EmailParseResult();
             }
 
             var pieces = raw.Split(new[] { ';', ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            var valid = new List<string>();
+            var result = new EmailParseResult();
             foreach (var piece in pieces)
             {
                 try
                 {
                     var mail = new MailAddress(piece);
-                    valid.Add(mail.Address);
+                    result.Valid.Add(mail.Address);
                 }
                 catch
                 {
+                    result.Invalid.Add(piece);
                 }
             }
 
-            return valid;
+            return result;
         }
 
         private static string? BuildPreview(string? value, int maxLen)
@@ -924,6 +1112,14 @@ namespace crm_api.Services
             {
                 address = email
             }
+        };
+
+        private static Dictionary<string, object?> CreateAttachment(OutlookCustomerMailAttachmentDto attachment) => new()
+        {
+            ["@odata.type"] = "#microsoft.graph.fileAttachment",
+            ["name"] = attachment.FileName,
+            ["contentType"] = string.IsNullOrWhiteSpace(attachment.ContentType) ? "application/octet-stream" : attachment.ContentType,
+            ["contentBytes"] = attachment.Base64Content
         };
 
         private static (string ErrorCode, string ErrorMessage) ParseGraphError(string? body, HttpStatusCode statusCode)
@@ -976,6 +1172,12 @@ namespace crm_api.Services
             public string? RefreshToken { get; set; }
             public string? Scope { get; set; }
             public int ExpiresInSeconds { get; set; }
+        }
+
+        private sealed class EmailParseResult
+        {
+            public List<string> Valid { get; } = new();
+            public List<string> Invalid { get; } = new();
         }
 
         private sealed class GraphSendMailResult

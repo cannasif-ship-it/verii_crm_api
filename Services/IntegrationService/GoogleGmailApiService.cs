@@ -121,7 +121,17 @@ namespace crm_api.Services
                 }
             }
 
-            var toRecipients = ParseEmails(dto.To);
+            var toParse = ParseEmails(dto.To);
+            if (toParse.Invalid.Count > 0)
+            {
+                var invalidMessage = _localizationService.GetLocalizedString("GoogleGmailApiService.InvalidRecipientAddresses");
+                return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
+                    invalidMessage,
+                    string.Join(", ", toParse.Invalid),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            var toRecipients = toParse.Valid;
             if (toRecipients.Count == 0)
             {
                 if (!string.IsNullOrWhiteSpace(contact?.Email))
@@ -142,8 +152,28 @@ namespace crm_api.Services
                     StatusCodes.Status400BadRequest);
             }
 
-            var ccRecipients = ParseEmails(dto.Cc);
-            var bccRecipients = ParseEmails(dto.Bcc);
+            var ccParse = ParseEmails(dto.Cc);
+            if (ccParse.Invalid.Count > 0)
+            {
+                var invalidMessage = _localizationService.GetLocalizedString("GoogleGmailApiService.InvalidRecipientAddresses");
+                return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
+                    invalidMessage,
+                    string.Join(", ", ccParse.Invalid),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            var bccParse = ParseEmails(dto.Bcc);
+            if (bccParse.Invalid.Count > 0)
+            {
+                var invalidMessage = _localizationService.GetLocalizedString("GoogleGmailApiService.InvalidRecipientAddresses");
+                return ApiResponse<GoogleCustomerMailSendResultDto>.ErrorResult(
+                    invalidMessage,
+                    string.Join(", ", bccParse.Invalid),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            var ccRecipients = ccParse.Valid;
+            var bccRecipients = bccParse.Valid;
 
             var oauthSettings = await _tenantGoogleOAuthSettingsService.GetRuntimeSettingsAsync(tenantId, cancellationToken).ConfigureAwait(false);
             if (oauthSettings == null || !oauthSettings.IsEnabled)
@@ -181,7 +211,16 @@ namespace crm_api.Services
 
             var senderEmail = string.IsNullOrWhiteSpace(account.GoogleEmail) ? null : account.GoogleEmail!.Trim();
             var senderDisplayName = await ResolveSenderDisplayNameAsync(userId, cancellationToken).ConfigureAwait(false);
-            var mimeRaw = BuildMimeRaw(senderDisplayName, senderEmail, toRecipients, ccRecipients, bccRecipients, dto.Subject.Trim(), dto.Body, dto.IsHtml);
+            var mimeRaw = BuildMimeRaw(
+                senderDisplayName,
+                senderEmail,
+                toRecipients,
+                ccRecipients,
+                bccRecipients,
+                dto.Subject.Trim(),
+                dto.Body,
+                dto.IsHtml,
+                dto.Attachments);
 
             var gmailResponse = await SendViaGmailApiAsync(accessToken, mimeRaw, cancellationToken).ConfigureAwait(false);
             if (!gmailResponse.IsSuccess && IsInsufficientScopeError(gmailResponse))
@@ -331,6 +370,29 @@ namespace crm_api.Services
                     messageId = gmailResponse.MessageId
                 }).ConfigureAwait(false);
 
+            long? activityId = null;
+            if (dto.CreateActivityLog)
+            {
+                try
+                {
+                    activityId = await CreateCustomerMailActivityAsync(
+                        userId,
+                        customer,
+                        contact,
+                        dto,
+                        toRecipients,
+                        ccRecipients,
+                        bccRecipients,
+                        successLog.Id,
+                        sentAt,
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Google mail sent but CRM activity log could not be created. CustomerId={CustomerId}, UserId={UserId}", dto.CustomerId, userId);
+                }
+            }
+
             return ApiResponse<GoogleCustomerMailSendResultDto>.SuccessResult(
                 new GoogleCustomerMailSendResultDto
                 {
@@ -338,7 +400,8 @@ namespace crm_api.Services
                     IsSuccess = true,
                     GoogleMessageId = gmailResponse.MessageId,
                     GoogleThreadId = gmailResponse.ThreadId,
-                    SentAt = sentAt
+                    SentAt = sentAt,
+                    ActivityId = activityId
                 },
                 _localizationService.GetLocalizedString("GoogleGmailApiService.MailSentSuccessfully"));
         }
@@ -471,7 +534,19 @@ namespace crm_api.Services
                 MetadataJson = JsonSerializer.Serialize(new
                 {
                     customerName = customer.CustomerName,
-                    contactName = contact?.FullName
+                    contactName = contact?.FullName,
+                    moduleKey = dto.ModuleKey,
+                    recordId = dto.RecordId,
+                    recordNo = dto.RecordNo,
+                    revisionNo = dto.RevisionNo,
+                    customerCode = dto.CustomerCode,
+                    totalAmountDisplay = dto.TotalAmountDisplay,
+                    validUntil = dto.ValidUntil,
+                    recordOwnerName = dto.RecordOwnerName,
+                    contextTitle = dto.ContextTitle,
+                    attachments = dto.Attachments
+                        .Where(x => !string.IsNullOrWhiteSpace(x.FileName))
+                        .Select(x => new { x.FileName, x.ContentType })
                 })
             };
 
@@ -661,11 +736,159 @@ namespace crm_api.Services
             return true;
         }
 
-        private static List<string> ParseEmails(string? raw)
+        private sealed class EmailParseResult
         {
+            public List<string> Valid { get; } = new();
+            public List<string> Invalid { get; } = new();
+        }
+
+        private async Task<long?> CreateCustomerMailActivityAsync(
+            long userId,
+            Customer customer,
+            Contact? contact,
+            SendGoogleCustomerMailDto dto,
+            IReadOnlyList<string> toRecipients,
+            IReadOnlyList<string> ccRecipients,
+            IReadOnlyList<string> bccRecipients,
+            long mailLogId,
+            DateTimeOffset sentAt,
+            CancellationToken cancellationToken)
+        {
+            var activityTypeId = await ResolveMailActivityTypeIdAsync(cancellationToken).ConfigureAwait(false);
+            if (!activityTypeId.HasValue)
+            {
+                return null;
+            }
+
+            var moduleLabel = dto.ModuleKey?.Trim().ToLowerInvariant() switch
+            {
+                "quotation" => "Teklif",
+                "demand" => "Talep",
+                "order" => "Sipariş",
+                "activity" => "Aktivite",
+                _ => "Kayıt"
+            };
+
+            var subjectSuffix = !string.IsNullOrWhiteSpace(dto.RecordNo)
+                ? dto.RecordNo!.Trim()
+                : dto.RecordId.HasValue && dto.RecordId.Value > 0
+                    ? $"#{dto.RecordId.Value}"
+                    : customer.CustomerName;
+
+            var activity = new Activity
+            {
+                Subject = $"{moduleLabel} e-postası gönderildi - {subjectSuffix}",
+                Description = BuildActivityDescription(customer, contact, dto, toRecipients, ccRecipients, bccRecipients, mailLogId, sentAt),
+                ActivityTypeId = activityTypeId.Value,
+                StartDateTime = sentAt.LocalDateTime,
+                EndDateTime = sentAt.LocalDateTime,
+                IsAllDay = false,
+                Status = ActivityStatus.Completed,
+                Priority = ActivityPriority.Medium,
+                AssignedUserId = userId,
+                ContactId = contact?.Id,
+                PotentialCustomerId = customer.Id,
+                ErpCustomerCode = TrimOrNull(dto.CustomerCode, 50) ?? TrimOrNull(customer.CustomerCode, 50),
+            };
+
+            await _uow.Repository<Activity>().AddAsync(activity).ConfigureAwait(false);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
+
+            return activity.Id;
+        }
+
+        private async Task<long?> ResolveMailActivityTypeIdAsync(CancellationToken cancellationToken)
+        {
+            var activityType = await _uow.Repository<ActivityType>()
+                .Query(tracking: false)
+                .Where(x => !x.IsDeleted)
+                .OrderByDescending(x =>
+                    x.Name.Contains("mail") ||
+                    x.Name.Contains("Mail") ||
+                    x.Name.Contains("email") ||
+                    x.Name.Contains("Email") ||
+                    x.Name.Contains("posta") ||
+                    x.Name.Contains("Posta"))
+                .ThenBy(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return activityType?.Id;
+        }
+
+        private static string BuildActivityDescription(
+            Customer customer,
+            Contact? contact,
+            SendGoogleCustomerMailDto dto,
+            IReadOnlyList<string> toRecipients,
+            IReadOnlyList<string> ccRecipients,
+            IReadOnlyList<string> bccRecipients,
+            long mailLogId,
+            DateTimeOffset sentAt)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Google e-posta gönderim kaydı");
+            sb.AppendLine($"Gönderim zamanı: {sentAt.LocalDateTime:dd.MM.yyyy HH:mm}");
+            sb.AppendLine($"Müşteri: {customer.CustomerName}");
+
+            if (!string.IsNullOrWhiteSpace(dto.CustomerCode) || !string.IsNullOrWhiteSpace(customer.CustomerCode))
+            {
+                sb.AppendLine($"Cari kodu: {dto.CustomerCode ?? customer.CustomerCode}");
+            }
+
+            if (contact != null)
+            {
+                sb.AppendLine($"Kontak: {contact.FullName}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.RecordNo))
+            {
+                sb.AppendLine($"Belge no: {dto.RecordNo}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.RevisionNo))
+            {
+                sb.AppendLine($"Revize no: {dto.RevisionNo}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.TotalAmountDisplay))
+            {
+                sb.AppendLine($"Toplam: {dto.TotalAmountDisplay}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.ValidUntil))
+            {
+                sb.AppendLine($"Geçerlilik: {dto.ValidUntil}");
+            }
+
+            sb.AppendLine($"Konu: {dto.Subject}");
+            sb.AppendLine($"Alıcılar: {string.Join("; ", toRecipients)}");
+
+            if (ccRecipients.Count > 0)
+            {
+                sb.AppendLine($"CC: {string.Join("; ", ccRecipients)}");
+            }
+
+            if (bccRecipients.Count > 0)
+            {
+                sb.AppendLine($"BCC: {string.Join("; ", bccRecipients)}");
+            }
+
+            if (dto.Attachments.Count > 0)
+            {
+                sb.AppendLine($"Ekler: {string.Join(", ", dto.Attachments.Where(x => !string.IsNullOrWhiteSpace(x.FileName)).Select(x => x.FileName))}");
+            }
+
+            sb.AppendLine($"Mail log id: {mailLogId}");
+            return sb.ToString().Trim();
+        }
+
+        private static EmailParseResult ParseEmails(string? raw)
+        {
+            var result = new EmailParseResult();
             if (string.IsNullOrWhiteSpace(raw))
             {
-                return new List<string>();
+                return result;
             }
 
             var pieces = raw
@@ -673,21 +896,20 @@ namespace crm_api.Services
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            var valid = new List<string>();
             foreach (var piece in pieces)
             {
                 try
                 {
                     var mail = new MailAddress(piece);
-                    valid.Add(mail.Address);
+                    result.Valid.Add(mail.Address);
                 }
                 catch
                 {
-                    // Ignore invalid addresses to keep send flow resilient.
+                    result.Invalid.Add(piece);
                 }
             }
 
-            return valid;
+            return result;
         }
 
         private static string BuildMimeRaw(
@@ -698,7 +920,8 @@ namespace crm_api.Services
             IReadOnlyList<string> bccRecipients,
             string subject,
             string body,
-            bool isHtml)
+            bool isHtml,
+            IReadOnlyList<GoogleCustomerMailAttachmentDto>? attachments)
         {
             var fromHeader = !string.IsNullOrWhiteSpace(senderEmail)
                 ? (!string.IsNullOrWhiteSpace(senderDisplayName)
@@ -721,14 +944,75 @@ namespace crm_api.Services
 
             sb.AppendLine($"Subject: {EncodeMimeHeader(subject)}");
             sb.AppendLine("MIME-Version: 1.0");
-            sb.AppendLine($"Content-Type: {(isHtml ? "text/html" : "text/plain")}; charset=UTF-8");
-            sb.AppendLine("Content-Transfer-Encoding: 8bit");
-            sb.AppendLine();
-            sb.Append(body ?? string.Empty);
+
+            var validAttachments = (attachments ?? [])
+                .Where(x => !string.IsNullOrWhiteSpace(x.FileName) && !string.IsNullOrWhiteSpace(x.Base64Content))
+                .ToList();
+
+            if (validAttachments.Count == 0)
+            {
+                sb.AppendLine($"Content-Type: {(isHtml ? "text/html" : "text/plain")}; charset=UTF-8");
+                sb.AppendLine("Content-Transfer-Encoding: 8bit");
+                sb.AppendLine();
+                sb.Append(body ?? string.Empty);
+            }
+            else
+            {
+                var boundary = $"crm-mail-{Guid.NewGuid():N}";
+                sb.AppendLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
+                sb.AppendLine();
+
+                sb.AppendLine($"--{boundary}");
+                sb.AppendLine($"Content-Type: {(isHtml ? "text/html" : "text/plain")}; charset=UTF-8");
+                sb.AppendLine("Content-Transfer-Encoding: 8bit");
+                sb.AppendLine();
+                sb.AppendLine(body ?? string.Empty);
+
+                foreach (var attachment in validAttachments)
+                {
+                    var safeFileName = attachment.FileName.Trim().Replace("\"", string.Empty);
+                    var contentType = string.IsNullOrWhiteSpace(attachment.ContentType)
+                        ? "application/octet-stream"
+                        : attachment.ContentType.Trim();
+
+                    sb.AppendLine();
+                    sb.AppendLine($"--{boundary}");
+                    sb.AppendLine($"Content-Type: {contentType}; name=\"{safeFileName}\"");
+                    sb.AppendLine("Content-Transfer-Encoding: base64");
+                    sb.AppendLine($"Content-Disposition: attachment; filename=\"{safeFileName}\"");
+                    sb.AppendLine();
+
+                    var normalizedBase64 = attachment.Base64Content.Contains("base64,", StringComparison.OrdinalIgnoreCase)
+                        ? attachment.Base64Content[(attachment.Base64Content.IndexOf("base64,", StringComparison.OrdinalIgnoreCase) + 7)..]
+                        : attachment.Base64Content;
+
+                    var chunks = SplitBase64IntoMimeLines(normalizedBase64);
+                    foreach (var chunk in chunks)
+                    {
+                        sb.AppendLine(chunk);
+                    }
+                }
+
+                sb.AppendLine($"--{boundary}--");
+            }
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
             var base64 = Convert.ToBase64String(bytes);
             return base64.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        private static IEnumerable<string> SplitBase64IntoMimeLines(string base64)
+        {
+            var normalized = base64
+                .Replace("\r", string.Empty, StringComparison.Ordinal)
+                .Replace("\n", string.Empty, StringComparison.Ordinal)
+                .Trim();
+
+            for (var index = 0; index < normalized.Length; index += 76)
+            {
+                var length = Math.Min(76, normalized.Length - index);
+                yield return normalized.Substring(index, length);
+            }
         }
 
         private static string? BuildPreview(string? value, int maxLen)
