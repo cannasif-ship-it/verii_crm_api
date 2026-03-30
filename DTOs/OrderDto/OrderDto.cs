@@ -26,6 +26,11 @@ namespace crm_api.DTOs
         public string? RevisionNo { get; set; }
         public long? RevisionId { get; set; }
         public string Currency { get; set; } = string.Empty;
+        public string? CurrencyCode { get; set; }
+        public string? CurrencyDisplay { get; set; }
+        public decimal Total { get; set; }
+        public decimal GrandTotal { get; set; }
+        public string? GrandTotalDisplay { get; set; }
         public decimal? GeneralDiscountRate { get; set; }
         public decimal? GeneralDiscountAmount { get; set; }
         public long? SalesTypeDefinitionId { get; set; }
@@ -162,6 +167,11 @@ namespace crm_api.DTOs
         public string? RevisionNo { get; set; }
         public long? RevisionId { get; set; }
         public string Currency { get; set; } = string.Empty;
+        public string? CurrencyCode { get; set; }
+        public string? CurrencyDisplay { get; set; }
+        public decimal Total { get; set; }
+        public decimal GrandTotal { get; set; }
+        public string? GrandTotalDisplay { get; set; }
         public decimal? GeneralDiscountRate { get; set; }
         public decimal? GeneralDiscountAmount { get; set; }
         public long? SalesTypeDefinitionId { get; set; }

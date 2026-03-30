@@ -15,6 +15,8 @@ namespace crm_api.DTOs
 
     public class QuotationExchangeRateCreateDto
     {
+        public long? Id { get; set; }
+
         [Required]
         public long QuotationId { get; set; }
 
