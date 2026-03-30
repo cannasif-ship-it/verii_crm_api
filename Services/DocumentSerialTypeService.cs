@@ -316,21 +316,45 @@ namespace crm_api.Services
                     }
 
                     string beforeDash = oldDocumentSerial.Split('-')[0];
-                    var QuotationDocumentSerialTypes = await _unitOfWork.Quotations.Query().Where(x => x.OfferNo == beforeDash).ToListAsync().ConfigureAwait(false);
-                    int maxSerialNumber = QuotationDocumentSerialTypes
-                                                            .Select(x =>
-                                                            {
-                                                                if (string.IsNullOrWhiteSpace(x.RevisionNo))
-                                                                    return 0;
 
-                                                                var index = x.RevisionNo.LastIndexOf('-');                                                                if (index == -1)
-                                                                    return 0;
+                    static int ParseRevisionNumber(string? revisionNo)
+                    {
+                        if (string.IsNullOrWhiteSpace(revisionNo))
+                            return 0;
 
-                                                                var numberPart = x.RevisionNo[(index + 1)..];
-                                                                return int.TryParse(numberPart, out var rev) ? rev : 0;
-                                                            })
-                                                            .DefaultIfEmpty(0)
-                                                            .Max();
+                        var index = revisionNo.LastIndexOf('-');
+                        if (index == -1)
+                            return 0;
+
+                        var numberPart = revisionNo[(index + 1)..];
+                        return int.TryParse(numberPart, out var rev) ? rev : 0;
+                    }
+
+                    var quotationRevisionNumbers = await _unitOfWork.Quotations.Query()
+                        .Where(x => x.OfferNo == beforeDash && !x.IsDeleted)
+                        .Select(x => x.RevisionNo)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+
+                    var demandRevisionNumbers = await _unitOfWork.Demands.Query()
+                        .Where(x => x.OfferNo == beforeDash && !x.IsDeleted)
+                        .Select(x => x.RevisionNo)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+
+                    var orderRevisionNumbers = await _unitOfWork.Orders.Query()
+                        .Where(x => x.OfferNo == beforeDash && !x.IsDeleted)
+                        .Select(x => x.RevisionNo)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+
+                    int maxSerialNumber = quotationRevisionNumbers
+                        .Concat(demandRevisionNumbers)
+                        .Concat(orderRevisionNumbers)
+                        .Select(ParseRevisionNumber)
+                        .DefaultIfEmpty(0)
+                        .Max();
+
                     returnDocumentSerial = $"{beforeDash}-{maxSerialNumber + 1}";
                 }
 
