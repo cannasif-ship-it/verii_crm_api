@@ -14,6 +14,8 @@ using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
 using crm_api.Models.Notification;
 using crm_api.DTOs.NotificationDto;
+using System.Globalization;
+using crm_api.DTOs.ErpDto;
 
 
 namespace crm_api.Services
@@ -108,6 +110,7 @@ namespace crm_api.Services
                     .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<QuotationGetDto>(x)).ToList();
+                await EnrichQuotationDtosAsync(dtos).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<QuotationGetDto>
                 {
@@ -195,6 +198,7 @@ namespace crm_api.Services
                     .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<QuotationGetDto>(x)).ToList();
+                await EnrichQuotationDtosAsync(dtos).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<QuotationGetDto>
                 {
@@ -239,6 +243,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted).ConfigureAwait(false);
 
                 var quotationDto = _mapper.Map<QuotationGetDto>(quotationWithNav ?? quotation);
+                await EnrichQuotationDtoAsync(quotationDto).ConfigureAwait(false);
                 return ApiResponse<QuotationGetDto>.SuccessResult(quotationDto, _localizationService.GetLocalizedString("QuotationService.QuotationRetrieved"));
             }
             catch (Exception ex)
@@ -382,6 +387,7 @@ namespace crm_api.Services
             {
                 var quotations = await _unitOfWork.Quotations.FindAsync(q => q.PotentialCustomerId == potentialCustomerId).ConfigureAwait(false);
                 var quotationDtos = _mapper.Map<List<QuotationGetDto>>(quotations.ToList());
+                await EnrichQuotationDtosAsync(quotationDtos).ConfigureAwait(false);
                 return ApiResponse<List<QuotationGetDto>>.SuccessResult(quotationDtos, _localizationService.GetLocalizedString("QuotationService.QuotationsByPotentialCustomerRetrieved"));
             }
             catch (Exception ex)
@@ -398,6 +404,7 @@ namespace crm_api.Services
             {
                 var quotations = await _unitOfWork.Quotations.FindAsync(q => q.RepresentativeId == representativeId).ConfigureAwait(false);
                 var quotationDtos = _mapper.Map<List<QuotationGetDto>>(quotations.ToList());
+                await EnrichQuotationDtosAsync(quotationDtos).ConfigureAwait(false);
                 return ApiResponse<List<QuotationGetDto>>.SuccessResult(quotationDtos, _localizationService.GetLocalizedString("QuotationService.QuotationsByRepresentativeRetrieved"));
             }
             catch (Exception ex)
@@ -414,6 +421,7 @@ namespace crm_api.Services
             {
                 var quotations = await _unitOfWork.Quotations.FindAsync(q => (int?)q.Status == status).ConfigureAwait(false);
                 var quotationDtos = _mapper.Map<List<QuotationGetDto>>(quotations.ToList());
+                await EnrichQuotationDtosAsync(quotationDtos).ConfigureAwait(false);
                 return ApiResponse<List<QuotationGetDto>>.SuccessResult(quotationDtos, _localizationService.GetLocalizedString("QuotationService.QuotationsByStatusRetrieved"));
             }
             catch (Exception ex)
@@ -560,6 +568,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(q => q.Id == quotation.Id).ConfigureAwait(false);
 
                 var dto = _mapper.Map<QuotationGetDto>(quotationWithNav);
+                await EnrichQuotationDtoAsync(dto).ConfigureAwait(false);
 
                 return ApiResponse<QuotationGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationService.QuotationCreated"));
             }
@@ -570,6 +579,207 @@ namespace crm_api.Services
                 return ApiResponse<QuotationGetDto>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
                     _localizationService.GetLocalizedString("QuotationService.CreateQuotationBulkExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
+        public async Task<ApiResponse<QuotationGetDto>> UpdateQuotationBulkAsync(long id, QuotationBulkCreateDto bulkDto)
+        {
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+
+            try
+            {
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
+                if (!userIdResponse.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<QuotationGetDto>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+
+                var userId = userIdResponse.Data;
+
+                var quotation = await _unitOfWork.Quotations
+                    .Query(tracking: true)
+                    .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted)
+                    .ConfigureAwait(false);
+
+                if (quotation == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<QuotationGetDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
+                        StatusCodes.Status404NotFound);
+                }
+
+                _mapper.Map(bulkDto.Quotation, quotation);
+                quotation.GeneralDiscountRate = bulkDto.Quotation.GeneralDiscountRate;
+                quotation.GeneralDiscountAmount = bulkDto.Quotation.GeneralDiscountAmount;
+                quotation.UpdatedDate = DateTimeProvider.Now;
+                quotation.UpdatedBy = userId;
+
+                decimal total = 0m;
+                decimal grandTotal = 0m;
+
+                foreach (var lineDto in bulkDto.Lines)
+                {
+                    var calc = CalculateLine(
+                        lineDto.Quantity,
+                        lineDto.UnitPrice,
+                        lineDto.DiscountRate1,
+                        lineDto.DiscountRate2,
+                        lineDto.DiscountRate3,
+                        lineDto.DiscountAmount1,
+                        lineDto.DiscountAmount2,
+                        lineDto.DiscountAmount3,
+                        lineDto.VatRate
+                    );
+
+                    total += calc.NetTotal;
+                    grandTotal += calc.GrandTotal;
+                }
+
+                quotation.Total = total;
+                quotation.GrandTotal = grandTotal;
+
+                var existingLines = await _unitOfWork.QuotationLines.Query(tracking: true)
+                    .Where(x => x.QuotationId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var incomingLineIds = bulkDto.Lines
+                    .Where(x => x.Id.HasValue && x.Id.Value > 0)
+                    .Select(x => x.Id!.Value)
+                    .ToHashSet();
+
+                foreach (var existingLine in existingLines.Where(x => !incomingLineIds.Contains(x.Id)))
+                {
+                    existingLine.IsDeleted = true;
+                    existingLine.DeletedDate = DateTimeProvider.Now;
+                    existingLine.DeletedBy = userId;
+                }
+
+                var existingLineMap = existingLines.ToDictionary(x => x.Id);
+
+                foreach (var lineDto in bulkDto.Lines)
+                {
+                    var calc = CalculateLine(
+                        lineDto.Quantity,
+                        lineDto.UnitPrice,
+                        lineDto.DiscountRate1,
+                        lineDto.DiscountRate2,
+                        lineDto.DiscountRate3,
+                        lineDto.DiscountAmount1,
+                        lineDto.DiscountAmount2,
+                        lineDto.DiscountAmount3,
+                        lineDto.VatRate
+                    );
+
+                    if (lineDto.Id.HasValue && lineDto.Id.Value > 0 && existingLineMap.TryGetValue(lineDto.Id.Value, out var existingLine))
+                    {
+                        _mapper.Map(lineDto, existingLine);
+                        existingLine.QuotationId = id;
+                        existingLine.LineTotal = calc.NetTotal;
+                        existingLine.VatAmount = calc.VatAmount;
+                        existingLine.LineGrandTotal = calc.GrandTotal;
+                        existingLine.UpdatedDate = DateTimeProvider.Now;
+                        existingLine.UpdatedBy = userId;
+                    }
+                    else
+                    {
+                        var newLine = _mapper.Map<QuotationLine>(lineDto);
+                        newLine.QuotationId = id;
+                        newLine.LineTotal = calc.NetTotal;
+                        newLine.VatAmount = calc.VatAmount;
+                        newLine.LineGrandTotal = calc.GrandTotal;
+                        await _unitOfWork.QuotationLines.AddAsync(newLine).ConfigureAwait(false);
+                    }
+                }
+
+                var existingRates = await _unitOfWork.QuotationExchangeRates.Query(tracking: true)
+                    .Where(x => x.QuotationId == id && !x.IsDeleted)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var incomingRateIds = (bulkDto.ExchangeRates ?? new List<QuotationExchangeRateCreateDto>())
+                    .Where(x => x.Id.HasValue && x.Id.Value > 0)
+                    .Select(x => x.Id!.Value)
+                    .ToHashSet();
+
+                foreach (var existingRate in existingRates.Where(x => !incomingRateIds.Contains(x.Id)))
+                {
+                    existingRate.IsDeleted = true;
+                    existingRate.DeletedDate = DateTimeProvider.Now;
+                    existingRate.DeletedBy = userId;
+                }
+
+                var existingRateMap = existingRates.ToDictionary(x => x.Id);
+
+                foreach (var rateDto in bulkDto.ExchangeRates ?? Enumerable.Empty<QuotationExchangeRateCreateDto>())
+                {
+                    if (rateDto.Id.HasValue && rateDto.Id.Value > 0 && existingRateMap.TryGetValue(rateDto.Id.Value, out var existingRate))
+                    {
+                        _mapper.Map(rateDto, existingRate);
+                        existingRate.QuotationId = id;
+                        existingRate.UpdatedDate = DateTimeProvider.Now;
+                        existingRate.UpdatedBy = userId;
+                    }
+                    else
+                    {
+                        var newRate = _mapper.Map<QuotationExchangeRate>(rateDto);
+                        newRate.QuotationId = id;
+                        await _unitOfWork.QuotationExchangeRates.AddAsync(newRate).ConfigureAwait(false);
+                    }
+                }
+
+                if (bulkDto.QuotationNotes != null)
+                {
+                    var existingNotes = await _unitOfWork.QuotationNotes.Query(tracking: true)
+                        .FirstOrDefaultAsync(x => x.QuotationId == id && !x.IsDeleted)
+                        .ConfigureAwait(false);
+
+                    if (existingNotes == null)
+                    {
+                        var newNotes = _mapper.Map<QuotationNotes>(bulkDto.QuotationNotes);
+                        newNotes.QuotationId = id;
+                        await _unitOfWork.QuotationNotes.AddAsync(newNotes).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        _mapper.Map(bulkDto.QuotationNotes, existingNotes);
+                        existingNotes.UpdatedDate = DateTimeProvider.Now;
+                        existingNotes.UpdatedBy = userId;
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                var quotationWithNav = await _unitOfWork.Quotations
+                    .Query()
+                    .AsNoTracking()
+                    .Include(q => q.Representative)
+                    .Include(q => q.Lines.Where(l => !l.IsDeleted))
+                    .Include(q => q.PotentialCustomer)
+                    .Include(q => q.CreatedByUser)
+                    .Include(q => q.UpdatedByUser)
+                    .Include(q => q.DocumentSerialType)
+                    .Include(q => q.SalesTypeDefinition)
+                    .FirstOrDefaultAsync(q => q.Id == quotation.Id)
+                    .ConfigureAwait(false);
+
+                var dto = _mapper.Map<QuotationGetDto>(quotationWithNav);
+                await EnrichQuotationDtoAsync(dto).ConfigureAwait(false);
+                return ApiResponse<QuotationGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationService.QuotationUpdated"));
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                return ApiResponse<QuotationGetDto>.ErrorResult(
+                    _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
+                    _localizationService.GetLocalizedString("QuotationService.UpdateQuotationExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
             }
         }
 
@@ -749,13 +959,46 @@ namespace crm_api.Services
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             try
             {
+                var userIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
+                if (!userIdResponse.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<QuotationGetDto>.ErrorResult(
+                        userIdResponse.Message,
+                        userIdResponse.Message,
+                        StatusCodes.Status401Unauthorized);
+                }
+                var userId = userIdResponse.Data;
+
                 var quotation = await _unitOfWork.Quotations.GetByIdAsync(quotationId).ConfigureAwait(false);
                 if (quotation == null)
                 {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<QuotationGetDto>.ErrorResult(
                         _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
                         _localizationService.GetLocalizedString("QuotationService.QuotationNotFound"),
                         StatusCodes.Status404NotFound);
+                }
+
+                var hasWaitingApprovalRequest = await _unitOfWork.ApprovalRequests.Query()
+                    .AnyAsync(x =>
+                        !x.IsDeleted &&
+                        x.EntityId == quotationId &&
+                        x.DocumentType == PricingRuleType.Quotation &&
+                        x.Status == ApprovalStatus.Waiting)
+                    .ConfigureAwait(false);
+
+                if (RevisionGuardHelper.TryGetRevisionBlockMessage(
+                    quotation.Status,
+                    hasWaitingApprovalRequest,
+                    "Teklif",
+                    out var revisionBlockMessage))
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<QuotationGetDto>.ErrorResult(
+                        revisionBlockMessage!,
+                        revisionBlockMessage!,
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var quotationLines = await _unitOfWork.QuotationLines.Query()
@@ -770,41 +1013,61 @@ namespace crm_api.Services
                 var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(quotation.DocumentSerialTypeId, false, quotation.RevisionNo).ConfigureAwait(false);
                 if (!documentSerialTypeWithRevision.Success)
                 {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<QuotationGetDto>.ErrorResult(
                         _localizationService.GetLocalizedString("QuotationService.DocumentSerialTypeGenerationError"),
                         documentSerialTypeWithRevision.Message,
                         StatusCodes.Status500InternalServerError);
                 }
 
+                var revisionDate = DateTimeProvider.Now;
+
                 var newQuotation = new Quotation();
                 newQuotation.OfferType = quotation.OfferType;
                 newQuotation.RevisionId = quotation.Id;
-                newQuotation.OfferDate = quotation.OfferDate;
                 newQuotation.OfferNo = quotation.OfferNo;
                 newQuotation.RevisionNo = documentSerialTypeWithRevision.Data;
-                newQuotation.OfferDate = quotation.OfferDate;
+                newQuotation.OfferDate = revisionDate;
                 newQuotation.Currency = quotation.Currency;
                 newQuotation.GeneralDiscountRate = quotation.GeneralDiscountRate;
                 newQuotation.GeneralDiscountAmount = quotation.GeneralDiscountAmount;
                 newQuotation.Total = quotation.Total;
                 newQuotation.GrandTotal = quotation.GrandTotal;
-                newQuotation.CreatedBy = quotation.CreatedBy;
-                newQuotation.CreatedDate = DateTimeProvider.Now;
+                newQuotation.Year = revisionDate.Year.ToString();
+                newQuotation.CreatedBy = userId;
+                newQuotation.CreatedDate = revisionDate;
                 newQuotation.PotentialCustomerId = quotation.PotentialCustomerId;
                 newQuotation.ErpCustomerCode = quotation.ErpCustomerCode;
                 newQuotation.ContactId = quotation.ContactId;
-                newQuotation.ValidUntil = quotation.ValidUntil;
+                newQuotation.ValidUntil = revisionDate.AddDays(14);
                 newQuotation.DeliveryDate = quotation.DeliveryDate;
                 newQuotation.ShippingAddressId = quotation.ShippingAddressId;
                 newQuotation.RepresentativeId = quotation.RepresentativeId;
                 newQuotation.ActivityId = quotation.ActivityId;
                 newQuotation.Description = quotation.Description;
                 newQuotation.PaymentTypeId = quotation.PaymentTypeId;
+                newQuotation.DocumentSerialTypeId = quotation.DocumentSerialTypeId;
                 newQuotation.HasCustomerSpecificDiscount = quotation.HasCustomerSpecificDiscount;
                 newQuotation.DemandId = quotation.DemandId;
                 newQuotation.SalesTypeDefinitionId = quotation.SalesTypeDefinitionId;
                 newQuotation.ErpProjectCode = quotation.ErpProjectCode;
                 newQuotation.Status = (int)ApprovalStatus.HavenotStarted;
+                newQuotation.IsCompleted = false;
+                newQuotation.CompletionDate = null;
+                newQuotation.IsPendingApproval = false;
+                newQuotation.ApprovalStatus = null;
+                newQuotation.RejectedReason = null;
+                newQuotation.ApprovedByUserId = null;
+                newQuotation.ApprovalDate = null;
+                newQuotation.IsERPIntegrated = false;
+                newQuotation.ERPIntegrationNumber = null;
+                newQuotation.LastSyncDate = null;
+                newQuotation.CountTriedBy = 0;
+                newQuotation.UpdatedBy = null;
+                newQuotation.UpdatedDate = null;
+                newQuotation.DeletedBy = null;
+                newQuotation.DeletedDate = null;
+                newQuotation.IsDeleted = false;
 
                 await _unitOfWork.Quotations.AddAsync(newQuotation).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
@@ -835,7 +1098,15 @@ namespace crm_api.Services
                     newLine.RelatedStockId = line.RelatedStockId;
                     newLine.RelatedProductKey = line.RelatedProductKey;
                     newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
+                    newLine.ErpProjectCode = line.ErpProjectCode;
                     newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
+                    newLine.CreatedBy = userId;
+                    newLine.CreatedDate = revisionDate;
+                    newLine.UpdatedBy = null;
+                    newLine.UpdatedDate = null;
+                    newLine.DeletedBy = null;
+                    newLine.DeletedDate = null;
+                    newLine.IsDeleted = false;
                     newQuotationLines.Add(newLine);
                 }
                 await _unitOfWork.QuotationLines.AddAllAsync(newQuotationLines).ConfigureAwait(false);
@@ -850,6 +1121,13 @@ namespace crm_api.Services
                     newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
                     newExchangeRate.Currency = exchangeRate.Currency;
                     newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
+                    newExchangeRate.CreatedBy = userId;
+                    newExchangeRate.CreatedDate = revisionDate;
+                    newExchangeRate.UpdatedBy = null;
+                    newExchangeRate.UpdatedDate = null;
+                    newExchangeRate.DeletedBy = null;
+                    newExchangeRate.DeletedDate = null;
+                    newExchangeRate.IsDeleted = false;
                     newQuotationExchangeRates.Add(newExchangeRate);
                 }
                 await _unitOfWork.QuotationExchangeRates.AddAllAsync(newQuotationExchangeRates).ConfigureAwait(false);
@@ -873,7 +1151,14 @@ namespace crm_api.Services
                         Note12 = quotationNotes.Note12,
                         Note13 = quotationNotes.Note13,
                         Note14 = quotationNotes.Note14,
-                        Note15 = quotationNotes.Note15
+                        Note15 = quotationNotes.Note15,
+                        CreatedBy = userId,
+                        CreatedDate = revisionDate,
+                        UpdatedBy = null,
+                        UpdatedDate = null,
+                        DeletedBy = null,
+                        DeletedDate = null,
+                        IsDeleted = false
                     };
 
                     await _unitOfWork.QuotationNotes.AddAsync(newQuotationNotes).ConfigureAwait(false);
@@ -882,6 +1167,7 @@ namespace crm_api.Services
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                 var dtos = _mapper.Map<QuotationGetDto>(newQuotation);
+                await EnrichQuotationDtoAsync(dtos).ConfigureAwait(false);
                 return ApiResponse<QuotationGetDto>.SuccessResult(dtos, _localizationService.GetLocalizedString("QuotationService.QuotationRevisionCreated"));
             }
             catch (Exception ex)
@@ -980,6 +1266,96 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("QuotationService.GetPriceRuleOfQuotationExceptionMessage", ex.Message
                     , StatusCodes.Status500InternalServerError));
             }
+        }
+
+        private async Task EnrichQuotationDtosAsync(List<QuotationGetDto> dtos)
+        {
+            if (dtos.Count == 0)
+            {
+                return;
+            }
+
+            var currencyLookup = await GetCurrencyLookupAsync().ConfigureAwait(false);
+
+            foreach (var dto in dtos)
+            {
+                ApplyCurrencyPresentation(dto, currencyLookup);
+            }
+        }
+
+        private async Task EnrichQuotationDtoAsync(QuotationGetDto? dto)
+        {
+            if (dto == null)
+            {
+                return;
+            }
+
+            var currencyLookup = await GetCurrencyLookupAsync().ConfigureAwait(false);
+            ApplyCurrencyPresentation(dto, currencyLookup);
+        }
+
+        private async Task<Dictionary<string, KurDto>> GetCurrencyLookupAsync()
+        {
+            try
+            {
+                var exchangeRatesResponse = await _erpService.GetExchangeRateAsync(DateTimeProvider.Now.Date, 1).ConfigureAwait(false);
+                if (!exchangeRatesResponse.Success || exchangeRatesResponse.Data == null)
+                {
+                    return new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                var lookup = new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+                foreach (var rate in exchangeRatesResponse.Data)
+                {
+                    lookup[rate.DovizTipi.ToString(CultureInfo.InvariantCulture)] = rate;
+
+                    if (!string.IsNullOrWhiteSpace(rate.DovizIsmi))
+                    {
+                        lookup[rate.DovizIsmi.Trim()] = rate;
+                    }
+                }
+
+                return lookup;
+            }
+            catch
+            {
+                return new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        private static void ApplyCurrencyPresentation(QuotationGetDto dto, Dictionary<string, KurDto> currencyLookup)
+        {
+            var presentation = ResolveCurrencyPresentation(dto.Currency, currencyLookup);
+            dto.CurrencyCode = presentation.Code;
+            dto.CurrencyDisplay = presentation.Display;
+            dto.GrandTotalDisplay = string.IsNullOrWhiteSpace(presentation.Code)
+                ? dto.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))
+                : $"{dto.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))} {presentation.Code}";
+        }
+
+        private static (string Code, string Display) ResolveCurrencyPresentation(string? rawCurrency, Dictionary<string, KurDto> currencyLookup)
+        {
+            var normalized = (rawCurrency ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return ("TRY", "-");
+            }
+
+            if (currencyLookup.TryGetValue(normalized, out var matchedRate))
+            {
+                var code = matchedRate.DovizIsmi?.Trim();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    return (code, $"{code} ({matchedRate.DovizTipi})");
+                }
+            }
+
+            if (int.TryParse(normalized, out var numericCurrency))
+            {
+                return (normalized, $"Tanimsiz doviz ({numericCurrency})");
+            }
+
+            return (normalized.ToUpperInvariant(), normalized.ToUpperInvariant());
         }
 
         public async Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request)
@@ -1307,15 +1683,17 @@ namespace crm_api.Services
             }
         }
 
-        public async Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync()
+        public async Task<ApiResponse<PagedResponse<ApprovalActionGetDto>>> GetWaitingApprovalsAsync(PagedRequest request)
         {
             try
             {
+                request ??= new PagedRequest();
+
                 // Eğer userId verilmemişse HttpContext'ten al
                 var targetUserIdResponse = await _userService.GetCurrentUserIdAsync().ConfigureAwait(false);
                 if (!targetUserIdResponse.Success)
                 {
-                    return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
+                    return ApiResponse<PagedResponse<ApprovalActionGetDto>>.ErrorResult(
                         targetUserIdResponse.Message,
                         targetUserIdResponse.Message,
                         StatusCodes.Status401Unauthorized);
@@ -1323,6 +1701,9 @@ namespace crm_api.Services
                 var targetUserId = targetUserIdResponse.Data;
 
                 var approvalActions = await _unitOfWork.ApprovalActions.Query()
+                    .AsNoTracking()
+                    .Include(x => x.ApprovalRequest)
+                    .Include(x => x.ApprovedByUser)
                     .Where(x =>
                         x.ApprovalRequest.DocumentType == PricingRuleType.Quotation &&
                         x.ApprovedByUserId == targetUserId &&
@@ -1330,19 +1711,217 @@ namespace crm_api.Services
                         !x.IsDeleted)
                     .ToListAsync().ConfigureAwait(false);
 
-                var dtos = _mapper.Map<List<ApprovalActionGetDto>>(approvalActions);
+                var quotationIds = approvalActions
+                    .Select(x => x.ApprovalRequest.EntityId)
+                    .Distinct()
+                    .ToList();
 
-                return ApiResponse<List<ApprovalActionGetDto>>.SuccessResult(
-                    dtos,
+                var quotations = await _unitOfWork.Quotations.Query()
+                    .AsNoTracking()
+                    .Where(x => quotationIds.Contains(x.Id) && !x.IsDeleted)
+                    .Include(x => x.PotentialCustomer)
+                    .Include(x => x.CreatedByUser)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var currencyLookup = await GetCurrencyLookupAsync().ConfigureAwait(false);
+                var quotationLookup = quotations.ToDictionary(x => x.Id);
+
+                var dtos = approvalActions.Select(action =>
+                {
+                    var dto = _mapper.Map<ApprovalActionGetDto>(action);
+                    dto.EntityId = action.ApprovalRequest.EntityId;
+
+                    if (quotationLookup.TryGetValue(action.ApprovalRequest.EntityId, out var quotation))
+                    {
+                        dto.QuotationOfferNo = quotation.OfferNo;
+                        dto.QuotationRevisionNo = quotation.RevisionNo;
+                        dto.QuotationCustomerName = quotation.PotentialCustomer?.CustomerName;
+                        dto.QuotationCustomerCode = quotation.ErpCustomerCode;
+                        dto.QuotationOwnerName = quotation.CreatedByUser != null
+                            ? $"{quotation.CreatedByUser.FirstName} {quotation.CreatedByUser.LastName}".Trim()
+                            : null;
+                        dto.QuotationGrandTotal = quotation.GrandTotal;
+
+                        var presentation = ResolveCurrencyPresentation(quotation.Currency, currencyLookup);
+                        dto.QuotationGrandTotalDisplay = string.IsNullOrWhiteSpace(presentation.Code)
+                            ? quotation.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))
+                            : $"{quotation.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))} {presentation.Code}";
+                    }
+
+                    return dto;
+                }).ToList();
+
+                var filteredDtos = ApplyWaitingApprovalsRequest(dtos, request);
+                var totalCount = filteredDtos.Count;
+                var pageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
+                var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
+
+                var pagedItems = filteredDtos
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var pagedResponse = new PagedResponse<ApprovalActionGetDto>
+                {
+                    Items = pagedItems,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+
+                return ApiResponse<PagedResponse<ApprovalActionGetDto>>.SuccessResult(
+                    pagedResponse,
                     _localizationService.GetLocalizedString("QuotationService.WaitingApprovalsRetrieved"));
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<ApprovalActionGetDto>>.ErrorResult(
+                return ApiResponse<PagedResponse<ApprovalActionGetDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationService.InternalServerError"),
                     _localizationService.GetLocalizedString("QuotationService.GetWaitingApprovalsExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private static List<ApprovalActionGetDto> ApplyWaitingApprovalsRequest(List<ApprovalActionGetDto> dtos, PagedRequest request)
+        {
+            IEnumerable<ApprovalActionGetDto> query = dtos;
+
+            var search = request.Search?.Trim();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(dto =>
+                    ContainsIgnoreCase(dto.QuotationOwnerName, search) ||
+                    ContainsIgnoreCase(dto.QuotationOfferNo, search) ||
+                    ContainsIgnoreCase(dto.QuotationRevisionNo, search) ||
+                    ContainsIgnoreCase(dto.QuotationCustomerName, search) ||
+                    ContainsIgnoreCase(dto.QuotationCustomerCode, search) ||
+                    ContainsIgnoreCase(dto.ApprovalRequestDescription, search));
+            }
+
+            if (request.Filters != null && request.Filters.Count > 0)
+            {
+                if (string.Equals(request.FilterLogic, "or", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(dto => request.Filters.Any(filter => MatchesWaitingApprovalsFilter(dto, filter)));
+                }
+                else
+                {
+                    query = query.Where(dto => request.Filters.All(filter => MatchesWaitingApprovalsFilter(dto, filter)));
+                }
+            }
+
+            query = ApplyWaitingApprovalsSorting(query, request.SortBy, request.SortDirection);
+            return query.ToList();
+        }
+
+        private static IEnumerable<ApprovalActionGetDto> ApplyWaitingApprovalsSorting(
+            IEnumerable<ApprovalActionGetDto> query,
+            string? sortBy,
+            string? sortDirection)
+        {
+            var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+            var normalizedSortBy = (sortBy ?? nameof(ApprovalActionGetDto.ActionDate)).Trim();
+
+            return normalizedSortBy switch
+            {
+                "QuotationOwnerName" => descending ? query.OrderByDescending(x => x.QuotationOwnerName) : query.OrderBy(x => x.QuotationOwnerName),
+                "QuotationOfferNo" => descending ? query.OrderByDescending(x => x.QuotationOfferNo) : query.OrderBy(x => x.QuotationOfferNo),
+                "QuotationRevisionNo" => descending ? query.OrderByDescending(x => x.QuotationRevisionNo) : query.OrderBy(x => x.QuotationRevisionNo),
+                "QuotationCustomerName" => descending ? query.OrderByDescending(x => x.QuotationCustomerName) : query.OrderBy(x => x.QuotationCustomerName),
+                "QuotationCustomerCode" => descending ? query.OrderByDescending(x => x.QuotationCustomerCode) : query.OrderBy(x => x.QuotationCustomerCode),
+                "QuotationGrandTotal" => descending ? query.OrderByDescending(x => x.QuotationGrandTotal ?? 0m) : query.OrderBy(x => x.QuotationGrandTotal ?? 0m),
+                "StepOrder" => descending ? query.OrderByDescending(x => x.StepOrder) : query.OrderBy(x => x.StepOrder),
+                "Status" => descending ? query.OrderByDescending(x => x.Status) : query.OrderBy(x => x.Status),
+                "ApprovalRequestId" => descending ? query.OrderByDescending(x => x.ApprovalRequestId) : query.OrderBy(x => x.ApprovalRequestId),
+                _ => descending ? query.OrderByDescending(x => x.ActionDate) : query.OrderBy(x => x.ActionDate),
+            };
+        }
+
+        private static bool MatchesWaitingApprovalsFilter(ApprovalActionGetDto dto, Filter filter)
+        {
+            var value = filter.Value?.Trim() ?? string.Empty;
+            return filter.Column switch
+            {
+                "QuotationOwnerName" => MatchString(dto.QuotationOwnerName, filter.Operator, value),
+                "QuotationOfferNo" => MatchString(dto.QuotationOfferNo, filter.Operator, value),
+                "QuotationRevisionNo" => MatchString(dto.QuotationRevisionNo, filter.Operator, value),
+                "QuotationCustomerName" => MatchString(dto.QuotationCustomerName, filter.Operator, value),
+                "QuotationCustomerCode" => MatchString(dto.QuotationCustomerCode, filter.Operator, value),
+                "QuotationGrandTotal" => MatchDecimal(dto.QuotationGrandTotal, filter.Operator, value),
+                "StepOrder" => MatchInt(dto.StepOrder, filter.Operator, value),
+                "Status" => MatchInt(dto.Status, filter.Operator, value),
+                "ActionDate" => MatchDate(dto.ActionDate, filter.Operator, value),
+                _ => true,
+            };
+        }
+
+        private static bool MatchString(string? source, string? op, string value)
+        {
+            var normalizedSource = source?.Trim() ?? string.Empty;
+            var normalizedValue = value.Trim();
+
+            return (op ?? "contains").ToLowerInvariant() switch
+            {
+                "equals" => string.Equals(normalizedSource, normalizedValue, StringComparison.OrdinalIgnoreCase),
+                "startswith" => normalizedSource.StartsWith(normalizedValue, StringComparison.OrdinalIgnoreCase),
+                "endswith" => normalizedSource.EndsWith(normalizedValue, StringComparison.OrdinalIgnoreCase),
+                _ => normalizedSource.Contains(normalizedValue, StringComparison.OrdinalIgnoreCase),
+            };
+        }
+
+        private static bool MatchDecimal(decimal? source, string? op, string value)
+        {
+            if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var numericValue) &&
+                !decimal.TryParse(value, NumberStyles.Any, CultureInfo.GetCultureInfo("tr-TR"), out numericValue))
+            {
+                return true;
+            }
+
+            var current = source ?? 0m;
+            return (op ?? "equals").ToLowerInvariant() switch
+            {
+                "greaterthan" => current > numericValue,
+                "lessthan" => current < numericValue,
+                _ => current == numericValue,
+            };
+        }
+
+        private static bool MatchInt(int source, string? op, string value)
+        {
+            if (!int.TryParse(value, out var numericValue))
+            {
+                return true;
+            }
+
+            return (op ?? "equals").ToLowerInvariant() switch
+            {
+                "greaterthan" => source > numericValue,
+                "lessthan" => source < numericValue,
+                _ => source == numericValue,
+            };
+        }
+
+        private static bool MatchDate(DateTime source, string? op, string value)
+        {
+            if (!DateTime.TryParse(value, out var dateValue))
+            {
+                return true;
+            }
+
+            var sourceDate = source.Date;
+            var targetDate = dateValue.Date;
+            return (op ?? "equals").ToLowerInvariant() switch
+            {
+                "greaterthan" => sourceDate > targetDate,
+                "lessthan" => sourceDate < targetDate,
+                _ => sourceDate == targetDate,
+            };
+        }
+
+        private static bool ContainsIgnoreCase(string? source, string value)
+        {
+            return !string.IsNullOrWhiteSpace(source) && source.Contains(value, StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request)

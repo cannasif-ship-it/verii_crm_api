@@ -16,11 +16,12 @@ namespace crm_api.Interfaces
         Task<ApiResponse<List<QuotationGetDto>>> GetQuotationsByStatusAsync(int status);
         Task<ApiResponse<bool>> QuotationExistsAsync(long id);
         Task<ApiResponse<QuotationGetDto>> CreateQuotationBulkAsync(QuotationBulkCreateDto bulkDto);
+        Task<ApiResponse<QuotationGetDto>> UpdateQuotationBulkAsync(long id, QuotationBulkCreateDto bulkDto);
         Task<ApiResponse<QuotationGetDto>> CreateRevisionOfQuotationAsync(long quotationId);
         Task<ApiResponse<List<PricingRuleLineGetDto>>> GetPriceRuleOfQuotationAsync(string customerCode, long salesmenId, DateTime quotationDate);
         Task<ApiResponse<List<PriceOfProductDto>>> GetPriceOfProductAsync(List<PriceOfProductRequestDto> request);
         Task<ApiResponse<bool>> StartApprovalFlowAsync(StartApprovalFlowDto request);
-        Task<ApiResponse<List<ApprovalActionGetDto>>> GetWaitingApprovalsAsync();
+        Task<ApiResponse<PagedResponse<ApprovalActionGetDto>>> GetWaitingApprovalsAsync(PagedRequest request);
         Task<ApiResponse<bool>> ApproveAsync(ApproveActionDto request);
         Task<ApiResponse<bool>> RejectAsync(RejectActionDto request);
         Task<ApiResponse<List<ApprovalScopeUserDto>>> GetQuotationRelatedUsersAsync(long userId);

@@ -75,6 +75,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPut("bulk-quotation/{id}")]
+        public async Task<IActionResult> UpdateQuotationBulk(long id, [FromBody] QuotationBulkCreateDto bulkDto)
+        {
+            var result = await _quotationService.UpdateQuotationBulkAsync(id, bulkDto);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpPost("revision-of-quotation")]
         public async Task<IActionResult> CreateRevisionOfQuotation([FromBody] long quotationId)
         {
@@ -126,9 +133,9 @@ namespace crm_api.Controllers
         /// </summary>
         /// <returns>ApiResponse</returns>
         [HttpGet("waiting-approvals")]
-        public async Task<IActionResult> GetWaitingApprovals()
+        public async Task<IActionResult> GetWaitingApprovals([FromQuery] PagedRequest request)
         {
-            var result = await _quotationService.GetWaitingApprovalsAsync();
+            var result = await _quotationService.GetWaitingApprovalsAsync(request);
             return StatusCode(result.StatusCode, result);
         }
 
