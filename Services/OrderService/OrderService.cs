@@ -14,6 +14,8 @@ using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Configuration;
 using crm_api.Models.Notification;
 using crm_api.DTOs.NotificationDto;
+using crm_api.DTOs.ErpDto;
+using System.Globalization;
 
 
 namespace crm_api.Services
@@ -107,6 +109,7 @@ namespace crm_api.Services
                     .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<OrderGetDto>(x)).ToList();
+                await EnrichOrderDtosAsync(dtos).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<OrderGetDto>
                 {
@@ -151,6 +154,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(q => q.Id == id && !q.IsDeleted).ConfigureAwait(false);
 
                 var orderDto = _mapper.Map<OrderGetDto>(orderWithNav ?? order);
+                await EnrichOrderDtoAsync(orderDto).ConfigureAwait(false);
                 return ApiResponse<OrderGetDto>.SuccessResult(orderDto, _localizationService.GetLocalizedString("OrderService.OrderRetrieved"));
             }
             catch (Exception ex)
@@ -294,6 +298,7 @@ namespace crm_api.Services
             {
                 var orders = await _unitOfWork.Orders.FindAsync(q => q.PotentialCustomerId == potentialCustomerId).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
+                await EnrichOrderDtosAsync(orderDtos).ConfigureAwait(false);
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByPotentialCustomerRetrieved"));
             }
             catch (Exception ex)
@@ -310,6 +315,7 @@ namespace crm_api.Services
             {
                 var orders = await _unitOfWork.Orders.FindAsync(q => q.RepresentativeId == representativeId).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
+                await EnrichOrderDtosAsync(orderDtos).ConfigureAwait(false);
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByRepresentativeRetrieved"));
             }
             catch (Exception ex)
@@ -326,6 +332,7 @@ namespace crm_api.Services
             {
                 var orders = await _unitOfWork.Orders.FindAsync(q => (int?)q.Status == status).ConfigureAwait(false);
                 var orderDtos = _mapper.Map<List<OrderGetDto>>(orders.ToList());
+                await EnrichOrderDtosAsync(orderDtos).ConfigureAwait(false);
                 return ApiResponse<List<OrderGetDto>>.SuccessResult(orderDtos, _localizationService.GetLocalizedString("OrderService.OrdersByStatusRetrieved"));
             }
             catch (Exception ex)
@@ -472,6 +479,7 @@ namespace crm_api.Services
                     .FirstOrDefaultAsync(q => q.Id == order.Id).ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderGetDto>(orderWithNav);
+                await EnrichOrderDtoAsync(dto).ConfigureAwait(false);
 
                 return ApiResponse<OrderGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OrderService.OrderCreated"));
             }
@@ -504,10 +512,32 @@ namespace crm_api.Services
                 var order = await _unitOfWork.Orders.GetByIdAsync(orderId).ConfigureAwait(false);
                 if (order == null)
                 {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<OrderGetDto>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.OrderNotFound"),
                         _localizationService.GetLocalizedString("OrderService.OrderNotFound"),
                         StatusCodes.Status404NotFound);
+                }
+
+                var hasWaitingApprovalRequest = await _unitOfWork.ApprovalRequests.Query()
+                    .AnyAsync(x =>
+                        !x.IsDeleted &&
+                        x.EntityId == orderId &&
+                        x.DocumentType == PricingRuleType.Order &&
+                        x.Status == ApprovalStatus.Waiting)
+                    .ConfigureAwait(false);
+
+                if (RevisionGuardHelper.TryGetRevisionBlockMessage(
+                    order.Status,
+                    hasWaitingApprovalRequest,
+                    "Sipariş",
+                    out var revisionBlockMessage))
+                {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
+                    return ApiResponse<OrderGetDto>.ErrorResult(
+                        revisionBlockMessage!,
+                        revisionBlockMessage!,
+                        StatusCodes.Status400BadRequest);
                 }
 
                 var orderLines = await _unitOfWork.OrderLines.Query()
@@ -522,41 +552,61 @@ namespace crm_api.Services
                 var documentSerialTypeWithRevision = await _documentSerialTypeService.GenerateDocumentSerialAsync(order.DocumentSerialTypeId, false, order.RevisionNo).ConfigureAwait(false);
                 if (!documentSerialTypeWithRevision.Success)
                 {
+                    await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                     return ApiResponse<OrderGetDto>.ErrorResult(
                         _localizationService.GetLocalizedString("OrderService.DocumentSerialTypeGenerationError"),
                         documentSerialTypeWithRevision.Message,
                         StatusCodes.Status500InternalServerError);
                 }
 
+                var revisionDate = DateTimeProvider.Now;
+
                 var newOrder = new Order();
                 newOrder.OfferType = order.OfferType;
                 newOrder.RevisionId = order.Id;
-                newOrder.OfferDate = order.OfferDate;
                 newOrder.OfferNo = order.OfferNo;
                 newOrder.RevisionNo = documentSerialTypeWithRevision.Data;
-                newOrder.OfferDate = order.OfferDate;
+                newOrder.OfferDate = revisionDate;
                 newOrder.Currency = order.Currency;
                 newOrder.GeneralDiscountRate = order.GeneralDiscountRate;
                 newOrder.GeneralDiscountAmount = order.GeneralDiscountAmount;
                 newOrder.Total = order.Total;
                 newOrder.GrandTotal = order.GrandTotal;
+                newOrder.Year = revisionDate.Year.ToString();
                 newOrder.CreatedBy = userId;
-                newOrder.CreatedDate = DateTimeProvider.Now;
+                newOrder.CreatedDate = revisionDate;
                 newOrder.PotentialCustomerId = order.PotentialCustomerId;
                 newOrder.ErpCustomerCode = order.ErpCustomerCode;
                 newOrder.ContactId = order.ContactId;
-                newOrder.ValidUntil = order.ValidUntil;
+                newOrder.ValidUntil = revisionDate.AddDays(14);
                 newOrder.DeliveryDate = order.DeliveryDate;
                 newOrder.ShippingAddressId = order.ShippingAddressId;
                 newOrder.RepresentativeId = order.RepresentativeId;
                 newOrder.ActivityId = order.ActivityId;
                 newOrder.Description = order.Description;
                 newOrder.PaymentTypeId = order.PaymentTypeId;
+                newOrder.DocumentSerialTypeId = order.DocumentSerialTypeId;
                 newOrder.HasCustomerSpecificDiscount = order.HasCustomerSpecificDiscount;
                 newOrder.QuotationId = order.QuotationId;
                 newOrder.SalesTypeDefinitionId = order.SalesTypeDefinitionId;
                 newOrder.ErpProjectCode = order.ErpProjectCode;
                 newOrder.Status = (int)ApprovalStatus.HavenotStarted;
+                newOrder.IsCompleted = false;
+                newOrder.CompletionDate = null;
+                newOrder.IsPendingApproval = false;
+                newOrder.ApprovalStatus = null;
+                newOrder.RejectedReason = null;
+                newOrder.ApprovedByUserId = null;
+                newOrder.ApprovalDate = null;
+                newOrder.IsERPIntegrated = false;
+                newOrder.ERPIntegrationNumber = null;
+                newOrder.LastSyncDate = null;
+                newOrder.CountTriedBy = 0;
+                newOrder.UpdatedBy = null;
+                newOrder.UpdatedDate = null;
+                newOrder.DeletedBy = null;
+                newOrder.DeletedDate = null;
+                newOrder.IsDeleted = false;
 
                 await _unitOfWork.Orders.AddAsync(newOrder).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
@@ -589,6 +639,13 @@ namespace crm_api.Services
                     newLine.IsMainRelatedProduct = line.IsMainRelatedProduct;
                     newLine.ErpProjectCode = line.ErpProjectCode;
                     newLine.ApprovalStatus = ApprovalStatus.HavenotStarted;
+                    newLine.CreatedBy = userId;
+                    newLine.CreatedDate = revisionDate;
+                    newLine.UpdatedBy = null;
+                    newLine.UpdatedDate = null;
+                    newLine.DeletedBy = null;
+                    newLine.DeletedDate = null;
+                    newLine.IsDeleted = false;
                     newOrderLines.Add(newLine);
                 }
                 await _unitOfWork.OrderLines.AddAllAsync(newOrderLines).ConfigureAwait(false);
@@ -603,8 +660,13 @@ namespace crm_api.Services
                     newExchangeRate.ExchangeRate = exchangeRate.ExchangeRate;
                     newExchangeRate.ExchangeRateDate = exchangeRate.ExchangeRateDate;
                     newExchangeRate.IsOfficial = exchangeRate.IsOfficial;
-                    newExchangeRate.CreatedDate = DateTimeProvider.Now;
+                    newExchangeRate.CreatedDate = revisionDate;
                     newExchangeRate.CreatedBy = userId;
+                    newExchangeRate.UpdatedBy = null;
+                    newExchangeRate.UpdatedDate = null;
+                    newExchangeRate.DeletedBy = null;
+                    newExchangeRate.DeletedDate = null;
+                    newExchangeRate.IsDeleted = false;
                     newOrderExchangeRates.Add(newExchangeRate);
                 }
                 await _unitOfWork.OrderExchangeRates.AddAllAsync(newOrderExchangeRates).ConfigureAwait(false);
@@ -628,7 +690,14 @@ namespace crm_api.Services
                         Note12 = orderNotes.Note12,
                         Note13 = orderNotes.Note13,
                         Note14 = orderNotes.Note14,
-                        Note15 = orderNotes.Note15
+                        Note15 = orderNotes.Note15,
+                        CreatedBy = userId,
+                        CreatedDate = revisionDate,
+                        UpdatedBy = null,
+                        UpdatedDate = null,
+                        DeletedBy = null,
+                        DeletedDate = null,
+                        IsDeleted = false
                     };
 
                     await _unitOfWork.OrderNotes.AddAsync(newOrderNotes).ConfigureAwait(false);
@@ -639,6 +708,7 @@ namespace crm_api.Services
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
                 var dto = _mapper.Map<OrderGetDto>(newOrder);
+                await EnrichOrderDtoAsync(dto).ConfigureAwait(false);
                 return ApiResponse<OrderGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("OrderService.RevisionCreated"));
             }
             catch (Exception ex)
@@ -1737,6 +1807,7 @@ namespace crm_api.Services
                     .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<OrderGetDto>(x)).ToList();
+                await EnrichOrderDtosAsync(dtos).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<OrderGetDto>
                 {
@@ -1994,6 +2065,96 @@ namespace crm_api.Services
                     _localizationService.GetLocalizedString("OrderService.ApprovalFlowReportExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private async Task EnrichOrderDtosAsync(List<OrderGetDto> dtos)
+        {
+            if (dtos.Count == 0)
+            {
+                return;
+            }
+
+            var currencyLookup = await GetCurrencyLookupAsync().ConfigureAwait(false);
+
+            foreach (var dto in dtos)
+            {
+                ApplyCurrencyPresentation(dto, currencyLookup);
+            }
+        }
+
+        private async Task EnrichOrderDtoAsync(OrderGetDto? dto)
+        {
+            if (dto == null)
+            {
+                return;
+            }
+
+            var currencyLookup = await GetCurrencyLookupAsync().ConfigureAwait(false);
+            ApplyCurrencyPresentation(dto, currencyLookup);
+        }
+
+        private async Task<Dictionary<string, KurDto>> GetCurrencyLookupAsync()
+        {
+            try
+            {
+                var exchangeRatesResponse = await _erpService.GetExchangeRateAsync(DateTimeProvider.Now.Date, 1).ConfigureAwait(false);
+                if (!exchangeRatesResponse.Success || exchangeRatesResponse.Data == null)
+                {
+                    return new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                var lookup = new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+                foreach (var rate in exchangeRatesResponse.Data)
+                {
+                    lookup[rate.DovizTipi.ToString(CultureInfo.InvariantCulture)] = rate;
+
+                    if (!string.IsNullOrWhiteSpace(rate.DovizIsmi))
+                    {
+                        lookup[rate.DovizIsmi.Trim()] = rate;
+                    }
+                }
+
+                return lookup;
+            }
+            catch
+            {
+                return new Dictionary<string, KurDto>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        private static void ApplyCurrencyPresentation(OrderGetDto dto, Dictionary<string, KurDto> currencyLookup)
+        {
+            var presentation = ResolveCurrencyPresentation(dto.Currency, currencyLookup);
+            dto.CurrencyCode = presentation.Code;
+            dto.CurrencyDisplay = presentation.Display;
+            dto.GrandTotalDisplay = string.IsNullOrWhiteSpace(presentation.Code)
+                ? dto.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))
+                : $"{dto.GrandTotal.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))} {presentation.Code}";
+        }
+
+        private static (string Code, string Display) ResolveCurrencyPresentation(string? rawCurrency, Dictionary<string, KurDto> currencyLookup)
+        {
+            var normalized = (rawCurrency ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return ("TRY", "-");
+            }
+
+            if (currencyLookup.TryGetValue(normalized, out var matchedRate))
+            {
+                var code = matchedRate.DovizIsmi?.Trim();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    return (code, $"{code} ({matchedRate.DovizTipi})");
+                }
+            }
+
+            if (int.TryParse(normalized, out var numericCurrency))
+            {
+                return (normalized, $"Tanimsiz doviz ({numericCurrency})");
+            }
+
+            return (normalized.ToUpperInvariant(), normalized.ToUpperInvariant());
         }
 
         private static string GetApprovalStatusName(ApprovalStatus? status)
