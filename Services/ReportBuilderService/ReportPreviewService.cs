@@ -103,13 +103,13 @@ namespace crm_api.Services.ReportBuilderService
 
             if (chartType == "table")
             {
-                var hasAggregatedValues = config.Values?.Any(v =>
-                {
-                    var aggregation = (v.Aggregation ?? "none").Trim().ToLowerInvariant();
-                    return aggregation != "none";
-                }) ?? false;
+                var shouldAggregateTable = (config.Values?.Any(v => !string.IsNullOrWhiteSpace(v.Field)) ?? false)
+                    && (
+                        (config.Axis != null && !string.IsNullOrWhiteSpace(config.Axis.Field))
+                        || (config.Legend != null && !string.IsNullOrWhiteSpace(config.Legend.Field))
+                    );
 
-                if (hasAggregatedValues)
+                if (shouldAggregateTable)
                 {
                     var selectCols = new List<string>();
                     var groupCols = new List<string>();
@@ -131,21 +131,17 @@ namespace crm_api.Services.ReportBuilderService
                         foreach (var value in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field)))
                         {
                             var fieldName = value.Field!.Trim();
-                            var aggregation = (value.Aggregation ?? "none").Trim().ToLowerInvariant();
+                            var aggregation = (value.Aggregation ?? "sum").Trim().ToLowerInvariant();
+                            if (aggregation == "none")
+                                aggregation = "sum";
 
                             if (schemaDict.ContainsKey(fieldName))
                             {
-                                if (aggregation == "none")
-                                    selectCols.Add($"[{Escape(fieldName)}]");
-                                else
-                                    selectCols.Add($"{AggSql(aggregation)}([{Escape(fieldName)}]) AS [{Escape(fieldName)}]");
+                                selectCols.Add($"{AggSql(aggregation)}([{Escape(fieldName)}]) AS [{Escape(fieldName)}]");
                             }
                             else if (calculatedFieldMap.ContainsKey(fieldName))
                             {
-                                if (aggregation == "none")
-                                    selectCols.Add($"{calculatedFieldMap[fieldName]} AS [{Escape(fieldName)}]");
-                                else
-                                    selectCols.Add($"{AggSql(aggregation)}({calculatedFieldMap[fieldName]}) AS [{Escape(fieldName)}]");
+                                selectCols.Add($"{AggSql(aggregation)}({calculatedFieldMap[fieldName]}) AS [{Escape(fieldName)}]");
                             }
                         }
                     }

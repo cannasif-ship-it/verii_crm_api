@@ -120,7 +120,7 @@ RETURN
 );');
 
 DECLARE @ReportName NVARCHAR(200) = N'Günlük Kullanıcı Kart Performans Raporu';
-DECLARE @ReportDescription NVARCHAR(500) = N'Başlangıç ve bitiş tarihine göre tüm kullanıcıların günlük trendini ve seçilen aralık için kümüle kart, kişi ve cari performansını gösterir.';
+DECLARE @ReportDescription NVARCHAR(500) = N'Başlangıç ve bitiş tarihine göre plasiyer bazlı günlük performans trendlerini ve seçilen aralık için kümüle özeti gösterir.';
 DECLARE @ConfigJson NVARCHAR(MAX) = N'{
   "chartType": "line",
   "axis": { "field": "tarih", "dateGrouping": "day" },
@@ -167,8 +167,8 @@ DECLARE @ConfigJson NVARCHAR(MAX) = N'{
       "values": [{ "field": "okutulan_kart_sayisi", "aggregation": "sum" }]
     },
     {
-      "id": "sales-rep-contact-creation",
-      "title": "Plasiyer Bazlı Kişi Oluşturma",
+      "id": "daily-contact-creation-trend",
+      "title": "Günlük Kişi Oluşturma Trendi",
       "size": "half",
       "height": "md",
       "appearance": {
@@ -176,33 +176,15 @@ DECLARE @ConfigJson NVARCHAR(MAX) = N'{
         "tone": "soft",
         "accentColor": "#f59e0b",
         "backgroundStyle": "card",
-        "sectionLabel": "Kişi Performansı",
-        "sectionDescription": "Seçilen tarih aralığında her plasiyerin oluşturduğu kişi sayısı."
+        "sectionLabel": "Günlük Kişi Performansı",
+        "sectionDescription": "Seçilen tarih aralığında plasiyer bazlı günlük kişi oluşturma trendi."
       },
-      "chartType": "bar",
-      "axis": { "field": "plasiyer" },
-      "sorting": { "by": "value", "direction": "desc", "valueField": "olusturulan_kisi_sayisi" },
+      "chartType": "line",
+      "axis": { "field": "tarih", "dateGrouping": "day" },
+      "legend": { "field": "plasiyer" },
+      "sorting": { "by": "axis", "direction": "desc" },
       "filters": [],
       "values": [{ "field": "olusturulan_kisi_sayisi", "aggregation": "sum" }]
-    },
-    {
-      "id": "sales-rep-card-scan-ranking",
-      "title": "Plasiyer Bazlı Kart Okutma",
-      "size": "full",
-      "height": "md",
-      "appearance": {
-        "themePreset": "operations",
-        "tone": "neutral",
-        "accentColor": "#2563eb",
-        "backgroundStyle": "card",
-        "sectionLabel": "Plasiyer Sıralaması",
-        "sectionDescription": "Kart okutma adetlerine göre plasiyer performans sıralaması."
-      },
-      "chartType": "stackedBar",
-      "axis": { "field": "plasiyer" },
-      "sorting": { "by": "value", "direction": "desc", "valueField": "okutulan_kart_sayisi" },
-      "filters": [],
-      "values": [{ "field": "okutulan_kart_sayisi", "aggregation": "sum" }]
     },
     {
       "id": "daily-card-performance-table",
