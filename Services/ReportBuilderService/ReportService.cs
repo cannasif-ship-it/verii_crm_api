@@ -51,13 +51,9 @@ namespace crm_api.Services.ReportBuilderService
                 if (entity == null)
                     return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
 
-                var access = await GetAccessDecisionAsync(entity, userId).ConfigureAwait(false);
-                if (!access.CanRead)
-                    return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportAccessDenied"), null, 403);
-
                 var dto = _mapper.Map<ReportDetailDto>(entity);
-                dto.CanManage = access.CanManage;
-                dto.AccessLevel = access.AccessLevel;
+                dto.CanManage = true;
+                dto.AccessLevel = entity.CreatedBy == userId ? "owner" : "organization";
                 dto.AssignedUserIds = await GetAssignedUserIdsAsync(entity.Id).ConfigureAwait(false);
                 return ApiResponse<ReportDetailDto>.SuccessResult(dto, _localizationService.GetLocalizedString("ReportService.ReportRetrieved"));
             }
@@ -102,13 +98,10 @@ namespace crm_api.Services.ReportBuilderService
                         .ToDictionaryAsync(x => x.ReportDefinitionId, x => x.Count)
                         .ConfigureAwait(false);
 
-                var accessible = visible
-                    .Select(r => new { Entity = r, Access = GetAccessDecision(r, assignedReportIds.Contains(r.Id), userId) })
-                    .Where(item => item.Access.CanRead)
-                    .Where(item =>
-                        !string.Equals(scope, "assigned", StringComparison.OrdinalIgnoreCase) ||
-                        item.Access.AccessLevel == "shared")
-                    .ToList();
+                var isAssignedScope = string.Equals(scope, "assigned", StringComparison.OrdinalIgnoreCase);
+                var accessible = isAssignedScope
+                    ? visible.Where(item => assignedReportIds.Contains(item.Id)).ToList()
+                    : visible;
 
                 var total = accessible.Count;
                 var list = accessible
@@ -118,10 +111,10 @@ namespace crm_api.Services.ReportBuilderService
 
                 var items = list.Select(item =>
                 {
-                    var dto = _mapper.Map<ReportListItemDto>(item.Entity);
-                    dto.CanManage = item.Access.CanManage;
-                    dto.AccessLevel = item.Access.AccessLevel;
-                    dto.AssignedUserCount = assignmentCountByReportId.TryGetValue(item.Entity.Id, out var count) ? count : 0;
+                    var dto = _mapper.Map<ReportListItemDto>(item);
+                    dto.CanManage = true;
+                    dto.AccessLevel = item.CreatedBy == userId ? "owner" : assignedReportIds.Contains(item.Id) ? "shared" : "organization";
+                    dto.AssignedUserCount = assignmentCountByReportId.TryGetValue(item.Id, out var count) ? count : 0;
                     return dto;
                 }).ToList();
                 var paged = new PagedResponse<ReportListItemDto> { Items = items, TotalCount = total, PageNumber = pageNumber, PageSize = pageSize };
@@ -176,10 +169,6 @@ namespace crm_api.Services.ReportBuilderService
             if (entity == null)
                 return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
 
-            var access = await GetAccessDecisionAsync(entity, userId).ConfigureAwait(false);
-            if (!access.CanManage)
-                return ApiResponse<ReportDetailDto>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportManageDenied"), null, 403);
-
             try
             {
                 entity.Name = dto.Name;
@@ -195,8 +184,8 @@ namespace crm_api.Services.ReportBuilderService
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 var updated = await _unitOfWork.ReportDefinitions.Query().AsNoTracking().FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
                 var detail = _mapper.Map<ReportDetailDto>(updated!);
-                detail.CanManage = access.CanManage;
-                detail.AccessLevel = access.AccessLevel;
+                detail.CanManage = true;
+                detail.AccessLevel = entity.CreatedBy == userId ? "owner" : "organization";
                 detail.AssignedUserIds = await GetAssignedUserIdsAsync(entity.Id).ConfigureAwait(false);
                 return ApiResponse<ReportDetailDto>.SuccessResult(detail, _localizationService.GetLocalizedString("ReportService.ReportUpdated"));
             }
@@ -214,10 +203,6 @@ namespace crm_api.Services.ReportBuilderService
             if (entity == null)
                 return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportNotFound"), null, 404);
 
-            var access = await GetAccessDecisionAsync(entity, userId).ConfigureAwait(false);
-            if (!access.CanManage)
-                return ApiResponse<bool>.ErrorResult(_localizationService.GetLocalizedString("ReportService.ReportManageDenied"), null, 403);
-
             entity.IsDeleted = true;
             entity.DeletedDate = DateTimeProvider.Now;
             entity.DeletedBy = userId;
@@ -225,32 +210,6 @@ namespace crm_api.Services.ReportBuilderService
             await repo.UpdateAsync(entity).ConfigureAwait(false);
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return ApiResponse<bool>.SuccessResult(true, _localizationService.GetLocalizedString("ReportService.ReportDeleted"));
-        }
-
-        private async Task<ReportAccessDecision> GetAccessDecisionAsync(ReportDefinition entity, long userId)
-        {
-            var isAssigned = await _unitOfWork.ReportAssignments.Query()
-                .AsNoTracking()
-                .AnyAsync(x => x.ReportDefinitionId == entity.Id && x.UserId == userId && !x.IsDeleted)
-                .ConfigureAwait(false);
-
-            return GetAccessDecision(entity, isAssigned, userId);
-        }
-
-        private ReportAccessDecision GetAccessDecision(ReportDefinition entity, bool isAssigned, long userId)
-        {
-            if (entity.CreatedBy == userId)
-                return ReportAccessDecision.Owner;
-
-            var access = ExtractGovernanceMetadata(entity.ConfigJson);
-
-            if (access.IsOrganizationWide)
-                return ReportAccessDecision.Organization;
-
-            if (isAssigned)
-                return ReportAccessDecision.Shared;
-
-            return ReportAccessDecision.None;
         }
 
         private async Task<List<long>> GetAssignedUserIdsAsync(long reportDefinitionId)
@@ -369,14 +328,6 @@ namespace crm_api.Services.ReportBuilderService
         private sealed record ReportGovernanceMetadata(bool IsOrganizationWide, IReadOnlyCollection<string> SharedWithEmails)
         {
             public static ReportGovernanceMetadata Empty { get; } = new(false, Array.Empty<string>());
-        }
-
-        private sealed record ReportAccessDecision(bool CanRead, bool CanManage, string AccessLevel)
-        {
-            public static ReportAccessDecision None { get; } = new(false, false, "none");
-            public static ReportAccessDecision Owner { get; } = new(true, true, "owner");
-            public static ReportAccessDecision Shared { get; } = new(true, true, "shared");
-            public static ReportAccessDecision Organization { get; } = new(true, true, "organization");
         }
 
         private async Task<ApiResponse<object>> ValidateForSaveAsync(string connectionKey, string dataSourceType, string dataSourceName, string configJson)
