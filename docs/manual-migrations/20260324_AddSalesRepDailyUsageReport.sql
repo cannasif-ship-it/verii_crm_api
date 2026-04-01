@@ -132,9 +132,7 @@ DECLARE @ConfigJson NVARCHAR(MAX) = N'{
   "filters": [],
   "datasetParameters": [
     { "name": "StartDate", "source": "literal", "value": "", "allowViewerOverride": true, "viewerLabel": "Başlangıç Tarihi" },
-    { "name": "EndDate", "source": "literal", "value": "", "allowViewerOverride": true, "viewerLabel": "Bitiş Tarihi" },
-    { "name": "UserId", "source": "literal", "value": "", "allowViewerOverride": false, "viewerLabel": "Kullanıcı Id" },
-    { "name": "UserEmail", "source": "literal", "value": "", "allowViewerOverride": false, "viewerLabel": "Kullanıcı E-Posta" }
+    { "name": "EndDate", "source": "literal", "value": "", "allowViewerOverride": true, "viewerLabel": "Bitiş Tarihi" }
   ],
   "lifecycle": { "status": "published", "version": 1 },
   "governance": {
