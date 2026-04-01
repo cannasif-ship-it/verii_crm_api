@@ -103,24 +103,78 @@ namespace crm_api.Services.ReportBuilderService
 
             if (chartType == "table")
             {
-                var cols = new List<string>();
-                if (config.Axis != null && !string.IsNullOrWhiteSpace(config.Axis.Field) && schemaDict.ContainsKey(config.Axis.Field.Trim()))
-                    cols.Add($"[{Escape(config.Axis.Field!.Trim())}]");
-                if (config.Values != null)
-                    foreach (var v in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field) && schemaDict.ContainsKey(v.Field!.Trim())))
-                        cols.Add($"[{Escape(v.Field!.Trim())}]");
-                if (config.Values != null)
-                    foreach (var v in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field) && calculatedFieldMap.ContainsKey(v.Field!.Trim()) && !cols.Any(c => c.Contains($"[{Escape(v.Field!.Trim())}]"))))
-                        cols.Add($"{calculatedFieldMap[v.Field!.Trim()]} AS [{Escape(v.Field.Trim())}]");
-                if (config.Legend != null && !string.IsNullOrWhiteSpace(config.Legend.Field) && schemaDict.ContainsKey(config.Legend.Field.Trim()))
-                    cols.Add($"[{Escape(config.Legend.Field!.Trim())}]");
-                if (cols.Count == 0 && config.Values != null && config.Values.Count > 0)
-                    foreach (var v in config.Values.Take(1))
-                        if (schemaDict.ContainsKey(v.Field!.Trim()))
-                            cols.Add($"[{Escape(v.Field.Trim())}]");
-                        else if (calculatedFieldMap.ContainsKey(v.Field!.Trim()))
+                var hasAggregatedValues = config.Values?.Any(v =>
+                {
+                    var aggregation = (v.Aggregation ?? "none").Trim().ToLowerInvariant();
+                    return aggregation != "none";
+                }) ?? false;
+
+                if (hasAggregatedValues)
+                {
+                    var selectCols = new List<string>();
+                    var groupCols = new List<string>();
+
+                    if (config.Axis != null && !string.IsNullOrWhiteSpace(config.Axis.Field) && schemaDict.ContainsKey(config.Axis.Field.Trim()))
+                    {
+                        selectCols.Add($"[{Escape(config.Axis.Field!.Trim())}]");
+                        groupCols.Add($"[{Escape(config.Axis.Field.Trim())}]");
+                    }
+
+                    if (config.Legend != null && !string.IsNullOrWhiteSpace(config.Legend.Field) && schemaDict.ContainsKey(config.Legend.Field.Trim()))
+                    {
+                        selectCols.Add($"[{Escape(config.Legend.Field!.Trim())}]");
+                        groupCols.Add($"[{Escape(config.Legend.Field.Trim())}]");
+                    }
+
+                    if (config.Values != null)
+                    {
+                        foreach (var value in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field)))
+                        {
+                            var fieldName = value.Field!.Trim();
+                            var aggregation = (value.Aggregation ?? "none").Trim().ToLowerInvariant();
+
+                            if (schemaDict.ContainsKey(fieldName))
+                            {
+                                if (aggregation == "none")
+                                    selectCols.Add($"[{Escape(fieldName)}]");
+                                else
+                                    selectCols.Add($"{AggSql(aggregation)}([{Escape(fieldName)}]) AS [{Escape(fieldName)}]");
+                            }
+                            else if (calculatedFieldMap.ContainsKey(fieldName))
+                            {
+                                if (aggregation == "none")
+                                    selectCols.Add($"{calculatedFieldMap[fieldName]} AS [{Escape(fieldName)}]");
+                                else
+                                    selectCols.Add($"{AggSql(aggregation)}({calculatedFieldMap[fieldName]}) AS [{Escape(fieldName)}]");
+                            }
+                        }
+                    }
+
+                    selectClause = selectCols.Count > 0 ? string.Join(", ", selectCols) : "*";
+                    if (groupCols.Count > 0)
+                        groupByClause = " GROUP BY " + string.Join(", ", groupCols);
+                }
+                else
+                {
+                    var cols = new List<string>();
+                    if (config.Axis != null && !string.IsNullOrWhiteSpace(config.Axis.Field) && schemaDict.ContainsKey(config.Axis.Field.Trim()))
+                        cols.Add($"[{Escape(config.Axis.Field!.Trim())}]");
+                    if (config.Values != null)
+                        foreach (var v in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field) && schemaDict.ContainsKey(v.Field!.Trim())))
+                            cols.Add($"[{Escape(v.Field!.Trim())}]");
+                    if (config.Values != null)
+                        foreach (var v in config.Values.Where(v => !string.IsNullOrWhiteSpace(v.Field) && calculatedFieldMap.ContainsKey(v.Field!.Trim()) && !cols.Any(c => c.Contains($"[{Escape(v.Field!.Trim())}]"))))
                             cols.Add($"{calculatedFieldMap[v.Field!.Trim()]} AS [{Escape(v.Field.Trim())}]");
-                selectClause = cols.Count > 0 ? string.Join(", ", cols) : "*";
+                    if (config.Legend != null && !string.IsNullOrWhiteSpace(config.Legend.Field) && schemaDict.ContainsKey(config.Legend.Field.Trim()))
+                        cols.Add($"[{Escape(config.Legend.Field!.Trim())}]");
+                    if (cols.Count == 0 && config.Values != null && config.Values.Count > 0)
+                        foreach (var v in config.Values.Take(1))
+                            if (schemaDict.ContainsKey(v.Field!.Trim()))
+                                cols.Add($"[{Escape(v.Field.Trim())}]");
+                            else if (calculatedFieldMap.ContainsKey(v.Field!.Trim()))
+                                cols.Add($"{calculatedFieldMap[v.Field!.Trim()]} AS [{Escape(v.Field.Trim())}]");
+                    selectClause = cols.Count > 0 ? string.Join(", ", cols) : "*";
+                }
             }
             else if (chartType == "kpi")
             {

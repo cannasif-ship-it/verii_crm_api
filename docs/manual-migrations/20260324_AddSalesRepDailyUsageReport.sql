@@ -120,7 +120,7 @@ RETURN
 );');
 
 DECLARE @ReportName NVARCHAR(200) = N'Günlük Kullanıcı Kart Performans Raporu';
-DECLARE @ReportDescription NVARCHAR(500) = N'Başlangıç ve bitiş tarihine göre tüm kullanıcıların günlük kart okutma, kişi oluşturma ve cari oluşturma performansını gösterir.';
+DECLARE @ReportDescription NVARCHAR(500) = N'Başlangıç ve bitiş tarihine göre tüm kullanıcıların günlük trendini ve seçilen aralık için kümüle kart, kişi ve cari performansını gösterir.';
 DECLARE @ConfigJson NVARCHAR(MAX) = N'{
   "chartType": "line",
   "axis": { "field": "tarih", "dateGrouping": "day" },
@@ -206,25 +206,24 @@ DECLARE @ConfigJson NVARCHAR(MAX) = N'{
     },
     {
       "id": "daily-card-performance-table",
-      "title": "Günlük Detay Tablosu",
+      "title": "Plasiyer Bazlı Kümüle Özet",
       "size": "full",
       "height": "lg",
       "appearance": {
         "themePreset": "operations",
         "tableDensity": "comfortable",
         "accentColor": "#0f766e",
-        "sectionLabel": "Detay Liste",
-        "sectionDescription": "Tarih, plasiyer, okutulan kart, oluşturulan kişi ve cari detaylarını birlikte gösterir."
+        "sectionLabel": "Kümüle Liste",
+        "sectionDescription": "Seçilen tarih aralığında her plasiyerin toplam okutulan kart, toplam kişi ve toplam cari adetlerini gösterir."
       },
       "chartType": "table",
-      "axis": { "field": "tarih", "dateGrouping": "day" },
-      "legend": { "field": "plasiyer" },
-      "sorting": { "by": "axis", "direction": "desc" },
+      "axis": { "field": "plasiyer" },
+      "sorting": { "by": "value", "direction": "desc", "valueField": "okutulan_kart_sayisi" },
       "filters": [],
       "values": [
-        { "field": "okutulan_kart_sayisi", "aggregation": "none" },
-        { "field": "olusturulan_kisi_sayisi", "aggregation": "none" },
-        { "field": "olusturulan_cari_sayisi", "aggregation": "none" }
+        { "field": "okutulan_kart_sayisi", "aggregation": "sum" },
+        { "field": "olusturulan_kisi_sayisi", "aggregation": "sum" },
+        { "field": "olusturulan_cari_sayisi", "aggregation": "sum" }
       ]
     }
   ],
