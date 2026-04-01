@@ -37,15 +37,15 @@ if (args.Contains("--verify", StringComparer.OrdinalIgnoreCase))
 {
     const string verifySql = """
 SELECT TOP (5)
-    report_date,
+    tarih,
+    plasiyer,
     user_id,
-    user_name,
     user_email,
-    scanned_card_count,
-    created_contact_count,
-    created_company_count
+    okutulan_kart_sayisi,
+    olusturulan_kisi_sayisi,
+    olusturulan_cari_sayisi
 FROM dbo.RII_FN_USER_DAILY_CARD_PERFORMANCE(NULL, NULL, NULL, NULL)
-ORDER BY report_date DESC, user_id ASC;
+ORDER BY tarih DESC, user_id ASC;
 
 SELECT TOP (1)
     Id,
@@ -57,16 +57,6 @@ FROM RII_REPORT_DEFINITIONS
 WHERE IsDeleted = 0
   AND Name = N'Günlük Kullanıcı Kart Performans Raporu'
 ORDER BY Id DESC;
-
-SELECT TOP (5)
-    ra.ReportDefinitionId,
-    ra.UserId,
-    u.Email,
-    ra.IsDeleted
-FROM RII_REPORT_ASSIGNMENTS ra
-INNER JOIN RII_USERS u ON u.Id = ra.UserId
-WHERE ra.IsDeleted = 0
-  AND ra.ReportDefinitionId = 5;
 """;
 
     await using var verifyCommand = connection.CreateCommand();
