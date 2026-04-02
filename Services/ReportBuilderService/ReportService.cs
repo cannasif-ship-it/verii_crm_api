@@ -97,10 +97,29 @@ namespace crm_api.Services.ReportBuilderService
                         .Select(x => new { ReportDefinitionId = x.Key, Count = x.Count() })
                         .ToDictionaryAsync(x => x.ReportDefinitionId, x => x.Count)
                         .ConfigureAwait(false);
+                var normalizedEmail = string.IsNullOrWhiteSpace(email)
+                    ? null
+                    : email.Trim().ToLowerInvariant();
 
                 var isAssignedScope = string.Equals(scope, "assigned", StringComparison.OrdinalIgnoreCase);
                 var accessible = isAssignedScope
-                    ? visible.Where(item => assignedReportIds.Contains(item.Id)).ToList()
+                    ? visible.Where(item =>
+                    {
+                        if (item.CreatedBy == userId || assignedReportIds.Contains(item.Id))
+                        {
+                            return true;
+                        }
+
+                        var governance = ExtractGovernanceMetadata(item.ConfigJson);
+                        if (governance.IsOrganizationWide)
+                        {
+                            return true;
+                        }
+
+                        return normalizedEmail != null
+                            && governance.SharedWithEmails.Any(sharedEmail =>
+                                string.Equals(sharedEmail, normalizedEmail, StringComparison.OrdinalIgnoreCase));
+                    }).ToList()
                     : visible;
 
                 var total = accessible.Count;
