@@ -32,6 +32,13 @@ namespace crm_api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("getEsnYapMas")]
+        public async Task<ActionResult<ApiResponse<List<EsnYapMasDto>>>> GetEsnYapMas()
+        {
+            var result = await _IErpService.GetEsnYapMasAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("getBranches")]
         [AllowAnonymous]
         public async Task<ActionResult<ApiResponse<List<BranchDto>>>> GetBranches([FromQuery] int? branchNo = null)

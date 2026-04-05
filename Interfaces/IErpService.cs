@@ -18,6 +18,7 @@ namespace crm_api.Interfaces
         Task<ApiResponse<List<ErpShippingAddressDto>>> GetErpShippingAddressAsync(string customerCode);
         Task<ApiResponse<List<StokGroupDto>>> GetStokGroupAsync(string? grupKodu);
         Task<ApiResponse<List<ProjeDto>>> GetProjectCodesAsync();
+        Task<ApiResponse<List<EsnYapMasDto>>> GetEsnYapMasAsync();
 
         // Health Check
         Task<ApiResponse<object>> HealthCheckAsync();

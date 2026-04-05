@@ -117,6 +117,12 @@ namespace crm_api.Mappings
                 .ForMember(dest => dest.Kod5, opt => opt.MapFrom(src => src.KOD_5))
                 .ForMember(dest => dest.Kod5Adi, opt => opt.MapFrom(src => src.KOD5_ADI))
                 .ForMember(dest => dest.IngIsim, opt => opt.MapFrom(src => src.INGISIM));
+
+            CreateMap<RII_FN_ESNYAPMAS, EsnYapMasDto>()
+                .ForMember(dest => dest.YapKod, opt => opt.MapFrom(src => src.YAPKOD))
+                .ForMember(dest => dest.YapAcik, opt => opt.MapFrom(src => src.YAPACIK))
+                .ForMember(dest => dest.SubeKodu, opt => opt.MapFrom(src => src.SUBE_KODU))
+                .ForMember(dest => dest.YplndrStokKod, opt => opt.MapFrom(src => src.YPLNDRSTOKKOD));
         }
     }
 }

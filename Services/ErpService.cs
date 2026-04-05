@@ -142,6 +142,30 @@ namespace crm_api.Services
             }
         }
 
+        public async Task<ApiResponse<List<EsnYapMasDto>>> GetEsnYapMasAsync()
+        {
+            try
+            {
+                var result = await _cmsContext.Set<RII_FN_ESNYAPMAS>()
+                    .FromSqlRaw("SELECT * FROM dbo.RII_FN_ESNYAPMAS()")
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var mappedResult = _mapper.Map<List<EsnYapMasDto>>(result);
+                return ApiResponse<List<EsnYapMasDto>>.SuccessResult(
+                    mappedResult,
+                    "ERP ESN yapı mas kayıtları getirildi.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<EsnYapMasDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                    $"RII_FN_ESNYAPMAS verileri alınırken hata oluştu: {ex.Message}",
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         // Branch işlemleri
         public async Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null)
         {

@@ -10,6 +10,7 @@ namespace crm_api.DTOs
         public long? ProductId { get; set; }
         public string? ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
+        public string? Unit { get; set; }
         public string? GroupCode { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
@@ -130,6 +131,7 @@ namespace crm_api.DTOs
         public long? ProductId { get; set; }
         public string? ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
+        public string? Unit { get; set; }
         public string? GroupCode { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }

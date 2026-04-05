@@ -81,6 +81,7 @@ namespace crm_api.Data
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<RII_FN_CAHAR> RII_FN_CAHAR { get; set; }
         public DbSet<RII_FN_CARIBAKIYE> RII_FN_CARIBAKIYE { get; set; }
+        public DbSet<RII_FN_ESNYAPMAS> RII_FN_ESNYAPMAS { get; set; }
 
         //Power BI DbSet'leri
         public DbSet<PowerBIReportDefinition> PowerBIReportDefinitions { get; set; }
@@ -172,6 +173,16 @@ namespace crm_api.Data
                 entity.ToFunction("RII_FN_CARIBAKIYE");
                 entity.Property(e => e.CARI_KOD).HasMaxLength(35);
                 entity.Property(e => e.BAKIYE_DURUMU).HasMaxLength(14);
+            });
+
+            modelBuilder.Entity<RII_FN_ESNYAPMAS>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_FN_ESNYAPMAS", t => t.ExcludeFromMigrations());
+                entity.ToFunction("RII_FN_ESNYAPMAS");
+                entity.Property(e => e.YAPKOD).HasMaxLength(15);
+                entity.Property(e => e.YAPACIK).HasMaxLength(255);
+                entity.Property(e => e.YPLNDRSTOKKOD).HasMaxLength(35);
             });
 
             // Apply all configurations from the Configurations folder

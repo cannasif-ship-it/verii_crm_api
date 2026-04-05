@@ -57,6 +57,7 @@ namespace crm_api.Services
                     .ToListAsync().ConfigureAwait(false);
 
                 var dtos = items.Select(x => _mapper.Map<DemandLineGetDto>(x)).ToList();
+                await ApplyUnitPresentationAsync(dtos).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<DemandLineGetDto>
                 {
@@ -90,6 +91,7 @@ namespace crm_api.Services
                 }
 
                 var dto = _mapper.Map<DemandLineGetDto>(line);
+                await ApplyUnitPresentationAsync(new[] { dto }).ConfigureAwait(false);
                 return ApiResponse<DemandLineGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("DemandLineService.DemandLineRetrieved"));
             }
             catch (Exception ex)
@@ -260,7 +262,8 @@ namespace crm_api.Services
                         {
                             DemandLine = ql,
                             ProductName = s.StockName,
-                            GroupCode = s.GrupKodu
+                            GroupCode = s.GrupKodu,
+                            Unit = s.Unit
                         })
                     .Select(x => new DemandLineGetDto
                     {
@@ -272,6 +275,7 @@ namespace crm_api.Services
                         DemandId = x.DemandLine.DemandId,
                         ProductCode = x.DemandLine.ProductCode,
                         ProductName = x.ProductName,
+                        Unit = x.Unit,
                         GroupCode = x.GroupCode,
                         Quantity = x.DemandLine.Quantity,
                         UnitPrice = x.DemandLine.UnitPrice,
@@ -305,6 +309,48 @@ namespace crm_api.Services
                 return ApiResponse<List<DemandLineGetDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("DemandLineService.InternalServerError"),
                     _localizationService.GetLocalizedString("DemandLineService.GetByDemandIdExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
+        private async Task ApplyUnitPresentationAsync(IEnumerable<DemandLineGetDto> dtos)
+        {
+            var dtoList = dtos.ToList();
+            if (dtoList.Count == 0)
+            {
+                return;
+            }
+
+            var productCodes = dtoList
+                .Where(x => string.IsNullOrWhiteSpace(x.Unit))
+                .Select(x => x.ProductCode?.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (productCodes.Count == 0)
+            {
+                return;
+            }
+
+            var stockUnits = await _unitOfWork.Stocks.Query()
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted && x.ErpStockCode != null && productCodes.Contains(x.ErpStockCode))
+                .Select(x => new { x.ErpStockCode, x.Unit })
+                .ToDictionaryAsync(x => x.ErpStockCode!, x => x.Unit, StringComparer.OrdinalIgnoreCase)
+                .ConfigureAwait(false);
+
+            foreach (var dto in dtoList)
+            {
+                var productCode = dto.ProductCode?.Trim();
+                if (string.IsNullOrWhiteSpace(productCode) || !string.IsNullOrWhiteSpace(dto.Unit))
+                {
+                    continue;
+                }
+
+                if (stockUnits.TryGetValue(productCode, out var unit))
+                {
+                    dto.Unit = unit;
+                }
             }
         }
     }

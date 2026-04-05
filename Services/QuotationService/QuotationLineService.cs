@@ -46,6 +46,7 @@ namespace crm_api.Services
                     .ApplyPagination(request.PageNumber, request.PageSize)
                     .Select(x => _mapper.Map<QuotationLineGetDto>(x))
                     .ToListAsync().ConfigureAwait(false);
+                await ApplyUnitPresentationAsync(items).ConfigureAwait(false);
 
                 var pagedResponse = new PagedResponse<QuotationLineGetDto>
                 {
@@ -79,6 +80,7 @@ namespace crm_api.Services
                 }
 
                 var dto = _mapper.Map<QuotationLineGetDto>(line);
+                await ApplyUnitPresentationAsync(new[] { dto }).ConfigureAwait(false);
                 return ApiResponse<QuotationLineGetDto>.SuccessResult(dto, _localizationService.GetLocalizedString("QuotationLineService.QuotationLineRetrieved"));
             }
             catch (Exception ex)
@@ -248,7 +250,8 @@ namespace crm_api.Services
                         {
                             QuotationLine = ql,
                             ProductName = s.StockName,
-                            GroupCode = s.GrupKodu
+                            GroupCode = s.GrupKodu,
+                            Unit = s.Unit
                         })
                     .Select(x => new QuotationLineGetDto
                     {
@@ -260,6 +263,7 @@ namespace crm_api.Services
                         QuotationId = x.QuotationLine.QuotationId,
                         ProductCode = x.QuotationLine.ProductCode,
                         ProductName = x.ProductName,
+                        Unit = x.Unit,
                         GroupCode = x.GroupCode,
                         Quantity = x.QuotationLine.Quantity,
                         UnitPrice = x.QuotationLine.UnitPrice,
@@ -293,6 +297,48 @@ namespace crm_api.Services
                 return ApiResponse<List<QuotationLineGetDto>>.ErrorResult(
                     _localizationService.GetLocalizedString("QuotationLineService.InternalServerError"),
                     _localizationService.GetLocalizedString("QuotationLineService.GetByQuotationIdExceptionMessage", ex.Message, StatusCodes.Status500InternalServerError));
+            }
+        }
+
+        private async Task ApplyUnitPresentationAsync(IEnumerable<QuotationLineGetDto> dtos)
+        {
+            var dtoList = dtos.ToList();
+            if (dtoList.Count == 0)
+            {
+                return;
+            }
+
+            var productCodes = dtoList
+                .Where(x => string.IsNullOrWhiteSpace(x.Unit))
+                .Select(x => x.ProductCode?.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (productCodes.Count == 0)
+            {
+                return;
+            }
+
+            var stockUnits = await _unitOfWork.Stocks.Query()
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted && x.ErpStockCode != null && productCodes.Contains(x.ErpStockCode))
+                .Select(x => new { x.ErpStockCode, x.Unit })
+                .ToDictionaryAsync(x => x.ErpStockCode!, x => x.Unit, StringComparer.OrdinalIgnoreCase)
+                .ConfigureAwait(false);
+
+            foreach (var dto in dtoList)
+            {
+                var productCode = dto.ProductCode?.Trim();
+                if (string.IsNullOrWhiteSpace(productCode) || !string.IsNullOrWhiteSpace(dto.Unit))
+                {
+                    continue;
+                }
+
+                if (stockUnits.TryGetValue(productCode, out var unit))
+                {
+                    dto.Unit = unit;
+                }
             }
         }
   
