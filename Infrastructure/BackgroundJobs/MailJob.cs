@@ -600,7 +600,7 @@ namespace Infrastructure.BackgroundJobs
 
         private string GetEmailTemplate(string title, string content)
         {
-            var year = DateTime.Now.Year;
+            var year = DateTime.UtcNow.Year;
             return $@"
 <!DOCTYPE html>
 <html>

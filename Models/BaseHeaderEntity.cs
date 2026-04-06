@@ -5,7 +5,7 @@ namespace crm_api.Models
     public abstract class BaseHeaderEntity : BaseEntity
     {
         
-        public string Year { get; set; } = DateTime.Now.Year.ToString();
+        public string Year { get; set; } = DateTime.UtcNow.Year.ToString();
               
         // Completion Date (specific)
         public DateTime? CompletionDate { get; set; } // kayıt tamamlanma tarihi

@@ -538,7 +538,7 @@ namespace crm_api.Services
         private async Task<Dictionary<string, string>> GetCurrencyNameMapAsync()
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var rates = await _erpService.GetExchangeRateAsync(DateTime.Now, 1).ConfigureAwait(false);
+            var rates = await _erpService.GetExchangeRateAsync(DateTime.UtcNow, 1).ConfigureAwait(false);
 
             if (!rates.Success || rates.Data == null)
             {

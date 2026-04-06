@@ -410,7 +410,7 @@ namespace crm_api.Services.ReportBuilderService
                 "currentuserid" => currentUserId,
                 "currentuseremail" => currentUserEmail,
                 "today" => DateTime.Today,
-                "now" => DateTime.Now,
+                "now" => DateTime.UtcNow,
                 _ => string.IsNullOrWhiteSpace(binding.Value) ? DBNull.Value : binding.Value
             };
         }

@@ -1687,7 +1687,7 @@ namespace crm_api.Services
 
             try
             {
-                var rates = await _erpService.GetExchangeRateAsync(DateTime.Now, 1).ConfigureAwait(false);
+                var rates = await _erpService.GetExchangeRateAsync(DateTime.UtcNow, 1).ConfigureAwait(false);
                 if (!rates.Success || rates.Data == null)
                     return normalized;
 
