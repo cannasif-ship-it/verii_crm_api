@@ -1,11 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using crm_api.Models;
 
 namespace crm_api.Data.Configurations
 {
     public abstract class BaseEntityConfiguration<T> : IEntityTypeConfiguration<T> where T : BaseEntity
     {
+        private static readonly ValueConverter<DateTime, DateTime> UtcDateTimeConverter = new(
+            value => value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc),
+            value => value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc)
+        );
+
+        private static readonly ValueConverter<DateTime?, DateTime?> NullableUtcDateTimeConverter = new(
+            value => value.HasValue
+                ? (value.Value.Kind == DateTimeKind.Utc ? value.Value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+                : value,
+            value => value.HasValue
+                ? (value.Value.Kind == DateTimeKind.Utc ? value.Value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+                : value
+        );
+
         public virtual void Configure(EntityTypeBuilder<T> builder)
         {
             // Primary key configuration
@@ -18,13 +33,16 @@ namespace crm_api.Data.Configurations
             // Base properties configuration
             builder.Property(e => e.CreatedDate)
                 .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasDefaultValueSql("GETUTCDATE()")
+                .HasConversion(UtcDateTimeConverter);
 
             builder.Property(e => e.UpdatedDate)
-                .IsRequired(false);
+                .IsRequired(false)
+                .HasConversion(NullableUtcDateTimeConverter);
 
             builder.Property(e => e.DeletedDate)
-                .IsRequired(false);
+                .IsRequired(false)
+                .HasConversion(NullableUtcDateTimeConverter);
 
             builder.Property(e => e.IsDeleted)
                 .IsRequired();

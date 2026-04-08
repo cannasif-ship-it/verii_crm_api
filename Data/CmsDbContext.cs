@@ -6,12 +6,27 @@ using crm_api.Data.Configurations;
 using depoWebAPI.Models;
 using crm_api.Models.PowerBi;
 using crm_api.Models.UserPermissions;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 
 namespace crm_api.Data
 {
     public class CmsDbContext : DbContext
     {
+        private static readonly ValueConverter<DateTime, DateTime> UtcDateTimeConverter = new(
+            value => value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc),
+            value => value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc)
+        );
+
+        private static readonly ValueConverter<DateTime?, DateTime?> NullableUtcDateTimeConverter = new(
+            value => value.HasValue
+                ? (value.Value.Kind == DateTimeKind.Utc ? value.Value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+                : value,
+            value => value.HasValue
+                ? (value.Value.Kind == DateTimeKind.Utc ? value.Value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+                : value
+        );
+
         public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
         {
         }
@@ -111,17 +126,6 @@ namespace crm_api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                foreach (var property in entityType.GetProperties())
-                {
-                    if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
-                    {
-                        property.SetColumnType("decimal(18,6)");
-                    }
-                }
-            }
-
             // Kur function yapılandırması - Key yok
             modelBuilder.Entity<RII_FN_KUR>(entity =>
             {
@@ -187,6 +191,27 @@ namespace crm_api.Data
 
             // Apply all configurations from the Configurations folder
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
+                    {
+                        property.SetColumnType("decimal(18,6)");
+                    }
+
+                    if (property.ClrType == typeof(DateTime))
+                    {
+                        property.SetValueConverter(UtcDateTimeConverter);
+                    }
+
+                    if (property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetValueConverter(NullableUtcDateTimeConverter);
+                    }
+                }
+            }
         }
     }
 }
