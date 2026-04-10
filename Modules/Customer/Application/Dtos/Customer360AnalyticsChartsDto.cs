@@ -1,0 +1,10 @@
+namespace crm_api.Modules.Customer.Application.Dtos.Customer360
+{
+    public class Customer360AnalyticsChartsDto
+    {
+        public List<Customer360MonthlyTrendItemDto> MonthlyTrend { get; set; } = new();
+        public Customer360DistributionDto Distribution { get; set; } = new();
+        public Customer360AmountComparisonDto AmountComparison { get; set; } = new();
+        public List<Customer360AmountComparisonDto> AmountComparisonByCurrency { get; set; } = new();
+    }
+}

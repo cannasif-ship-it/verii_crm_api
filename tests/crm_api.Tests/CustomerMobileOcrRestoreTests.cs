@@ -1,11 +1,7 @@
 using System.Security.Claims;
 using AutoMapper;
 using crm_api.Data;
-using crm_api.DTOs;
-using crm_api.Interfaces;
-using crm_api.Models;
 using crm_api.Repositories;
-using crm_api.Services;
 using crm_api.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

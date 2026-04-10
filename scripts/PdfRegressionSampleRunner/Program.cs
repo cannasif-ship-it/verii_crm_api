@@ -1,8 +1,6 @@
 using System.Text.Json;
-using crm_api.DTOs;
 using crm_api.Helpers;
 using crm_api.Infrastructure;
-using crm_api.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 

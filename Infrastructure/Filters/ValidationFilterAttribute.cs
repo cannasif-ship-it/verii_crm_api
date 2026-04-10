@@ -1,5 +1,3 @@
-using crm_api.DTOs;
-using crm_api.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

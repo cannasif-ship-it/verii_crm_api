@@ -1,5 +1,4 @@
 using crm_api.Data;
-using crm_api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace crm_api.Infrastructure.Startup

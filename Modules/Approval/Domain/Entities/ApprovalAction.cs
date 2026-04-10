@@ -1,0 +1,20 @@
+using System;
+
+namespace crm_api.Modules.Approval.Domain.Entities
+{
+    public class ApprovalAction : BaseEntity
+    {
+        public long ApprovalRequestId { get; set; }
+        public ApprovalRequest ApprovalRequest { get; set; } = null!;
+
+        public int StepOrder { get; set; }
+
+        public long ApprovedByUserId { get; set; }
+        public User ApprovedByUser { get; set; } = null!;
+
+        public DateTime ActionDate { get; set; }
+
+        public ApprovalStatus Status { get; set; } = ApprovalStatus.Waiting;
+    }
+
+}

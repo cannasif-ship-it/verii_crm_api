@@ -1,0 +1,67 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+#nullable disable
+
+namespace crm_api.Migrations
+{
+    /// <inheritdoc />
+    [DbContext(typeof(global::crm_api.Shared.Infrastructure.Persistence.CmsDbContext))]
+    [Migration("20260410170000_RenamePdfTemplateAssetsToPdfImages")]
+    public partial class RenamePdfTemplateAssetsToPdfImages : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_RII_PDF_TEMPLATE_ASSETS",
+                table: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.RenameTable(
+                name: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "RII_PDF_IMAGES");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedBy",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_CreatedBy");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_RelativeUrl",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_RelativeUrl");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_RII_PDF_IMAGES",
+                table: "RII_PDF_IMAGES",
+                column: "Id");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_RII_PDF_IMAGES",
+                table: "RII_PDF_IMAGES");
+
+            migrationBuilder.RenameTable(
+                name: "RII_PDF_IMAGES",
+                newName: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_CreatedBy",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedBy");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_RelativeUrl",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_RelativeUrl");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_RII_PDF_TEMPLATE_ASSETS",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                column: "Id");
+        }
+    }
+}

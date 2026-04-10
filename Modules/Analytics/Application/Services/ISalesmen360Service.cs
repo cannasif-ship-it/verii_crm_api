@@ -1,0 +1,13 @@
+using crm_api.Modules.Analytics.Application.Dtos;
+
+namespace crm_api.Modules.Analytics.Application.Services
+{
+    public interface ISalesmen360Service
+    {
+        Task<ApiResponse<Salesmen360OverviewDto>> GetOverviewAsync(long userId, string? currency = null);
+        Task<ApiResponse<Salesmen360AnalyticsSummaryDto>> GetAnalyticsSummaryAsync(long userId, string? currency = null);
+        Task<ApiResponse<Salesmen360AnalyticsChartsDto>> GetAnalyticsChartsAsync(long userId, int months = 12, string? currency = null);
+        Task<ApiResponse<List<CohortRetentionDto>>> GetCohortRetentionAsync(long userId, int months = 12);
+        Task<ApiResponse<ActivityDto>> ExecuteRecommendedActionAsync(long userId, ExecuteRecommendedActionDto request);
+    }
+}

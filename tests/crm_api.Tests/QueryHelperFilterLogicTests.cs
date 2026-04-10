@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using crm_api.DTOs;
 using crm_api.Helpers;
-using crm_api.Models;
 using Xunit;
 
 namespace crm_api.Tests;

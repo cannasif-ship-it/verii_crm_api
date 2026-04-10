@@ -1,4 +1,3 @@
-using crm_api.DTOs;
 using System.Linq;
 using Xunit;
 

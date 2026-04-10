@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using crm_api.Data;
+using crm_api.Shared.Infrastructure.Persistence;
 
 #nullable disable
 
@@ -22,7 +22,393 @@ namespace crm_api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PermissionDefinitions_Code");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PermissionDefinitions_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PERMISSION_DEFINITIONS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Code = "dashboard.view",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Dashboard View"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Code = "customers.view",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Customers View"
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Code = "salesmen360.view",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Salesmen 360 View"
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            Code = "customer360.view",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Customer 360 View"
+                        },
+                        new
+                        {
+                            Id = 5L,
+                            Code = "powerbi.view",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Power BI View"
+                        });
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystemAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PermissionGroups_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PermissionGroups_Name");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PERMISSION_GROUPS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Full system access",
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsSystemAdmin = true,
+                            Name = "System Admin"
+                        });
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroupPermission", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("PermissionDefinitionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PermissionGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PermissionGroupPermission_IsDeleted");
+
+                    b.HasIndex("PermissionDefinitionId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("PermissionGroupId", "PermissionDefinitionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PermissionGroupPermission_GroupId_DefinitionId");
+
+                    b.ToTable("RII_PERMISSION_GROUP_PERMISSIONS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_UserAuthority_IsDeleted");
+
+                    b.HasIndex("Title")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserAuthority_Title");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_USER_AUTHORITY", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Title = "User"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Title = "Manager"
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Title = "Admin"
+                        });
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserPermissionGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("PermissionGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_UserPermissionGroup_IsDeleted");
+
+                    b.HasIndex("PermissionGroupId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("UserId", "PermissionGroupId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserPermissionGroup_UserId_GroupId");
+
+                    b.ToTable("RII_USER_PERMISSION_GROUPS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -162,7 +548,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityImage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -222,7 +608,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_IMAGE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityMeetingType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityMeetingType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -278,7 +664,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_MEETING_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityReminder", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityReminder", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -351,7 +737,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_REMINDER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityShipping", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityShipping", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -407,7 +793,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_SHIPPING", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityTopicPurpose", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityTopicPurpose", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -463,7 +849,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_TOPIC_PURPOSE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -523,7 +909,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalAction", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalAction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -589,7 +975,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_ACTION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlow", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -649,7 +1035,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_FLOW", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlowStep", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlowStep", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -709,7 +1095,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_FLOW_STEP", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -782,7 +1168,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_REQUEST", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRole", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRole", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -844,7 +1230,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_ROLE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRoleGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -897,7 +1283,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_ROLE_GROUP", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalUserRole", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalUserRole", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -954,7 +1340,418 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_USER_ROLE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.CatalogCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CatalogId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRoot")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<long?>("ParentCatalogCategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_CatalogCategory_IsDeleted");
+
+                    b.HasIndex("ParentCatalogCategoryId")
+                        .HasDatabaseName("IX_CatalogCategory_ParentCatalogCategoryId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("CatalogId", "CategoryId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_CatalogCategory_CatalogId_CategoryId");
+
+                    b.ToTable("RII_CATALOG_CATEGORY", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCatalog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int?>("BranchCode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CatalogType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ProductCatalog_Code");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ProductCatalog_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PRODUCT_CATALOG", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ColorHex")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FullPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("IconName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLeaf")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<long?>("ParentCategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VisualPreset")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ProductCategory_Code");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ProductCategory_IsDeleted");
+
+                    b.HasIndex("ParentCategoryId")
+                        .HasDatabaseName("IX_ProductCategory_ParentCategoryId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PRODUCT_CATEGORY", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategoryRule", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OperatorType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("RuleCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("RuleName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("StockAttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("IX_ProductCategoryRule_CategoryId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ProductCategoryRule_IsDeleted");
+
+                    b.HasIndex("Priority")
+                        .HasDatabaseName("IX_ProductCategoryRule_Priority");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PRODUCT_CATEGORY_RULE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.StockCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AssignmentType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long?>("RuleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<long>("StockId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("IX_StockCategory_CategoryId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_StockCategory_IsDeleted");
+
+                    b.HasIndex("RuleId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("StockId", "CategoryId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_StockCategory_StockId_CategoryId");
+
+                    b.ToTable("RII_STOCK_CATEGORY", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1017,7 +1814,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CITY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Contact", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Contact", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1120,7 +1917,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CONTACT", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1187,7 +1984,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_COUNTRY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1307,10 +2104,10 @@ namespace crm_api.Migrations
                         .HasColumnName("LAST_SYNC_DATE");
 
                     b.Property<decimal?>("Latitude")
-                        .HasColumnType("decimal(9,6)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("Longitude")
-                        .HasColumnType("decimal(9,6)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(250)
@@ -1416,7 +2213,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CUSTOMER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerImage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1476,7 +2273,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CUSTOMER_IMAGE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1534,7 +2331,384 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CUSTOMER_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.District", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ERPCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId")
+                        .HasDatabaseName("IX_District_CityId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("ERPCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_District_ERPCode")
+                        .HasFilter("[ERPCode] IS NOT NULL");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_District_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_District_Name");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_DISTRICT", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long?>("CityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ContactPerson")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("CountryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DistrictId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDefault")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId")
+                        .HasDatabaseName("IX_ShippingAddress_CityId");
+
+                    b.HasIndex("CountryId")
+                        .HasDatabaseName("IX_ShippingAddress_CountryId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_ShippingAddress_CustomerId");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("DistrictId")
+                        .HasDatabaseName("IX_ShippingAddress_DistrictId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ShippingAddress_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_ShippingAddress_Latitude_Longitude");
+
+                    b.ToTable("RII_SHIPPING_ADDRESS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Title", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TitleName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Title_IsDeleted");
+
+                    b.HasIndex("TitleName")
+                        .HasDatabaseName("IX_Title_TitleName");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_TITLE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("CustomerTypeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RuleType")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("SalesRepId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("SerialCurrent")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SerialIncrement")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SerialLength")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SerialPrefix")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("SerialStart")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CustomerTypeId")
+                        .HasDatabaseName("IX_DocumentSerialType_CustomerTypeId");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_DocumentSerialType_IsDeleted");
+
+                    b.HasIndex("RuleType")
+                        .HasDatabaseName("IX_DocumentSerialType_RuleType");
+
+                    b.HasIndex("SalesRepId")
+                        .HasDatabaseName("IX_DocumentSerialType_SalesRepId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_DOCUMENT_SERIAL_TYPE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("SalesType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_SalesTypeDefinition_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_SalesTypeDefinition_Name");
+
+                    b.HasIndex("SalesType")
+                        .HasDatabaseName("IX_SalesTypeDefinition_SalesType");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("SalesType", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SalesTypeDefinition_SalesType_Name");
+
+                    b.ToTable("RII_SALES_TYPE_DEFINITION", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1772,7 +2946,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1848,7 +3022,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1985,7 +3159,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2097,16 +3271,13 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.District", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.PasswordResetRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("CityId")
-                        .HasColumnType("bigint");
 
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
@@ -2122,50 +3293,148 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ERPCode")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RII_PASSWORD_RESET_REQUEST", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsEmailConfirmed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.HasIndex("CityId")
-                        .HasDatabaseName("IX_District_CityId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("ERPCode")
+                    b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("IX_District_ERPCode")
-                        .HasFilter("[ERPCode] IS NOT NULL");
+                        .HasDatabaseName("IX_Users_Email");
 
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_District_IsDeleted");
+                        .HasDatabaseName("IX_Users_IsDeleted");
 
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_District_Name");
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("RII_DISTRICT", (string)null);
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_Username");
+
+                    b.ToTable("RII_USERS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DocumentSerialType", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserDetail", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2181,39 +3450,28 @@ namespace crm_api.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<long?>("CustomerTypeId")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("DeletedBy")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<byte?>("Gender")
+                        .HasColumnType("tinyint");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(18,6)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("RuleType")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("SalesRepId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("SerialCurrent")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SerialIncrement")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SerialLength")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SerialPrefix")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("SerialStart")
-                        .HasColumnType("int");
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
@@ -2221,30 +3479,115 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("decimal(18,6)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
 
-                    b.HasIndex("CustomerTypeId")
-                        .HasDatabaseName("IX_DocumentSerialType_CustomerTypeId");
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_UserDetail_IsDeleted");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserDetail_UserId");
+
+                    b.ToTable("RII_USER_DETAIL", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceInfo")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
 
                     b.HasIndex("DeletedBy");
 
                     b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_DocumentSerialType_IsDeleted");
+                        .HasDatabaseName("IX_UserSession_IsDeleted");
 
-                    b.HasIndex("RuleType")
-                        .HasDatabaseName("IX_DocumentSerialType_RuleType");
+                    b.HasIndex("RevokedAt")
+                        .HasDatabaseName("IX_UserSession_RevokedAt");
 
-                    b.HasIndex("SalesRepId")
-                        .HasDatabaseName("IX_DocumentSerialType_SalesRepId");
+                    b.HasIndex("SessionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserSession_SessionId");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("RII_DOCUMENT_SERIAL_TYPE", (string)null);
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_UserSession_UserId");
+
+                    b.ToTable("RII_USER_SESSION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.GoogleCustomerMailLog", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.GoogleCustomerMailLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2388,7 +3731,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_GOOGLE_CUSTOMER_MAIL_LOGS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.GoogleIntegrationLog", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.GoogleIntegrationLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2482,13 +3825,161 @@ namespace crm_api.Migrations
                     b.ToTable("RII_GOOGLE_INTEGRATION_LOGS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.JobFailureLog", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.OutlookCustomerMailLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BccEmails")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CcEmails")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<long?>("ContactId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHtml")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MetadataJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("OutlookConversationId")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("OutlookMessageId")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SenderEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long>("SentByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("TemplateKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("TemplateName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("TemplateVersion")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToEmails")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_ContactId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CreatedDate")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_CreatedDate");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_CustomerId");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsSuccess")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_IsSuccess");
+
+                    b.HasIndex("SentByUserId")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_SentByUserId");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_OutlookCustomerMailLogs_TenantId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_OUTLOOK_CUSTOMER_MAIL_LOGS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.OutlookIntegrationLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActivityId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
@@ -2504,44 +3995,45 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ExceptionMessage")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("ExceptionType")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("FailedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("JobId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("JobName")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Queue")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Reason")
+                    b.Property<string>("Message")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StackTrace")
+                    b.Property<string>("MetadataJson")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ProviderEventId")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint");
@@ -2549,27 +4041,524 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
 
+                    b.HasIndex("CreatedDate")
+                        .HasDatabaseName("IX_OutlookIntegrationLogs_CreatedDate");
+
                     b.HasIndex("DeletedBy");
 
-                    b.HasIndex("FailedAt")
-                        .HasDatabaseName("IX_JobFailureLog_FailedAt");
-
-                    b.HasIndex("JobId")
-                        .HasDatabaseName("IX_JobFailureLog_JobId");
-
-                    b.HasIndex("JobName")
-                        .HasDatabaseName("IX_JobFailureLog_JobName");
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_OutlookIntegrationLogs_TenantId");
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("RII_JOB_FAILURE_LOG", (string)null);
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_OutlookIntegrationLogs_UserId");
+
+                    b.ToTable("RII_OUTLOOK_INTEGRATION_LOGS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.SmtpSetting", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("EnableSsl")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FromName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PasswordEncrypted")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Timeout")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("RII_SMTP_SETTING", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.TenantGoogleOAuthSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("ClientSecretEncrypted")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("RedirectUri")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Scopes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TenantGoogleOAuthSettings_TenantId");
+
+                    b.ToTable("RII_TENANT_GOOGLE_OAUTH_SETTINGS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.UserGoogleAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccessTokenEncrypted")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("GoogleEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsConnected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("RefreshTokenEncrypted")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Scopes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_UserGoogleAccounts_TenantId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserGoogleAccounts_UserId");
+
+                    b.ToTable("RII_USER_GOOGLE_ACCOUNTS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.UserOutlookAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccessTokenEncrypted")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsConnected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("OutlookEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("RefreshTokenEncrypted")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Scopes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_UserOutlookAccounts_TenantId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserOutlookAccounts_UserId");
+
+                    b.ToTable("RII_USER_OUTLOOK_ACCOUNTS", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_2SHIPPING", b =>
+                {
+                    b.Property<string>("CARI_ADRES")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CARI_IL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CARI_ILCE")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CARI_ISIM")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CARI_KOD")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("__EFMigrationsHistory_FN_2SHIPPING", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_2SHIPPING");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_CAHAR", b =>
+                {
+                    b.Property<string>("ACIKLAMA")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("ALACAK")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("BELGE_NO")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<decimal?>("BORC")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("CARI_KOD")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<decimal?>("DOVIZ_ALACAK")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("DOVIZ_BORC")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<byte?>("DOVIZ_TURU")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("PARA_BIRIMI")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("TARIH")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("TARIH_SIRALI_DOVIZ_BAKIYE")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("TARIH_SIRALI_TL_BAKIYE")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("VADE_SIRALI_DOVIZ_BAKIYE")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("VADE_SIRALI_TL_BAKIYE")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<DateTime?>("VADE_TARIHI")
+                        .HasColumnType("datetime2");
+
+                    b.ToTable("__EFMigrationsHistory_FN_CAHAR", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_CAHAR");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_CARIBAKIYE", b =>
+                {
+                    b.Property<string>("BAKIYE_DURUMU")
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)");
+
+                    b.Property<decimal?>("BAKIYE_TUTARI")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("CARI_KOD")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("nvarchar(35)");
+
+                    b.Property<decimal?>("NET_BAKIYE")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.ToTable("__EFMigrationsHistory_FN_CARIBAKIYE", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_CARIBAKIYE");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_ESNYAPMAS", b =>
+                {
+                    b.Property<short>("SUBE_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("YAPACIK")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("YAPKOD")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("YPLNDRSTOKKOD")
+                        .HasMaxLength(35)
+                        .HasColumnType("nvarchar(35)");
+
+                    b.ToTable("__EFMigrationsHistory_FN_ESNYAPMAS", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_ESNYAPMAS");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_KUR", b =>
+                {
+                    b.Property<string>("DOVIZ_ISMI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DOVIZ_TIPI")
+                        .HasColumnType("int");
+
+                    b.Property<double>("KUR_DEGERI")
+                        .HasColumnType("float");
+
+                    b.ToTable("__EFMigrationsHistory_FN_KUR", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_KUR");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_STOK", b =>
+                {
+                    b.Property<string>("GRUP_ISIM")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GRUP_KODU")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("INGISIM")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<short>("ISLETME_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("KOD1_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD2_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD3_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD4_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD5_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD_1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD_2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD_3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD_4")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KOD_5")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OLCU_BR1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("STOK_ADI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("STOK_KODU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<short>("SUBE_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("URETICI_KODU")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("__EFMigrationsHistory_FN_STOK", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_FN_STOK");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_STGROUP", b =>
+                {
+                    b.Property<string>("GRUP_ISIM")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GRUP_KOD")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<short>("ISLETME_KODU")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("SUBE_KODU")
+                        .HasColumnType("smallint");
+
+                    b.ToTable("__EFMigrationsHistory_STGROUP", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToFunction("RII_STGROUP");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Notification.Domain.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2651,7 +4640,7 @@ namespace crm_api.Migrations
                     b.ToTable("Notifications", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Order", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2895,7 +4884,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2971,7 +4960,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3108,7 +5097,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3220,364 +5209,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OutlookCustomerMailLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("BccEmails")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CcEmails")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<long?>("ContactId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorCode")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsHtml")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MetadataJson")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("OutlookConversationId")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("OutlookMessageId")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("SenderEmail")
-                        .HasMaxLength(320)
-                        .HasColumnType("nvarchar(320)");
-
-                    b.Property<DateTimeOffset?>("SentAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<long>("SentByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("TemplateKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("TemplateName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("TemplateVersion")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ToEmails")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_ContactId");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("CreatedDate")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_CreatedDate");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_CustomerId");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsSuccess")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_IsSuccess");
-
-                    b.HasIndex("SentByUserId")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_SentByUserId");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_OutlookCustomerMailLogs_TenantId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_OUTLOOK_CUSTOMER_MAIL_LOGS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.OutlookIntegrationLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ActivityId")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorCode")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("MetadataJson")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Operation")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("ProviderEventId")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("CreatedDate")
-                        .HasDatabaseName("IX_OutlookIntegrationLogs_CreatedDate");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_OutlookIntegrationLogs_TenantId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_OutlookIntegrationLogs_UserId");
-
-                    b.ToTable("RII_OUTLOOK_INTEGRATION_LOGS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.PasswordResetRequest", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RII_PASSWORD_RESET_REQUEST", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.PaymentType", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("CreatedDate")
-                        .HasDatabaseName("IX_PaymentType_CreatedDate");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_PaymentType_IsDeleted");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_PaymentType_Name");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_PAYMENT_TYPE", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.PdfTablePreset", b =>
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.PdfTablePreset", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3659,7 +5291,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PDF_TABLE_PRESETS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PdfTemplateAsset", b =>
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.PdfTemplateAsset", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3723,7 +5355,7 @@ namespace crm_api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy")
-                        .HasDatabaseName("IX_RII_PDF_TEMPLATE_ASSETS_CreatedBy");
+                        .HasDatabaseName("IX_RII_PDF_IMAGES_CreatedBy");
 
                     b.HasIndex("CreatedByUserId");
 
@@ -3731,15 +5363,180 @@ namespace crm_api.Migrations
 
                     b.HasIndex("RelativeUrl")
                         .IsUnique()
-                        .HasDatabaseName("IX_RII_PDF_TEMPLATE_ASSETS_RelativeUrl")
+                        .HasDatabaseName("IX_RII_PDF_IMAGES_RelativeUrl")
                         .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("RII_PDF_TEMPLATE_ASSETS", (string)null);
+                    b.ToTable("RII_PDF_IMAGES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIConfiguration", b =>
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.QuickQuotationImage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<string>("RelativeUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("IX_RII_QUICK_QUOTATION_IMAGES_CreatedBy");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("RelativeUrl")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RII_QUICK_QUOTATION_IMAGES_RelativeUrl")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("RII_QUICK_QUOTATION_IMAGES", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.ReportTemplate", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Default")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RuleType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TemplateJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_IsActive");
+
+                    b.HasIndex("RuleType")
+                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("RuleType", "Default")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_Default")
+                        .HasFilter("[Default] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("RuleType", "IsActive")
+                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_IsActive");
+
+                    b.ToTable("RII_REPORT_TEMPLATES", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIConfiguration", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3805,7 +5602,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_CONFIGURATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3868,7 +5665,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_GROUPS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroupReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroupReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3925,7 +5722,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_GROUP_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4013,7 +5810,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportRoleMapping", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportRoleMapping", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4074,7 +5871,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_REPORT_ROLE_MAPPINGS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.UserPowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.UserPowerBIGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4131,7 +5928,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_POWERBI_GROUPS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4233,7 +6030,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_HEADER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4338,7 +6135,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleSalesman", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleSalesman", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4399,7 +6196,67 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_SALESMAN", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricing", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.PaymentType", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CreatedDate")
+                        .HasDatabaseName("IX_PaymentType_CreatedDate");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PaymentType_IsDeleted");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_PaymentType_Name");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_PAYMENT_TYPE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricing", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4487,7 +6344,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRODUCT_PRICING", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricingGroupBy", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricingGroupBy", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4564,7 +6421,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRODUCT_PRICING_GROUP_BY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4808,7 +6665,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4884,7 +6741,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5021,7 +6878,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5133,7 +6990,369 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportAssignment", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("ApprovedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasDefaultValue("");
+
+                    b.Property<decimal>("DiscountRate1")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,6)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<decimal>("DiscountRate2")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,6)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<decimal>("DiscountRate3")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,6)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<decimal>("ExchangeRate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,6)")
+                        .HasDefaultValue(1m);
+
+                    b.Property<bool>("IsApproved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("OfferDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("QuotationId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("QuotationNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<long?>("RevisionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsApproved");
+
+                    b.HasIndex("QuotationId");
+
+                    b.HasIndex("RevisionId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_TEMP_QUOTATTION", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattionExchangeLine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<DateTime>("ExchangeRateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsManual")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<long>("TempQuotattionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("Currency");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("TempQuotattionId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("TempQuotattionId", "Currency")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("RII_TEMP_QUOTATTION_EXCHANGE_LINE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattionLine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasDefaultValue("");
+
+                    b.Property<decimal>("DiscountAmount1")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("DiscountAmount2")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("DiscountAmount3")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("DiscountRate1")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("DiscountRate2")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("DiscountRate3")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasDefaultValue("");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("LineGrandTotal")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<long>("TempQuotattionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("VatAmount")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("VatRate")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ProductCode");
+
+                    b.HasIndex("TempQuotattionId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_TEMP_QUOTATTION_LINE", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.UserDiscountLimit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErpProductGroupCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MaxDiscount1")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("MaxDiscount2")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("MaxDiscount3")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<long>("SalespersonId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("ErpProductGroupCode")
+                        .HasDatabaseName("IX_UserDiscountLimit_ErpProductGroupCode");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_UserDiscountLimit_IsDeleted");
+
+                    b.HasIndex("SalespersonId")
+                        .HasDatabaseName("IX_UserDiscountLimit_SalespersonId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.HasIndex("SalespersonId", "ErpProductGroupCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserDiscountLimit_SalespersonId_ErpProductGroupCode");
+
+                    b.ToTable("RII_USER_DISCOUNT_LIMIT", (string)null);
+                });
+
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportAssignment", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5189,7 +7408,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_REPORT_ASSIGNMENTS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5265,348 +7484,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportTemplate", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CreatedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Default")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("RuleType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TemplateJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_IsActive");
-
-                    b.HasIndex("RuleType")
-                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType");
-
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.HasIndex("RuleType", "Default")
-                        .IsUnique()
-                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_Default")
-                        .HasFilter("[Default] = 1 AND [IsDeleted] = 0");
-
-                    b.HasIndex("RuleType", "IsActive")
-                        .HasDatabaseName("IX_RII_REPORT_TEMPLATES_RuleType_IsActive");
-
-                    b.ToTable("RII_REPORT_TEMPLATES", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.SalesTypeDefinition", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("SalesType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_SalesTypeDefinition_IsDeleted");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_SalesTypeDefinition_Name");
-
-                    b.HasIndex("SalesType")
-                        .HasDatabaseName("IX_SalesTypeDefinition_SalesType");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("SalesType", "Name")
-                        .IsUnique()
-                        .HasDatabaseName("IX_SalesTypeDefinition_SalesType_Name");
-
-                    b.ToTable("RII_SALES_TYPE_DEFINITION", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.ShippingAddress", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long?>("CityId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ContactPerson")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<long?>("CountryId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("DistrictId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsDefault")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PostalCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId")
-                        .HasDatabaseName("IX_ShippingAddress_CityId");
-
-                    b.HasIndex("CountryId")
-                        .HasDatabaseName("IX_ShippingAddress_CountryId");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("IX_ShippingAddress_CustomerId");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("DistrictId")
-                        .HasDatabaseName("IX_ShippingAddress_DistrictId");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_ShippingAddress_IsDeleted");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("Latitude", "Longitude")
-                        .HasDatabaseName("IX_ShippingAddress_Latitude_Longitude");
-
-                    b.ToTable("RII_SHIPPING_ADDRESS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.SmtpSetting", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CreatedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("EnableSsl")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FromEmail")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("FromName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Host")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PasswordEncrypted")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Port")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Timeout")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.ToTable("RII_SMTP_SETTING", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5728,7 +7606,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockDetail", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockDetail", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5787,7 +7665,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_DETAIL", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockImage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5857,7 +7735,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_IMAGE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockRelation", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockRelation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5929,186 +7807,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_RELATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CurrencyCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasDefaultValue("");
-
-                    b.Property<decimal>("DiscountRate1")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,6)")
-                        .HasDefaultValue(0m);
-
-                    b.Property<decimal>("DiscountRate2")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,6)")
-                        .HasDefaultValue(0m);
-
-                    b.Property<decimal>("DiscountRate3")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,6)")
-                        .HasDefaultValue(0m);
-
-                    b.Property<decimal>("ExchangeRate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,6)")
-                        .HasDefaultValue(1m);
-
-                    b.Property<bool>("IsApproved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("OfferDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("QuotationId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("QuotationNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<long?>("RevisionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsApproved");
-
-                    b.HasIndex("QuotationId");
-
-                    b.HasIndex("RevisionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_TEMP_QUOTATTION", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionExchangeLine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTime>("ExchangeRateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsManual")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<long>("TempQuotattionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("Currency");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("TempQuotattionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("TempQuotattionId", "Currency")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("RII_TEMP_QUOTATTION_EXCHANGE_LINE", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattionLine", b =>
+            modelBuilder.Entity("crm_api.Shared.Infrastructure.Monitoring.JobFailureLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -6130,1307 +7829,278 @@ namespace crm_api.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasDefaultValue("");
-
-                    b.Property<decimal>("DiscountAmount1")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountAmount2")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountAmount3")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate1")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate2")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("DiscountRate3")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("ImagePath")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasDefaultValue("");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("LineGrandTotal")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("LineTotal")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("ProductCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<long>("TempQuotattionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("VatAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("VatRate")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("ProductCode");
-
-                    b.HasIndex("TempQuotattionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_TEMP_QUOTATTION_LINE", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.TenantGoogleOAuthSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("ClientSecretEncrypted")
-                        .IsRequired()
+                    b.Property<string>("ExceptionMessage")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
+                    b.Property<string>("ExceptionType")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<bool>("IsEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("RedirectUri")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Scopes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_TenantGoogleOAuthSettings_TenantId");
-
-                    b.ToTable("RII_TENANT_GOOGLE_OAUTH_SETTINGS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.Title", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime>("FailedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("TitleName")
+                    b.Property<string>("JobId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_Title_IsDeleted");
-
-                    b.HasIndex("TitleName")
-                        .HasDatabaseName("IX_Title_TitleName");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_TITLE", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.User", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
+                    b.Property<string>("JobName")
                         .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Queue")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsEmailConfirmed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("RefreshToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("RoleId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Users_Email");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_Users_IsDeleted");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Users_Username");
-
-                    b.ToTable("RII_USERS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserAuthority", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserAuthority_IsDeleted");
-
-                    b.HasIndex("Title")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserAuthority_Title");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_USER_AUTHORITY", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Title = "User"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Title = "Manager"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Title = "Admin"
-                        });
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserDetail", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Reason")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<byte?>("Gender")
-                        .HasColumnType("tinyint");
-
-                    b.Property<decimal?>("Height")
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal?>("Weight")
-                        .HasColumnType("decimal(5,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserDetail_IsDeleted");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserDetail_UserId");
-
-                    b.ToTable("RII_USER_DETAIL", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserDiscountLimit", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErpProductGroupCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("MaxDiscount1")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("MaxDiscount2")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("MaxDiscount3")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<long>("SalespersonId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("ErpProductGroupCode")
-                        .HasDatabaseName("IX_UserDiscountLimit_ErpProductGroupCode");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserDiscountLimit_IsDeleted");
-
-                    b.HasIndex("SalespersonId")
-                        .HasDatabaseName("IX_UserDiscountLimit_SalespersonId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("SalespersonId", "ErpProductGroupCode")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserDiscountLimit_SalespersonId_ErpProductGroupCode");
-
-                    b.ToTable("RII_USER_DISCOUNT_LIMIT", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserGoogleAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccessTokenEncrypted")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<DateTimeOffset?>("ExpiresAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("GoogleEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsConnected")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("RefreshTokenEncrypted")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Scopes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_UserGoogleAccounts_TenantId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserGoogleAccounts_UserId");
-
-                    b.ToTable("RII_USER_GOOGLE_ACCOUNTS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserOutlookAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccessTokenEncrypted")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<DateTimeOffset?>("ExpiresAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsConnected")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("OutlookEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("RefreshTokenEncrypted")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Scopes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_UserOutlookAccounts_TenantId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserOutlookAccounts_UserId");
-
-                    b.ToTable("RII_USER_OUTLOOK_ACCOUNTS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("IX_PermissionDefinitions_Code");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_PermissionDefinitions_IsDeleted");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_PERMISSION_DEFINITIONS", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Code = "dashboard.view",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Dashboard View"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Code = "customers.view",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Customers View"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            Code = "salesmen360.view",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Salesmen 360 View"
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            Code = "customer360.view",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Customer 360 View"
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            Code = "powerbi.view",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Power BI View"
-                        });
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSystemAdmin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_PermissionGroups_IsDeleted");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("IX_PermissionGroups_Name");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("RII_PERMISSION_GROUPS", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Full system access",
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsSystemAdmin = true,
-                            Name = "System Admin"
-                        });
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroupPermission", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("PermissionDefinitionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("PermissionGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_PermissionGroupPermission_IsDeleted");
-
-                    b.HasIndex("PermissionDefinitionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("PermissionGroupId", "PermissionDefinitionId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_PermissionGroupPermission_GroupId_DefinitionId");
-
-                    b.ToTable("RII_PERMISSION_GROUP_PERMISSIONS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.UserPermissionGroup", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("PermissionGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserPermissionGroup_IsDeleted");
-
-                    b.HasIndex("PermissionGroupId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("UserId", "PermissionGroupId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserPermissionGroup_UserId_GroupId");
-
-                    b.ToTable("RII_USER_PERMISSION_GROUPS", (string)null);
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserSession", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeviceInfo")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_UserSession_IsDeleted");
-
-                    b.HasIndex("RevokedAt")
-                        .HasDatabaseName("IX_UserSession_RevokedAt");
-
-                    b.HasIndex("SessionId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserSession_SessionId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_UserSession_UserId");
-
-                    b.ToTable("RII_USER_SESSION", (string)null);
-                });
-
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_2SHIPPING", b =>
-                {
-                    b.Property<string>("CARI_ADRES")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CARI_IL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CARI_ILCE")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CARI_ISIM")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CARI_KOD")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("__EFMigrationsHistory_FN_2SHIPPING", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToFunction("RII_FN_2SHIPPING");
-                });
-
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_CAHAR", b =>
-                {
-                    b.Property<string>("ACIKLAMA")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("ALACAK")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("BELGE_NO")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<decimal?>("BORC")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("CARI_KOD")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<decimal?>("DOVIZ_ALACAK")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("DOVIZ_BORC")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<byte?>("DOVIZ_TURU")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("PARA_BIRIMI")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<DateTime?>("TARIH")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("TARIH_SIRALI_DOVIZ_BAKIYE")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("TARIH_SIRALI_TL_BAKIYE")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("VADE_SIRALI_DOVIZ_BAKIYE")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal?>("VADE_SIRALI_TL_BAKIYE")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTime?>("VADE_TARIHI")
-                        .HasColumnType("datetime2");
-
-                    b.ToTable("__EFMigrationsHistory_FN_CAHAR", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToFunction("RII_FN_CAHAR");
-                });
-
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_CARIBAKIYE", b =>
-                {
-                    b.Property<string>("BAKIYE_DURUMU")
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
-                    b.Property<decimal?>("BAKIYE_TUTARI")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("CARI_KOD")
-                        .IsRequired()
-                        .HasMaxLength(35)
-                        .HasColumnType("nvarchar(35)");
-
-                    b.Property<decimal?>("NET_BAKIYE")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.ToTable("__EFMigrationsHistory_FN_CARIBAKIYE", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToFunction("RII_FN_CARIBAKIYE");
-                });
-
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_KUR", b =>
-                {
-                    b.Property<string>("DOVIZ_ISMI")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DOVIZ_TIPI")
+                    b.Property<int>("RetryCount")
                         .HasColumnType("int");
 
-                    b.Property<double>("KUR_DEGERI")
-                        .HasColumnType("float");
+                    b.Property<string>("StackTrace")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
-                    b.ToTable("__EFMigrationsHistory_FN_KUR", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
 
-                    b.ToFunction("RII_FN_KUR");
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("FailedAt")
+                        .HasDatabaseName("IX_JobFailureLog_FailedAt");
+
+                    b.HasIndex("JobId")
+                        .HasDatabaseName("IX_JobFailureLog_JobId");
+
+                    b.HasIndex("JobName")
+                        .HasDatabaseName("IX_JobFailureLog_JobName");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RII_JOB_FAILURE_LOG", (string)null);
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_STOK", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
                 {
-                    b.Property<string>("GRUP_ISIM")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<string>("GRUP_KODU")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<string>("INGISIM")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<short>("ISLETME_KODU")
-                        .HasColumnType("smallint");
+                    b.Navigation("CreatedByUser");
 
-                    b.Property<string>("KOD1_ADI")
-                        .HasColumnType("nvarchar(max)");
+                    b.Navigation("DeletedByUser");
 
-                    b.Property<string>("KOD2_ADI")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD3_ADI")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD4_ADI")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD5_ADI")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD_1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD_2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD_3")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD_4")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KOD_5")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OLCU_BR1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("STOK_ADI")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("STOK_KODU")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<short>("SUBE_KODU")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("URETICI_KODU")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("__EFMigrationsHistory_FN_STOK", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToFunction("RII_FN_STOK");
+                    b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_STGROUP", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
                 {
-                    b.Property<string>("GRUP_ISIM")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<string>("GRUP_KOD")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<short>("ISLETME_KODU")
-                        .HasColumnType("smallint");
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Property<short>("SUBE_KODU")
-                        .HasColumnType("smallint");
+                    b.Navigation("CreatedByUser");
 
-                    b.ToTable("__EFMigrationsHistory_STGROUP", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.Navigation("DeletedByUser");
 
-                    b.ToFunction("RII_STGROUP");
+                    b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroupPermission", b =>
                 {
-                    b.HasOne("crm_api.Models.ActivityMeetingType", "ActivityMeetingType")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", "PermissionDefinition")
+                        .WithMany("GroupPermissions")
+                        .HasForeignKey("PermissionDefinitionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", "PermissionGroup")
+                        .WithMany("GroupPermissions")
+                        .HasForeignKey("PermissionGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("PermissionDefinition");
+
+                    b.Navigation("PermissionGroup");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserPermissionGroup", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", "PermissionGroup")
+                        .WithMany("UserGroups")
+                        .HasForeignKey("PermissionGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("PermissionGroup");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
+                {
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.ActivityMeetingType", "ActivityMeetingType")
                         .WithMany()
                         .HasForeignKey("ActivityMeetingTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ActivityShipping", "ActivityShipping")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.ActivityShipping", "ActivityShipping")
                         .WithMany()
                         .HasForeignKey("ActivityShippingId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ActivityTopicPurpose", "ActivityTopicPurpose")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.ActivityTopicPurpose", "ActivityTopicPurpose")
                         .WithMany()
                         .HasForeignKey("ActivityTopicPurposeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ActivityType", "ActivityType")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.ActivityType", "ActivityType")
                         .WithMany("Activities")
                         .HasForeignKey("ActivityTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "AssignedUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "AssignedUser")
                         .WithMany()
                         .HasForeignKey("AssignedUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.Contact", "Contact")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
                         .WithMany()
                         .HasForeignKey("PaymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
                         .WithMany()
                         .HasForeignKey("PotentialCustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7458,25 +8128,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityImage", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany("Images")
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7490,19 +8160,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityMeetingType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityMeetingType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7514,25 +8184,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityReminder", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityReminder", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany("Reminders")
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7546,19 +8216,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityShipping", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityShipping", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7570,19 +8240,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityTopicPurpose", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityTopicPurpose", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7594,19 +8264,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7618,31 +8288,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalAction", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalAction", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalRequest", "ApprovalRequest")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", "ApprovalRequest")
                         .WithMany()
                         .HasForeignKey("ApprovalRequestId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7658,19 +8328,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlow", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7682,31 +8352,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlowStep", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlowStep", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalFlow", "ApprovalFlow")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", "ApprovalFlow")
                         .WithMany()
                         .HasForeignKey("ApprovalFlowId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", "ApprovalRoleGroup")
                         .WithMany()
                         .HasForeignKey("ApprovalRoleGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7722,25 +8392,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalFlow", "ApprovalFlow")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", "ApprovalFlow")
                         .WithMany()
                         .HasForeignKey("ApprovalFlowId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7754,25 +8424,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRole", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRole", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", "ApprovalRoleGroup")
                         .WithMany()
                         .HasForeignKey("ApprovalRoleGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7786,19 +8456,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRoleGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7810,30 +8480,30 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalUserRole", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalUserRole", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalRole", "ApprovalRole")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRole", "ApprovalRole")
                         .WithMany()
                         .HasForeignKey("ApprovalRoleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -7850,25 +8520,206 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.CatalogCategory", b =>
                 {
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCatalog", "Catalog")
+                        .WithMany("CatalogCategories")
+                        .HasForeignKey("CatalogId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", "Category")
+                        .WithMany("CatalogCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.CatalogCategory", "ParentCatalogCategory")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentCatalogCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Catalog");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("ParentCatalogCategory");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCatalog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", "ParentCategory")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("ParentCategory");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategoryRule", b =>
+                {
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", "Category")
+                        .WithMany("CategoryRules")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.StockCategory", b =>
+                {
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", "Category")
+                        .WithMany("StockCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Catalog.Domain.Entities.ProductCategoryRule", "Rule")
+                        .WithMany("StockCategories")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
+                        .WithMany()
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Rule");
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
+                {
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany("Cities")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7882,34 +8733,34 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Contact", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Contact", b =>
                 {
-                    b.HasOne("crm_api.Models.Country", null)
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", null)
                         .WithMany("Contacts")
                         .HasForeignKey("CountryId");
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany("Contacts")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Title", "Title")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Title", "Title")
                         .WithMany("Contacts")
                         .HasForeignKey("TitleId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7925,19 +8776,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7949,49 +8800,49 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.CustomerType", "CustomerType")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.CustomerType", "CustomerType")
                         .WithMany("Customers")
                         .HasForeignKey("CustomerTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.ShippingAddress", "DefaultShippingAddress")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "DefaultShippingAddress")
                         .WithMany()
                         .HasForeignKey("DefaultShippingAddressId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.District", "District")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -8015,25 +8866,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerImage", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany("CustomerImages")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -8047,19 +8898,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -8071,223 +8922,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.District", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
-                        .WithMany()
-                        .HasForeignKey("DocumentSerialTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
-                        .WithMany()
-                        .HasForeignKey("PaymentTypeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
-                        .WithMany()
-                        .HasForeignKey("PotentialCustomerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "Representative")
-                        .WithMany()
-                        .HasForeignKey("RepresentativeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.SalesTypeDefinition", "SalesTypeDefinition")
-                        .WithMany()
-                        .HasForeignKey("SalesTypeDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
-                        .WithMany()
-                        .HasForeignKey("ShippingAddressId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("ApprovedByUser");
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("DocumentSerialType");
-
-                    b.Navigation("PaymentType");
-
-                    b.Navigation("PotentialCustomer");
-
-                    b.Navigation("Representative");
-
-                    b.Navigation("SalesTypeDefinition");
-
-                    b.Navigation("ShippingAddress");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.DemandExchangeRate", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Demand", "Demand")
-                        .WithMany()
-                        .HasForeignKey("DemandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Demand");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.DemandLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Demand", "Demand")
-                        .WithMany("Lines")
-                        .HasForeignKey("DemandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
-                        .WithMany()
-                        .HasForeignKey("PricingRuleHeaderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
-                        .WithMany()
-                        .HasForeignKey("RelatedStockId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Demand");
-
-                    b.Navigation("PricingRuleHeader");
-
-                    b.Navigation("RelatedStock");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.DemandNotes", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Demand", "Demand")
-                        .WithOne("DemandNotes")
-                        .HasForeignKey("crm_api.Models.DemandNotes", "DemandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Demand");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.District", b =>
-                {
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany("Districts")
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -8301,1250 +8954,40 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.DocumentSerialType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.CustomerType", "CustomerType")
-                        .WithMany()
-                        .HasForeignKey("CustomerTypeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "SalesRep")
-                        .WithMany()
-                        .HasForeignKey("SalesRepId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("CustomerType");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("SalesRep");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.GoogleCustomerMailLog", b =>
-                {
-                    b.HasOne("crm_api.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "SentByUser")
-                        .WithMany()
-                        .HasForeignKey("SentByUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("SentByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.GoogleIntegrationLog", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.JobFailureLog", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.Order", b =>
-                {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
-                        .WithMany()
-                        .HasForeignKey("DocumentSerialTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
-                        .WithMany()
-                        .HasForeignKey("PaymentTypeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
-                        .WithMany()
-                        .HasForeignKey("PotentialCustomerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
-                        .WithMany()
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "Representative")
-                        .WithMany()
-                        .HasForeignKey("RepresentativeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.SalesTypeDefinition", "SalesTypeDefinition")
-                        .WithMany()
-                        .HasForeignKey("SalesTypeDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
-                        .WithMany()
-                        .HasForeignKey("ShippingAddressId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("ApprovedByUser");
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("DocumentSerialType");
-
-                    b.Navigation("PaymentType");
-
-                    b.Navigation("PotentialCustomer");
-
-                    b.Navigation("Quotation");
-
-                    b.Navigation("Representative");
-
-                    b.Navigation("SalesTypeDefinition");
-
-                    b.Navigation("ShippingAddress");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.OrderExchangeRate", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.OrderLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Order", "Order")
-                        .WithMany("Lines")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
-                        .WithMany()
-                        .HasForeignKey("PricingRuleHeaderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
-                        .WithMany()
-                        .HasForeignKey("RelatedStockId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("PricingRuleHeader");
-
-                    b.Navigation("RelatedStock");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.OrderNotes", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Order", "Order")
-                        .WithOne("OrderNotes")
-                        .HasForeignKey("crm_api.Models.OrderNotes", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.OutlookCustomerMailLog", b =>
-                {
-                    b.HasOne("crm_api.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "SentByUser")
-                        .WithMany()
-                        .HasForeignKey("SentByUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("SentByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.OutlookIntegrationLog", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PasswordResetRequest", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PaymentType", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PdfTablePreset", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PdfTemplateAsset", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIConfiguration", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroup", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroupReportDefinition", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIReportDefinition", "ReportDefinition")
-                        .WithMany()
-                        .HasForeignKey("ReportDefinitionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Group");
-
-                    b.Navigation("ReportDefinition");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportDefinition", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportRoleMapping", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIReportDefinition", "ReportDefinition")
-                        .WithMany()
-                        .HasForeignKey("PowerBIReportDefinitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.UserAuthority", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("ReportDefinition");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PowerBi.UserPowerBIGroup", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Group");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PricingRuleLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
-                        .WithMany("Lines")
-                        .HasForeignKey("PricingRuleHeaderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("PricingRuleHeader");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.PricingRuleSalesman", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
-                        .WithMany("Salesmen")
-                        .HasForeignKey("PricingRuleHeaderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "Salesman")
-                        .WithMany()
-                        .HasForeignKey("SalesmanId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("PricingRuleHeader");
-
-                    b.Navigation("Salesman");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ProductPricing", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ProductPricingGroupBy", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
-                {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Demand", "Demand")
-                        .WithMany()
-                        .HasForeignKey("DemandId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
-                        .WithMany()
-                        .HasForeignKey("DocumentSerialTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
-                        .WithMany()
-                        .HasForeignKey("PaymentTypeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
-                        .WithMany()
-                        .HasForeignKey("PotentialCustomerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "Representative")
-                        .WithMany()
-                        .HasForeignKey("RepresentativeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.SalesTypeDefinition", "SalesTypeDefinition")
-                        .WithMany()
-                        .HasForeignKey("SalesTypeDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
-                        .WithMany()
-                        .HasForeignKey("ShippingAddressId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("ApprovedByUser");
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Demand");
-
-                    b.Navigation("DocumentSerialType");
-
-                    b.Navigation("PaymentType");
-
-                    b.Navigation("PotentialCustomer");
-
-                    b.Navigation("Representative");
-
-                    b.Navigation("SalesTypeDefinition");
-
-                    b.Navigation("ShippingAddress");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.QuotationExchangeRate", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
-                        .WithMany()
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Quotation");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.QuotationLine", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
-                        .WithMany()
-                        .HasForeignKey("PricingRuleHeaderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
-                        .WithMany("Lines")
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
-                        .WithMany()
-                        .HasForeignKey("RelatedStockId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("PricingRuleHeader");
-
-                    b.Navigation("Quotation");
-
-                    b.Navigation("RelatedStock");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.QuotationNotes", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
-                        .WithOne("QuotationNotes")
-                        .HasForeignKey("crm_api.Models.QuotationNotes", "QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("Quotation");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportAssignment", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.ReportBuilder.ReportDefinition", "ReportDefinition")
-                        .WithMany("Assignments")
-                        .HasForeignKey("ReportDefinitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("ReportDefinition");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportDefinition", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ReportTemplate", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.SalesTypeDefinition", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.ShippingAddress", b =>
-                {
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany("ShippingAddresses")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.District", "District")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9564,17 +9007,585 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.SmtpSetting", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Title", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.CustomerType", "CustomerType")
+                        .WithMany()
+                        .HasForeignKey("CustomerTypeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "SalesRep")
+                        .WithMany()
+                        .HasForeignKey("SalesRepId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("CustomerType");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("SalesRep");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
+                {
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
+                        .WithMany()
+                        .HasForeignKey("DocumentSerialTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
+                        .WithMany()
+                        .HasForeignKey("PaymentTypeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
+                        .WithMany()
+                        .HasForeignKey("PotentialCustomerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
+                        .WithMany()
+                        .HasForeignKey("RepresentativeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", "SalesTypeDefinition")
+                        .WithMany()
+                        .HasForeignKey("SalesTypeDefinitionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
+                        .WithMany()
+                        .HasForeignKey("ShippingAddressId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("DocumentSerialType");
+
+                    b.Navigation("PaymentType");
+
+                    b.Navigation("PotentialCustomer");
+
+                    b.Navigation("Representative");
+
+                    b.Navigation("SalesTypeDefinition");
+
+                    b.Navigation("ShippingAddress");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandExchangeRate", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandLine", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
+                        .WithMany("Lines")
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
+                        .WithMany()
+                        .HasForeignKey("PricingRuleHeaderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
+                        .WithMany()
+                        .HasForeignKey("RelatedStockId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("PricingRuleHeader");
+
+                    b.Navigation("RelatedStock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandNotes", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
+                        .WithOne("DemandNotes")
+                        .HasForeignKey("crm_api.Modules.Demand.Domain.Entities.DemandNotes", "DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.PasswordResetRequest", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", "RoleNavigation")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("RoleNavigation");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserDetail", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserSession", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany("Sessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.GoogleCustomerMailLog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("SentByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.GoogleIntegrationLog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.OutlookCustomerMailLog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("SentByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.OutlookIntegrationLog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.SmtpSetting", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
@@ -9585,81 +9596,174 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.UserGoogleAccount", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.UserOutlookAccount", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Notification.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.StockDetail", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.Stock", "Stock")
-                        .WithOne("StockDetail")
-                        .HasForeignKey("crm_api.Models.StockDetail", "StockId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("DeletedByUser");
 
-                    b.Navigation("Stock");
-
                     b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Stock", "Stock")
-                        .WithMany("StockImages")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
+                        .WithMany()
+                        .HasForeignKey("DocumentSerialTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
+                        .WithMany()
+                        .HasForeignKey("PaymentTypeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
+                        .WithMany()
+                        .HasForeignKey("PotentialCustomerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
+                        .WithMany()
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
+                        .WithMany()
+                        .HasForeignKey("RepresentativeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", "SalesTypeDefinition")
+                        .WithMany()
+                        .HasForeignKey("SalesTypeDefinitionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
+                        .WithMany()
+                        .HasForeignKey("ShippingAddressId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("DocumentSerialType");
+
+                    b.Navigation("PaymentType");
+
+                    b.Navigation("PotentialCustomer");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("Representative");
+
+                    b.Navigation("SalesTypeDefinition");
+
+                    b.Navigation("ShippingAddress");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderExchangeRate", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9668,36 +9772,40 @@ namespace crm_api.Migrations
 
                     b.Navigation("DeletedByUser");
 
-                    b.Navigation("Stock");
+                    b.Navigation("Order");
 
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockRelation", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
+                        .WithMany("Lines")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
+                        .WithMany()
+                        .HasForeignKey("PricingRuleHeaderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
                         .WithMany()
                         .HasForeignKey("RelatedStockId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.Stock", "Stock")
-                        .WithMany("ParentRelations")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9705,43 +9813,733 @@ namespace crm_api.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("DeletedByUser");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("PricingRuleHeader");
 
                     b.Navigation("RelatedStock");
 
-                    b.Navigation("Stock");
-
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderNotes", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
+                        .WithOne("OrderNotes")
+                        .HasForeignKey("crm_api.Modules.Order.Domain.Entities.OrderNotes", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.PdfTablePreset", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.PdfTemplateAsset", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.QuickQuotationImage", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.ReportTemplate", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIConfiguration", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroupReportDefinition", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", "ReportDefinition")
+                        .WithMany()
+                        .HasForeignKey("ReportDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("ReportDefinition");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportRoleMapping", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", "ReportDefinition")
+                        .WithMany()
+                        .HasForeignKey("PowerBIReportDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("ReportDefinition");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.UserPowerBIGroup", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("UpdatedByUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleLine", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
+                        .WithMany("Lines")
+                        .HasForeignKey("PricingRuleHeaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("PricingRuleHeader");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleSalesman", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
+                        .WithMany("Salesmen")
+                        .HasForeignKey("PricingRuleHeaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Salesman")
+                        .WithMany()
+                        .HasForeignKey("SalesmanId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("PricingRuleHeader");
+
+                    b.Navigation("Salesman");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.PaymentType", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricing", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricingGroupBy", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
+                {
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
+                        .WithMany()
+                        .HasForeignKey("DocumentSerialTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
+                        .WithMany()
+                        .HasForeignKey("PaymentTypeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
+                        .WithMany()
+                        .HasForeignKey("PotentialCustomerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
+                        .WithMany()
+                        .HasForeignKey("RepresentativeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", "SalesTypeDefinition")
+                        .WithMany()
+                        .HasForeignKey("SalesTypeDefinitionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
+                        .WithMany()
+                        .HasForeignKey("ShippingAddressId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("DocumentSerialType");
+
+                    b.Navigation("PaymentType");
+
+                    b.Navigation("PotentialCustomer");
+
+                    b.Navigation("Representative");
+
+                    b.Navigation("SalesTypeDefinition");
+
+                    b.Navigation("ShippingAddress");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationExchangeRate", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
+                        .WithMany()
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationLine", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
+                        .WithMany()
+                        .HasForeignKey("PricingRuleHeaderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
+                        .WithMany("Lines")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
+                        .WithMany()
+                        .HasForeignKey("RelatedStockId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("PricingRuleHeader");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("RelatedStock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
+                        .WithOne("QuotationNotes")
+                        .HasForeignKey("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", "QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
                         .WithMany()
                         .HasForeignKey("QuotationId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.TempQuotattion", "Revision")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", "Revision")
                         .WithMany("Revisions")
                         .HasForeignKey("RevisionId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9759,25 +10557,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattionExchangeLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattionExchangeLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.TempQuotattion", "TempQuotattion")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", "TempQuotattion")
                         .WithMany("ExchangeLines")
                         .HasForeignKey("TempQuotattionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9791,25 +10589,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.TempQuotattionLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattionLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.TempQuotattion", "TempQuotattion")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", "TempQuotattion")
                         .WithMany("Lines")
                         .HasForeignKey("TempQuotattionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9823,137 +10621,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Title", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.UserDiscountLimit", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.User", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.UserAuthority", "RoleNavigation")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("RoleNavigation");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserAuthority", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserDetail", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserDiscountLimit", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "Salespersons")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Salespersons")
                         .WithMany()
                         .HasForeignKey("SalespersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9967,213 +10653,285 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserGoogleAccount", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportAssignment", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserOutlookAccount", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroupPermission", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionDefinition", "PermissionDefinition")
-                        .WithMany("GroupPermissions")
-                        .HasForeignKey("PermissionDefinitionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionGroup", "PermissionGroup")
-                        .WithMany("GroupPermissions")
-                        .HasForeignKey("PermissionGroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("PermissionDefinition");
-
-                    b.Navigation("PermissionGroup");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserPermissions.UserPermissionGroup", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionGroup", "PermissionGroup")
-                        .WithMany("UserGroups")
-                        .HasForeignKey("PermissionGroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("PermissionGroup");
-
-                    b.Navigation("UpdatedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("crm_api.Models.UserSession", b =>
-                {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("crm_api.Models.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
+                    b.HasOne("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", "ReportDefinition")
+                        .WithMany("Assignments")
+                        .HasForeignKey("ReportDefinitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("DeletedByUser");
+
+                    b.Navigation("ReportDefinition");
 
                     b.Navigation("UpdatedByUser");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockDetail", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
+                        .WithOne("StockDetail")
+                        .HasForeignKey("crm_api.Modules.Stock.Domain.Entities.StockDetail", "StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockImage", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
+                        .WithMany("StockImages")
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockRelation", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
+                        .WithMany()
+                        .HasForeignKey("RelatedStockId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
+                        .WithMany("ParentRelations")
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("RelatedStock");
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Shared.Infrastructure.Monitoring.JobFailureLog", b =>
+                {
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
+                {
+                    b.Navigation("GroupPermissions");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
+                {
+                    b.Navigation("GroupPermissions");
+
+                    b.Navigation("UserGroups");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Reminders");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
                     b.Navigation("Activities");
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.CatalogCategory", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCatalog", b =>
+                {
+                    b.Navigation("CatalogCategories");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategory", b =>
+                {
+                    b.Navigation("CatalogCategories");
+
+                    b.Navigation("CategoryRules");
+
+                    b.Navigation("Children");
+
+                    b.Navigation("StockCategories");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Catalog.Domain.Entities.ProductCategoryRule", b =>
+                {
+                    b.Navigation("StockCategories");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
                 {
                     b.Navigation("Districts");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
                     b.Navigation("Cities");
 
                     b.Navigation("Contacts");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Contacts");
 
@@ -10182,54 +10940,50 @@ namespace crm_api.Migrations
                     b.Navigation("ShippingAddresses");
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
                     b.Navigation("Customers");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Title", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
                 {
                     b.Navigation("DemandNotes");
 
                     b.Navigation("Lines");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Order", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Sessions");
+                });
+
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("OrderNotes");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("Salesmen");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("QuotationNotes");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportDefinition", b =>
-                {
-                    b.Navigation("Assignments");
-                });
-
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
-                {
-                    b.Navigation("ParentRelations");
-
-                    b.Navigation("StockDetail");
-
-                    b.Navigation("StockImages");
-                });
-
-            modelBuilder.Entity("crm_api.Models.TempQuotattion", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.TempQuotattion", b =>
                 {
                     b.Navigation("ExchangeLines");
 
@@ -10238,26 +10992,18 @@ namespace crm_api.Migrations
                     b.Navigation("Revisions");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Title", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", b =>
                 {
-                    b.Navigation("Contacts");
+                    b.Navigation("Assignments");
                 });
 
-            modelBuilder.Entity("crm_api.Models.User", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
                 {
-                    b.Navigation("Sessions");
-                });
+                    b.Navigation("ParentRelations");
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
-                {
-                    b.Navigation("GroupPermissions");
-                });
+                    b.Navigation("StockDetail");
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
-                {
-                    b.Navigation("GroupPermissions");
-
-                    b.Navigation("UserGroups");
+                    b.Navigation("StockImages");
                 });
 #pragma warning restore 612, 618
         }

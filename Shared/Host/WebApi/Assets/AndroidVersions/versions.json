@@ -1,0 +1,12 @@
+{
+  "android": {
+    "latestVersion": "1.0.0",
+    "latestVersionCode": 1,
+    "minimumSupportedVersion": "1.0.0",
+    "minimumSupportedVersionCode": 1,
+    "apkFileName": "verii-crm-1.0.0.apk",
+    "apkUrl": "",
+    "releaseNotes": "CRM mobile update manifest. Release notes will be updated per release.",
+    "publishedAtUtc": "2026-04-09T12:00:00Z"
+  }
+}

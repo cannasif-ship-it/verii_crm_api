@@ -1,0 +1,87 @@
+using Microsoft.AspNetCore.Mvc;
+using crm_api.Modules.Integrations.Application.Dtos.Erp;
+using Microsoft.AspNetCore.Authorization;
+
+namespace crm_api.Modules.Integrations.Api
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class ErpController : ControllerBase
+    {
+        private readonly IErpService _IErpService;
+
+        public ErpController(IErpService erpService)
+        {
+            _IErpService = erpService;
+        }
+
+        [HttpGet("getAllCustomers")]
+        public async Task<ActionResult<ApiResponse<List<CariDto>>>> GetCaris([FromQuery] string? cariKodu = null)
+        {
+            var result = await _IErpService.GetCarisAsync(cariKodu);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getAllProducts")]
+        public async Task<ActionResult<ApiResponse<List<StokDto>>>> GetStoks([FromQuery] string? stokKodu = null)
+        {
+            var result = await _IErpService.GetStoksAsync(stokKodu);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getEsnYapMas")]
+        public async Task<ActionResult<ApiResponse<List<EsnYapMasDto>>>> GetEsnYapMas()
+        {
+            var result = await _IErpService.GetEsnYapMasAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getBranches")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<BranchDto>>>> GetBranches([FromQuery] int? branchNo = null)
+        {
+            var result = await _IErpService.GetBranchesAsync(branchNo);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getExchangeRate")]
+        public async Task<ActionResult<ApiResponse<List<KurDto>>>> GetExchangeRate(
+            [FromQuery] DateTime tarih,
+            [FromQuery] int fiyatTipi)
+        {
+            var result = await _IErpService.GetExchangeRateAsync(tarih, fiyatTipi);
+
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getStokGroup")]
+        public async Task<ActionResult<ApiResponse<List<StokGroupDto>>>> GetStokGroup([FromQuery] string? grupKodu)
+        {
+            var result = await _IErpService.GetStokGroupAsync(grupKodu);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getErpShippingAddress")]
+        public async Task<ActionResult<ApiResponse<List<ErpShippingAddressDto>>>> GetErpShippingAddress([FromQuery] string customerCode)
+        {
+            var result = await _IErpService.GetErpShippingAddressAsync(customerCode);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("getProjectCodes")]
+        public async Task<ActionResult<ApiResponse<List<ProjeDto>>>> GetProjectCodes()
+        {
+            var result = await _IErpService.GetProjectCodesAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("health-check")]
+        [AllowAnonymous]
+        public IActionResult HealthCheckPublic()
+        {
+            var healthResponse = new { Status = "Healthy", Timestamp = DateTime.UtcNow };
+            return StatusCode(200, healthResponse);
+        }
+    }
+}

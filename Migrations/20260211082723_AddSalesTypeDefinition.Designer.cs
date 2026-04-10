@@ -25,7 +25,7 @@ namespace crm_api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -137,7 +137,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityReminder", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityReminder", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -210,7 +210,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_REMINDER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -270,7 +270,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ACTIVITY_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalAction", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalAction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -336,7 +336,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_ACTION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlow", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -396,7 +396,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_FLOW", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlowStep", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlowStep", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -456,7 +456,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_FLOW_STEP", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -591,7 +591,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_ROLE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRoleGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -701,7 +701,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_APPROVAL_USER_ROLE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -764,7 +764,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CITY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Contact", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Contact", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -867,7 +867,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CONTACT", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -933,7 +933,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_COUNTRY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1153,7 +1153,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CUSTOMER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1211,7 +1211,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_CUSTOMER_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1439,7 +1439,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1515,7 +1515,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1636,7 +1636,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1748,7 +1748,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DEMAND_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.District", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.District", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1816,7 +1816,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DISTRICT", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.DocumentSerialType", b =>
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1895,7 +1895,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_DOCUMENT_SERIAL_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
+            modelBuilder.Entity("crm_api.Modules.Notification.Domain.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1977,7 +1977,7 @@ namespace crm_api.Migrations
                     b.ToTable("Notifications", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Order", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2211,7 +2211,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2287,7 +2287,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2408,7 +2408,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2520,7 +2520,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_ORDER_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PasswordResetRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.PasswordResetRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2578,7 +2578,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PASSWORD_RESET_REQUEST", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PaymentType", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.PaymentType", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2638,7 +2638,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PAYMENT_TYPE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIConfiguration", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIConfiguration", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2704,7 +2704,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_CONFIGURATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2767,7 +2767,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_GROUPS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroupReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroupReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2824,7 +2824,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_GROUP_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2912,7 +2912,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportRoleMapping", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportRoleMapping", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2973,7 +2973,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_POWERBI_REPORT_ROLE_MAPPINGS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.UserPowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.UserPowerBIGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3030,7 +3030,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_POWERBI_GROUPS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3132,7 +3132,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_HEADER", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3237,7 +3237,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleSalesman", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleSalesman", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3298,7 +3298,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRICING_RULE_SALESMAN", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricing", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricing", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3386,7 +3386,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRODUCT_PRICING", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricingGroupBy", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricingGroupBy", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3463,7 +3463,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PRODUCT_PRICING_GROUP_BY", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3697,7 +3697,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationExchangeRate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3773,7 +3773,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_EXCHANGE_RATE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationLine", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -3894,7 +3894,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_LINE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4006,7 +4006,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_QUOTATION_NOTES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4082,7 +4082,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_REPORT_DEFINITIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportTemplate", b =>
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.ReportTemplate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4165,7 +4165,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_REPORT_TEMPLATES", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.SalesTypeDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4230,7 +4230,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_SALES_TYPE_DEFINITION", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.ShippingAddress", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4329,7 +4329,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_SHIPPING_ADDRESS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.SmtpSetting", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.SmtpSetting", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4412,7 +4412,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_SMTP_SETTING", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4534,7 +4534,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockDetail", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockDetail", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4593,7 +4593,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_DETAIL", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockImage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4663,7 +4663,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_STOCK_IMAGE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockRelation", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockRelation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4792,7 +4792,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_TITLE", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.User", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4897,7 +4897,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USERS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserAuthority", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -4974,7 +4974,7 @@ namespace crm_api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserDetail", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserDetail", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5043,7 +5043,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_DETAIL", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserDiscountLimit", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.UserDiscountLimit", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5115,7 +5115,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_DISCOUNT_LIMIT", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5230,7 +5230,7 @@ namespace crm_api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5310,7 +5310,7 @@ namespace crm_api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroupPermission", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroupPermission", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5367,7 +5367,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_PERMISSION_GROUP_PERMISSIONS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.UserPermissionGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserPermissionGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5424,7 +5424,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_PERMISSION_GROUPS", (string)null);
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserSession", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserSession", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -5508,7 +5508,7 @@ namespace crm_api.Migrations
                     b.ToTable("RII_USER_SESSION", (string)null);
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_2SHIPPING", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_2SHIPPING", b =>
                 {
                     b.Property<string>("CARI_ADRES")
                         .HasColumnType("nvarchar(max)");
@@ -5533,7 +5533,7 @@ namespace crm_api.Migrations
                     b.ToFunction("RII_FN_2SHIPPING");
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_KUR", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_KUR", b =>
                 {
                     b.Property<string>("DOVIZ_ISMI")
                         .IsRequired()
@@ -5553,7 +5553,7 @@ namespace crm_api.Migrations
                     b.ToFunction("RII_FN_KUR");
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_FN_STOK", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_FN_STOK", b =>
                 {
                     b.Property<string>("GRUP_ISIM")
                         .HasColumnType("nvarchar(max)");
@@ -5621,7 +5621,7 @@ namespace crm_api.Migrations
                     b.ToFunction("RII_FN_STOK");
                 });
 
-            modelBuilder.Entity("depoWebAPI.Models.RII_STGROUP", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.ReadModels.RII_STGROUP", b =>
                 {
                     b.Property<string>("GRUP_ISIM")
                         .HasColumnType("nvarchar(max)");
@@ -5643,41 +5643,41 @@ namespace crm_api.Migrations
                     b.ToFunction("RII_STGROUP");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
                 {
-                    b.HasOne("crm_api.Models.ActivityType", "ActivityType")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.ActivityType", "ActivityType")
                         .WithMany("Activities")
                         .HasForeignKey("ActivityTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "AssignedUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "AssignedUser")
                         .WithMany()
                         .HasForeignKey("AssignedUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.Contact", "Contact")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
                         .WithMany()
                         .HasForeignKey("PotentialCustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5697,25 +5697,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityReminder", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityReminder", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany("Reminders")
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5729,19 +5729,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5753,31 +5753,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalAction", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalAction", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalRequest", "ApprovalRequest")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", "ApprovalRequest")
                         .WithMany()
                         .HasForeignKey("ApprovalRequestId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5793,19 +5793,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlow", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5817,31 +5817,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalFlowStep", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalFlowStep", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalFlow", "ApprovalFlow")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", "ApprovalFlow")
                         .WithMany()
                         .HasForeignKey("ApprovalFlowId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", "ApprovalRoleGroup")
                         .WithMany()
                         .HasForeignKey("ApprovalRoleGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5857,25 +5857,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRequest", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalFlow", "ApprovalFlow")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalFlow", "ApprovalFlow")
                         .WithMany()
                         .HasForeignKey("ApprovalFlowId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5891,23 +5891,23 @@ namespace crm_api.Migrations
 
             modelBuilder.Entity("crm_api.Models.ApprovalRole", b =>
                 {
-                    b.HasOne("crm_api.Models.ApprovalRoleGroup", "ApprovalRoleGroup")
+                    b.HasOne("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", "ApprovalRoleGroup")
                         .WithMany()
                         .HasForeignKey("ApprovalRoleGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5921,19 +5921,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ApprovalRoleGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.Approval.Domain.Entities.ApprovalRoleGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -5953,22 +5953,22 @@ namespace crm_api.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -5985,25 +5985,25 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
                 {
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany("Cities")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6017,24 +6017,24 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Contact", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Contact", b =>
                 {
-                    b.HasOne("crm_api.Models.Country", null)
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", null)
                         .WithMany("Contacts")
                         .HasForeignKey("CountryId");
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany("Contacts")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6044,7 +6044,7 @@ namespace crm_api.Migrations
                         .HasForeignKey("TitleId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6060,19 +6060,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6084,49 +6084,49 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.CustomerType", "CustomerType")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.CustomerType", "CustomerType")
                         .WithMany("Customers")
                         .HasForeignKey("CustomerTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.ShippingAddress", "DefaultShippingAddress")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "DefaultShippingAddress")
                         .WithMany()
                         .HasForeignKey("DefaultShippingAddressId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.District", "District")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6150,19 +6150,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6174,60 +6174,60 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany()
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Contact", "Contact")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
                         .WithMany()
                         .HasForeignKey("DocumentSerialTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
                         .WithMany()
                         .HasForeignKey("PaymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
                         .WithMany()
                         .HasForeignKey("PotentialCustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "Representative")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
                         .WithMany()
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6255,25 +6255,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandExchangeRate", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Demand", "Demand")
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
                         .WithMany()
                         .HasForeignKey("DemandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6287,35 +6287,35 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Demand", "Demand")
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
                         .WithMany("Lines")
                         .HasForeignKey("DemandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
                         .WithMany()
                         .HasForeignKey("PricingRuleHeaderId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
                         .WithMany()
                         .HasForeignKey("RelatedStockId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6333,25 +6333,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.DemandNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.DemandNotes", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Demand", "Demand")
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
                         .WithOne("DemandNotes")
-                        .HasForeignKey("crm_api.Models.DemandNotes", "DemandId")
+                        .HasForeignKey("crm_api.Modules.Demand.Domain.Entities.DemandNotes", "DemandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6365,25 +6365,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.District", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.District", b =>
                 {
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany("Districts")
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6397,29 +6397,29 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.DocumentSerialType", b =>
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.CustomerType", "CustomerType")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.CustomerType", "CustomerType")
                         .WithMany()
                         .HasForeignKey("CustomerTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "SalesRep")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "SalesRep")
                         .WithMany()
                         .HasForeignKey("SalesRepId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6435,24 +6435,24 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Notification.Notification", b =>
+            modelBuilder.Entity("crm_api.Modules.Notification.Domain.Entities.Notification", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -6467,65 +6467,65 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Order", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany()
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Contact", "Contact")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
                         .WithMany()
                         .HasForeignKey("DocumentSerialTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
                         .WithMany()
                         .HasForeignKey("PaymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
                         .WithMany()
                         .HasForeignKey("PotentialCustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
                         .WithMany()
                         .HasForeignKey("QuotationId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "Representative")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
                         .WithMany()
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6555,25 +6555,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderExchangeRate", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Order", "Order")
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6587,35 +6587,35 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Order", "Order")
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
                         .WithMany("Lines")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
                         .WithMany()
                         .HasForeignKey("PricingRuleHeaderId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
                         .WithMany()
                         .HasForeignKey("RelatedStockId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6633,25 +6633,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.OrderNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.OrderNotes", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Order", "Order")
+                    b.HasOne("crm_api.Modules.Order.Domain.Entities.Order", "Order")
                         .WithOne("OrderNotes")
-                        .HasForeignKey("crm_api.Models.OrderNotes", "OrderId")
+                        .HasForeignKey("crm_api.Modules.Order.Domain.Entities.OrderNotes", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6665,24 +6665,24 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PasswordResetRequest", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.PasswordResetRequest", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -6697,19 +6697,19 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PaymentType", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.PaymentType", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6721,19 +6721,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIConfiguration", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIConfiguration", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6745,19 +6745,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6769,31 +6769,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIGroupReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroupReportDefinition", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIGroup", "Group")
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIReportDefinition", "ReportDefinition")
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", "ReportDefinition")
                         .WithMany()
                         .HasForeignKey("ReportDefinitionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6809,19 +6809,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6833,31 +6833,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.PowerBIReportRoleMapping", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportRoleMapping", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIReportDefinition", "ReportDefinition")
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIReportDefinition", "ReportDefinition")
                         .WithMany()
                         .HasForeignKey("PowerBIReportDefinitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.UserAuthority", "Role")
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6873,30 +6873,30 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PowerBi.UserPowerBIGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.PowerBI.Domain.Entities.UserPowerBIGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PowerBi.PowerBIGroup", "Group")
+                    b.HasOne("crm_api.Modules.PowerBI.Domain.Entities.PowerBIGroup", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -6913,24 +6913,24 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6944,25 +6944,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
                         .WithMany("Lines")
                         .HasForeignKey("PricingRuleHeaderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -6976,31 +6976,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleSalesman", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleSalesman", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
                         .WithMany("Salesmen")
                         .HasForeignKey("PricingRuleHeaderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "Salesman")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Salesman")
                         .WithMany()
                         .HasForeignKey("SalesmanId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7016,19 +7016,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricing", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricing", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7040,19 +7040,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ProductPricingGroupBy", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.ProductPricingGroupBy", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7064,65 +7064,65 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
                 {
-                    b.HasOne("crm_api.Models.Activity", "Activity")
+                    b.HasOne("crm_api.Modules.Activity.Domain.Entities.Activity", "Activity")
                         .WithMany()
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "ApprovedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Contact", "Contact")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Demand", "Demand")
+                    b.HasOne("crm_api.Modules.Demand.Domain.Entities.Demand", "Demand")
                         .WithMany()
                         .HasForeignKey("DemandId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.DocumentSerialType", "DocumentSerialType")
+                    b.HasOne("crm_api.Modules.Definitions.Domain.Entities.DocumentSerialType", "DocumentSerialType")
                         .WithMany()
                         .HasForeignKey("DocumentSerialTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.PaymentType", "PaymentType")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.PaymentType", "PaymentType")
                         .WithMany()
                         .HasForeignKey("PaymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "PotentialCustomer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "PotentialCustomer")
                         .WithMany()
                         .HasForeignKey("PotentialCustomerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "Representative")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Representative")
                         .WithMany()
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.ShippingAddress", "ShippingAddress")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7152,25 +7152,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationExchangeRate", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationExchangeRate", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
                         .WithMany()
                         .HasForeignKey("QuotationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7184,35 +7184,35 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationLine", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationLine", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.PricingRuleHeader", "PricingRuleHeader")
+                    b.HasOne("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", "PricingRuleHeader")
                         .WithMany()
                         .HasForeignKey("PricingRuleHeaderId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
                         .WithMany("Lines")
                         .HasForeignKey("QuotationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
                         .WithMany()
                         .HasForeignKey("RelatedStockId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7230,25 +7230,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.QuotationNotes", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Quotation", "Quotation")
+                    b.HasOne("crm_api.Modules.Quotation.Domain.Entities.Quotation", "Quotation")
                         .WithOne("QuotationNotes")
-                        .HasForeignKey("crm_api.Models.QuotationNotes", "QuotationId")
+                        .HasForeignKey("crm_api.Modules.Quotation.Domain.Entities.QuotationNotes", "QuotationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7262,19 +7262,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportBuilder.ReportDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7286,17 +7286,17 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ReportTemplate", b =>
+            modelBuilder.Entity("crm_api.Modules.PdfBuilder.Domain.Entities.ReportTemplate", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
@@ -7307,19 +7307,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.SalesTypeDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.Definitions.Domain.Entities.SalesTypeDefinition", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7331,40 +7331,40 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ShippingAddress", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.ShippingAddress", b =>
                 {
-                    b.HasOne("crm_api.Models.City", "City")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Country", "Country")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Country", "Country")
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Customer", "Customer")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.Customer", "Customer")
                         .WithMany("ShippingAddresses")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.District", "District")
+                    b.HasOne("crm_api.Modules.Customer.Domain.Entities.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7384,17 +7384,17 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.SmtpSetting", b =>
+            modelBuilder.Entity("crm_api.Modules.Integrations.Domain.Entities.SmtpSetting", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
@@ -7405,19 +7405,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7429,25 +7429,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockDetail", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockDetail", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Stock", "Stock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
                         .WithOne("StockDetail")
-                        .HasForeignKey("crm_api.Models.StockDetail", "StockId")
+                        .HasForeignKey("crm_api.Modules.Stock.Domain.Entities.StockDetail", "StockId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7461,25 +7461,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockImage", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockImage", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Stock", "Stock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
                         .WithMany("StockImages")
                         .HasForeignKey("StockId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7493,31 +7493,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.StockRelation", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.StockRelation", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.Stock", "RelatedStock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "RelatedStock")
                         .WithMany()
                         .HasForeignKey("RelatedStockId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.Stock", "Stock")
+                    b.HasOne("crm_api.Modules.Stock.Domain.Entities.Stock", "Stock")
                         .WithMany("ParentRelations")
                         .HasForeignKey("StockId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7535,17 +7535,17 @@ namespace crm_api.Migrations
 
             modelBuilder.Entity("crm_api.Models.Title", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7557,25 +7557,25 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.User", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.UserAuthority", "RoleNavigation")
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", "RoleNavigation")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7589,19 +7589,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserAuthority", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserAuthority", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7613,24 +7613,24 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserDetail", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserDetail", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -7645,25 +7645,25 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserDiscountLimit", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.UserDiscountLimit", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "Salespersons")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "Salespersons")
                         .WithMany()
                         .HasForeignKey("SalespersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7677,19 +7677,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7701,19 +7701,19 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7725,31 +7725,31 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroupPermission", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroupPermission", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionDefinition", "PermissionDefinition")
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", "PermissionDefinition")
                         .WithMany("GroupPermissions")
                         .HasForeignKey("PermissionDefinitionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionGroup", "PermissionGroup")
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", "PermissionGroup")
                         .WithMany("GroupPermissions")
                         .HasForeignKey("PermissionGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -7765,30 +7765,30 @@ namespace crm_api.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.UserPermissionGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.UserPermissionGroup", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.UserPermissions.PermissionGroup", "PermissionGroup")
+                    b.HasOne("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", "PermissionGroup")
                         .WithMany("UserGroups")
                         .HasForeignKey("PermissionGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -7805,24 +7805,24 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserSession", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.UserSession", b =>
                 {
-                    b.HasOne("crm_api.Models.User", "CreatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "DeletedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "UpdatedByUser")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("crm_api.Models.User", "User")
+                    b.HasOne("crm_api.Modules.Identity.Domain.Entities.User", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7837,69 +7837,69 @@ namespace crm_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Activity", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.Activity", b =>
                 {
                     b.Navigation("Reminders");
                 });
 
-            modelBuilder.Entity("crm_api.Models.ActivityType", b =>
+            modelBuilder.Entity("crm_api.Modules.Activity.Domain.Entities.ActivityType", b =>
                 {
                     b.Navigation("Activities");
                 });
 
-            modelBuilder.Entity("crm_api.Models.City", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.City", b =>
                 {
                     b.Navigation("Districts");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Country", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Country", b =>
                 {
                     b.Navigation("Cities");
 
                     b.Navigation("Contacts");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Customer", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Contacts");
 
                     b.Navigation("ShippingAddresses");
                 });
 
-            modelBuilder.Entity("crm_api.Models.CustomerType", b =>
+            modelBuilder.Entity("crm_api.Modules.Customer.Domain.Entities.CustomerType", b =>
                 {
                     b.Navigation("Customers");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Demand", b =>
+            modelBuilder.Entity("crm_api.Modules.Demand.Domain.Entities.Demand", b =>
                 {
                     b.Navigation("DemandNotes");
 
                     b.Navigation("Lines");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Order", b =>
+            modelBuilder.Entity("crm_api.Modules.Order.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("OrderNotes");
                 });
 
-            modelBuilder.Entity("crm_api.Models.PricingRuleHeader", b =>
+            modelBuilder.Entity("crm_api.Modules.Pricing.Domain.Entities.PricingRuleHeader", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("Salesmen");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Quotation", b =>
+            modelBuilder.Entity("crm_api.Modules.Quotation.Domain.Entities.Quotation", b =>
                 {
                     b.Navigation("Lines");
 
                     b.Navigation("QuotationNotes");
                 });
 
-            modelBuilder.Entity("crm_api.Models.Stock", b =>
+            modelBuilder.Entity("crm_api.Modules.Stock.Domain.Entities.Stock", b =>
                 {
                     b.Navigation("ParentRelations");
 
@@ -7913,17 +7913,17 @@ namespace crm_api.Migrations
                     b.Navigation("Contacts");
                 });
 
-            modelBuilder.Entity("crm_api.Models.User", b =>
+            modelBuilder.Entity("crm_api.Modules.Identity.Domain.Entities.User", b =>
                 {
                     b.Navigation("Sessions");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionDefinition", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionDefinition", b =>
                 {
                     b.Navigation("GroupPermissions");
                 });
 
-            modelBuilder.Entity("crm_api.Models.UserPermissions.PermissionGroup", b =>
+            modelBuilder.Entity("crm_api.Modules.AccessControl.Domain.Entities.PermissionGroup", b =>
                 {
                     b.Navigation("GroupPermissions");
 

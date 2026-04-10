@@ -1,6 +1,3 @@
-using crm_api.DTOs;
-using crm_api.Models;
-using crm_api.Services;
 using Xunit;
 
 namespace crm_api.Tests

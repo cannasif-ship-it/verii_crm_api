@@ -1,8 +1,6 @@
 using Hangfire;
 using Infrastructure.BackgroundJobs.Interfaces;
-using crm_api.Interfaces;
 using crm_api.Data;
-using crm_api.Models;
 using crm_api.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

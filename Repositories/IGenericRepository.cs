@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Linq.Expressions;
-using crm_api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace crm_api.Repositories

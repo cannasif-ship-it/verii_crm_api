@@ -1,4 +1,3 @@
-using crm_api.Models;
 
 namespace crm_api.Helpers;
 

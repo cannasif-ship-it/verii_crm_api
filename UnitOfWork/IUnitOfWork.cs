@@ -1,7 +1,5 @@
-using crm_api.Models;
 using crm_api.Repositories;
-using crm_api.Models.PowerBi;
-using crm_api.Models.UserPermissions;
+using crm_api.Modules.AccessControl.Domain.Entities;
 
 namespace crm_api.UnitOfWork
 {
@@ -65,9 +63,9 @@ namespace crm_api.UnitOfWork
         IGenericRepository<ApprovalRoleGroup> ApprovalRoleGroups { get; }
         IGenericRepository<ApprovalRole> ApprovalRoles { get; }
         IGenericRepository<ApprovalUserRole> ApprovalUserRoles { get; }
-        IGenericRepository<crm_api.Models.Notification.Notification> Notifications { get; }
-        IGenericRepository<crm_api.Models.ReportBuilder.ReportDefinition> ReportDefinitions { get; }
-        IGenericRepository<crm_api.Models.ReportBuilder.ReportAssignment> ReportAssignments { get; }
+        IGenericRepository<crm_api.Modules.Notification.Domain.Entities.Notification> Notifications { get; }
+        IGenericRepository<crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition> ReportDefinitions { get; }
+        IGenericRepository<crm_api.Modules.ReportBuilder.Domain.Entities.ReportAssignment> ReportAssignments { get; }
         IGenericRepository<SmtpSetting> SmtpSettings { get; }
         IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions { get; }
         IGenericRepository<PowerBIGroup> PowerBIGroups { get; }

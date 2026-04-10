@@ -1,0 +1,160 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace crm_api.Migrations
+{
+    /// <inheritdoc />
+    public partial class RenamePdfTemplateAssetsToPdfImages : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_CreatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_DeletedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_UpdatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_RII_PDF_TEMPLATE_ASSETS",
+                table: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.RenameTable(
+                name: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "RII_PDF_IMAGES");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_UpdatedByUserId",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_UpdatedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_RelativeUrl",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_RelativeUrl");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_DeletedByUserId",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_DeletedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedByUserId",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_CreatedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedBy",
+                table: "RII_PDF_IMAGES",
+                newName: "IX_RII_PDF_IMAGES_CreatedBy");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_RII_PDF_IMAGES",
+                table: "RII_PDF_IMAGES",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_CreatedByUserId",
+                table: "RII_PDF_IMAGES",
+                column: "CreatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_DeletedByUserId",
+                table: "RII_PDF_IMAGES",
+                column: "DeletedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_UpdatedByUserId",
+                table: "RII_PDF_IMAGES",
+                column: "UpdatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_CreatedByUserId",
+                table: "RII_PDF_IMAGES");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_DeletedByUserId",
+                table: "RII_PDF_IMAGES");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RII_PDF_IMAGES_RII_USERS_UpdatedByUserId",
+                table: "RII_PDF_IMAGES");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_RII_PDF_IMAGES",
+                table: "RII_PDF_IMAGES");
+
+            migrationBuilder.RenameTable(
+                name: "RII_PDF_IMAGES",
+                newName: "RII_PDF_TEMPLATE_ASSETS");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_UpdatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_UpdatedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_RelativeUrl",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_RelativeUrl");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_DeletedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_DeletedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_CreatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedByUserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_RII_PDF_IMAGES_CreatedBy",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                newName: "IX_RII_PDF_TEMPLATE_ASSETS_CreatedBy");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_RII_PDF_TEMPLATE_ASSETS",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_CreatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                column: "CreatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_DeletedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                column: "DeletedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RII_PDF_TEMPLATE_ASSETS_RII_USERS_UpdatedByUserId",
+                table: "RII_PDF_TEMPLATE_ASSETS",
+                column: "UpdatedByUserId",
+                principalTable: "RII_USERS",
+                principalColumn: "Id");
+        }
+    }
+}

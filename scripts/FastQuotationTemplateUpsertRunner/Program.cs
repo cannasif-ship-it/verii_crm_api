@@ -1,19 +1,15 @@
 using System.Text.Json;
 using crm_api.Data;
-using crm_api.DTOs;
 using crm_api.Helpers;
 using crm_api.Infrastructure;
-using crm_api.Interfaces;
-using crm_api.Models;
-using crm_api.Services;
 using crm_api.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using depoWebAPI.Models;
-using crm_api.DTOs.ErpDto;
+using crm_api.Modules.Integrations.Domain.ReadModels;
+using crm_api.Modules.Integrations.Application.Dtos.Erp;
 
 namespace FastQuotationTemplateUpsertRunner;
 

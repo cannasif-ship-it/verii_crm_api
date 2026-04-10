@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using crm_api.Data;
-using crm_api.Interfaces;
-using crm_api.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

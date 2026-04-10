@@ -1,5 +1,4 @@
 using crm_api.Helpers;
-using crm_api.Models;
 using Xunit;
 
 namespace crm_api.Tests;

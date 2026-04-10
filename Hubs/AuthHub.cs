@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using crm_api.Data;
 using Microsoft.EntityFrameworkCore;
-using crm_api.Models;
 
 namespace crm_api.Hubs
 {

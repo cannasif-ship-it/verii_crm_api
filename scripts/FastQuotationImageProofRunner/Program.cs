@@ -1,11 +1,7 @@
 using System.Text.Json;
 using crm_api.Data;
-using crm_api.DTOs;
 using crm_api.Helpers;
 using crm_api.Infrastructure;
-using crm_api.Interfaces;
-using crm_api.Models;
-using crm_api.Services;
 using crm_api.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
