@@ -81,7 +81,15 @@ namespace crm_api.Modules.PdfBuilder.Api
         [HttpPost("assets/upload")]
         [Consumes("multipart/form-data")]
         [RequestSizeLimit(10 * 1024 * 1024)]
-        public async Task<IActionResult> UploadAsset(IFormFile file, [FromForm] long? templateId = null, [FromForm] string? assetScope = null)
+        public async Task<IActionResult> UploadAsset(
+            IFormFile file,
+            [FromForm] long? templateId = null,
+            [FromForm] string? assetScope = null,
+            [FromForm] string? elementId = null,
+            [FromForm] int? pageNumber = null,
+            [FromForm] long? tempQuotattionId = null,
+            [FromForm] long? tempQuotattionLineId = null,
+            [FromForm] string? productCode = null)
         {
             if (!long.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) || userId <= 0)
                 return Unauthorized(ApiResponse<object>.ErrorResult(
@@ -89,7 +97,16 @@ namespace crm_api.Modules.PdfBuilder.Api
                     "Invalid or missing user claim",
                     401));
 
-            var result = await _pdfTemplateAssetService.UploadAsync(file, userId, templateId, assetScope);
+            var result = await _pdfTemplateAssetService.UploadAsync(
+                file,
+                userId,
+                templateId,
+                assetScope,
+                elementId,
+                pageNumber,
+                tempQuotattionId,
+                tempQuotattionLineId,
+                productCode);
             if (!result.Success)
                 return StatusCode(result.StatusCode, result);
             return Ok(result);

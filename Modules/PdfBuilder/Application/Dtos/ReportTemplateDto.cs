@@ -463,6 +463,12 @@ namespace crm_api.Modules.PdfBuilder.Application.Dtos
         public string RelativeUrl { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
         public long SizeBytes { get; set; }
+        public long? ReportTemplateId { get; set; }
+        public string? ElementId { get; set; }
+        public int? PageNumber { get; set; }
+        public long? TempQuotattionId { get; set; }
+        public long? TempQuotattionLineId { get; set; }
+        public string? ProductCode { get; set; }
     }
 
     public class PdfTablePresetDto : BaseEntityDto

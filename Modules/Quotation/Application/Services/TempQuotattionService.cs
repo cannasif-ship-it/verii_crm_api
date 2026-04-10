@@ -1,5 +1,6 @@
 using AutoMapper;
 using crm_api.Helpers;
+using crm_api.Modules.PdfBuilder.Application.Services;
 using QuotationEntity = crm_api.Modules.Quotation.Domain.Entities.Quotation;
 using crm_api.UnitOfWork;
 using Microsoft.AspNetCore.Http;
@@ -18,19 +19,22 @@ namespace crm_api.Modules.Quotation.Application.Services
         private readonly ILocalizationService _localizationService;
         private readonly IUserService _userService;
         private readonly IDocumentSerialTypeService _documentSerialTypeService;
+        private readonly IPdfTemplateAssetService _pdfTemplateAssetService;
 
         public TempQuotattionService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILocalizationService localizationService,
             IUserService userService,
-            IDocumentSerialTypeService documentSerialTypeService)
+            IDocumentSerialTypeService documentSerialTypeService,
+            IPdfTemplateAssetService pdfTemplateAssetService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _userService = userService;
             _documentSerialTypeService = documentSerialTypeService;
+            _pdfTemplateAssetService = pdfTemplateAssetService;
         }
 
         public async Task<ApiResponse<PagedResponse<TempQuotattionGetDto>>> GetAllAsync(PagedRequest request)
@@ -287,10 +291,21 @@ namespace crm_api.Modules.Quotation.Application.Services
                         LineTotal = line.LineTotal,
                         LineGrandTotal = line.LineGrandTotal,
                         Description = line.Description,
+                        ImagePath = line.ImagePath,
                         CreatedDate = DateTimeProvider.Now
                     }).ToList();
 
                     await _unitOfWork.TempQuotattionLines.AddAllAsync(revisionLines).ConfigureAwait(false);
+                    await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                    foreach (var revisionLine in revisionLines.Where(x => !string.IsNullOrWhiteSpace(x.ImagePath)))
+                    {
+                        await _pdfTemplateAssetService.BindQuickQuotationImageAsync(
+                            revisionLine.ImagePath,
+                            revision.Id,
+                            revisionLine.Id,
+                            revisionLine.ProductCode).ConfigureAwait(false);
+                    }
                 }
 
                 if (sourceExchangeLines.Any())
@@ -699,6 +714,12 @@ namespace crm_api.Modules.Quotation.Application.Services
                 await _unitOfWork.TempQuotattionLines.AddAsync(entity).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
+                await _pdfTemplateAssetService.BindQuickQuotationImageAsync(
+                    entity.ImagePath,
+                    entity.TempQuotattionId,
+                    entity.Id,
+                    entity.ProductCode).ConfigureAwait(false);
+
                 return ApiResponse<TempQuotattionLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionLineGetDto>(entity),
                     _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLineCreated"));
@@ -746,6 +767,15 @@ namespace crm_api.Modules.Quotation.Application.Services
                 await _unitOfWork.TempQuotattionLines.AddAllAsync(entities).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
+                foreach (var entity in entities.Where(x => !string.IsNullOrWhiteSpace(x.ImagePath)))
+                {
+                    await _pdfTemplateAssetService.BindQuickQuotationImageAsync(
+                        entity.ImagePath,
+                        entity.TempQuotattionId,
+                        entity.Id,
+                        entity.ProductCode).ConfigureAwait(false);
+                }
+
                 var response = entities.Select(_mapper.Map<TempQuotattionLineGetDto>).ToList();
                 return ApiResponse<List<TempQuotattionLineGetDto>>.SuccessResult(response, _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLinesCreated"));
             }
@@ -777,6 +807,13 @@ namespace crm_api.Modules.Quotation.Application.Services
                 await _unitOfWork.TempQuotattionLines.UpdateAsync(entity).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
+                await _pdfTemplateAssetService.ClearQuickQuotationImageBindingsForLineAsync(entity.Id).ConfigureAwait(false);
+                await _pdfTemplateAssetService.BindQuickQuotationImageAsync(
+                    entity.ImagePath,
+                    entity.TempQuotattionId,
+                    entity.Id,
+                    entity.ProductCode).ConfigureAwait(false);
+
                 return ApiResponse<TempQuotattionLineGetDto>.SuccessResult(
                     _mapper.Map<TempQuotattionLineGetDto>(entity),
                     _localizationService.GetLocalizedString("TempQuotattionService.TempQuotattionLineUpdated"));
@@ -803,6 +840,7 @@ namespace crm_api.Modules.Quotation.Application.Services
                         StatusCodes.Status404NotFound);
                 }
 
+                await _pdfTemplateAssetService.ClearQuickQuotationImageBindingsForLineAsync(lineId).ConfigureAwait(false);
                 await _unitOfWork.TempQuotattionLines.SoftDeleteAsync(lineId).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 

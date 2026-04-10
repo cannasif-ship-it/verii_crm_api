@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace crm_api.Modules.PdfBuilder.Domain.Entities
 {
@@ -16,5 +17,7 @@ namespace crm_api.Modules.PdfBuilder.Domain.Entities
         public string ContentType { get; set; } = string.Empty;
 
         public long SizeBytes { get; set; }
+
+        public ICollection<PdfImageUsage> Usages { get; set; } = new List<PdfImageUsage>();
     }
 }

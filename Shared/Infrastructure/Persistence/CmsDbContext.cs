@@ -90,7 +90,9 @@ namespace crm_api.Shared.Infrastructure.Persistence
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
         public DbSet<PdfTemplateAsset> PdfTemplateAssets { get; set; }
+        public DbSet<PdfImageUsage> PdfImageUsages { get; set; }
         public DbSet<QuickQuotationImage> QuickQuotationImages { get; set; }
+        public DbSet<QuickQuotationImageUsage> QuickQuotationImageUsages { get; set; }
         public DbSet<PdfTablePreset> PdfTablePresets { get; set; }
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public DbSet<ReportAssignment> ReportAssignments { get; set; }

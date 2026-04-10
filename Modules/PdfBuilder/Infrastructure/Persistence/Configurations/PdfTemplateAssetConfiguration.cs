@@ -37,6 +37,11 @@ namespace crm_api.Modules.PdfBuilder.Infrastructure.Persistence.Configurations
 
             builder.HasIndex(x => x.CreatedBy)
                 .HasDatabaseName("IX_RII_PDF_IMAGES_CreatedBy");
+
+            builder.HasMany(x => x.Usages)
+                .WithOne(x => x.PdfTemplateAsset)
+                .HasForeignKey(x => x.PdfTemplateAssetId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
