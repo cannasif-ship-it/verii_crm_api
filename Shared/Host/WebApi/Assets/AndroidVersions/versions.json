@@ -1,12 +1,12 @@
 {
   "android": {
-    "latestVersion": "1.0.0",
-    "latestVersionCode": 1,
-    "minimumSupportedVersion": "1.0.0",
-    "minimumSupportedVersionCode": 1,
-    "apkFileName": "verii-crm-1.0.0.apk",
+    "latestVersion": "1.0.11",
+    "latestVersionCode": 12,
+    "minimumSupportedVersion": "1.0.11",
+    "minimumSupportedVersionCode": 12,
+    "apkFileName": "verii-crm-1.0.11.apk",
     "apkUrl": "",
-    "releaseNotes": "CRM mobile update manifest. Release notes will be updated per release.",
-    "publishedAtUtc": "2026-04-09T12:00:00Z"
+    "releaseNotes": "1.0.11 release. Minimum supported mobile build is now 12.",
+    "publishedAtUtc": "2026-04-15T12:00:00Z"
   }
 }
