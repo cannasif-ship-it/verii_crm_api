@@ -15,6 +15,7 @@ namespace crm_api.Data
 
         // ERP DbSet'leri
         public DbSet<RII_FN_CARI> RII_FN_CARI { get; set; }
+        public DbSet<RII_FN_CARIPLASIYER> RII_FN_CARIPLASIYER { get; set; }
         public DbSet<RII_VW_STOK> RII_VW_STOK { get; set; }
         public DbSet<RII_FN_BRANCHES> Branches { get; set; }
         public DbSet<RII_FN_PROJECTCODE> RII_FN_PROJECTCODE { get; set; }
@@ -32,6 +33,15 @@ namespace crm_api.Data
                 entity.Property(e => e.CARI_TEL).HasMaxLength(20);
                 entity.Property(e => e.CARI_IL).HasMaxLength(50);
                 entity.Property(e => e.CARI_ADRES).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<RII_FN_CARIPLASIYER>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToFunction("RII_FN_CARIPLASIYER");
+                entity.Property(e => e.PLASIYER_KODU).HasMaxLength(8);
+                entity.Property(e => e.PLASIYER_ACIKLAMA).HasMaxLength(30);
+                entity.Property(e => e.ISIM).HasMaxLength(35);
             });
 
             // Stok view yapılandırması - Key yok

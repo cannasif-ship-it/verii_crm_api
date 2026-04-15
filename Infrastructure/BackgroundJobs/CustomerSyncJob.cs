@@ -89,6 +89,9 @@ namespace Infrastructure.BackgroundJobs
                     var website = erpCustomer.Web ?? string.Empty;
                     var phone1 = erpCustomer.CariTel ?? string.Empty;
                     var address = erpCustomer.CariAdres ?? string.Empty;
+                    var salesRepCode = string.IsNullOrWhiteSpace(erpCustomer.PlasiyerKodu)
+                        ? null
+                        : erpCustomer.PlasiyerKodu.Trim();
                     var branchCode = erpCustomer.SubeKodu;
                     var businessUnitCode = erpCustomer.IsletmeKodu;
 
@@ -105,6 +108,7 @@ namespace Infrastructure.BackgroundJobs
                             Website = website,
                             Phone1 = phone1,
                             Address = address,
+                            SalesRepCode = salesRepCode,
                             BranchCode = branchCode,
                             BusinessUnitCode = businessUnitCode,
                             IsERPIntegrated = true,
@@ -127,6 +131,7 @@ namespace Infrastructure.BackgroundJobs
                     if (customer.Website != website) { customer.Website = website; updated = true; }
                     if (customer.Phone1 != phone1) { customer.Phone1 = phone1; updated = true; }
                     if (customer.Address != address) { customer.Address = address; updated = true; }
+                    if (customer.SalesRepCode != salesRepCode) { customer.SalesRepCode = salesRepCode; updated = true; }
                     if (customer.BranchCode != branchCode) { customer.BranchCode = branchCode; updated = true; }
                     if (customer.BusinessUnitCode != businessUnitCode) { customer.BusinessUnitCode = businessUnitCode; updated = true; }
 

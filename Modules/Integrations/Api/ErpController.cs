@@ -23,6 +23,15 @@ namespace crm_api.Modules.Integrations.Api
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("getCariPlasiyer")]
+        public async Task<ActionResult<ApiResponse<List<CariPlasiyerDto>>>> GetCariPlasiyer(
+            [FromQuery] string? subeKodu = null,
+            [FromQuery] string? plasiyerKodu = null)
+        {
+            var result = await _IErpService.GetCariPlasiyerAsync(subeKodu, plasiyerKodu);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("getAllProducts")]
         public async Task<ActionResult<ApiResponse<List<StokDto>>>> GetStoks([FromQuery] string? stokKodu = null)
         {

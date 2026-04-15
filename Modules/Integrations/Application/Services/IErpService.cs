@@ -9,6 +9,7 @@ namespace crm_api.Modules.Integrations.Application.Services
         Task<ApiResponse<short>> GetBranchCodeFromContext();
         Task<ApiResponse<List<CariDto>>> GetCarisAsync(string? cariKodu);
         Task<ApiResponse<List<CariDto>>> GetCarisByCodesAsync(IEnumerable<string> cariKodlari);
+        Task<ApiResponse<List<CariPlasiyerDto>>> GetCariPlasiyerAsync(string? subeKodu = null, string? plasiyerKodu = null);
         Task<ApiResponse<List<StokFunctionDto>>> GetStoksAsync(string? stokKodu);
         Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null);
         Task<ApiResponse<List<KurDto>>> GetExchangeRateAsync(DateTime tarih, int fiyatTipi);

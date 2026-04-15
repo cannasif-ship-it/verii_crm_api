@@ -112,6 +112,36 @@ namespace crm_api.Modules.Integrations.Application.Services
             }
         }
 
+        public async Task<ApiResponse<List<CariPlasiyerDto>>> GetCariPlasiyerAsync(string? subeKodu = null, string? plasiyerKodu = null)
+        {
+            try
+            {
+                var subeFromContext = _httpContextAccessor.HttpContext?.Items["BranchCode"] as string;
+                var resolvedSubeKodu = string.IsNullOrWhiteSpace(subeKodu) ? subeFromContext : subeKodu;
+
+                var result = await _erpContext.Set<RII_FN_CARIPLASIYER>()
+                    .FromSqlRaw(
+                        "SELECT * FROM dbo.RII_FN_CARIPLASIYER({0}, {1})",
+                        string.IsNullOrWhiteSpace(resolvedSubeKodu) ? DBNull.Value : resolvedSubeKodu,
+                        string.IsNullOrWhiteSpace(plasiyerKodu) ? DBNull.Value : plasiyerKodu)
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var mappedResult = _mapper.Map<List<CariPlasiyerDto>>(result);
+                return ApiResponse<List<CariPlasiyerDto>>.SuccessResult(
+                    mappedResult,
+                    _localizationService.GetLocalizedString("ErpService.CariRecordsRetrieved"));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<CariPlasiyerDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("ErpService.InternalServerError"),
+                    _localizationService.GetLocalizedString("ErpService.GetAllCariExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
         // Stok işlemleri - DTO dönen versiyon
         public async Task<ApiResponse<List<StokFunctionDto>>> GetStoksAsync(string? stokKodu)
         {

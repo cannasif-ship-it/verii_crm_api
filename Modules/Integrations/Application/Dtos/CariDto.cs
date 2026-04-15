@@ -16,5 +16,6 @@ namespace crm_api.Modules.Integrations.Application.Dtos.Erp
         public string? VergiNumarasi { get; set; }
         public string? VergiDairesi { get; set; }
         public string? TcknNumber { get; set; }
+        public string? PlasiyerKodu { get; set; }
     }
 }

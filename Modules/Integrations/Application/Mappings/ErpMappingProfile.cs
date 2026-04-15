@@ -25,7 +25,8 @@ namespace crm_api.Modules.Integrations.Application.Mappings
                 .ForMember(dest => dest.Web, opt => opt.MapFrom(src => src.WEB))
                 .ForMember(dest => dest.VergiNumarasi, opt => opt.MapFrom(src => src.VERGI_NUMARASI))
                 .ForMember(dest => dest.VergiDairesi, opt => opt.MapFrom(src => src.VERGI_DAIRESI))
-                .ForMember(dest => dest.TcknNumber, opt => opt.MapFrom(src => src.TCKIMLIKNO));
+                .ForMember(dest => dest.TcknNumber, opt => opt.MapFrom(src => src.TCKIMLIKNO))
+                .ForMember(dest => dest.PlasiyerKodu, opt => opt.MapFrom(src => src.PLASIYER_KODU));
 
             CreateMap<RII_FN_CAHAR, ErpCariMovementDto>()
                 .ForMember(dest => dest.CariKod, opt => opt.MapFrom(src => src.CARI_KOD))
@@ -69,6 +70,12 @@ namespace crm_api.Modules.Integrations.Application.Mappings
             CreateMap<RII_FN_BRANCHES, BranchDto>()
                 .ForMember(dest => dest.SubeKodu, opt => opt.MapFrom(src => src.SUBE_KODU))
                 .ForMember(dest => dest.Unvan, opt => opt.MapFrom(src => src.UNVAN));
+
+            CreateMap<RII_FN_CARIPLASIYER, CariPlasiyerDto>()
+                .ForMember(dest => dest.SubeKodu, opt => opt.MapFrom(src => src.SUBE_KODU))
+                .ForMember(dest => dest.PlasiyerKodu, opt => opt.MapFrom(src => src.PLASIYER_KODU))
+                .ForMember(dest => dest.PlasiyerAciklama, opt => opt.MapFrom(src => src.PLASIYER_ACIKLAMA))
+                .ForMember(dest => dest.Isim, opt => opt.MapFrom(src => src.ISIM));
 
             // RII_FN_PROJECTCODE (Proje kodu) mappings
             CreateMap<RII_FN_PROJECTCODE, ProjeDto>()
