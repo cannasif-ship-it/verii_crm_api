@@ -32,6 +32,8 @@ namespace crm_api.UnitOfWork
         IGenericRepository<UserDiscountLimit> UserDiscountLimits { get; }
         IGenericRepository<PaymentType> PaymentTypes { get; }
         IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions { get; }
+        IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCode> SalesRepCodes { get; }
+        IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCodeUserMatch> SalesRepCodeUserMatches { get; }
         IGenericRepository<ShippingAddress> ShippingAddresses { get; }
         IGenericRepository<Quotation> Quotations { get; }
         IGenericRepository<TempQuotattion> TempQuotattions { get; }

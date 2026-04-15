@@ -39,6 +39,8 @@ namespace crm_api.UnitOfWork
         private IGenericRepository<ActivityShipping>? _activityShippings;
         private IGenericRepository<PaymentType>? _paymentTypes;
         private IGenericRepository<SalesTypeDefinition>? _salesTypeDefinitions;
+        private IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCode>? _salesRepCodes;
+        private IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCodeUserMatch>? _salesRepCodeUserMatches;
         private IGenericRepository<ProductPricing>? _productPricings;
         private IGenericRepository<ProductPricingGroupBy>? _productPricingGroupBys;
         private IGenericRepository<UserDiscountLimit>? _userDiscountLimits;
@@ -119,6 +121,8 @@ namespace crm_api.UnitOfWork
         public IGenericRepository<ActivityShipping> ActivityShippings{get{_activityShippings ??= new GenericRepository<ActivityShipping>(_context, _httpContextAccessor);return _activityShippings;}}
         public IGenericRepository<PaymentType> PaymentTypes{get{_paymentTypes ??= new GenericRepository<PaymentType>(_context, _httpContextAccessor);return _paymentTypes;}}
         public IGenericRepository<SalesTypeDefinition> SalesTypeDefinitions{get{_salesTypeDefinitions ??= new GenericRepository<SalesTypeDefinition>(_context, _httpContextAccessor);return _salesTypeDefinitions;}}
+        public IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCode> SalesRepCodes{get{_salesRepCodes ??= new GenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCode>(_context, _httpContextAccessor);return _salesRepCodes;}}
+        public IGenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCodeUserMatch> SalesRepCodeUserMatches{get{_salesRepCodeUserMatches ??= new GenericRepository<crm_api.Modules.Definitions.Domain.Entities.SalesRepCodeUserMatch>(_context, _httpContextAccessor);return _salesRepCodeUserMatches;}}
 
         public IGenericRepository<ProductPricing> ProductPricings{get{_productPricings ??= new GenericRepository<ProductPricing>(_context, _httpContextAccessor);return _productPricings;}}
         public IGenericRepository<ProductPricingGroupBy> ProductPricingGroupBys{get{_productPricingGroupBys ??= new GenericRepository<ProductPricingGroupBy>(_context, _httpContextAccessor);return _productPricingGroupBys;}}

@@ -1,10 +1,16 @@
 using System.Text.Json;
-using crm_api.Data;
-using crm_api.Helpers;
 using crm_api.Infrastructure;
+using crm_api.Modules.PdfBuilder.Application.Dtos;
+using crm_api.Modules.PdfBuilder.Application.Services;
+using crm_api.Modules.PdfBuilder.Domain.Entities;
 using crm_api.UnitOfWork;
 using crm_api.Modules.Integrations.Domain.ReadModels;
 using crm_api.Modules.Integrations.Application.Dtos.Erp;
+using crm_api.Modules.Integrations.Application.Services;
+using crm_api.Shared.Common.Application;
+using crm_api.Shared.Common.Dtos;
+using crm_api.Shared.Infrastructure.Abstractions;
+using crm_api.Shared.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +22,7 @@ namespace ActivityTemplateProofRunner;
 public static class Program
 {
     private const long ActivityId = 70;
-    private const string TemplateTitle = "Aktivite Fuar Formu v2";
+    private const string TemplateTitle = "Windo Yeni Aktivite Formu";
 
     public static async Task Main(string[] args)
     {
@@ -27,7 +33,7 @@ public static class Program
             ?? throw new InvalidOperationException("DefaultConnection could not be resolved.");
         var outputPdf = args.Length > 0
             ? Path.GetFullPath(args[0])
-            : Path.Combine(root, "pdf-samples", "activity-69-proof-v2.pdf");
+            : Path.Combine(root, "pdf-samples", "activity-70-proof-windo-yeni.pdf");
 
         var dbOptions = new DbContextOptionsBuilder<CmsDbContext>()
             .UseSqlServer(connectionString)
@@ -130,77 +136,95 @@ public static class Program
         var logoPath = Path.Combine(Directory.GetParent(ResolveApiRoot())!.FullName, "pdf-samples", "assets", "bilginoglu-endustri-logo.png");
         var elements = new List<ReportElement>
         {
+            CreateShape("page-bg", 8, 8, 194, 281, "#e5edf8", "#ffffff", "1px solid #d6e0ef"),
+            CreateShape("header-band", 8, 8, 194, 24, "#123f7a", "#123f7a"),
             new()
             {
                 Id = "logo",
                 Type = "image",
                 Section = "page",
                 X = 16,
-                Y = 10,
-                Width = 58,
-                Height = 18,
+                Y = 12,
+                Width = 52,
+                Height = 14,
                 Value = ToDataUri(logoPath),
                 Style = new ElementStyle
                 {
                     ImageFit = "contain",
                 },
             },
-            CreateText("title", 88, 13, 92, 9, "MUSTERI GORUSME FORMU", 16, true),
-            CreateShape("header-line", 14, 30, 182, 0.6m, "#1d4d8f"),
+            CreateText("title", 74, 14, 98, 7, "WINDO YENI FUAR GORUSME FORMU", 15, true, "Helvetica-Bold"),
+            CreateFieldBox("fair-box", 156, 11, 36, 17),
+            CreateText("fair-label", 160, 14, 28, 4, "FUAR ADI", 8.5m, true, "Helvetica-Bold"),
+            CreateText("fair-name", 160, 18.5m, 28, 4, "KAZAKHSTAN 2026", 7.5m, true, "Helvetica-Bold"),
+            CreateText("fair-date", 160, 22.5m, 28, 3.5m, "01-03 NISAN", 6.5m, false),
 
-            CreateHeaderLabel("fair-title", 123, 34, 22, "Fuar Adi"),
-            CreateFieldBox("fair-box", 142, 32, 48, 11),
-            CreateText("fair-name", 145, 35, 42, 3.5m, "Kazakistan Makine Fuari'26", 7, true, "Helvetica-Bold"),
-            CreateText("fair-date", 150, 39, 30, 3.5m, "01-03 NISAN 2026", 6.5m, false),
+            CreatePanelLabel("company-label", 16, 38, 64, "FIRMA ADI, ADRESI"),
+            CreateFieldBox("company-box", 16, 44, 110, 28),
+            CreateField("company-name", 20, 48, 102, 5, "CustomerName", false, 10, "Helvetica-Bold"),
+            CreateField("company-address", 20, 55, 102, 12, "CustomerAddress", true, 8.5m),
 
-            CreateHeaderLabel("company-label", 18, 38, 48, "Firma Adi, Adresi"),
-            CreateUnderline("company-line", 18, 48, 104),
-            CreateField("company-field", 18, 43.5m, 104, 4.5m, "CustomerName", false),
-            CreateUnderline("address-line", 18, 58, 104),
-            CreateField("address-field", 18, 52.5m, 104, 5.5m, "CustomerAddress", true, 7.5m),
+            CreatePanelLabel("contact-label", 16, 78, 78, "GORUSULEN KISI / GOREVI / E-POSTA"),
+            CreateFieldBox("contact-box", 16, 84, 110, 18),
+            CreateField("contact-name", 20, 89, 102, 5, "ContactName", false, 9.5m, "Helvetica-Bold"),
+            CreateField("contact-email", 20, 95, 102, 4, "ContactEmail", false, 8),
 
-            CreateHeaderLabel("contact-label", 18, 66, 90, "Gorusulen Kisi / Gorevi / E-Mail"),
-            CreateUnderline("contact-line", 18, 76, 104),
-            CreateField("contact-field", 18, 71.5m, 104, 4.5m, "ContactName", false),
+            CreatePanelLabel("phone-label", 16, 108, 24, "TELEFON"),
+            CreateFieldBox("phone-box", 16, 114, 52, 14),
+            CreateField("phone-field", 20, 119, 44, 4, "ContactPhone", false, 9, "Helvetica-Bold"),
 
-            CreateHeaderLabel("email-label", 18, 82, 26, "E-Posta"),
-            CreateUnderline("email-line", 18, 92, 50),
-            CreateField("email-field", 18, 87.5m, 50, 4.5m, "ContactEmail", false),
-            CreateHeaderLabel("phone-label", 72, 82, 22, "Telefon"),
-            CreateUnderline("phone-line", 72, 92, 50),
-            CreateField("phone-field", 72, 87.5m, 50, 4.5m, "ContactPhone", false),
+            CreatePanelLabel("visitor-label", 74, 108, 38, "GORUSEN KISI"),
+            CreateFieldBox("visitor-box", 74, 114, 52, 14),
+            CreateField("visitor-field", 78, 119, 44, 4, "AssignedUserName", false, 9, "Helvetica-Bold"),
 
-            CreateSectionTitle("visit-title", 129, 48, "ZIYARET TARIHI"),
-            CreateFieldBox("visit-current-box", 129, 54, 61, 14),
-            CreateField("visit-current", 132, 58, 55, 7, "StartDateTime", false, 9, "Helvetica-Bold"),
+            CreatePanelLabel("card-label", 132, 38, 46, "MUSTERI KARTVIZITI"),
+            CreateFieldBox("card-box", 132, 44, 60, 84),
+            new()
+            {
+                Id = "customer-card-image",
+                Type = "image",
+                Section = "page",
+                X = 136,
+                Y = 48,
+                Width = 52,
+                Height = 76,
+                Path = "CustomerLatestImageUrl",
+                Style = new ElementStyle
+                {
+                    ImageFit = "contain",
+                    Border = "1px dashed #8fa7c6",
+                    Padding = 4,
+                },
+            },
 
-            CreateSectionTitle("shipping-title", 129, 76, "TESLIMAT"),
-            CreateFieldBox("shipping-current-box", 129, 82, 28, 14),
-            CreateField("shipping-current", 132, 86, 22, 7, "ActivityShippingName", false, 9, "Helvetica-Bold"),
+            CreatePanelLabel("date-label", 16, 138, 36, "ZIYARET TARIHI"),
+            CreateFieldBox("date-box", 16, 144, 38, 16),
+            CreateField("date-field", 20, 150, 30, 5, "StartDateTime", false, 9.5m, "Helvetica-Bold"),
 
-            CreateSectionTitle("payment-title", 162, 76, "ODEME"),
-            CreateFieldBox("payment-current-box", 162, 82, 28, 14),
-            CreateField("payment-current", 165, 86, 22, 7, "PaymentTypeName", false, 9, "Helvetica-Bold"),
+            CreatePanelLabel("shipping-label", 60, 138, 28, "TESLIMAT"),
+            CreateFieldBox("shipping-box", 60, 144, 40, 16),
+            CreateField("shipping-field", 64, 150, 32, 5, "ActivityShippingName", true, 9.5m, "Helvetica-Bold"),
 
-            CreateSectionTitle("topic-title", 18, 104, "ILGILENILEN KONULAR"),
-            CreateFieldBox("topic-current-box", 18, 110, 104, 18),
-            CreateField("topic-current", 21, 115, 98, 10, "ActivityTopicPurposeName", true, 9, "Helvetica-Bold"),
+            CreatePanelLabel("payment-label", 106, 138, 22, "ODEME"),
+            CreateFieldBox("payment-box", 106, 144, 40, 16),
+            CreateField("payment-field", 110, 150, 32, 5, "PaymentTypeName", true, 9.5m, "Helvetica-Bold"),
 
-            CreateSectionTitle("meeting-title", 129, 104, "GORUSME"),
-            CreateFieldBox("meeting-current-box", 129, 110, 61, 18),
-            CreateField("meeting-current", 132, 115, 55, 10, "ActivityMeetingTypeName", true, 9, "Helvetica-Bold"),
+            CreatePanelLabel("meeting-label", 152, 138, 24, "GORUSME"),
+            CreateFieldBox("meeting-box", 152, 144, 40, 16),
+            CreateField("meeting-field", 156, 150, 32, 5, "ActivityMeetingTypeName", true, 9.5m, "Helvetica-Bold"),
 
-            CreateSectionTitle("summary-title", 94, 140, "GORUSME OZETI"),
-            CreateShape("summary-frame", 18, 146, 172, 128, "#d5dbe6", "#ffffff", "1px solid #d5dbe6"),
+            CreatePanelLabel("topic-label", 16, 170, 58, "ILGILENILEN KONULAR"),
+            CreateFieldBox("topic-box", 16, 176, 176, 18),
+            CreateField("topic-field", 20, 182, 168, 7, "ActivityTopicPurposeName", true, 9.5m, "Helvetica-Bold"),
+
+            CreatePanelLabel("summary-label", 16, 204, 44, "GORUSME OZETI"),
+            CreateFieldBox("summary-box", 16, 210, 176, 56),
         };
 
-        elements.AddRange(CreateGridLines(18, 146, 172, 128, 4, 4));
-        elements.Add(CreateField("summary-field", 21, 149, 166, 120, "Description", true, 9));
+        elements.AddRange(CreateGridLines(16, 210, 176, 56, 6, 6));
+        elements.Add(CreateField("summary-field", 20, 214, 168, 48, "Description", true, 9));
 
-        elements.Add(CreateHeaderLabel("footer-left", 18, 279, 34, "Gorusen Kisi"));
-        elements.Add(CreateUnderline("footer-left-line", 18, 287, 58));
-        elements.Add(CreateField("footer-user", 18, 282.5m, 58, 4, "AssignedUserName", false, 8));
-        elements.Add(CreateText("footer-rev", 168, 284, 22, 4, "FR 07.01.01 REV: 00", 6, false));
+        elements.Add(CreateText("footer-rev", 160, 274, 26, 4, "REV 02", 6.5m, false));
 
         return new ReportTemplateData
         {
@@ -239,6 +263,9 @@ public static class Program
 
     private static ReportElement CreateHeaderLabel(string id, decimal x, decimal y, decimal width, string text)
         => CreateText(id, x, y, width, 4.5m, text.ToUpperInvariant(), 9.5m, true, "Helvetica-Bold");
+
+    private static ReportElement CreatePanelLabel(string id, decimal x, decimal y, decimal width, string text)
+        => CreateText(id, x, y, width, 4.8m, text.ToUpperInvariant(), 11.5m, true, "Helvetica-Bold");
 
     private static ReportElement CreateUnderline(string id, decimal x, decimal y, decimal width)
         => CreateShape(id, x, y, width, 0.35m, "#7b8794");
@@ -371,6 +398,7 @@ public static class Program
         public Task<ApiResponse<short>> GetBranchCodeFromContext() => throw new NotSupportedException();
         public Task<ApiResponse<List<CariDto>>> GetCarisAsync(string? cariKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<CariDto>>> GetCarisByCodesAsync(IEnumerable<string> cariKodlari) => throw new NotSupportedException();
+        public Task<ApiResponse<List<CariPlasiyerDto>>> GetCariPlasiyerAsync(string? subeKodu = null, string? plasiyerKodu = null) => throw new NotSupportedException();
         public Task<ApiResponse<List<StokFunctionDto>>> GetStoksAsync(string? stokKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null) => throw new NotSupportedException();
         public Task<ApiResponse<List<ErpCariMovementDto>>> GetCariMovementsAsync(string customerCode) => throw new NotSupportedException();
@@ -378,6 +406,7 @@ public static class Program
         public Task<ApiResponse<List<ErpShippingAddressDto>>> GetErpShippingAddressAsync(string customerCode) => throw new NotSupportedException();
         public Task<ApiResponse<List<StokGroupDto>>> GetStokGroupAsync(string? grupKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<ProjeDto>>> GetProjectCodesAsync() => throw new NotSupportedException();
+        public Task<ApiResponse<List<EsnYapMasDto>>> GetEsnYapMasAsync() => throw new NotSupportedException();
         public Task<ApiResponse<object>> HealthCheckAsync() => throw new NotSupportedException();
         public Task<ApiResponse<List<KurDto>>> GetExchangeRateAsync(DateTime tarih, int fiyatTipi)
             => Task.FromResult(ApiResponse<List<KurDto>>.SuccessResult(new List<KurDto>(), "ok"));

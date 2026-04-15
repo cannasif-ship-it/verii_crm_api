@@ -339,6 +339,7 @@ public static class Program
         public Task<ApiResponse<short>> GetBranchCodeFromContext() => throw new NotSupportedException();
         public Task<ApiResponse<List<CariDto>>> GetCarisAsync(string? cariKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<CariDto>>> GetCarisByCodesAsync(IEnumerable<string> cariKodlari) => throw new NotSupportedException();
+        public Task<ApiResponse<List<CariPlasiyerDto>>> GetCariPlasiyerAsync(string? subeKodu = null, string? plasiyerKodu = null) => throw new NotSupportedException();
         public Task<ApiResponse<List<StokFunctionDto>>> GetStoksAsync(string? stokKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<BranchDto>>> GetBranchesAsync(int? branchNo = null) => throw new NotSupportedException();
         public Task<ApiResponse<List<ErpCariMovementDto>>> GetCariMovementsAsync(string customerCode) => throw new NotSupportedException();
@@ -346,6 +347,7 @@ public static class Program
         public Task<ApiResponse<List<ErpShippingAddressDto>>> GetErpShippingAddressAsync(string customerCode) => throw new NotSupportedException();
         public Task<ApiResponse<List<StokGroupDto>>> GetStokGroupAsync(string? grupKodu) => throw new NotSupportedException();
         public Task<ApiResponse<List<ProjeDto>>> GetProjectCodesAsync() => throw new NotSupportedException();
+        public Task<ApiResponse<List<EsnYapMasDto>>> GetEsnYapMasAsync() => throw new NotSupportedException();
         public Task<ApiResponse<object>> HealthCheckAsync() => throw new NotSupportedException();
 
         public Task<ApiResponse<List<KurDto>>> GetExchangeRateAsync(DateTime tarih, int fiyatTipi)

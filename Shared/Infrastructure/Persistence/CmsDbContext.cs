@@ -47,6 +47,8 @@ namespace crm_api.Shared.Infrastructure.Persistence
         public DbSet<UserDiscountLimit> UserDiscountLimits { get; set; }
         public DbSet<PaymentType> PaymentTypes { get; set; }
         public DbSet<SalesTypeDefinition> SalesTypeDefinitions { get; set; }
+        public DbSet<crm_api.Modules.Definitions.Domain.Entities.SalesRepCode> SalesRepCodes { get; set; }
+        public DbSet<crm_api.Modules.Definitions.Domain.Entities.SalesRepCodeUserMatch> SalesRepCodeUserMatches { get; set; }
         public DbSet<ShippingAddress> ShippingAddresses { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<TempQuotattion> TempQuotattions { get; set; }

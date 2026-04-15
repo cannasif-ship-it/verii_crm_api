@@ -132,6 +132,8 @@ public static class ModuleServiceCollectionExtensions
     public static IServiceCollection AddDefinitionsModule(this IServiceCollection services)
     {
         services.AddScoped<ISalesTypeService, SalesTypeService>();
+        services.AddScoped<ISalesRepCodeService, SalesRepCodeService>();
+        services.AddScoped<ISalesRepCodeUserMatchService, SalesRepCodeUserMatchService>();
         services.AddScoped<ITitleService, TitleService>();
         services.AddScoped<IDocumentSerialTypeService, DocumentSerialTypeService>();
 
