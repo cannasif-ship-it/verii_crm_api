@@ -22,6 +22,6 @@ namespace crm_api.Modules.Catalog.Application.Services
         Task<ApiResponse<CategoryRuleApplyResultDto>> ApplyCategoryRulesAsync(long catalogId, long catalogCategoryId);
         Task<ApiResponse<CatalogStockItemDto>> CreateStockCategoryAssignmentAsync(long catalogId, long catalogCategoryId, StockCategoryCreateDto request);
         Task<ApiResponse<object>> DeleteStockCategoryAssignmentAsync(long catalogId, long catalogCategoryId, long stockCategoryId);
-        Task<ApiResponse<PagedResponse<CatalogStockItemDto>>> GetCatalogCategoryStocksAsync(long catalogId, long catalogCategoryId, PagedRequest request);
+        Task<ApiResponse<PagedResponse<CatalogStockItemDto>>> GetCatalogCategoryStocksAsync(long catalogId, long catalogCategoryId, bool includeDescendants, PagedRequest request);
     }
 }

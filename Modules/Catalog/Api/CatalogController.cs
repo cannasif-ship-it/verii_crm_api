@@ -157,9 +157,9 @@ namespace crm_api.Modules.Catalog.Api
         }
 
         [HttpGet("{catalogId:long}/categories/{catalogCategoryId:long}/stocks")]
-        public async Task<IActionResult> GetCatalogCategoryStocks(long catalogId, long catalogCategoryId, [FromQuery] PagedRequest request)
+        public async Task<IActionResult> GetCatalogCategoryStocks(long catalogId, long catalogCategoryId, [FromQuery] bool includeDescendants = false, [FromQuery] PagedRequest request = null!)
         {
-            var result = await _productCatalogService.GetCatalogCategoryStocksAsync(catalogId, catalogCategoryId, request);
+            var result = await _productCatalogService.GetCatalogCategoryStocksAsync(catalogId, catalogCategoryId, includeDescendants, request);
             return StatusCode(result.StatusCode, result);
         }
     }

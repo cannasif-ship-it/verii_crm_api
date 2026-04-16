@@ -1503,7 +1503,7 @@ namespace crm_api.Modules.Catalog.Application.Services
             }
         }
 
-        public async Task<ApiResponse<PagedResponse<CatalogStockItemDto>>> GetCatalogCategoryStocksAsync(long catalogId, long catalogCategoryId, PagedRequest request)
+        public async Task<ApiResponse<PagedResponse<CatalogStockItemDto>>> GetCatalogCategoryStocksAsync(long catalogId, long catalogCategoryId, bool includeDescendants, PagedRequest request)
         {
             try
             {
@@ -1523,16 +1523,22 @@ namespace crm_api.Modules.Catalog.Application.Services
                         StatusCodes.Status404NotFound);
                 }
 
-                var query = _dbContext.StockCategories
+                var categoryIds = includeDescendants
+                    ? await GetCatalogSubtreeCategoryIdsAsync(catalogId, catalogCategoryId).ConfigureAwait(false)
+                    : new List<long> { categoryNode.CategoryId };
+
+                var query = _dbContext.Stocks
                     .AsNoTracking()
-                    .Include(x => x.Stock)
-                    .Where(x => x.CategoryId == categoryNode.CategoryId &&
-                                !x.IsDeleted &&
-                                !x.Stock.IsDeleted)
-                    .Select(x => x.Stock)
+                    .Where(x => !x.IsDeleted &&
+                                _dbContext.StockCategories.Any(sc =>
+                                    sc.StockId == x.Id &&
+                                    categoryIds.Contains(sc.CategoryId) &&
+                                    !sc.IsDeleted))
                     .ApplySearch(request.Search, StockSearchableColumns);
 
-                var totalCount = await query.CountAsync().ConfigureAwait(false);
+                var totalCount = await query
+                    .CountAsync()
+                    .ConfigureAwait(false);
 
                 var stocks = await query
                     .OrderBy(x => x.StockName)
@@ -1544,13 +1550,22 @@ namespace crm_api.Modules.Catalog.Application.Services
                 var stockIds = stocks.Select(x => x.Id).ToList();
                 var stockAssignments = await _dbContext.StockCategories
                     .AsNoTracking()
-                    .Where(x => x.CategoryId == categoryNode.CategoryId && stockIds.Contains(x.StockId) && !x.IsDeleted)
-                    .ToDictionaryAsync(x => x.StockId, x => x)
+                    .Where(x => categoryIds.Contains(x.CategoryId) && stockIds.Contains(x.StockId) && !x.IsDeleted)
+                    .ToListAsync()
                     .ConfigureAwait(false);
+
+                var assignmentByStockId = stockAssignments
+                    .GroupBy(x => x.StockId)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group
+                            .OrderByDescending(x => x.IsPrimary)
+                            .ThenBy(x => x.CreatedDate)
+                            .First());
 
                 var items = stocks.Select(stock =>
                 {
-                    stockAssignments.TryGetValue(stock.Id, out var assignment);
+                    assignmentByStockId.TryGetValue(stock.Id, out var assignment);
                     return new CatalogStockItemDto
                     {
                         Id = stock.Id,
@@ -1597,6 +1612,45 @@ namespace crm_api.Modules.Catalog.Application.Services
                     _localizationService.GetLocalizedString("ProductCatalogService.GetCatalogCategoryStocksExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private async Task<List<long>> GetCatalogSubtreeCategoryIdsAsync(long catalogId, long catalogCategoryId)
+        {
+            var catalogNodes = await _dbContext.CatalogCategories
+                .AsNoTracking()
+                .Where(x => x.CatalogId == catalogId && !x.IsDeleted)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.ParentCatalogCategoryId,
+                    x.CategoryId
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var nodesByParent = catalogNodes.ToLookup(x => x.ParentCatalogCategoryId);
+            var catalogNodeById = catalogNodes.ToDictionary(x => x.Id);
+
+            var queue = new Queue<long>();
+            var categoryIds = new HashSet<long>();
+
+            queue.Enqueue(catalogCategoryId);
+
+            while (queue.Count > 0)
+            {
+                var currentCatalogCategoryId = queue.Dequeue();
+                if (catalogNodeById.TryGetValue(currentCatalogCategoryId, out var currentNode))
+                {
+                    categoryIds.Add(currentNode.CategoryId);
+                }
+
+                foreach (var child in nodesByParent[currentCatalogCategoryId])
+                {
+                    queue.Enqueue(child.Id);
+                }
+            }
+
+            return categoryIds.ToList();
         }
 
         private async Task<string> BuildCategoryPathAsync(long? parentCategoryId, string categoryName)
