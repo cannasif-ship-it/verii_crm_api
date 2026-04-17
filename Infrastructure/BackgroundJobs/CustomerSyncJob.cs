@@ -81,7 +81,7 @@ namespace Infrastructure.BackgroundJobs
 
             foreach (var erpCustomer in erpResponse.Data)
             {
-                var code = erpCustomer.CariKod ?? string.Empty;
+                var code = erpCustomer.CariKod?.Trim() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(code))
                 {
                     skippedCount++;
@@ -562,12 +562,11 @@ VALUES ({string.Join(", ", parameterNames)});";
             var sql = $@"
 UPDATE [dbo].[RII_CUSTOMER]
 SET {string.Join(", ", setClauses)}
-WHERE [Id] = @Id AND [CustomerCode] = @CustomerCode;";
+WHERE [Id] = @Id;";
 
             var parameters = new List<object>
             {
                 CreateSqlParameter("@Id", id),
-                CreateSqlParameter("@CustomerCode", code),
                 CreateSqlParameter("@CustomerName", name),
                 CreateSqlParameter("@TaxOffice", taxOffice),
                 CreateSqlParameter("@TaxNumber", taxNumber),
