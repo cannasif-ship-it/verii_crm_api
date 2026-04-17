@@ -38,10 +38,12 @@ namespace crm_api.Modules.Customer.Infrastructure.Persistence.Configurations
 
             // Classification
             builder.Property(e => e.SalesRepCode)
+                .HasColumnName("SalesRepCode")
                 .HasMaxLength(50)
                 .IsRequired(false);
 
             builder.Property(e => e.GroupCode)
+                .HasColumnName("GroupCode")
                 .HasMaxLength(50)
                 .IsRequired(false);
 

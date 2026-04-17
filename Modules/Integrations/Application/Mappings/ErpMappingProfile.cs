@@ -26,7 +26,8 @@ namespace crm_api.Modules.Integrations.Application.Mappings
                 .ForMember(dest => dest.VergiNumarasi, opt => opt.MapFrom(src => src.VERGI_NUMARASI))
                 .ForMember(dest => dest.VergiDairesi, opt => opt.MapFrom(src => src.VERGI_DAIRESI))
                 .ForMember(dest => dest.TcknNumber, opt => opt.MapFrom(src => src.TCKIMLIKNO))
-                .ForMember(dest => dest.PlasiyerKodu, opt => opt.MapFrom(src => src.PLASIYER_KODU));
+                .ForMember(dest => dest.PlasiyerKodu, opt => opt.MapFrom(src => src.PLASIYER_KODU))
+                .ForMember(dest => dest.GrupKodu, opt => opt.MapFrom(src => src.GRUP_KODU));
 
             CreateMap<RII_FN_CAHAR, ErpCariMovementDto>()
                 .ForMember(dest => dest.CariKod, opt => opt.MapFrom(src => src.CARI_KOD))

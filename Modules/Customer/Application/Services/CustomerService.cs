@@ -619,20 +619,21 @@ namespace crm_api.Modules.Customer.Application.Services
                     continue;
 
                 // RII_CUSTOMER için null dönmemesi gereken alanlar: ERP null gelirse '' veya 0 atanır
-                var taxOffice = erpCustomer.VergiDairesi ?? string.Empty;
-                var taxNumber = erpCustomer.VergiNumarasi ?? string.Empty;
-                var tcknNumber = erpCustomer.TcknNumber ?? string.Empty;
-                var email = erpCustomer.Email ?? string.Empty;
-                var website = erpCustomer.Web ?? string.Empty;
-                var phone1 = erpCustomer.CariTel ?? string.Empty;
-                var address = erpCustomer.CariAdres ?? string.Empty;
-                var salesRepCode = NormalizeNullable(erpCustomer.PlasiyerKodu);
+                var taxOffice = PreserveErpOptional(erpCustomer.VergiDairesi, 100);
+                var taxNumber = PreserveErpOptional(erpCustomer.VergiNumarasi, 50);
+                var tcknNumber = PreserveErpOptional(erpCustomer.TcknNumber, 11);
+                var email = PreserveErpOptional(erpCustomer.Email, 100);
+                var website = PreserveErpOptional(erpCustomer.Web, 100);
+                var phone1 = PreserveErpOptional(erpCustomer.CariTel, 100);
+                var address = PreserveErpOptional(erpCustomer.CariAdres, 500);
+                var salesRepCode = PreserveErpOptional(erpCustomer.PlasiyerKodu, 50);
+                var groupCode = PreserveErpOptional(erpCustomer.GrupKodu, 50);
                 var branchCode = erpCustomer.SubeKodu;
                 var businessUnitCode = erpCustomer.IsletmeKodu;
 
                 if (!customerByCode.TryGetValue(code, out var customer))
                 {
-                    var name = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : (erpCustomer.CariIsim ?? string.Empty).Trim();
+                    var name = PreserveErpRequired(erpCustomer.CariIsim, code, 200);
                     if (string.IsNullOrWhiteSpace(name)) name = code;
                     newCustomers.Add(new CustomerEntity
                     {
@@ -646,6 +647,7 @@ namespace crm_api.Modules.Customer.Application.Services
                         Phone1 = phone1,
                         Address = address,
                         SalesRepCode = salesRepCode,
+                        GroupCode = groupCode,
                         BranchCode = branchCode,
                         BusinessUnitCode = businessUnitCode,
                         IsERPIntegrated = true,
@@ -659,7 +661,7 @@ namespace crm_api.Modules.Customer.Application.Services
 
                 var updated = false;
                 var reactivated = false;
-                var newName = string.IsNullOrWhiteSpace(erpCustomer.CariIsim) ? code : (erpCustomer.CariIsim ?? string.Empty).Trim();
+                var newName = PreserveErpRequired(erpCustomer.CariIsim, code, 200);
                 if (string.IsNullOrWhiteSpace(newName)) newName = code;
 
                 if (customer.CustomerName != newName) { customer.CustomerName = newName; updated = true; }
@@ -671,6 +673,7 @@ namespace crm_api.Modules.Customer.Application.Services
                 if (customer.Phone1 != phone1) { customer.Phone1 = phone1; updated = true; }
                 if (customer.Address != address) { customer.Address = address; updated = true; }
                 if (customer.SalesRepCode != salesRepCode) { customer.SalesRepCode = salesRepCode; updated = true; }
+                if (customer.GroupCode != groupCode) { customer.GroupCode = groupCode; updated = true; }
                 if (customer.BranchCode != branchCode) { customer.BranchCode = branchCode; updated = true; }
                 if (customer.BusinessUnitCode != businessUnitCode) { customer.BusinessUnitCode = businessUnitCode; updated = true; }
 
@@ -1069,6 +1072,27 @@ namespace crm_api.Modules.Customer.Application.Services
         private static string? NormalizeNullable(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string PreserveErpRequired(string? value, string fallback, int maxLength)
+        {
+            var preserved = PreserveErpOptional(value, maxLength);
+            if (string.IsNullOrEmpty(preserved))
+            {
+                return fallback.Length > maxLength ? fallback[..maxLength] : fallback;
+            }
+
+            return preserved;
+        }
+
+        private static string? PreserveErpOptional(string? value, int maxLength)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            return value.Length > maxLength ? value[..maxLength] : value;
         }
 
         private static List<CustomerDuplicateCandidateDto> BuildDuplicateCandidates(
