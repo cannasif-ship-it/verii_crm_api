@@ -99,6 +99,7 @@ namespace crm_api.Shared.Infrastructure.Persistence
         public DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public DbSet<ReportAssignment> ReportAssignments { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
+        public DbSet<crm_api.Modules.System.Domain.Entities.SystemSetting> SystemSettings { get; set; }
         public DbSet<RII_FN_CAHAR> RII_FN_CAHAR { get; set; }
         public DbSet<RII_FN_CARIBAKIYE> RII_FN_CARIBAKIYE { get; set; }
         public DbSet<RII_FN_CARIPLASIYER> RII_FN_CARIPLASIYER { get; set; }

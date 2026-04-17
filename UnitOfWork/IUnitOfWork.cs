@@ -69,6 +69,7 @@ namespace crm_api.UnitOfWork
         IGenericRepository<crm_api.Modules.ReportBuilder.Domain.Entities.ReportDefinition> ReportDefinitions { get; }
         IGenericRepository<crm_api.Modules.ReportBuilder.Domain.Entities.ReportAssignment> ReportAssignments { get; }
         IGenericRepository<SmtpSetting> SmtpSettings { get; }
+        IGenericRepository<crm_api.Modules.System.Domain.Entities.SystemSetting> SystemSettings { get; }
         IGenericRepository<PowerBIReportDefinition> PowerBIReportDefinitions { get; }
         IGenericRepository<PowerBIGroup> PowerBIGroups { get; }
         IGenericRepository<UserPowerBIGroup> UserPowerBIGroups { get; }

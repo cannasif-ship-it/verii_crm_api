@@ -1,4 +1,5 @@
 using crm_api.Helpers;
+using crm_api.Modules.System.Application.Services;
 using crm_api.Modules.Integrations.Infrastructure.Security;
 using crm_api.Repositories;
 using crm_api.Shared.Common.Application;
@@ -245,6 +246,7 @@ public static class ModuleServiceCollectionExtensions
     public static IServiceCollection AddSystemModule(this IServiceCollection services)
     {
         services.AddScoped<IHangfireDeadLetterJob, global::Infrastructure.BackgroundJobs.HangfireDeadLetterJob>();
+        services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 
         return services;
     }
