@@ -77,8 +77,16 @@ namespace crm_api.Modules.System.Api
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
-            var failed = await _db.JobFailureLogs
+            var executions = _db.JobExecutionLogs
                 .AsNoTracking()
+                .Where(x => !x.IsDeleted);
+
+            var failed = await executions.CountAsync(x => x.Status == "Failed");
+            var succeeded = await executions.CountAsync(x => x.Status == "Succeeded");
+            var queues = await executions
+                .Where(x => !string.IsNullOrWhiteSpace(x.Queue))
+                .Select(x => x.Queue!)
+                .Distinct()
                 .CountAsync();
 
             return Ok(new
@@ -86,11 +94,11 @@ namespace crm_api.Modules.System.Api
                 Enqueued = 0,
                 Processing = 0,
                 Scheduled = 0,
-                Succeeded = 0,
+                Succeeded = succeeded,
                 Failed = failed,
                 Deleted = 0,
                 Servers = 0,
-                Queues = 1,
+                Queues = queues,
                 Timestamp = DateTime.UtcNow
             });
         }
@@ -128,6 +136,43 @@ namespace crm_api.Modules.System.Api
                 .ToListAsync();
 
             var total = await _db.JobFailureLogs.CountAsync();
+
+            return Ok(new
+            {
+                Items = items,
+                Total = total,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [HttpGet("successes-from-db")]
+        public async Task<IActionResult> GetSuccessesFromDb([FromQuery] int from = 0, [FromQuery] int count = 50)
+        {
+            if (from < 0) from = 0;
+            if (count <= 0) count = 50;
+            if (count > 200) count = 200;
+
+            var successQuery = _db.JobExecutionLogs
+                .AsNoTracking()
+                .Where(x => x.Status == "Succeeded");
+
+            var items = await successQuery
+                .OrderByDescending(x => x.FinishedAt)
+                .Skip(from)
+                .Take(count)
+                .Select(x => new
+                {
+                    x.JobId,
+                    x.RecurringJobId,
+                    x.JobName,
+                    FinishedAt = x.FinishedAt.ToString("o"),
+                    x.DurationMs,
+                    x.Queue,
+                    x.RetryCount
+                })
+                .ToListAsync();
+
+            var total = await successQuery.CountAsync();
 
             return Ok(new
             {

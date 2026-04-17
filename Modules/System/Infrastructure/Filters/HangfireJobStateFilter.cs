@@ -6,6 +6,7 @@ using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 namespace crm_api.Modules.System.Infrastructure.Filters
 {
     public class HangfireJobStateFilter : IApplyStateFilter
@@ -33,6 +34,8 @@ namespace crm_api.Modules.System.Infrastructure.Filters
             var job = context.BackgroundJob?.Job;
             var jobName = job == null ? "unknown" : $"{job.Type.FullName}.{job.Method.Name}";
             var queue = context.GetJobParameter<string>("Queue");
+            var recurringJobId = context.GetJobParameter<string>("RecurringJobId");
+            var createdAt = context.BackgroundJob?.CreatedAt ?? DateTime.UtcNow;
 
             if (context.NewState is FailedState failedState)
             {
@@ -70,6 +73,23 @@ namespace crm_api.Modules.System.Infrastructure.Filters
                             IsDeleted = false
                         };
                         db.JobFailureLogs.Add(log);
+                        db.JobExecutionLogs.Add(new JobExecutionLog
+                        {
+                            JobId = jobId,
+                            RecurringJobId = recurringJobId,
+                            JobName = jobName,
+                            Status = "Failed",
+                            Queue = queue,
+                            StartedAt = createdAt,
+                            FinishedAt = DateTime.UtcNow,
+                            DurationMs = Math.Max(0, (int)(DateTime.UtcNow - createdAt).TotalMilliseconds),
+                            Reason = failedState.Reason,
+                            ExceptionType = failedState.Exception?.GetType().FullName,
+                            ExceptionMessage = failedState.Exception?.Message,
+                            RetryCount = retryCount,
+                            CreatedDate = DateTimeProvider.Now,
+                            IsDeleted = false
+                        });
                         db.SaveChanges();
                     }
                     catch (Exception ex)
@@ -105,6 +125,31 @@ namespace crm_api.Modules.System.Infrastructure.Filters
                     jobName,
                     succeededState.Latency,
                     succeededState.PerformanceDuration);
+
+                try
+                {
+                    using var scope = _scopeFactory.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
+                    db.JobExecutionLogs.Add(new JobExecutionLog
+                    {
+                        JobId = jobId,
+                        RecurringJobId = recurringJobId,
+                        JobName = jobName,
+                        Status = "Succeeded",
+                        Queue = queue,
+                        StartedAt = createdAt,
+                        FinishedAt = DateTime.UtcNow,
+                        DurationMs = (int)Math.Max(0L, succeededState.Latency + succeededState.PerformanceDuration),
+                        RetryCount = context.GetJobParameter<int>("RetryCount"),
+                        CreatedDate = DateTimeProvider.Now,
+                        IsDeleted = false
+                    });
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "JobExecutionLog SQL kaydı başarısız. JobId: {JobId}", jobId);
+                }
             }
         }
 

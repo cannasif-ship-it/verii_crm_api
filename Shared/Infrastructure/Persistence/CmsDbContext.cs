@@ -124,6 +124,7 @@ namespace crm_api.Shared.Infrastructure.Persistence
         public DbSet<OutlookIntegrationLog> OutlookIntegrationLogs { get; set; }
         public DbSet<OutlookCustomerMailLog> OutlookCustomerMailLogs { get; set; }
         public DbSet<JobFailureLog> JobFailureLogs { get; set; }
+        public DbSet<JobExecutionLog> JobExecutionLogs { get; set; }
 
 
 
