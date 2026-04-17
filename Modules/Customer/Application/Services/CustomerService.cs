@@ -1,4 +1,5 @@
 using AutoMapper;
+using crm_api.Modules.Customer.Application.Dtos;
 using CustomerEntity = crm_api.Modules.Customer.Domain.Entities.Customer;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
@@ -43,6 +43,7 @@ namespace crm_api.Modules.Customer.Application.Services
         private readonly IErpService _erpService;
         private readonly ILogger<CustomerService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICustomerSalesScopeService _customerSalesScopeService;
 
         private readonly IGeocodingService _geocodingService;
         private readonly IFileUploadService _fileUploadService;
@@ -54,6 +55,7 @@ namespace crm_api.Modules.Customer.Application.Services
             IErpService erpService,
             ILogger<CustomerService> logger,
             IHttpContextAccessor httpContextAccessor,
+            ICustomerSalesScopeService customerSalesScopeService,
             IGeocodingService geocodingService,
             IFileUploadService fileUploadService)
         {
@@ -63,17 +65,18 @@ namespace crm_api.Modules.Customer.Application.Services
             _erpService = erpService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _customerSalesScopeService = customerSalesScopeService;
             _geocodingService = geocodingService;
             _fileUploadService = fileUploadService;
         }
 
-        public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(PagedRequest request)
+        public async Task<ApiResponse<PagedResponse<CustomerGetDto>>> GetAllCustomersAsync(CustomerListQueryDto request)
         {
             try
             {
                 if (request == null)
                 {
-                    request = new PagedRequest();
+                    request = new CustomerListQueryDto();
                 }
 
                 if (request.Filters == null)
@@ -91,7 +94,7 @@ namespace crm_api.Modules.Customer.Application.Services
                     { "customerTypeName", "CustomerType.Name" }
                 };
 
-                var query = _unitOfWork.Customers
+                var baseQuery = _unitOfWork.Customers
                     .Query()
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.Country)
@@ -100,7 +103,13 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.CustomerType)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
-                    .Include(c => c.DeletedByUser)
+                    .Include(c => c.DeletedByUser);
+
+                var query = await _customerSalesScopeService
+                    .ApplyScopeAsync(baseQuery, request.ContextUserId)
+                    .ConfigureAwait(false);
+
+                query = query
                     .ApplySearch(request.Search, SearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
@@ -139,7 +148,8 @@ namespace crm_api.Modules.Customer.Application.Services
         {
             try
             {
-                var customer = await _unitOfWork.Customers
+                var scopedQuery = await _customerSalesScopeService
+                    .ApplyScopeAsync(_unitOfWork.Customers
                     .Query()
                     .Include(c => c.Country)
                     .Include(c => c.City)
@@ -147,8 +157,12 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.CustomerType)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
-                    .Include(c => c.DeletedByUser)
-                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted).ConfigureAwait(false);
+                    .Include(c => c.DeletedByUser))
+                    .ConfigureAwait(false);
+
+                var customer = await scopedQuery
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted)
+                    .ConfigureAwait(false);
 
                 if (customer == null)
                 {
@@ -206,7 +220,7 @@ namespace crm_api.Modules.Customer.Application.Services
 
                 var parsedFilters = ParseFiltersJson(query.Filters);
 
-                var customerQuery = _unitOfWork.Customers
+                var baseCustomerQuery = _unitOfWork.Customers
                     .Query()
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.CustomerType)
@@ -218,8 +232,13 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.ShippingAddresses)
                         .ThenInclude(sa => sa.City)
                     .Include(c => c.ShippingAddresses)
-                        .ThenInclude(sa => sa.District)
-                    .ApplyFilters(parsedFilters, query.FilterLogic, columnMapping);
+                        .ThenInclude(sa => sa.District);
+
+                var customerQuery = await _customerSalesScopeService
+                    .ApplyScopeAsync(baseCustomerQuery)
+                    .ConfigureAwait(false);
+
+                customerQuery = customerQuery.ApplyFilters(parsedFilters, query.FilterLogic, columnMapping);
 
                 var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"]?.ToString();
                 if (short.TryParse(branchCodeStr, out var branchCode) && branchCode > 0)

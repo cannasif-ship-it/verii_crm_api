@@ -1,4 +1,5 @@
 using Hangfire;
+using crm_api.Modules.Customer.Application.Dtos;
 using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +21,7 @@ namespace crm_api.Modules.Customer.Api
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request)
+        public async Task<IActionResult> Get([FromQuery] CustomerListQueryDto request)
         {
             var result = await _customerService.GetAllCustomersAsync(request);
             return StatusCode(result.StatusCode, result);

@@ -27,8 +27,9 @@ namespace crm_api.Infrastructure.ModelBinding
             var filterLogic = ParseString(query, new[] { "filterLogic", "FilterLogic" });
             request.FilterLogic = string.Equals(filterLogic, "or", StringComparison.OrdinalIgnoreCase) ? "or" : "and";
 
-            // Support derived DTO fields (e.g. GoogleIntegrationLogsQueryDto.ErrorsOnly)
+            // Support derived DTO fields (e.g. GoogleIntegrationLogsQueryDto.ErrorsOnly, CustomerListQueryDto.ContextUserId)
             BindDerivedBooleanProperties(request, query);
+            BindDerivedNullableLongProperties(request, query);
 
             bindingContext.Result = ModelBindingResult.Success(request);
             return Task.CompletedTask;
@@ -61,6 +62,22 @@ namespace crm_api.Infrastructure.ModelBinding
             if (bool.TryParse(rawErrorsOnly, out var errorsOnly))
             {
                 errorsOnlyProperty.SetValue(request, errorsOnly);
+            }
+        }
+
+        private static void BindDerivedNullableLongProperties(PagedRequest request, Microsoft.AspNetCore.Http.IQueryCollection query)
+        {
+            var requestType = request.GetType();
+            var contextUserIdProperty = requestType.GetProperty("ContextUserId");
+            if (contextUserIdProperty == null || contextUserIdProperty.PropertyType != typeof(long?))
+            {
+                return;
+            }
+
+            var rawContextUserId = ParseString(query, new[] { "contextUserId", "ContextUserId" });
+            if (long.TryParse(rawContextUserId, out var contextUserId) && contextUserId > 0)
+            {
+                contextUserIdProperty.SetValue(request, contextUserId);
             }
         }
 

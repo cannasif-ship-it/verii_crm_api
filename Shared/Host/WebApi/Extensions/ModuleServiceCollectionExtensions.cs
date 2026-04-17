@@ -60,6 +60,7 @@ public static class ModuleServiceCollectionExtensions
 
     public static IServiceCollection AddCustomerModule(this IServiceCollection services)
     {
+        services.AddScoped<ICustomerSalesScopeService, CustomerSalesScopeService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ICustomerImageService, CustomerImageService>();
         services.AddScoped<ICustomerTypeService, CustomerTypeService>();
