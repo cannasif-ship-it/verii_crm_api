@@ -91,7 +91,7 @@ namespace crm_api.Modules.Customer.Application.Services
                     { "customerTypeName", "CustomerType.Name" }
                 };
 
-                var query = ApplyCustomerVisibilityFilter(_unitOfWork.Customers
+                var query = _unitOfWork.Customers
                     .Query()
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.Country)
@@ -100,7 +100,7 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.CustomerType)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
-                    .Include(c => c.DeletedByUser))
+                    .Include(c => c.DeletedByUser)
                     .ApplySearch(request.Search, SearchableColumns)
                     .ApplyFilters(request.Filters, request.FilterLogic, columnMapping);
 
@@ -139,7 +139,7 @@ namespace crm_api.Modules.Customer.Application.Services
         {
             try
             {
-                var customer = await ApplyCustomerVisibilityFilter(_unitOfWork.Customers
+                var customer = await _unitOfWork.Customers
                     .Query()
                     .Include(c => c.Country)
                     .Include(c => c.City)
@@ -147,7 +147,7 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.CustomerType)
                     .Include(c => c.CreatedByUser)
                     .Include(c => c.UpdatedByUser)
-                    .Include(c => c.DeletedByUser))
+                    .Include(c => c.DeletedByUser)
                     .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted).ConfigureAwait(false);
 
                 if (customer == null)
@@ -206,7 +206,7 @@ namespace crm_api.Modules.Customer.Application.Services
 
                 var parsedFilters = ParseFiltersJson(query.Filters);
 
-                var customerQuery = ApplyCustomerVisibilityFilter(_unitOfWork.Customers
+                var customerQuery = _unitOfWork.Customers
                     .Query()
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.CustomerType)
@@ -218,7 +218,7 @@ namespace crm_api.Modules.Customer.Application.Services
                     .Include(c => c.ShippingAddresses)
                         .ThenInclude(sa => sa.City)
                     .Include(c => c.ShippingAddresses)
-                        .ThenInclude(sa => sa.District))
+                        .ThenInclude(sa => sa.District)
                     .ApplyFilters(parsedFilters, query.FilterLogic, columnMapping);
 
                 var branchCodeStr = _httpContextAccessor.HttpContext?.Items["BranchCode"]?.ToString();
@@ -310,27 +310,6 @@ namespace crm_api.Modules.Customer.Application.Services
                     _localizationService.GetLocalizedString("CustomerService.GetAllCustomersExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
-        }
-
-        private IQueryable<CustomerEntity> ApplyCustomerVisibilityFilter(IQueryable<CustomerEntity> query)
-        {
-            if (!ShouldRestrictCustomerVisibility())
-            {
-                return query;
-            }
-
-            return query.Where(c =>
-                c.CustomerCode == null ||
-                c.CustomerCode == "" ||
-                c.CustomerCode.Contains("120-01"));
-        }
-
-        private bool ShouldRestrictCustomerVisibility()
-        {
-            var role = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value
-                ?? _httpContextAccessor.HttpContext?.User?.FindFirst("role")?.Value;
-
-            return string.Equals(role?.Trim(), "User", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<ApiResponse<CustomerGetDto>> CreateCustomerAsync(CustomerCreateDto customerCreateDto)
