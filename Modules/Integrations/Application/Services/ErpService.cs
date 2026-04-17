@@ -119,7 +119,7 @@ namespace crm_api.Modules.Integrations.Application.Services
                 var subeFromContext = _httpContextAccessor.HttpContext?.Items["BranchCode"] as string;
                 var resolvedSubeKodu = string.IsNullOrWhiteSpace(subeKodu) ? subeFromContext : subeKodu;
 
-                var result = await _erpContext.Set<RII_FN_CARIPLASIYER>()
+                var result = await _cmsContext.Set<RII_FN_CARIPLASIYER>()
                     .FromSqlRaw(
                         "SELECT * FROM dbo.RII_FN_CARIPLASIYER({0}, {1})",
                         string.IsNullOrWhiteSpace(resolvedSubeKodu) ? DBNull.Value : resolvedSubeKodu,
@@ -128,7 +128,15 @@ namespace crm_api.Modules.Integrations.Application.Services
                     .ToListAsync()
                     .ConfigureAwait(false);
 
-                var mappedResult = _mapper.Map<List<CariPlasiyerDto>>(result);
+                var mappedResult = _mapper.Map<List<CariPlasiyerDto>>(result)
+                    .Select(x => new CariPlasiyerDto
+                    {
+                        SubeKodu = x.SubeKodu,
+                        PlasiyerKodu = x.PlasiyerKodu ?? string.Empty,
+                        PlasiyerAciklama = x.PlasiyerAciklama ?? string.Empty,
+                        Isim = x.Isim ?? string.Empty,
+                    })
+                    .ToList();
                 return ApiResponse<List<CariPlasiyerDto>>.SuccessResult(
                     mappedResult,
                     _localizationService.GetLocalizedString("ErpService.CariRecordsRetrieved"));

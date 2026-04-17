@@ -101,6 +101,7 @@ namespace crm_api.Shared.Infrastructure.Persistence
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<RII_FN_CAHAR> RII_FN_CAHAR { get; set; }
         public DbSet<RII_FN_CARIBAKIYE> RII_FN_CARIBAKIYE { get; set; }
+        public DbSet<RII_FN_CARIPLASIYER> RII_FN_CARIPLASIYER { get; set; }
         public DbSet<RII_FN_ESNYAPMAS> RII_FN_ESNYAPMAS { get; set; }
 
         //Power BI DbSet'leri
@@ -182,6 +183,16 @@ namespace crm_api.Shared.Infrastructure.Persistence
                 entity.ToFunction("RII_FN_CARIBAKIYE");
                 entity.Property(e => e.CARI_KOD).HasMaxLength(35);
                 entity.Property(e => e.BAKIYE_DURUMU).HasMaxLength(14);
+            });
+
+            modelBuilder.Entity<RII_FN_CARIPLASIYER>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToTable("__EFMigrationsHistory_FN_CARIPLASIYER", t => t.ExcludeFromMigrations());
+                entity.ToFunction("RII_FN_CARIPLASIYER");
+                entity.Property(e => e.PLASIYER_KODU).HasMaxLength(8);
+                entity.Property(e => e.PLASIYER_ACIKLAMA).HasMaxLength(30);
+                entity.Property(e => e.ISIM).HasMaxLength(35);
             });
 
             modelBuilder.Entity<RII_FN_ESNYAPMAS>(entity =>
