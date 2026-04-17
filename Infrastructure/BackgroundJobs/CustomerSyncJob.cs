@@ -57,6 +57,37 @@ namespace Infrastructure.BackgroundJobs
 
             _logger.LogInformation("Customer sync fetched {Count} ERP records from ERP.", erpResponse.Data.Count);
 
+            var duplicateCustomerCodes = erpResponse.Data
+                .Where(x => !string.IsNullOrWhiteSpace(x.CariKod))
+                .GroupBy(x => x.CariKod!, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1)
+                .Select(g => new
+                {
+                    Code = g.Key,
+                    Count = g.Count(),
+                    Branches = string.Join(", ", g
+                        .Select(x => $"{x.SubeKodu}/{x.IsletmeKodu}")
+                        .Distinct()
+                        .OrderBy(x => x))
+                })
+                .OrderBy(x => x.Code)
+                .ToList();
+
+            if (duplicateCustomerCodes.Count > 0)
+            {
+                var duplicateSummary = string.Join(
+                    " | ",
+                    duplicateCustomerCodes
+                        .Take(20)
+                        .Select(x => $"{x.Code} ({x.Count}) [{x.Branches}]"));
+
+                var duplicateMessage =
+                    $"Customer sync aborted because ERP returned duplicate CariKod values. DuplicateCount={duplicateCustomerCodes.Count}. Samples={duplicateSummary}";
+
+                _logger.LogError(duplicateMessage);
+                throw new InvalidOperationException(duplicateMessage);
+            }
+
             var customerColumns = await GetCustomerColumnNamesAsync();
             var salesRepCodeColumnName = ResolveColumnName(customerColumns, "SalesRepCode", "SalesRepcode");
             var groupCodeColumnName = ResolveColumnName(customerColumns, "GroupCode");
@@ -77,9 +108,7 @@ namespace Infrastructure.BackgroundJobs
             var reactivatedCount = 0;
             var skippedCount = 0;
             var failedCount = 0;
-            var duplicatePayloadCount = 0;
             var failedCodes = new List<string>();
-            var processedCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var erpCustomer in erpResponse.Data)
             {
@@ -87,12 +116,6 @@ namespace Infrastructure.BackgroundJobs
                 if (string.IsNullOrWhiteSpace(code))
                 {
                     skippedCount++;
-                    continue;
-                }
-
-                if (!processedCodes.Add(code))
-                {
-                    duplicatePayloadCount++;
                     continue;
                 }
 
@@ -248,7 +271,7 @@ namespace Infrastructure.BackgroundJobs
             {
                 var sampleFailedCodes = string.Join(", ", failedCodes.Take(10));
                 throw new InvalidOperationException(
-                    $"Customer sync completed with record failures. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Failed={failedCount}, Skipped={skippedCount}, DuplicatePayload={duplicatePayloadCount}, SampleFailedCodes=[{sampleFailedCodes}]");
+                    $"Customer sync completed with record failures. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Failed={failedCount}, Skipped={skippedCount}, SampleFailedCodes=[{sampleFailedCodes}]");
             }
 
             if (erpResponse.Data.Count > 0 &&
@@ -258,17 +281,16 @@ namespace Infrastructure.BackgroundJobs
                 reactivatedCount == 0)
             {
                 throw new InvalidOperationException(
-                    $"Customer sync finished without mirroring any ERP customer. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Skipped={skippedCount}, DuplicatePayload={duplicatePayloadCount}");
+                    $"Customer sync finished without mirroring any ERP customer. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Skipped={skippedCount}");
             }
 
             _logger.LogInformation(
-                "Customer sync completed. created={Created}, updated={Updated}, reactivated={Reactivated}, failed={Failed}, skipped={Skipped}, duplicatePayload={DuplicatePayload}.",
+                "Customer sync completed. created={Created}, updated={Updated}, reactivated={Reactivated}, failed={Failed}, skipped={Skipped}.",
                 createdCount,
                 updatedCount,
                 reactivatedCount,
                 failedCount,
-                skippedCount,
-                duplicatePayloadCount);
+                skippedCount);
                 _logger.LogInformation(_localizationService.GetLocalizedString("CustomerSyncJob.Completed"));
         }
 
