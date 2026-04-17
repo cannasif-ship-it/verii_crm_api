@@ -1,5 +1,7 @@
 using crm_api.Modules.Definitions.Application.Dtos;
 using crm_api.Modules.Definitions.Application.Services;
+using Hangfire;
+using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +13,14 @@ namespace crm_api.Modules.Definitions.Api
     public class SalesRepCodeController : ControllerBase
     {
         private readonly ISalesRepCodeService _salesRepCodeService;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public SalesRepCodeController(ISalesRepCodeService salesRepCodeService)
+        public SalesRepCodeController(
+            ISalesRepCodeService salesRepCodeService,
+            IBackgroundJobClient backgroundJobClient)
         {
             _salesRepCodeService = salesRepCodeService;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         [HttpGet]
@@ -53,10 +59,22 @@ namespace crm_api.Modules.Definitions.Api
         }
 
         [HttpPost("sync")]
-        public async Task<IActionResult> Sync()
+        public IActionResult Sync()
         {
-            var result = await _salesRepCodeService.SyncSalesRepCodesFromErpAsync();
-            return StatusCode(result.StatusCode, result);
+            var jobId = _backgroundJobClient.Enqueue<ISalesRepCodeSyncJob>(job => job.ExecuteAsync());
+
+            return Ok(new ApiResponse<SalesRepCodeSyncTriggerResponseDto>
+            {
+                Success = true,
+                Message = "Sales rep code sync queued successfully.",
+                Data = new SalesRepCodeSyncTriggerResponseDto
+                {
+                    JobId = jobId,
+                    Queue = "default",
+                    EnqueuedAtUtc = DateTime.UtcNow
+                },
+                StatusCode = StatusCodes.Status200OK
+            });
         }
     }
 }
