@@ -9,5 +9,6 @@ namespace crm_api.Modules.System.Domain.Entities
         public string TimeFormat { get; set; } = "HH:mm";
         public string NumberFormat { get; set; } = "tr-TR";
         public int DecimalPlaces { get; set; } = 2;
+        public bool RestrictCustomersBySalesRepMatch { get; set; }
     }
 }

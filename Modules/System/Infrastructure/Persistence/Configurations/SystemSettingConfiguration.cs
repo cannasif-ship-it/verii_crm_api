@@ -18,6 +18,7 @@ namespace crm_api.Modules.System.Infrastructure.Persistence.Configurations
             builder.Property(x => x.TimeFormat).HasMaxLength(20).IsRequired();
             builder.Property(x => x.NumberFormat).HasMaxLength(20).IsRequired();
             builder.Property(x => x.DecimalPlaces).IsRequired();
+            builder.Property(x => x.RestrictCustomersBySalesRepMatch).IsRequired();
         }
     }
 }
