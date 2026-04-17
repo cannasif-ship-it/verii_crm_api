@@ -15,6 +15,15 @@ namespace crm_api.Modules.Identity.Application.Services
 {
     public class UserService : IUserService
     {
+        private static readonly string[] UserSearchableColumns =
+        {
+            "Username",
+            "Email",
+            "FirstName",
+            "LastName",
+            "RoleNavigation.Title"
+        };
+
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _loc;
@@ -80,7 +89,7 @@ namespace crm_api.Modules.Identity.Application.Services
                     .Include(u => u.CreatedByUser)
                     .Include(u => u.UpdatedByUser)
                     .Include(u => u.DeletedByUser)
-                    .ApplySearch(request.Search, QueryHelper.CommonSearchableColumns);
+                    .ApplySearch(request.Search, UserSearchableColumns);
 
                 var fullNameFilters = request.Filters
                     .Where(f => string.Equals(f.Column, "fullName", StringComparison.OrdinalIgnoreCase)
