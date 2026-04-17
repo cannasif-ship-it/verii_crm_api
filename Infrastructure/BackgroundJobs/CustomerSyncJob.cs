@@ -50,9 +50,12 @@ namespace Infrastructure.BackgroundJobs
 
             if (erpResponse?.Data == null || erpResponse.Data.Count == 0)
             {
-                _logger.LogInformation("Customer sync skipped: no ERP records returned.");
-                return;
+                var message = "Customer sync returned zero ERP records for a full sync request.";
+                _logger.LogWarning(message);
+                throw new InvalidOperationException(message);
             }
+
+            _logger.LogInformation("Customer sync fetched {Count} ERP records from ERP.", erpResponse.Data.Count);
 
             var customerColumns = await GetCustomerColumnNamesAsync();
             var salesRepCodeColumnName = ResolveColumnName(customerColumns, "SalesRepCode", "SalesRepcode");
@@ -75,6 +78,7 @@ namespace Infrastructure.BackgroundJobs
             var skippedCount = 0;
             var failedCount = 0;
             var duplicatePayloadCount = 0;
+            var failedCodes = new List<string>();
             var processedCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var erpCustomer in erpResponse.Data)
@@ -234,9 +238,27 @@ namespace Infrastructure.BackgroundJobs
                 catch (Exception ex)
                 {
                     failedCount++;
+                    failedCodes.Add(code);
                     await LogRecordFailureAsync(code, ex);
                     _db.ChangeTracker.Clear();
                 }
+            }
+
+            if (failedCount > 0)
+            {
+                var sampleFailedCodes = string.Join(", ", failedCodes.Take(10));
+                throw new InvalidOperationException(
+                    $"Customer sync completed with record failures. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Failed={failedCount}, Skipped={skippedCount}, DuplicatePayload={duplicatePayloadCount}, SampleFailedCodes=[{sampleFailedCodes}]");
+            }
+
+            if (erpResponse.Data.Count > 0 &&
+                existingCustomers.Count == 0 &&
+                createdCount == 0 &&
+                updatedCount == 0 &&
+                reactivatedCount == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Customer sync finished without mirroring any ERP customer. ERP={erpResponse.Data.Count}, Created={createdCount}, Updated={updatedCount}, Reactivated={reactivatedCount}, Skipped={skippedCount}, DuplicatePayload={duplicatePayloadCount}");
             }
 
             _logger.LogInformation(
