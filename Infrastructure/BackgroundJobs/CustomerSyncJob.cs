@@ -57,37 +57,6 @@ namespace Infrastructure.BackgroundJobs
 
             _logger.LogInformation("Customer sync fetched {Count} ERP records from ERP.", erpResponse.Data.Count);
 
-            var duplicateCustomerCodes = erpResponse.Data
-                .Where(x => !string.IsNullOrWhiteSpace(x.CariKod))
-                .GroupBy(x => x.CariKod!, StringComparer.OrdinalIgnoreCase)
-                .Where(g => g.Count() > 1)
-                .Select(g => new
-                {
-                    Code = g.Key,
-                    Count = g.Count(),
-                    Branches = string.Join(", ", g
-                        .Select(x => $"{x.SubeKodu}/{x.IsletmeKodu}")
-                        .Distinct()
-                        .OrderBy(x => x))
-                })
-                .OrderBy(x => x.Code)
-                .ToList();
-
-            if (duplicateCustomerCodes.Count > 0)
-            {
-                var duplicateSummary = string.Join(
-                    " | ",
-                    duplicateCustomerCodes
-                        .Take(20)
-                        .Select(x => $"{x.Code} ({x.Count}) [{x.Branches}]"));
-
-                var duplicateMessage =
-                    $"Customer sync aborted because ERP returned duplicate CariKod values. DuplicateCount={duplicateCustomerCodes.Count}. Samples={duplicateSummary}";
-
-                _logger.LogError(duplicateMessage);
-                throw new InvalidOperationException(duplicateMessage);
-            }
-
             var customerColumns = await GetCustomerColumnNamesAsync();
             var salesRepCodeColumnName = ResolveColumnName(customerColumns, "SalesRepCode", "SalesRepcode");
             var groupCodeColumnName = ResolveColumnName(customerColumns, "GroupCode");
@@ -184,6 +153,7 @@ namespace Infrastructure.BackgroundJobs
 
                     var updated = false;
                     var reactivated = false;
+                    var wasDeleted = customer.IsDeleted;
 
                     if (!StringEquals(customer.CustomerName, name)) { customer.CustomerName = name; updated = true; }
                     if (!StringEquals(customer.TaxOffice, taxOffice)) { customer.TaxOffice = taxOffice; updated = true; }
@@ -198,7 +168,7 @@ namespace Infrastructure.BackgroundJobs
                     if (customer.BranchCode != branchCode) { customer.BranchCode = branchCode; updated = true; }
                     if (customer.BusinessUnitCode != businessUnitCode) { customer.BusinessUnitCode = businessUnitCode; updated = true; }
 
-                    if (customer.IsDeleted)
+                    if (wasDeleted)
                     {
                         customer.IsDeleted = false;
                         updated = true;
@@ -231,7 +201,7 @@ namespace Infrastructure.BackgroundJobs
                         salesRepCodeColumnName,
                         groupCodeColumnName,
                         nowUtc,
-                        customer.IsDeleted);
+                        wasDeleted);
 
                     if (reactivated)
                     {
