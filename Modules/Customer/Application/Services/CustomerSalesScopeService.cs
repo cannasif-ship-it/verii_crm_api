@@ -24,7 +24,8 @@ namespace crm_api.Modules.Customer.Application.Services
             var isRestrictionEnabled = await _unitOfWork.SystemSettings
                 .Query()
                 .AsNoTracking()
-                .Where(x => x.Id == 1 && !x.IsDeleted)
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.Id)
                 .Select(x => (bool?)x.RestrictCustomersBySalesRepMatch)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);

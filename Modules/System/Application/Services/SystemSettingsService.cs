@@ -31,7 +31,8 @@ namespace crm_api.Modules.System.Application.Services
                 var entity = await _unitOfWork.SystemSettings
                     .Query()
                     .AsNoTracking()
-                    .Where(x => x.Id == 1 && !x.IsDeleted)
+                    .Where(x => !x.IsDeleted)
+                    .OrderBy(x => x.Id)
                     .FirstOrDefaultAsync()
                     .ConfigureAwait(false);
 
@@ -61,7 +62,8 @@ namespace crm_api.Modules.System.Application.Services
             {
                 var entity = await _unitOfWork.SystemSettings
                     .Query()
-                    .Where(x => x.Id == 1 && !x.IsDeleted)
+                    .Where(x => !x.IsDeleted)
+                    .OrderBy(x => x.Id)
                     .FirstOrDefaultAsync()
                     .ConfigureAwait(false);
 
@@ -69,7 +71,6 @@ namespace crm_api.Modules.System.Application.Services
                 {
                     entity = new Domain.Entities.SystemSetting
                     {
-                        Id = 1,
                         IsDeleted = false,
                         CreatedDate = DateTimeProvider.Now,
                         CreatedBy = userId
