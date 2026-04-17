@@ -21,14 +21,7 @@ namespace crm_api.Modules.Customer.Application.Services
 
         public async Task<IQueryable<CustomerEntity>> ApplyScopeAsync(IQueryable<CustomerEntity> query, long? contextUserId = null)
         {
-            var isRestrictionEnabled = await _unitOfWork.SystemSettings
-                .Query()
-                .AsNoTracking()
-                .Where(x => !x.IsDeleted)
-                .OrderBy(x => x.Id)
-                .Select(x => (bool?)x.RestrictCustomersBySalesRepMatch)
-                .FirstOrDefaultAsync()
-                .ConfigureAwait(false);
+            var isRestrictionEnabled = await IsRestrictionEnabledAsync().ConfigureAwait(false);
 
             if (isRestrictionEnabled != true)
             {
@@ -70,6 +63,123 @@ namespace crm_api.Modules.Customer.Application.Services
             return query.Where(x =>
                 x.SalesRepCode != null &&
                 allowedSalesRepCodes.Contains(x.SalesRepCode));
+        }
+
+        public async Task<CustomerSalesRepCodeResolutionResult> ResolveCustomerSalesRepCodeAsync(string? requestedSalesRepCode, long? contextUserId = null)
+        {
+            var isRestrictionEnabled = await IsRestrictionEnabledAsync().ConfigureAwait(false);
+            var normalizedRequestedSalesRepCode = NormalizeCode(requestedSalesRepCode);
+
+            if (isRestrictionEnabled != true)
+            {
+                return new CustomerSalesRepCodeResolutionResult
+                {
+                    RestrictionEnabled = false,
+                    Success = true,
+                    SalesRepCode = normalizedRequestedSalesRepCode
+                };
+            }
+
+            var effectiveUserId = contextUserId ?? GetCurrentUserId();
+            if (effectiveUserId == null || effectiveUserId <= 0)
+            {
+                return new CustomerSalesRepCodeResolutionResult
+                {
+                    RestrictionEnabled = true,
+                    Success = false,
+                    ErrorCode = "missing_user"
+                };
+            }
+
+            var allowedSalesRepCodes = await GetAllowedSalesRepCodesAsync(effectiveUserId.Value).ConfigureAwait(false);
+            if (allowedSalesRepCodes.Count == 0)
+            {
+                return new CustomerSalesRepCodeResolutionResult
+                {
+                    RestrictionEnabled = true,
+                    Success = false,
+                    ErrorCode = "no_match"
+                };
+            }
+
+            if (!string.IsNullOrWhiteSpace(normalizedRequestedSalesRepCode))
+            {
+                var matchedCode = allowedSalesRepCodes.FirstOrDefault(x => string.Equals(x, normalizedRequestedSalesRepCode, StringComparison.OrdinalIgnoreCase));
+                if (matchedCode == null)
+                {
+                    return new CustomerSalesRepCodeResolutionResult
+                    {
+                        RestrictionEnabled = true,
+                        Success = false,
+                        ErrorCode = "not_allowed"
+                    };
+                }
+
+                return new CustomerSalesRepCodeResolutionResult
+                {
+                    RestrictionEnabled = true,
+                    Success = true,
+                    SalesRepCode = matchedCode
+                };
+            }
+
+            if (allowedSalesRepCodes.Count == 1)
+            {
+                return new CustomerSalesRepCodeResolutionResult
+                {
+                    RestrictionEnabled = true,
+                    Success = true,
+                    SalesRepCode = allowedSalesRepCodes[0]
+                };
+            }
+
+            return new CustomerSalesRepCodeResolutionResult
+            {
+                RestrictionEnabled = true,
+                Success = false,
+                ErrorCode = "multiple_matches"
+            };
+        }
+
+        private async Task<bool?> IsRestrictionEnabledAsync()
+        {
+            return await _unitOfWork.SystemSettings
+                .Query()
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.Id)
+                .Select(x => (bool?)x.RestrictCustomersBySalesRepMatch)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+        }
+
+        private async Task<List<string>> GetAllowedSalesRepCodesAsync(long userId)
+        {
+            var branchCode = GetCurrentBranchCode();
+            var matchesQuery = _unitOfWork.SalesRepCodeUserMatches
+                .Query()
+                .Where(x => !x.IsDeleted && x.UserId == userId)
+                .Include(x => x.SalesRepCode)
+                .AsQueryable();
+
+            if (branchCode.HasValue && branchCode.Value > 0)
+            {
+                matchesQuery = matchesQuery.Where(x => x.SalesRepCode.BranchCode == branchCode.Value);
+            }
+
+            return (await matchesQuery
+                    .Select(x => x.SalesRepCode.SalesRepCodeValue)
+                    .ToListAsync()
+                    .ConfigureAwait(false))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static string? NormalizeCode(string? salesRepCode)
+        {
+            return string.IsNullOrWhiteSpace(salesRepCode) ? null : salesRepCode.Trim();
         }
 
         private long? GetCurrentUserId()

@@ -342,6 +342,12 @@ namespace crm_api.Modules.Customer.Application.Services
                     return governanceError;
                 }
 
+                var salesRepResolutionError = await TryApplyScopedSalesRepCodeAsync(customerCreateDto).ConfigureAwait(false);
+                if (salesRepResolutionError != null)
+                {
+                    return salesRepResolutionError;
+                }
+
                 var customer = _mapper.Map<CustomerEntity>(customerCreateDto);
                 await TryFillCoordinatesFromAddressAsync(customer).ConfigureAwait(false);
                 await _unitOfWork.Customers.AddAsync(customer).ConfigureAwait(false);
@@ -1452,6 +1458,34 @@ namespace crm_api.Modules.Customer.Application.Services
             }
 
             return shouldRefreshCoordinates;
+        }
+
+        private async Task<ApiResponse<CustomerGetDto>?> TryApplyScopedSalesRepCodeAsync(CustomerCreateDto customerCreateDto)
+        {
+            var resolution = await _customerSalesScopeService
+                .ResolveCustomerSalesRepCodeAsync(customerCreateDto.SalesRepCode)
+                .ConfigureAwait(false);
+
+            if (resolution.Success)
+            {
+                customerCreateDto.SalesRepCode = resolution.SalesRepCode;
+                return null;
+            }
+
+            var messageKey = resolution.ErrorCode switch
+            {
+                "missing_user" => "CustomerService.CustomerSalesRepScopeUserRequired",
+                "no_match" => "CustomerService.CustomerSalesRepScopeMatchRequired",
+                "not_allowed" => "CustomerService.CustomerSalesRepCodeNotAllowed",
+                "multiple_matches" => "CustomerService.CustomerSalesRepCodeSelectionRequired",
+                _ => "CustomerService.CustomerSalesRepScopeMatchRequired"
+            };
+
+            var message = _localizationService.GetLocalizedString(messageKey);
+            return ApiResponse<CustomerGetDto>.ErrorResult(
+                message,
+                message,
+                StatusCodes.Status400BadRequest);
         }
 
         private async Task TryRefreshBusinessCardCoordinatesAsync(CustomerEntity customer, CustomerCreateFromMobileDto request, bool shouldRefreshCoordinates)
