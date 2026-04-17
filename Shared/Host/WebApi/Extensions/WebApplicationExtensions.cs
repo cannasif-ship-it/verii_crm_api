@@ -183,11 +183,16 @@ public static class WebApplicationExtensions
                 "erp-customer-sync-job",
                 job => job.ExecuteAsync(),
                 Cron.MinuteInterval(30));
+            RecurringJob.AddOrUpdate<ISalesRepCodeSyncJob>(
+                "erp-sales-rep-sync-job",
+                job => job.ExecuteAsync(),
+                Cron.MinuteInterval(30));
         }
         else
         {
             RecurringJob.RemoveIfExists("erp-stock-sync-job");
             RecurringJob.RemoveIfExists("erp-customer-sync-job");
+            RecurringJob.RemoveIfExists("erp-sales-rep-sync-job");
             app.Logger.LogInformation("Skipping recurring ERP sync jobs in Development environment.");
         }
 

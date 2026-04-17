@@ -134,6 +134,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ISalesTypeService, SalesTypeService>();
         services.AddScoped<ISalesRepCodeService, SalesRepCodeService>();
         services.AddScoped<ISalesRepCodeUserMatchService, SalesRepCodeUserMatchService>();
+        services.AddScoped<global::Infrastructure.BackgroundJobs.Interfaces.ISalesRepCodeSyncJob, global::Infrastructure.BackgroundJobs.SalesRepCodeSyncJob>();
         services.AddScoped<ITitleService, TitleService>();
         services.AddScoped<IDocumentSerialTypeService, DocumentSerialTypeService>();
 
