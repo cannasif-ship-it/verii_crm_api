@@ -158,6 +158,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<IStockImageService, StockImageService>();
         services.AddScoped<IStockRelationService, StockRelationService>();
         services.AddScoped<IStockSyncJob, global::crm_api.Modules.Stock.Infrastructure.Jobs.StockSyncJob>();
+        services.AddScoped<IStockImageBulkImportJob, global::crm_api.Modules.Stock.Infrastructure.Jobs.StockImageBulkImportJob>();
 
         return services;
     }

@@ -1,6 +1,8 @@
 using AutoMapper;
 using crm_api.UnitOfWork;
 using crm_api.Helpers;
+using Hangfire;
+using Infrastructure.BackgroundJobs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 
@@ -12,13 +14,23 @@ namespace crm_api.Modules.Stock.Application.Services
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
         private readonly IFileUploadService _fileUploadService;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public StockImageService(IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService, IFileUploadService fileUploadService)
+        public StockImageService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ILocalizationService localizationService,
+            IFileUploadService fileUploadService,
+            IWebHostEnvironment environment,
+            IBackgroundJobClient backgroundJobClient)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _localizationService = localizationService;
             _fileUploadService = fileUploadService;
+            _environment = environment;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         public async Task<ApiResponse<List<StockImageDto>>> AddImagesAsync(List<StockImageCreateDto> imageDtos)
@@ -126,6 +138,60 @@ namespace crm_api.Modules.Stock.Application.Services
             {
                 await _unitOfWork.RollbackTransactionAsync().ConfigureAwait(false);
                 return ApiResponse<List<StockImageDto>>.ErrorResult(
+                    _localizationService.GetLocalizedString("StockImageService.InternalServerError"),
+                    _localizationService.GetLocalizedString("StockImageService.UploadImagesExceptionMessage", ex.Message),
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<StockImageBulkImportQueuedDto>> QueueBulkImportAsync(IFormFile archive)
+        {
+            try
+            {
+                if (archive == null || archive.Length == 0)
+                {
+                    return ApiResponse<StockImageBulkImportQueuedDto>.ErrorResult(
+                        _localizationService.GetLocalizedString("FileUploadService.FileRequired"),
+                        _localizationService.GetLocalizedString("FileUploadService.FileRequired"),
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var extension = Path.GetExtension(archive.FileName);
+                if (!string.Equals(extension, ".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApiResponse<StockImageBulkImportQueuedDto>.ErrorResult(
+                        "Yalnızca ZIP arşivi yükleyebilirsiniz.",
+                        "Only .zip archives are supported.",
+                        StatusCodes.Status400BadRequest);
+                }
+
+                var importsFolder = Path.Combine(_environment.ContentRootPath, "uploads", "stock-image-imports");
+                Directory.CreateDirectory(importsFolder);
+
+                var storedFileName = $"{Guid.NewGuid():N}.zip";
+                var archivePath = Path.Combine(importsFolder, storedFileName);
+
+                await using (var fileStream = new FileStream(archivePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                await using (var sourceStream = archive.OpenReadStream())
+                {
+                    await sourceStream.CopyToAsync(fileStream).ConfigureAwait(false);
+                }
+
+                var jobId = _backgroundJobClient.Enqueue<IStockImageBulkImportJob>(
+                    job => job.ExecuteAsync(archivePath, archive.FileName));
+
+                return ApiResponse<StockImageBulkImportQueuedDto>.SuccessResult(
+                    new StockImageBulkImportQueuedDto
+                    {
+                        JobId = jobId,
+                        OriginalFileName = archive.FileName,
+                        QueuedAt = DateTime.UtcNow
+                    },
+                    "Toplu stok görsel içe aktarma kuyruğa alındı.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<StockImageBulkImportQueuedDto>.ErrorResult(
                     _localizationService.GetLocalizedString("StockImageService.InternalServerError"),
                     _localizationService.GetLocalizedString("StockImageService.UploadImagesExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);

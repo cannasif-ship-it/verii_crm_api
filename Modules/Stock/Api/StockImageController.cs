@@ -52,6 +52,22 @@ namespace crm_api.Modules.Stock.Api
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("bulk-import")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> BulkImport(IFormFile archive)
+        {
+            if (archive == null || archive.Length == 0)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResult(
+                    _localizationService.GetLocalizedString("FileUploadService.FileRequired"),
+                    "No archive provided",
+                    400));
+            }
+
+            var result = await _stockImageService.QueueBulkImportAsync(archive);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {

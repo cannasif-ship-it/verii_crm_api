@@ -29,4 +29,11 @@ namespace crm_api.Modules.Stock.Application.Dtos
         public int SortOrder { get; set; }
         public bool IsPrimary { get; set; }
     }
+
+    public class StockImageBulkImportQueuedDto
+    {
+        public string JobId { get; set; } = string.Empty;
+        public string OriginalFileName { get; set; } = string.Empty;
+        public DateTime QueuedAt { get; set; }
+    }
 }
