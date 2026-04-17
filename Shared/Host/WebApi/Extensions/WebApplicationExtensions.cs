@@ -173,28 +173,27 @@ public static class WebApplicationExtensions
             Authorization = new[] { new HangfireAuthorizationFilter() }
         });
 
-        if (!app.Environment.IsDevelopment())
-        {
-            RecurringJob.AddOrUpdate<IStockSyncJob>(
-                "erp-stock-sync-job",
-                job => job.ExecuteAsync(),
-                Cron.MinuteInterval(30));
-            RecurringJob.AddOrUpdate<ICustomerSyncJob>(
-                "erp-customer-sync-job",
-                job => job.ExecuteAsync(),
-                Cron.MinuteInterval(30));
-            RecurringJob.AddOrUpdate<ISalesRepCodeSyncJob>(
-                "erp-sales-rep-sync-job",
-                job => job.ExecuteAsync(),
-                Cron.MinuteInterval(30));
-        }
-        else
-        {
-            RecurringJob.RemoveIfExists("erp-stock-sync-job");
-            RecurringJob.RemoveIfExists("erp-customer-sync-job");
-            RecurringJob.RemoveIfExists("erp-sales-rep-sync-job");
-            app.Logger.LogInformation("Skipping recurring ERP sync jobs in Development environment.");
-        }
+        var recurringCron = app.Environment.IsDevelopment()
+            ? Cron.Yearly()
+            : Cron.MinuteInterval(30);
+
+        RecurringJob.AddOrUpdate<IStockSyncJob>(
+            "erp-stock-sync-job",
+            job => job.ExecuteAsync(),
+            recurringCron);
+        RecurringJob.AddOrUpdate<ICustomerSyncJob>(
+            "erp-customer-sync-job",
+            job => job.ExecuteAsync(),
+            recurringCron);
+        RecurringJob.AddOrUpdate<ISalesRepCodeSyncJob>(
+            "erp-sales-rep-sync-job",
+            job => job.ExecuteAsync(),
+            recurringCron);
+
+        app.Logger.LogInformation(
+            "Registered recurring ERP sync jobs with cron '{Cron}' for environment '{EnvironmentName}'.",
+            recurringCron,
+            app.Environment.EnvironmentName);
 
         return app;
     }
