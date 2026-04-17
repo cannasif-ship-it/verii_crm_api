@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using crm_api.Data;
+using Hangfire;
+using Hangfire.Storage;
 
 namespace crm_api.Modules.System.Api
 {
@@ -15,6 +17,61 @@ namespace crm_api.Modules.System.Api
         public HangfireController(CmsDbContext db)
         {
             _db = db;
+        }
+
+        [HttpGet("recurring-jobs")]
+        public IActionResult GetRecurringJobs()
+        {
+            using var connection = JobStorage.Current.GetConnection();
+            var jobs = connection.GetRecurringJobs()
+                .OrderBy(x => x.Id)
+                .Select(x => new
+                {
+                    x.Id,
+                    JobName = x.Job?.Type?.Name ?? x.Id,
+                    Method = x.Job?.Method?.Name,
+                    Cron = x.Cron,
+                    Queue = x.Queue,
+                    NextExecution = x.NextExecution?.ToString("o"),
+                    LastExecution = x.LastExecution?.ToString("o"),
+                    LastJobId = x.LastJobId,
+                    Error = x.Error,
+                })
+                .ToList();
+
+            return Ok(new
+            {
+                Items = jobs,
+                Total = jobs.Count,
+                Timestamp = DateTime.UtcNow,
+            });
+        }
+
+        [HttpPost("recurring-jobs/{jobId}/trigger")]
+        public IActionResult TriggerRecurringJob([FromRoute] string jobId)
+        {
+            if (string.IsNullOrWhiteSpace(jobId))
+            {
+                return BadRequest(new { Message = "Job id is required." });
+            }
+
+            using var connection = JobStorage.Current.GetConnection();
+            var exists = connection.GetRecurringJobs()
+                .Any(x => string.Equals(x.Id, jobId, StringComparison.OrdinalIgnoreCase));
+
+            if (!exists)
+            {
+                return NotFound(new { Message = "Recurring job not found." });
+            }
+
+            RecurringJob.TriggerJob(jobId);
+
+            return Ok(new
+            {
+                JobId = jobId,
+                TriggeredAt = DateTime.UtcNow,
+                Message = "Recurring job triggered successfully.",
+            });
         }
 
         [HttpGet("stats")]
