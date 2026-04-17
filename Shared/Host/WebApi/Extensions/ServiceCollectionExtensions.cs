@@ -125,6 +125,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddHostedService<AdminBootstrapHostedService>();
+        services.AddHostedService<SystemSettingsBootstrapHostedService>();
         services.AddAutoMapper(typeof(AssemblyMarker).Assembly);
         services.AddSharedInfrastructureModule();
         services.AddSystemModule();
