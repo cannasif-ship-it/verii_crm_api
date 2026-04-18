@@ -11,11 +11,6 @@ namespace crm_api.Modules.System.Infrastructure.Persistence.Configurations
         {
             builder.ToTable("SystemSettings");
 
-            builder.Property(x => x.DefaultLanguage).HasMaxLength(10).IsRequired();
-            builder.Property(x => x.DefaultCurrencyCode).HasMaxLength(10).IsRequired();
-            builder.Property(x => x.DefaultTimeZone).HasMaxLength(100).IsRequired();
-            builder.Property(x => x.DateFormat).HasMaxLength(20).IsRequired();
-            builder.Property(x => x.TimeFormat).HasMaxLength(20).IsRequired();
             builder.Property(x => x.NumberFormat).HasMaxLength(20).IsRequired();
             builder.Property(x => x.DecimalPlaces).IsRequired();
             builder.Property(x => x.RestrictCustomersBySalesRepMatch).IsRequired();

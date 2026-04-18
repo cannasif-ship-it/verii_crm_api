@@ -35,11 +35,6 @@ namespace crm_api.Infrastructure.Startup
 
             await unitOfWork.SystemSettings.AddAsync(new SystemSetting
             {
-                DefaultLanguage = "tr",
-                DefaultCurrencyCode = "TRY",
-                DefaultTimeZone = "Europe/Istanbul",
-                DateFormat = "dd.MM.yyyy",
-                TimeFormat = "HH:mm",
                 NumberFormat = "tr-TR",
                 DecimalPlaces = 2,
                 RestrictCustomersBySalesRepMatch = false,

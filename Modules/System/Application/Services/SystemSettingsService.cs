@@ -60,6 +60,8 @@ namespace crm_api.Modules.System.Application.Services
         {
             try
             {
+                NormalizeDto(dto);
+
                 var entity = await _unitOfWork.SystemSettings
                     .Query()
                     .Where(x => !x.IsDeleted)
@@ -106,6 +108,17 @@ namespace crm_api.Modules.System.Application.Services
                     _localizationService.GetLocalizedString("SystemSettingsService.UpdateExceptionMessage", ex.Message),
                     StatusCodes.Status500InternalServerError);
             }
+        }
+
+        private static void NormalizeDto(UpdateSystemSettingsDto dto)
+        {
+            dto.NumberFormat = NormalizeRequiredString(dto.NumberFormat, "tr-TR");
+            dto.DecimalPlaces = Math.Clamp(dto.DecimalPlaces, 0, 6);
+        }
+
+        private static string NormalizeRequiredString(string? value, string fallback)
+        {
+            return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
         }
     }
 }
